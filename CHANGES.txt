@@ -1,0 +1,25 @@
+Version 0.8
+-----------
+* significant speed-up of mod contrast calc
+* fixed several problems with SIR_Fourier plot
+* improved Fourier plots (window function, calibration)
+* fixed mod contrast map display scaling
+* ELYRA data conversion from main dialog now works
+* better log info - tidied output, preparation for GUI
+
+Version 0.9
+-----------
+* SI "Z variation" plugin now normalized to average values
+  in the image, making it more robust
+* Modulation contrast calculation improved / fixed,
+** so it is valid at different noise levels 
+** uses illumination pattern orders 1 and 2 instead of 1
+** a noticeable effect is that typical mod contrast values 
+   are halved
+* SIR histogram and Z variation plugins produce stacks
+* SIR Fourier check produces a radial profile plot
+* phase calibration plugin improved,
+** detects peaks from pattern order 1 and plots them
+** estimates line spacing and k angle from the peaks
+** produces result table for phase step analysis
+* new N-SIM format converter

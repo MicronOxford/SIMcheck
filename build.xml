@@ -1,0 +1,153 @@
+<!-- Ant makefile for an ImageJ plugin package (Graeme Ball, Micron Oxford) -->
+
+<!-- Assumes the package is organized in a maven-like fashion.
+     Targets are: all=compile,test,docs,package,install (+clean)
+ -->
+
+
+<!-- CONFIGURATION STARTS HERE -->
+
+<project name="SIMcheck" default="all">
+
+  <!-- configure package description -->
+  <description>
+    SIMcheck - an ImageJ plugin package for SIM data evaluation.
+  </description>
+  <property name="package" value="SIMcheck"/>
+  <property name="version" value="0.9"/>
+  <property name="author" value="Graeme Ball"/>
+  <property name="organization" value="Micron Oxford"/>
+
+  <!-- configure system specifics (IJ plugin & lib dir soft links) -->
+  <property name="IJ.plugins" location="plugins"/> 
+  <property name="lib" location="lib"/>
+  <path id="libpath">
+    <fileset dir="${lib}/">
+      <!-- lib dir requires ij.jar, junit-4.10.jar -->
+      <include name="*.jar" />
+    </fileset>
+  </path>
+
+  <!-- CONFIGURATION ENDS HERE -->
+
+
+  <!-- set global properties for this build -->                                 
+  <property name="src.main.java" location="src/main/java"/>
+  <property name="src.main.resources" location="src/main/resources"/>
+  <property name="src.test.java" location="src/test/java"/>
+  <property name="target" location="target"/>
+  <property name="target.classes" location="target/classes"/>
+  <property name="target.test-classes" location="target/test-classes"/>
+  <property name="docs" location="docs"/>
+
+
+
+  <!-- Ant targets: default all = compile, test, docs, package, install -->
+
+  <target name="init" 
+    description="create target directories if not existing" >
+    <mkdir dir="${target}"/>
+    <mkdir dir="${target.classes}"/>
+    <mkdir dir="${target.classes}/${package}"/>
+    <mkdir dir="${target.test-classes}"/>
+    <mkdir dir="${target.test-classes}/${package}"/>
+    <mkdir dir="${docs}"/>
+    <mkdir dir="${docs}/api"/>
+  </target> 
+
+  <target name="compile" depends="init" 
+    description="compile package source to classes">
+    <javac includeantruntime="false" 
+        srcdir="${src.main.java}/" 
+        destdir="${target.test-classes}" 
+        classpathref="libpath"
+        includes="${package}/*.java"
+        debug="on"/>
+    <copy todir="${target.classes}/${package}">
+      <fileset dir="${target.test-classes}/${package}"
+        excludes="**/*Test.class"/>
+    </copy>
+    <javac includeantruntime="false" 
+        srcdir="${src.test.java}/" 
+        destdir="${target.test-classes}" 
+        classpathref="libpath"
+        includes="${package}/*.java"
+        debug="on">
+    </javac>
+  </target>
+
+  <target name="test" depends="compile" 
+    description="compile and run all tests">
+    <junit printsummary="yes" haltonfailure="yes">
+      <formatter type="plain" usefile="false" />
+      <classpath>
+          <pathelement location="${target.test-classes}"/>
+          <pathelement location="${lib}/ij.jar"/>
+          <pathelement location="${lib}/junit-4.10.jar"/>
+      </classpath>
+      <batchtest fork="yes" todir="${target.test-classes}">
+          <fileset dir="${src.test.java}">
+              <include name="${package}/*Test*.java"/>
+          </fileset>
+      </batchtest>
+    </junit>
+  </target>
+
+  <target name="package" depends="compile"                                         
+    description="bundle compiled classes and resources into a package jar">
+    <copy todir="${target.classes}">
+      <fileset dir="${src.main.resources}">
+      </fileset>
+    </copy>
+    <tstamp/>
+    <manifest file="${target}/MANIFEST.MF">
+      <attribute name="Built-By" value="${author}"/>
+      <attribute name="Implementation-Title" value="${package}"/>
+      <attribute name="Implementation-Version" value="${version} ${TODAY}"/> 
+      <attribute name="Implementation-Vendor" value="${organization}"/>
+    </manifest>
+    <jar jarfile="${target}/${package}_.jar" 
+        manifest="${target}/MANIFEST.MF"
+        basedir="${target.classes}" />
+  </target> 
+
+  <target name="install" depends="package"                                         
+    description="copy the package jar into an ImageJ plugin folder">
+    <copy todir="${IJ.plugins}">
+      <fileset dir="${target}/">
+        <!-- ImageJ plugins must have an underscore in the filename -->
+        <filename name="${package}_.jar"/>
+      </fileset>
+    </copy>
+  </target> 
+
+  <target name="docs" depends="compile" 
+    description="generate javadocs">
+    <javadoc
+        destdir="${docs}/api"
+        classpathref="libpath"
+        author="true"
+        version="true"
+        use="true"
+        windowtitle="${package}">
+      <fileset dir="${src.main.java}/">
+        <include name="${package}/*.java"/>
+      </fileset>
+    </javadoc>
+  </target>
+
+  <target name="all" depends="compile, test, package, install, docs" 
+    description="compile all sources and run all tests">
+  </target>
+
+  <target name="clean" 
+    description="delete all previously generated files">
+    <delete dir="${target}" failonerror="false"/>
+    <delete dir="${docs}" failonerror="false"/>
+    <delete>
+      <!-- using Fiji script editor creates .class files in source directory -->
+      <fileset dir="${src.main.java}/" includes="*.class"/>
+    </delete>
+  </target>
+
+</project>
