@@ -84,51 +84,6 @@ PROJECT STRUCTURE
 Eclipse project created using File->New->Project->from Ant build file
 
 
-SIM Reconstruction Problems & Remedies (Kai Wicker)
----------------------------------------------------
-
-- Camera background
-
-  - subtraction
-
-- optical distortions & uneven gain
-
-  - flat-field correction
-
-- illumination intensity fluctuations
-
-  - normalisation (after background subtraction)
-
-- sample drift between images
-
-  - drift correction by means of cross-correlation
-
-- unknown grating period
-
-  - find grating vector using component cross-correlations
-
-- fluctuations in grating phase
-
-  - optimization of mixing matrix
-
-- fluctuation of order strengths between images
-
-- sample drift between focal slices
-
-  - drift correction through cross-correlation
-
-- unknown zero grating phase
-
-  - global phase via cross-correlation
-
-- drift between rotational orientations
-
-  - drift correction through cross-correlation
-
-- unknown order strengths
-
-  - compare different separated components
-
 
 Style Notes
 ===========
@@ -184,3 +139,29 @@ problems / ideas -
       - cali: PSF symmetry within tolerance?
       - cali: OTF extent, shape & order separation?
 
+
+SIM Reconstruction Problems & Remedies 
+--------------------------------------
+(Kai Wicker)
+
+- **Camera background**: subtraction
+
+- **optical distortions & uneven gain**: flat-field correction
+
+- **illumination intensity fluctuations**: normalisation (after background subtraction)
+
+- **sample drift between images**: drift correction by means of cross-correlation
+
+- **unknown grating period**: find grating vector using component cross-correlations
+
+- **fluctuations in grating phase**: optimization of mixing matrix
+
+- **fluctuation of order strengths between images**
+
+- **sample drift between focal slices**: drift correction through cross-correlation
+
+- **unknown zero grating phase**: global phase via cross-correlation
+
+- **drift between rotational orientations**: drift correction through cross-correlation
+
+- **unknown order strengths**: compare different separated components
