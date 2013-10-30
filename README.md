@@ -16,11 +16,8 @@ Code is arranged in a conventional Maven-like structure and includes an
 ant build script that can copy the resulting SIMcheck_.jar to a local
 plugin folder.
 
-A version history of the package is available in the git repository:
-    https://github.com/graemeball/SIMcheck_
-Versions are recorded as git tags according to the the scheme: vX.Y
-where X is a major release, Y is minor release (new feature/s or refactoring)
-
+**The latest .jar can be downloaded from the 
+[Micron Oxford Website](http://www.micron.ox.ac.uk/microngroup/software/SIMcheck_.jar)**
 
 Features
 ========
@@ -37,26 +34,22 @@ Features
 1: Calibration Checks
 ---------------------
 
-===================  =================================  ================
-    Check                   Statistic(s)                    Comments
-===================  =================================  ================
- Cal phases         phase step & range stable?          +k0 angles, linespacing
- Cal grating, TODO  grating clean?                      grating image
- Cal PSF, TODO      SNR, symmetry, posn&focus OK?
-===================  =================================  ================
+    Check          |        Statistic(s)            |       Comments
+------------------ | ------------------------------ | -----------------------
+ Cal phases        | phase step & range stable?     | +k0 angles, linespacing
+ Cal grating, TODO | grating clean?                 |  grating image
+ Cal PSF, TODO     | SNR, symmetry, posn&focus OK?  | 
 
 ----------------------------------
 2: Pre-processing, Raw Data Checks
 ----------------------------------
 
-===================  =================================  ================
-    Check                   Statistic(s)                    Comments
-===================  =================================  ================
- Raw Z profile        bleaching and angle diffs OK?       
- Raw Fourier plots    SI pattern correct & regular?       TODO? k0 & linspc
- Raw floaties         no floaties or drift detected?      threshold/stat?
- Raw Mod Contrast     feature MCNR acceptable?            Wiener par
-===================  =================================  ================
+    Check          |        Statistic(s)             |      Comments
+------------------ | ------------------------------- | ---------------------
+ Raw Z profile     |  bleaching and angle diffs OK?  |    
+ Raw Fourier plots |  SI pattern correct & regular?  |    TODO? k0 & linspc
+ Raw floaties      |  no floaties or drift detected? |    threshold/stat?
+ Raw Mod Contrast  |  feature MCNR acceptable?       |    Wiener par
 
 - TODO? camera correction? correlation coefficient & linearity
 
@@ -64,13 +57,11 @@ Features
 3: Post-reconstruction Checks
 -----------------------------
 
-===================  =================================  ================
-    Check                   Statistic(s)                    Comments
-===================  =================================  ================
- SIR Histogram        +ve/-ve ratio acceptable?         top/bottom 0.5%
- SIR Fourier Plot     symmetry+profile OK? +res/angle   +radial profile
- SIR MCNR Map         None - for visual inspection      MCNR + intensity
-===================  =================================  ================
+    Check          |        Statistic(s)              |     Comments
+------------------ | -------------------------------- | --------------------
+ SIR Histogram     |  +ve/-ve ratio acceptable?       | top/bottom 0.5%
+ SIR Fourier Plot  |  symmetry+profile OK? +res/angle | +radial profile
+ SIR MCNR Map      |  None - for visual inspection    | MCNR + intensity
 
 
 PROJECT STRUCTURE
@@ -149,9 +140,9 @@ Style Notes
 * unconventional choices which some people may consider bad pratice -
   * significant use of a utility class with static methods to provide 
     functionality missing from java arrays, math, & IJ API
-  * final to mark immutability rarely worth the increase in visual noise
-  * package-private is less verbose & makes unit testing easier
-    (apart from that I never call non-public methods between classes)
+  * final not used to mark immutability (not worth increase in visual noise)
+  * most methods package-private rather than private - less verbose & makes
+    unit testing easier (I never call non-public methods between classes)
 
 
 TODO
@@ -163,7 +154,7 @@ problems / ideas -
 * display / warn saturated pixels (try green)
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
-      - prototype swing GUI report
+      - swing GUI runner & report
       - raw -> WF same size as SIR by interpolation (& preserve type??)
       - SIR_Fourier:
         - one orthogonal slice, not whole stack?
@@ -172,17 +163,13 @@ problems / ideas -
       - SIR_hist with multiple frames
       - SIR_FFT, update window function to Rainer Heintzmann's
       - make sure tests and debug not deployed
-      - convert runner to non-blocking swing GUI
-      - result log messages 60 char width auto-formatting?
+      - convert dialog & logging to non-blocking swing GUI
       - final empirical tests, param calibration, tolerances etc.
       - public web page with EXAMPLES
-      - ensure log output is simple, concise & self-documenting
-      - final tidying of dead code, bad code, TODOs
+      - improve log output: should be simple, concise & self-documenting
       - check preconditions & robustness w.r.t. input data (multi-d, type etc.)
       - junit test suite to test/debug non-interactive code
-      - tidy git / branches (clean & compress); mavenize???
-      - update javadocs & txt incl. NOTICE, README
-      - contact Kai again / feedback?
+      - mavenize & make Fiji update site
       - try to install LUTs into IJ menu?
       - add ResultTable support to ResultSet class
       - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
