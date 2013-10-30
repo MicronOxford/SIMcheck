@@ -60,6 +60,7 @@ Features
     Check          |        Statistic(s)              |     Comments
 ------------------ | -------------------------------- | --------------------
  SIR Histogram     |  +ve/-ve ratio acceptable?       | top/bottom 0.5%
+ SIR Z variation   |  stdev of miniumum vs. mean      | shows mismatch
  SIR Fourier Plot  |  symmetry+profile OK? +res/angle | +radial profile
  SIR MCNR Map      |  None - for visual inspection    | MCNR + intensity
 
