@@ -108,6 +108,7 @@ problems / ideas -
 * Recon data histogram +ve/-ve ratio wrong
 * bleaching calculation: combine per-9Z and inter-angle decay
 * display / warn saturated pixels (try green)
+* make SIR ortho an optional extra
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - swing GUI runner & report
