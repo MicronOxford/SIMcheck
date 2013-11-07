@@ -1,1 +1,11 @@
 *.class
+.DS_Store
+mk
+lib
+plugins
+y
+z
+test_images
+public/
+extras/
+src/test/resources/
