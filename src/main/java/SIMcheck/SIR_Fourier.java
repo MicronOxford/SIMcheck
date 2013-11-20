@@ -39,10 +39,14 @@ public class SIR_Fourier implements PlugIn, EProcessor {
 
     String name = "Reconstructed Data Fourier Plots";
     ResultSet results = new ResultSet(name);
-    double[] resolutions = {0.10, 0.12, 0.15, 0.2, 0.3, 0.6};
-    double blurRadius = 6.0d;  // default for 512x512
     static final String[] setMinChoices = {"mode", "mean", "min"};
-    int setMinChoice = 0;
+    private static final String fourierLutName = "SIMcheckFourier.lut";
+    
+    // parameter fields
+    public double[] resolutions = {0.10, 0.12, 0.15, 0.2, 0.3, 0.6};
+    public double blurRadius = 6.0d;  // default for 512x512
+    public int setMinChoice = 0;
+    public boolean showAxial = false;
     
     @Override
     public void run(String arg) {
@@ -51,10 +55,12 @@ public class SIR_Fourier implements PlugIn, EProcessor {
         imp.getWidth();
         gd.addNumericField("Blur radius (512x512)", blurRadius, 1);
         gd.addChoice("Crop minimum to", setMinChoices, "mode");
+        gd.addCheckbox("Show axial FFT", showAxial);
         gd.showDialog();
         if (gd.wasOKed()) {
             this.blurRadius = gd.getNextNumber();
             this.setMinChoice = gd.getNextChoiceIndex();
+            this.showAxial = gd.getNextBoolean();
 	        results = exec(imp);
 	        results.report();
         }
@@ -69,58 +75,48 @@ public class SIR_Fourier implements PlugIn, EProcessor {
     public ResultSet exec(ImagePlus... imps) {
         Calibration cal = imps[0].getCalibration();
         ImagePlus imp2 = imps[0].duplicate();
-        new StackConverter(imp2).convertToGray32();  // for OrthoReslicer
         
-        /// 1. reslice for orthogonal view
-        OrthoReslicer orthoReslicer = new OrthoReslicer();
-        ImagePlus impOrtho = imp2.duplicate();
-        impOrtho = orthoReslicer.exec(impOrtho, false);
-        Calibration calOrtho = impOrtho.getCalibration();
-
-        /// 2. FFT slices in SIR and Z-resliced SIR images
         IJ.showStatus("Fourier transforming slices (lateral view)");
         ImagePlus impF = FFT2D.fftImp(imp2);
-        IJ.showStatus("Fourier transforming slices (orthogonal view)");
-        ImagePlus impOrthoF = FFT2D.fftImp(impOrtho);
-        
-        /// 3. optionally blur slices and set display range
         blurRadius *= (double)impF.getWidth() / 512.0d;
         IJ.showStatus("Blurring & rescaling slices (lateral view)");
-        impF = displaySettings(impF);  // FIXME, scale info
-        IJ.showStatus("Blurring & rescaling slices (orthogonal view)");
-        impOrthoF = displaySettings(impOrthoF);
-        
-        /// 4. annotate Fourier transformed slices with resolution rings
-        impOrthoF = resizeAndPad(impOrthoF, cal);
-        calOrtho.pixelHeight = calOrtho.pixelWidth;  // after resizeAndPad
+        impF = displaySettings(impF);  
         impF = overlayResRings(impF, cal);
-        impOrthoF = overlayResRings(impOrthoF, calOrtho);
         I1l.copyStackDims(imps[0], impF);
-        I1l.copyStackDims(imps[0], impOrthoF);
-        results.addInfo(
-                "Fourier plots (XY and XZ)", 
-                " to estimate resolution & check for artifacts\n"
-                + "  - concentric, evenly-spaced colors indicate high resolution\n"
-                + "  - flat Fourier spectrum (broad middle rings) indicate weaker\n"
-                + "    high frequency information and poor resolution\n"
-                + "  - spots in XY Fourier spectrum indicate periodic XY patterns\n"
-                + "  - asymmetric FFT indicates decreased resolution due to: angle to angle intensity\n"
-                + "    variations, angle-specific k0 error, or angle-specific z-modulation issues\n");
-        String fourierLUTfile = "SIMcheckFourier.lut";
-        if (blurRadius > 0) {
-            IndexColorModel LUT = loadLut(fourierLUTfile);
-            double[] displayRange = {0.0d, 255.0d};  // show all
-            I1l.applyLUT(impF, LUT, displayRange);
-            I1l.applyLUT(impOrthoF, LUT, displayRange);
-        }
         impF.setTitle(I1l.makeTitle(imps[0], "FTL"));
         results.addImp("lateral (XY)", impF);
-        impOrthoF.setTitle(I1l.makeTitle(imps[0], "FTO"));
-        results.addImp("orthogonal / axial (XZ)", impOrthoF);
+        // radial profile of lateral FFT
         ImagePlus radialProfiles = makeRadialProfiles(impF);
         radialProfiles.setTitle(I1l.makeTitle(imps[0], "FTR"));
         results.addImp("lateral Fourier radial profiles (central Z)", 
                 radialProfiles);
+        /// for orthogonal (axial) view, reslice first
+        if (showAxial) {
+            new StackConverter(imp2).convertToGray32();  // for OrthoReslicer
+            OrthoReslicer orthoReslicer = new OrthoReslicer();
+            ImagePlus impOrtho = imp2.duplicate();
+            impOrtho = orthoReslicer.exec(impOrtho, false);
+            Calibration calOrtho = impOrtho.getCalibration();
+            IJ.showStatus("Fourier transforming slices (orthogonal view)");
+            ImagePlus impOrthoF = FFT2D.fftImp(impOrtho);
+            IJ.showStatus("Blurring & rescaling slices (orthogonal view)");
+            impOrthoF = displaySettings(impOrthoF);
+            impOrthoF = resizeAndPad(impOrthoF, cal);
+            calOrtho.pixelHeight = calOrtho.pixelWidth;  // after resizeAndPad
+            impOrthoF = overlayResRings(impOrthoF, calOrtho);
+            I1l.copyStackDims(imps[0], impOrthoF);
+            impOrthoF.setTitle(I1l.makeTitle(imps[0], "FTO"));
+            results.addImp("orthogonal / axial (XZ)", impOrthoF);
+        }
+        results.addInfo(
+            "Fourier plots (XY and XZ)", 
+            " to estimate resolution & check for artifacts\n"
+            + "  - concentric, evenly-spaced colors indicate high resolution\n"
+            + "  - flat Fourier spectrum (broad middle rings) indicate weaker\n"
+            + "    high frequency information and poor resolution\n"
+            + "  - spots in XY Fourier spectrum indicate periodic XY patterns\n"
+            + "  - asymmetric FFT indicates decreased resolution due to: angle to angle intensity\n"
+            + "    variations, angle-specific k0 error, or angle-specific z-modulation issues\n");
         return results;
     }
     
@@ -210,6 +206,11 @@ public class SIR_Fourier implements PlugIn, EProcessor {
                     (ImageProcessor)setBPminMax(bp, (int)min, (int)max, 255);
             imp.setProcessor(ip);
             IJ.showProgress(s, ns);
+            if (blurRadius > 0) {
+                double[] displayRange = {0.0d, 255.0d};  // show all
+                IndexColorModel lut = loadLut(fourierLutName);
+                I1l.applyLUT(imp, lut, displayRange);
+            }
         }
         return imp;
     }
@@ -288,8 +289,8 @@ public class SIR_Fourier implements PlugIn, EProcessor {
 
     /** Load a LUT from a file. (NB. getClass is non-static) */
     IndexColorModel loadLut(String LUTfile) {
-        InputStream is = getClass().getResourceAsStream(LUTfile);
         IndexColorModel cm = null;
+        InputStream is = getClass().getResourceAsStream(LUTfile);
         if (is != null) {
             try {
                 cm = LutLoader.open(is);
