@@ -40,7 +40,7 @@ public class SIR_Fourier implements PlugIn, EProcessor {
     String name = "Reconstructed Data Fourier Plots";
     ResultSet results = new ResultSet(name);
     static final String[] setMinChoices = {"mode", "mean", "min"};
-    private static final String fourierLutName = "SIMcheckFourier.lut";
+    private static final String fourierLutName = "SIMcheck/SIMcheckFourier.lut";
     
     // parameter fields
     public double[] resolutions = {0.10, 0.12, 0.15, 0.2, 0.3, 0.6};
@@ -290,17 +290,20 @@ public class SIR_Fourier implements PlugIn, EProcessor {
     /** Load a LUT from a file. (NB. getClass is non-static) */
     IndexColorModel loadLut(String LUTfile) {
         IndexColorModel cm = null;
-        InputStream is = getClass().getResourceAsStream(LUTfile);
+        //InputStream is = getClass().getResourceAsStream(LUTfile);
+        InputStream is = SIR_Fourier.class.getClassLoader().getResourceAsStream(LUTfile);
         if (is != null) {
             try {
                 cm = LutLoader.open(is);
             } catch (IOException e) {
-                IJ.log("  ! error loading LUT");
+                IJ.log("  ! error opening InputStream while loading LUT");
                 IJ.error("" + e);
             }
-        }
-        if (cm == null) {
-            IJ.log("  ! error loading LUT");
+            if (cm == null) {
+                IJ.log("  ! error loading LUT - IndexColorModel is null");
+            }
+        } else {
+            IJ.log("  ! InputStream is null while trying to load LUT");
         }
         return cm;
     }
