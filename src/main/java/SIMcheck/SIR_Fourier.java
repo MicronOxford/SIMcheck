@@ -26,8 +26,6 @@ import ij.measure.*;
 import ij.gui.*;
 
 import java.awt.Color;
-import java.awt.image.IndexColorModel;
-import java.io.*;
 
 /** 
  * This plugin plots FFTs of reconstructed stacks with resolution rings.
@@ -40,7 +38,7 @@ public class SIR_Fourier implements PlugIn, EProcessor {
     String name = "Reconstructed Data Fourier Plots";
     ResultSet results = new ResultSet(name);
     static final String[] setMinChoices = {"mode", "mean", "min"};
-    private static final String fourierLutName = "SIMcheck/SIMcheckFourier.lut";
+    private static final String fourierLUTfile = "SIMcheck/SIMcheckFourier.lut";
     
     // parameter fields
     public double[] resolutions = {0.10, 0.12, 0.15, 0.2, 0.3, 0.6};
@@ -206,11 +204,10 @@ public class SIR_Fourier implements PlugIn, EProcessor {
                     (ImageProcessor)setBPminMax(bp, (int)min, (int)max, 255);
             imp.setProcessor(ip);
             IJ.showProgress(s, ns);
-            if (blurRadius > 0) {
-                double[] displayRange = {0.0d, 255.0d};  // show all
-                IndexColorModel lut = loadLut(fourierLutName);
-                I1l.applyLUT(imp, lut, displayRange);
-            }
+        }
+        if (blurRadius > 0) {
+            double[] displayRange = {0.0d, 255.0d};  // show all
+            I1l.applyLUT(imp, I1l.loadLut(fourierLUTfile), displayRange);
         }
         return imp;
     }
@@ -285,27 +282,6 @@ public class SIR_Fourier implements PlugIn, EProcessor {
             Fimp.setOverlay(resOverlay);
         }
         return Fimp;
-    }
-
-    /** Load a LUT from a file. (NB. getClass is non-static) */
-    IndexColorModel loadLut(String LUTfile) {
-        IndexColorModel cm = null;
-        //InputStream is = getClass().getResourceAsStream(LUTfile);
-        InputStream is = SIR_Fourier.class.getClassLoader().getResourceAsStream(LUTfile);
-        if (is != null) {
-            try {
-                cm = LutLoader.open(is);
-            } catch (IOException e) {
-                IJ.log("  ! error opening InputStream while loading LUT");
-                IJ.error("" + e);
-            }
-            if (cm == null) {
-                IJ.log("  ! error loading LUT - IndexColorModel is null");
-            }
-        } else {
-            IJ.log("  ! InputStream is null while trying to load LUT");
-        }
-        return cm;
     }
     
     /** main method for testing */

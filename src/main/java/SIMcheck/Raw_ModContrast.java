@@ -21,8 +21,6 @@ package SIMcheck;
 import ij.*;
 import ij.process.*;
 import ij.plugin.*;
-import java.io.*;
-import java.awt.image.IndexColorModel;
 import ij.plugin.HyperStackConverter;
 import ij.gui.GenericDialog;
 
@@ -70,7 +68,7 @@ public class Raw_ModContrast implements PlugIn, EProcessor {
 
     String name = "Raw Data Modulation Contrast (MCN)";
     ResultSet results = new ResultSet(name);
-    String contrastLUTfile = "MCNR.lut";
+    private static final String mcnrLUTfile = "SIMcheck/MCNR.lut";
     
     // parameter fields
     public int phases = 5;
@@ -237,8 +235,7 @@ public class Raw_ModContrast implements PlugIn, EProcessor {
         impResult.setT(1);
         impResult.setOpenAsHyperStack(true);
         if (!doRawFourier) {
-            IndexColorModel LUT = loadLut(contrastLUTfile);
-            I1l.applyLUT(impResult, LUT, displayRange);
+            I1l.applyLUT(impResult, I1l.loadLut(mcnrLUTfile), displayRange);
             results.addImp("modulation contrast-to-noise ratio image", 
                     impResult);
             results.addInfo("Modulation contrast-to-noise ratio (MCNR)",
@@ -285,24 +282,6 @@ public class Raw_ModContrast implements PlugIn, EProcessor {
         vp = I1l.normalizeInner(vp);
         vp = DFT1D.dftOuter(vp);
         return vp;
-    }
-
-    /** Load a LUT from a file (NB. getClass() is non-static) */
-    IndexColorModel loadLut(String LUTfile) {
-        InputStream is = getClass().getResourceAsStream(LUTfile);
-        IndexColorModel cm = null;
-        if (is != null) {
-            try {
-                cm = LutLoader.open(is);
-            } catch (IOException e) {
-                IJ.log("  ! error loading LUT");
-                IJ.error("" + e);
-            }
-        }
-        if (cm == null) {
-            IJ.log("  ! warning: cm is null");
-        }
-        return cm;
     }
 
     /** Calculate position of different orders/bands in frequency space.
