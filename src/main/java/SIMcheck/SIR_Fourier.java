@@ -26,6 +26,7 @@ import ij.measure.*;
 import ij.gui.*;
 
 import java.awt.Color;
+import java.awt.image.IndexColorModel;
 
 /** 
  * This plugin plots FFTs of reconstructed stacks with resolution rings.
@@ -38,7 +39,8 @@ public class SIR_Fourier implements PlugIn, EProcessor {
     String name = "Reconstructed Data Fourier Plots";
     ResultSet results = new ResultSet(name);
     static final String[] setMinChoices = {"mode", "mean", "min"};
-    private static final String fourierLUTfile = "SIMcheck/SIMcheckFourier.lut";
+    private static final IndexColorModel fourierLUT = 
+            I1l.loadLut("SIMcheck/SIMcheckFourier.lut");
     
     // parameter fields
     public double[] resolutions = {0.10, 0.12, 0.15, 0.2, 0.3, 0.6};
@@ -98,8 +100,8 @@ public class SIR_Fourier implements PlugIn, EProcessor {
             IJ.showStatus("Fourier transforming slices (orthogonal view)");
             ImagePlus impOrthoF = FFT2D.fftImp(impOrtho);
             IJ.showStatus("Blurring & rescaling slices (orthogonal view)");
-            impOrthoF = displaySettings(impOrthoF);
             impOrthoF = resizeAndPad(impOrthoF, cal);
+            impOrthoF = displaySettings(impOrthoF);
             calOrtho.pixelHeight = calOrtho.pixelWidth;  // after resizeAndPad
             impOrthoF = overlayResRings(impOrthoF, calOrtho);
             I1l.copyStackDims(imps[0], impOrthoF);
@@ -207,7 +209,7 @@ public class SIR_Fourier implements PlugIn, EProcessor {
         }
         if (blurRadius > 0) {
             double[] displayRange = {0.0d, 255.0d};  // show all
-            I1l.applyLUT(imp, I1l.loadLut(fourierLUTfile), displayRange);
+            I1l.applyLUT(imp, fourierLUT, displayRange);
         }
         return imp;
     }

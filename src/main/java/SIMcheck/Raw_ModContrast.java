@@ -23,6 +23,7 @@ import ij.process.*;
 import ij.plugin.*;
 import ij.plugin.HyperStackConverter;
 import ij.gui.GenericDialog;
+import java.awt.image.IndexColorModel;
 
 /** This plugin displays a modulation contrast map for raw SI data. 
  * For each channel, displaying the result with a LUT which is also shown. 
@@ -68,7 +69,8 @@ public class Raw_ModContrast implements PlugIn, EProcessor {
 
     String name = "Raw Data Modulation Contrast (MCN)";
     ResultSet results = new ResultSet(name);
-    private static final String mcnrLUTfile = "SIMcheck/MCNR.lut";
+    private static final IndexColorModel mcnrLUT = 
+            I1l.loadLut("SIMcheck/MCNR.lut");
     
     // parameter fields
     public int phases = 5;
@@ -235,7 +237,7 @@ public class Raw_ModContrast implements PlugIn, EProcessor {
         impResult.setT(1);
         impResult.setOpenAsHyperStack(true);
         if (!doRawFourier) {
-            I1l.applyLUT(impResult, I1l.loadLut(mcnrLUTfile), displayRange);
+            I1l.applyLUT(impResult, mcnrLUT, displayRange);
             results.addImp("modulation contrast-to-noise ratio image", 
                     impResult);
             results.addInfo("Modulation contrast-to-noise ratio (MCNR)",

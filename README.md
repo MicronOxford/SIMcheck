@@ -104,30 +104,27 @@ Style Notes
 TODO
 ====
 
-problems / ideas -
-* Recon data histogram +ve/-ve ratio wrong
-* bleaching calculation: combine per-9Z and inter-angle decay
-* display / warn saturated pixels (try green)
-* make SIR ortho an optional extra
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
-      - swing GUI runner & report
-      - raw -> WF same size as SIR by interpolation (& preserve type??)
-      - SIR_Fourier:
-        - one orthogonal slice, not whole stack?
-        - finalize scaling: separate for lat & ortho?
+      - check recon data histogram +/- ratio calc (Lothar found error?)
+      - display / warn saturated pixels (try green)
+      - improve log output & names: should be simple, concise & self-documenting
+      - paper & public web page with EXAMPLES
       - ImagePlus.isHyperstack() = true
       - SIR_hist with multiple frames
       - SIR_FFT, update window function to Rainer Heintzmann's
       - make sure tests and debug not deployed
       - convert dialog & logging to non-blocking swing GUI
+      - raw -> WF same size as SIR by interpolation (& preserve type??)
+      - bleaching calculation: combine per-9Z and inter-angle decay?
+      - SIR_Fourier:
+        - one orthogonal slice, not whole stack?
+        - finalize scaling: separate for lat & ortho?
       - final empirical tests, param calibration, tolerances etc.
-      - public web page with EXAMPLES
-      - improve log output: should be simple, concise & self-documenting
       - check preconditions & robustness w.r.t. input data (multi-d, type etc.)
-      - junit test suite to test/debug non-interactive code
       - mavenize & make Fiji update site
-      - try to install LUTs into IJ menu?
+      - junit test suite to test/debug non-interactive code
+      - better LUT loading scheme, try to install LUTs into IJ menu?
       - add ResultTable support to ResultSet class
       - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
 
