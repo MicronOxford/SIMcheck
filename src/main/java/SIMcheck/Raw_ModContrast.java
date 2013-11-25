@@ -271,7 +271,7 @@ public class Raw_ModContrast implements PlugIn, EProcessor {
          * using dataset where MCNR = 4.6 sigma^2 has optimal Wiener = 0.04
          *   x / 4.6^2  = 0.004, => x = 0.085 and Wiener = 0.085 / (MCNR^2)
          */
-        return 0.085d / (mcnr * mcnr);
+        return 0.170d / (mcnr * mcnr);  // 0.0085 doubled based on Wiener series
     }
     
     /** Calculate DFT for window orthogonal to an XY slice. */

@@ -104,6 +104,16 @@ Style Notes
 TODO
 ====
 
+feedback from IMP facility manager
+* motion check, in log file,
+  - note that they intensity normalized in log
+  - note that also for uneven illumination in Blaze
+* conrast map,
+  - change name of "Z window half-width"
+  - what does "raw Fourier" option do?
+* improve naming of checks, parameters etc. to be more intuitive
+* Wiener filter parameter estimate - document, calibrate
+* discard negatives macro / utility
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - check recon data histogram +/- ratio calc (Lothar found error?)
