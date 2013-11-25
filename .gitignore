@@ -1,6 +1,7 @@
 *.class
 .DS_Store
 mk
+build.log
 lib
 plugins
 y
@@ -9,3 +10,5 @@ test_images
 public/
 extras/
 src/test/resources/
+docs/
+target/
