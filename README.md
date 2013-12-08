@@ -68,7 +68,7 @@ Features
 PROJECT STRUCTURE
 =================
 
-- README.txt - this file
+- README.md - this file
 - NOTICE.txt  - Notices and attributions required by libraries depended on
 - LICENSE.txt - Project's license
 - build.xml - ant buildfile
