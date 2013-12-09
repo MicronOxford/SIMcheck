@@ -4,6 +4,9 @@ unit, Department of Biochemistry, Oxford.
 The PRIMARY AUTHOR of the project is:
   * Graeme Ball
 
+Additional Coders:
+  * Ian Dobbie
+
 Additional CONTRIBUTORS who provided intellectual input are:
   * Lothar Schermelleh
   * Rainer Kaufmann
