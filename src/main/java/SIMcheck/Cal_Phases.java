@@ -185,7 +185,7 @@ public class Cal_Phases implements PlugIn {
 			    }
 			    if ((Math.abs(phaseShifts[c-1][index]) > 1.5*expectedStep) | 
 				(Math.abs(phaseShifts[c-1][index]) < 0.5*expectedStep)){
-				IJ.log("C"+c+"-A"+a+"-Z"+z+"-p"+p" : Phase step > 1.5 or  <0.5 times expected step size");
+				IJ.log("C"+c+"-A"+a+"-Z"+z+"-p"+p+" : Phase step > 1.5 or  <0.5 times expected step size");
 			    }
 			    // need some way to decide on the initial direction to triger this warning.
 			    //if(phaseShift*phaseDirection < 1){
