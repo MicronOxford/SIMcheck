@@ -83,7 +83,7 @@
       <classpath>
           <pathelement location="${target.test-classes}"/>
           <pathelement location="${lib}/ij.jar"/>
-          <pathelement location="${lib}/junit-4.10.jar"/>
+          <pathelement location="${lib}/junit.jar"/>
       </classpath>
       <batchtest fork="yes" todir="${target.test-classes}">
           <fileset dir="${src.test.java}">
