@@ -51,8 +51,6 @@ Features
  Raw floaties      |  no floaties or drift detected? |    threshold/stat?
  Raw Mod Contrast  |  feature MCNR acceptable?       |    Wiener par
 
-- TODO? camera correction? correlation coefficient & linearity
-
 -----------------------------
 3: Post-reconstruction Checks
 -----------------------------
@@ -85,7 +83,6 @@ PROJECT STRUCTURE
 Eclipse project created using File->New->Project->from Ant build file
 
 
-
 Style Notes
 ===========
 * simple, modular structure - each check is a standalone plugin
@@ -93,18 +90,11 @@ Style Notes
 * ImageJ1-like preference for pre- java 5 features (i.e. not many generics)
   and reliance on float primitive type for most calculations
 * no dependencies other than ImageJ1
-* unconventional choices which some people may consider bad pratice -
-  * significant use of a utility class with static methods to provide 
-    functionality missing from java arrays, math, & IJ API
-  * final not used to mark immutability (not worth increase in visual noise)
-  * most methods package-private rather than private - less verbose & makes
-    unit testing easier (I never call non-public methods between classes)
 
 
 TODO
 ====
 
-feedback from IMP facility manager
 * motion check, in log file,
   - note that they intensity normalized in log
   - note that also for uneven illumination in Blaze

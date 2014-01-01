@@ -23,7 +23,7 @@
   <property name="lib" location="lib"/>
   <path id="libpath">
     <fileset dir="${lib}/">
-      <!-- lib dir requires ij.jar, junit-4.10.jar -->
+      <!-- lib dir requires ij.jar, junit.jar -->
       <include name="*.jar" />
     </fileset>
   </path>
@@ -39,7 +39,6 @@
   <property name="target.classes" location="target/classes"/>
   <property name="target.test-classes" location="target/test-classes"/>
   <property name="docs" location="docs"/>
-
 
 
   <!-- Ant targets: default all = compile, test, docs, package, install -->
