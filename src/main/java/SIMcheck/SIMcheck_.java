@@ -76,7 +76,7 @@ public class SIMcheck_ implements PlugIn {
         SIMcheckDialog.addNumericField("phases", phases, 1);
         SIMcheckDialog.addCheckbox("Raw_Intensity_Profile", true);
         SIMcheckDialog.addCheckbox("Raw_Fourier_Plots", true);
-        SIMcheckDialog.addCheckbox("Raw_data_Motion_Check", true);
+        SIMcheckDialog.addCheckbox("Raw_Angle_Difference", true);
         SIMcheckDialog.addCheckbox("Raw_Modulation_Contrast", true);
         SIMcheckDialog.addMessage("------------ Reconstructed data ------------");
         SIMcheckDialog.addChoice("Reconstructed_Data:", titles, titles[nullTitleIndex]);
@@ -143,10 +143,10 @@ public class SIMcheck_ implements PlugIn {
                         results.report();
                     }
                     if (SIMcheckDialog.getNextBoolean()) {
-                        Raw_MotionCheck raw_motion_plugin = new Raw_MotionCheck();
-                        raw_motion_plugin.phases = phases;
-                        raw_motion_plugin.angles = angles;
-                        ResultSet results = raw_motion_plugin.exec(SIstackImp);
+                        Raw_Angle_Difference raw_a_diff_plugin = new Raw_Angle_Difference();
+                        raw_a_diff_plugin.phases = phases;
+                        raw_a_diff_plugin.angles = angles;
+                        ResultSet results = raw_a_diff_plugin.exec(SIstackImp);
                         results.report();
                     }
                     if (SIMcheckDialog.getNextBoolean()) {

@@ -1,74 +1,75 @@
-/*  Copyright (c) 2013, Graeme Ball and Micron Oxford,                          
- *  University of Oxford, Department of Biochemistry.                           
- *                                                                               
- *  This program is free software: you can redistribute it and/or modify         
- *  it under the terms of the GNU General Public License as published by         
- *  the Free Software Foundation, either version 3 of the License, or            
- *  (at your option) any later version.                                          
- *                                                                               
- *  This program is distributed in the hope that it will be useful,              
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of               
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
- *  GNU General Public License for more details.                                 
- *                                                                               
- *  You should have received a copy of the GNU General Public License            
- *  along with this program.  If not, see http://www.gnu.org/licenses/ .         
- */ 
+/*  Copyright (c) 2013, Graeme Ball and Micron Oxford,
+ *  University of Oxford, Department of Biochemistry.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see http://www.gnu.org/licenses/ .
+ */
 
 package SIMcheck;
 import ij.*;
 import ij.plugin.*;
 import ij.process.*;
-import ij.gui.GenericDialog; 
+import ij.gui.GenericDialog;
 
-/** This plugin converts raw SI data into pseudo-wide-field stack with each 
- * angle normalized and false-colored (Cyan=A1, Magenta=A2, Yellow=A3). 
- * False-coloring is intended to show up drift between angles and "floaties", 
- * i.e. small objects drifting within the sample. In the absence of drift 
- * or "floaties", images ought to appear white/gray!
+/** This plugin converts raw SI data into pseudo-wide-field stack with each
+ * angle normalized, false-colored (Cyan=A1, Magenta=A2, Yellow=A3), and
+ * combined into a single slice. False-coloring shows up differences between
+ * angles, which may be due to drift, "floaties" (small objects floating within
+ * the sample), or illumination differences between angles. In the absence of 
+ * differences, images ought to appear white/gray!
  * @author Graeme Ball <graemeball@gmail.com>
- */ 
-public class Raw_MotionCheck implements PlugIn, EProcessor {
-    
+ */
+public class Raw_Angle_Difference implements PlugIn, EProcessor {
+
     String name = "Raw Data Motion Check";
     ResultSet results = new ResultSet(name);
-    
+
     // parameter fields
     public int phases = 5;
     public int angles = 3;
-    
-    @Override 
+
+    @Override
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
-        GenericDialog gd = new GenericDialog(name);                   
-        gd.addMessage("Requires SI raw data in API OMX (CPZAT) order.");        
-        gd.addNumericField("Angles", angles, 1);                               
-        gd.addNumericField("Phases", phases, 1);                               
-        gd.showDialog();                                                        
+        GenericDialog gd = new GenericDialog(name);
+        gd.addMessage("Requires SI raw data in API OMX (CPZAT) order.");
+        gd.addNumericField("Angles", angles, 1);
+        gd.addNumericField("Phases", phases, 1);
+        gd.showDialog();
         if (gd.wasCanceled()) return;
-        if (gd.wasOKed()) {                                                     
-            // update angles and phases according to numeric fields             
-            angles = (int)gd.getNextNumber();                                   
-            phases = (int)gd.getNextNumber();                                   
-        }                                                                       
-        if(!I1l.stackDivisibleBy(imp, phases * angles)){                                                 
-            IJ.showMessage( "Raw Data Motion Check", 
+        if (gd.wasOKed()) {
+            // update angles and phases according to numeric fields
+            angles = (int)gd.getNextNumber();
+            phases = (int)gd.getNextNumber();
+        }
+        if(!I1l.stackDivisibleBy(imp, phases * angles)){
+            IJ.showMessage( "Raw Data Motion Check",
                     "Error: stack size not consistent with phases/angles.");
-            return;                                                             
+            return;
         }
         results = exec(imp);
         results.report();
     }
 
     /** Execute plugin functionality: false-color angles to show disparities.
-     * @param imps raw SI data ImagePlus should be first imp 
-     * @return ResultSet containing merge of false-colored angles 
-     */ 
+     * @param imps raw SI data ImagePlus should be first imp
+     * @return ResultSet containing merge of false-colored angles
+     */
     public ResultSet exec(ImagePlus... imps) {
         ImagePlus imp = imps[0];
         IJ.showStatus("Raw data motion check...");
         if (angles != 3) {
-            IJ.showMessage("Raw Data Motion Check", 
+            IJ.showMessage("Raw Data Motion Check",
                     "This plugin only works for 3 angles currently.");
         } else {
             int nc = imp.getNChannels();
@@ -77,7 +78,7 @@ public class Raw_MotionCheck implements PlugIn, EProcessor {
             nz = nz / (phases * angles);  // take phase & angle out of Z
 
             // factors to normalize angles to highest intensity
-            double[][] normFactors = new double[3][3];  
+            double[][] normFactors = new double[3][3];
             // total intensities for each [angle][channel] (max 3x3)
             double[][] totalIntens = new double[3][3];
 
@@ -85,18 +86,19 @@ public class Raw_MotionCheck implements PlugIn, EProcessor {
             calcNormalizationFactors(imp, nc, angles, totalIntens, normFactors);
             ImagePlus colorImp = colorAngles(imp, projImp, nc, nz, normFactors);
             results.addImp("false-colored angles (C, M, Y)", colorImp);
-            results.addInfo("False-colored angles", 
-                    "phases averaged, colors Cyan, Magenta, Yellow"
-                    + " are for angles 1, 2 & 3 \n   (non-white indicates"
-                    + " motion occurred between data for different angles)");
+            results.addInfo("False-colored angles",
+                    "phases averaged, angles normalized, colored Cyan,"
+                    + " Magenta, Yellow for angles 1, 2 & 3 \n"
+                    + "  (non-white indicates differences between angles due"
+                    + " to drift, floating particles or uneven illumination");
         }
         return results;
     }
-    
+
     /** Arrange and run average projections of the 5 phases each CZAT. **/
-    ImagePlus averagePhase(ImagePlus imp, int nc, int nz, int nt, 
+    ImagePlus averagePhase(ImagePlus imp, int nc, int nz, int nt,
             double[][] intens) {
-        ImageStack stack = imp.getStack(); 
+        ImageStack stack = imp.getStack();
         ImageStack Pset = new ImageStack(imp.getWidth(), imp.getHeight());
         ImageStack avStack = new ImageStack(imp.getWidth(), imp.getHeight());
 
@@ -140,30 +142,30 @@ public class Raw_MotionCheck implements PlugIn, EProcessor {
 
     /** Average a set of slices (mean projection). **/
     ImageProcessor averageSlices(ImagePlus imp, ImageStack stack, int nslices) {
-        int width = imp.getWidth();                                             
+        int width = imp.getWidth();
         int height = imp.getHeight();
         int npix = width * height;  // per slice
         float[] avpix;
         FloatProcessor oip = new FloatProcessor(width, height);
         avpix = (float[])oip.getPixels();
         for (int s = 1; s <= nslices; s++) {
-            FloatProcessor fp = (FloatProcessor)stack.getProcessor(s).convertToFloat();  
+            FloatProcessor fp = (FloatProcessor)stack.getProcessor(s).convertToFloat();
             float[] fpixels = (float[])fp.getPixels();
             for (int i = 0; i < npix; i++) {
                 avpix[i] += fpixels[i];
             }
         }
-        for (int i = 0; i < npix; i++){                                            
+        for (int i = 0; i < npix; i++){
             avpix[i] /= (float)nslices;
         }
         oip = new FloatProcessor(width, height, avpix, null);
         return oip;
     }
-    
+
 
     /** Calculate factors to normalize to highest intensity in angle group. **/
-    void calcNormalizationFactors(ImagePlus imp, int nc, int na, 
-            double[][] intens, double[][] normFactor) { 
+    void calcNormalizationFactors(ImagePlus imp, int nc, int na,
+            double[][] intens, double[][] normFactor) {
         for(int c = 0; c < nc; c++){
             double maxIntensity = 0;
             for (int a = 0; a < na; a++){
@@ -176,19 +178,19 @@ public class Raw_MotionCheck implements PlugIn, EProcessor {
             }
         }
     }
-    
+
 
     /** Create RGB stacks colored Cyan, Magenta, Yellow for Angles 1, 2, 3 **/
-    ImagePlus colorAngles(ImagePlus imp, ImagePlus projImp, int nc, int nz, 
+    ImagePlus colorAngles(ImagePlus imp, ImagePlus projImp, int nc, int nz,
             double[][] normFactor) {
         int nt = projImp.getNFrames();  // after phase removal
         // average phases and make new stack to hold RGB result
-        ImageStack projStack = projImp.getStack(); 
+        ImageStack projStack = projImp.getStack();
         ImageStack RBGstack = new ImageStack(imp.getWidth(), imp.getHeight());
         int sliceIn = 0;
         int sliceOut = 0;
         int width = imp.getWidth();
-        int height = imp.getHeight(); 
+        int height = imp.getHeight();
         double half = 0.5;
         IJ.showStatus("False-coloring each angle");
         for (int t = 1; t <= nt; t++) {
@@ -196,22 +198,22 @@ public class Raw_MotionCheck implements PlugIn, EProcessor {
                 IJ.showProgress(z, nz);
                 for (int c = 1; c <= nc; c++) {
                     // make new (temporary) stack to hold angle set
-                    ImageStack angleSet = new ImageStack(imp.getWidth(), 
+                    ImageStack angleSet = new ImageStack(imp.getWidth(),
                             imp.getHeight());
                     // make new (temporary) stack to hold 8-bit RGB sets (i.e. 3 slices)
-                    ImageStack RGBset = new ImageStack(imp.getWidth(), 
+                    ImageStack RGBset = new ImageStack(imp.getWidth(),
                             imp.getHeight());
                     for (int a = 1; a <= angles; a++) {
                         sliceIn++;
                         // get a slice as float, normalize it (see above) and convert to 8-bit
-                        FloatProcessor fp = 
+                        FloatProcessor fp =
                                 (FloatProcessor)projStack.getProcessor(sliceIn).convertToFloat();
                         fp.multiply(normFactor[a-1][c-1]);
                         angleSet.addSlice(null, fp);
                         // calculate RGB values now we have all the angles
-                        if (a == angles) { 
+                        if (a == angles) {
                             sliceOut++;
-                            // 1. convert angleSet to RGBset using proportions:- 
+                            // 1. convert angleSet to RGBset using proportions:-
                             //      0,0.5,0.5 / 0.5,0,0.5 / 0.5,0.5,0 = C / M / Y
                             FloatProcessor ipAngle1 = (FloatProcessor)angleSet.getProcessor(1);
                             FloatProcessor ipAngle2 = (FloatProcessor)angleSet.getProcessor(2);
@@ -233,15 +235,15 @@ public class Raw_MotionCheck implements PlugIn, EProcessor {
                             RGBset.addSlice(String.valueOf(2),bpGreen);
                             FloatProcessor ipBlue = new FloatProcessor(width, height);
                             ipBlue.copyBits(ipAngle1, 0, 0, Blitter.ADD);
-                            ipBlue.copyBits(ipAngle2, 0, 0, Blitter.ADD); 
+                            ipBlue.copyBits(ipAngle2, 0, 0, Blitter.ADD);
                             ByteProcessor bpBlue = (ByteProcessor)ipBlue.convertToByte(true);
                             RGBset.addSlice(String.valueOf(3),bpBlue);
-                            // 2. convert 3 slices of RGBset to 1 RGB slice 
-                            ImagePlus tempImp = new ImagePlus("Temp", RGBset);                               
-                            ImageConverter ic = new ImageConverter(tempImp);                       
+                            // 2. convert 3 slices of RGBset to 1 RGB slice
+                            ImagePlus tempImp = new ImagePlus("Temp", RGBset);
+                            ImageConverter ic = new ImageConverter(tempImp);
                             ic.convertRGBStackToRGB();
-                            ImageStack singleRGB = tempImp.getStack(); 
-                            RBGstack.addSlice(String.valueOf(sliceOut),singleRGB.getProcessor(1)); 
+                            ImageStack singleRGB = tempImp.getStack();
+                            RBGstack.addSlice(String.valueOf(sliceOut),singleRGB.getProcessor(1));
                         }
                     }
                 }

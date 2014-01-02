@@ -99,19 +99,16 @@ TODO
 ====
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
-      - paper & public web page with EXAMPLES
-      - display / warn saturated pixels (try green)
-      - improve log output & names: should be simple, concise & self-explanatory
-        - MCNR: change name of "Z window half-width"
-        - MCNR: what does "raw Fourier" option do?
-      - motion check, in log file,
-        - note that they intensity normalized in log
-        - note that also for uneven illumination in Blaze
-      - Wiener filter parameter estimate - document, calibrate
       - ImagePlus.isHyperstack() = true
       - SIR_Fourier:
         - one orthogonal slice, not whole stack?
         - finalize scaling: separate for lat & ortho?
+      - improve log output & names: should be simple, concise & self-explanatory
+        - MCNR: change name of "Z window half-width"
+        - MCNR: what does "raw Fourier" option do?
+      - Wiener filter parameter estimate - document, calibrate
+      - paper & public web page with EXAMPLES
+      - display / warn saturated pixels (try green)
       - add ResultTable support to ResultSet class
       - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
       - discard negatives macro / utility
