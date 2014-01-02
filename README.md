@@ -46,9 +46,9 @@ Features
 
     Check          |        Statistic(s)             |      Comments
 ------------------ | ------------------------------- | ---------------------
- Raw Z profile     |  bleaching and angle diffs OK?  |    
+ Raw Angle Diff    |  no colored differences?        |    threshold/stat?
+ Raw Z Profile     |  bleaching and angle diffs OK?  | 
  Raw Fourier plots |  SI pattern correct & regular?  |    TODO? k0 & linspc
- Raw floaties      |  no floaties or drift detected? |    threshold/stat?
  Raw Mod Contrast  |  feature MCNR acceptable?       |    Wiener par
 
 -----------------------------
