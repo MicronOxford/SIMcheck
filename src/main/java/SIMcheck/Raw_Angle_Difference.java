@@ -252,9 +252,7 @@ public class Raw_Angle_Difference implements PlugIn, EProcessor {
         ImagePlus colorImp = new ImagePlus(I1l.makeTitle(imp, "APJ"), RBGstack);
         colorImp.setDimensions(nc, nz, nt);
         int centralZ = nz / 2;
-        colorImp.setZ(centralZ);
-        colorImp.setC(1);
-        colorImp.setT(1);
+        colorImp.setPosition(1, centralZ, 1);
         colorImp.setOpenAsHyperStack(true);
         return colorImp;
     }

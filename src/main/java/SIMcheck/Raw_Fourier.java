@@ -115,9 +115,7 @@ public class Raw_Fourier implements PlugIn, EProcessor {
         impOut.setDimensions(nc, nz * phases, nt);
         I1l.copyCal(impAll, impOut);
         int centralZ = ((nz / 2) * phases) - phases + 1;  // 1st phase
-        impOut.setZ(centralZ);                                       
-        impOut.setC(1);                                              
-        impOut.setT(1);                                              
+        impOut.setPosition(1, centralZ, 1);
         impOut.setOpenAsHyperStack(true);
         return impOut;
     }
