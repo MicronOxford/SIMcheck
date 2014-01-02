@@ -141,9 +141,9 @@ public class SIR_histogram implements PlugIn, EProcessor {
         ip.setColor(100);
         ip.fill();
         ip.setColor(140);
-        ip.fill(new ij.gui.Roi(0, 0, 48, 1));  // 24 pixels at 140 (mode + 40)
+        ip.fill(new ij.gui.Roi(0, 0, 48, 1));  // 48 pixels at 140 (mode + 40)
         ip.setColor(80);
-        ip.fill(new ij.gui.Roi(0, 1, 48, 1));  // 24 pixels at 80 (mode -20)
+        ip.fill(new ij.gui.Roi(0, 1, 48, 1));  // 48 pixels at 80 (mode -20)
         imp.setProcessor(ip);
         IJ.run(imp, "Select All", "");
         ImageStatistics stats = new StackStatistics(imp);
@@ -157,7 +157,8 @@ public class SIR_histogram implements PlugIn, EProcessor {
         } else {
             imp.close();
         }
-        boolean testResult = pnRatio > 1.8 && pnRatio < 2.2;
+        // expect 48*40 / 48*20 = 2.0
+        boolean testResult = pnRatio > 1.95 && pnRatio < 2.05;
         return testResult;
     }
 
