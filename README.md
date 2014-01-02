@@ -5,19 +5,24 @@ SIMcheck
 SIMcheck is a package of ImageJ tools for assessing the quality and
 reliability of Structured Illumination Microscopy (SIM) data.
 
-To install the built result, copy ./build/dist/SIMcheck_.jar to your ImageJ
-plugins/ directory and restart ImageJ. Note that the lib/ directory here must
-contain a soft link to the ij.jar you are using for the build process to work.
+* More information can be found on the 
+[Micron Oxford Website](http://www.micron.ox.ac.uk/software/SIMCheck.shtml)**
+* **The latest .jar can be downloaded from
+[here](http://www.micron.ox.ac.uk/microngroup/software/SIMcheck_.jar)**
+* Further help is available
+[here](http://www.micron.ox.ac.uk/microngroup/software/SIMcheck.html)**
+
+The code is arranged in a conventional Maven-like structure and includes
+an ant build script that can copy the resulting SIMcheck_.jar to a local
+plugin folder. Before building the project, first make a ./lib/ directory 
+containing a soft link to the ij.jar from the desired ImageJ version,
+as well as a soft link to junit.jar. The built result will be copied
+to ./plugins/ so soft-link this to your ImageJ plugins folder. Type "ant"
+to build the default (all) target and restart ImageJ or Help->Refresh Menus
 
 Copyright Graeme Ball and Micron Oxford, Department of Biochemistry, 
 University of Oxford. License GPL unless stated otherwise in a given file.
 
-Code is arranged in a conventional Maven-like structure and includes an
-ant build script that can copy the resulting SIMcheck_.jar to a local
-plugin folder.
-
-**The latest .jar can be downloaded from the 
-[Micron Oxford Website](http://www.micron.ox.ac.uk/microngroup/software/SIMcheck_.jar)**
 
 Features
 ========
@@ -89,10 +94,10 @@ Style Notes
 ===========
 
 * simple, modular structure - each check is a standalone plugin
-* exec methods take input images and return results with no GUI calls
+* exec methods take input images and return ResulSet with no GUI calls
+* no dependencies other than ImageJ1
 * ImageJ1-like preference for pre- java 5 features (i.e. not many generics)
   and reliance on float primitive type for most calculations
-* no dependencies other than ImageJ1
 
 
 TODO
