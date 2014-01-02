@@ -6,11 +6,11 @@ SIMcheck is a package of ImageJ tools for assessing the quality and
 reliability of Structured Illumination Microscopy (SIM) data.
 
 * More information can be found on the 
-[Micron Oxford Website](http://www.micron.ox.ac.uk/software/SIMCheck.shtml)**
+[Micron Oxford Website](http://www.micron.ox.ac.uk/software/SIMCheck.shtml)
 * **The latest .jar can be downloaded from
 [here](http://www.micron.ox.ac.uk/microngroup/software/SIMcheck_.jar)**
 * Further help is available
-[here](http://www.micron.ox.ac.uk/microngroup/software/SIMcheck.html)**
+[here](http://www.micron.ox.ac.uk/microngroup/software/SIMcheck.html)
 
 The code is arranged in a conventional Maven-like structure and includes
 an ant build script that can copy the resulting SIMcheck_.jar to a local
