@@ -100,7 +100,6 @@ TODO
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - paper & public web page with EXAMPLES
-      - check recon data histogram +/- ratio calc (Lothar found error?)
       - display / warn saturated pixels (try green)
       - improve log output & names: should be simple, concise & self-explanatory
         - MCNR: change name of "Z window half-width"

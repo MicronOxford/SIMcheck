@@ -95,7 +95,7 @@ public class SIR_histogram implements PlugIn, EProcessor {
      * @param pc (0-1) fraction of histogram to use at lower AND upper ends
      * @return (Imax - Imode) / (Imode - Imin), i.e. positive / negative ratio 
      */
-    double calcPosNegRatio(ImageStatistics stats, double pc) {
+    static double calcPosNegRatio(ImageStatistics stats, double pc) {
         int[] hist = stats.histogram;
         // find hist step (bin size), and number of pixels in image 
         double histStep = (stats.histMax - stats.histMin)
@@ -111,7 +111,7 @@ public class SIR_histogram implements PlugIn, EProcessor {
         double binValue = stats.histMin;
         while (negPc < pc && binValue < stats.dmode && bin < hist.length) {
             negPc += (double)hist[bin] / nPixels;
-            negTotal += (binValue * hist[bin]) - stats.dmode;
+            negTotal += (binValue - stats.dmode) * hist[bin];  // make mode 0
             bin += 1;
             binValue += histStep;
         }
@@ -123,16 +123,46 @@ public class SIR_histogram implements PlugIn, EProcessor {
         binValue = stats.histMax;
         while ((posPc < pc) && (bin >= 0)) {
             posPc += (double)hist[bin] / nPixels;
-            // adjust so that histogram mode is zero intensity
-            posTotal += (binValue * hist[bin]) - stats.dmode;  
+            posTotal += (binValue - stats.dmode) * hist[bin];  // make mode 0
             bin -= 1;
             binValue -= histStep;
         }
         // negTotal may or may not be negative
+        System.out.println("hist: " + I1l.prn(hist));
+        System.out.println("min; mode; max = " +
+                stats.histMin + "; " + stats.dmode + "; " + stats.histMax);
+        System.out.println("posTotal=" + posTotal + ", negTotal=" + negTotal);
         double posNegRatio = Math.abs(posTotal / negTotal);  
         return posNegRatio;
     }
 
+    /** test private methods, return "true" if all behave as expected */
+    static boolean selfTest() {
+        // test calcPosNegRatio() using image with a few high and low pixels
+        ImagePlus imp = IJ.createImage("stripe", "8-bit black", 64, 64, 1);
+        ImageProcessor ip = imp.getProcessor();
+        IJ.run(imp, "Select All", "");
+        ip.setColor(100);
+        ip.fill();
+        ip.setColor(140);
+        ip.fill(new ij.gui.Roi(0, 0, 48, 1));  // 24 pixels at 140 (mode + 40)
+        ip.setColor(80);
+        ip.fill(new ij.gui.Roi(0, 1, 48, 1));  // 24 pixels at 80 (mode -20)
+        imp.setProcessor(ip);
+        IJ.run(imp, "Select All", "");
+        imp.show();
+        ImageStatistics stats = new StackStatistics(imp);
+        double pnRatio = calcPosNegRatio(stats, 0.005);
+        System.out.println("pnRatio = " + pnRatio);
+        boolean testResult = pnRatio > 1.8 && pnRatio < 2.2;
+        return testResult;
+    }
+
+    /** Call selfTest */
+    public static void main(String[] args) {
+        System.out.println("selfTest successful? " + selfTest());
+    }
+    
     /** Extend ImageJ HistogramWindow for auto log scaling and stack stats. */
     class EhistWindow extends HistogramWindow {
         private static final long serialVersionUID = 1L;
@@ -142,7 +172,6 @@ public class SIR_histogram implements PlugIn, EProcessor {
             super.logScale = true;
             this.showHistogram(imp, stats);
         }
-
+        
     }
-    
 }

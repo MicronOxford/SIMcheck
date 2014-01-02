@@ -512,6 +512,15 @@ public final class I1l {
     
     
     /** Convert array to string for printing. */
+    public static String prn(long[] arr) {
+        String arrString = "";
+        for (int i = 0; i < arr.length; i++) {
+            arrString += " " + arr[i];
+        }
+        return arrString;
+    }
+    
+    /** Convert array to string for printing. */
     public static String prn(int[] arr) {
         String arrString = "";
         for (int i = 0; i < arr.length; i++) {
