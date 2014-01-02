@@ -128,16 +128,12 @@ public class SIR_histogram implements PlugIn, EProcessor {
             binValue -= histStep;
         }
         // negTotal may or may not be negative
-        System.out.println("hist: " + I1l.prn(hist));
-        System.out.println("min; mode; max = " +
-                stats.histMin + "; " + stats.dmode + "; " + stats.histMax);
-        System.out.println("posTotal=" + posTotal + ", negTotal=" + negTotal);
         double posNegRatio = Math.abs(posTotal / negTotal);  
         return posNegRatio;
     }
 
-    /** test private methods, return "true" if all behave as expected */
-    static boolean selfTest() {
+    /** test private methods, return true if all OK */
+    static boolean selfTest(boolean verbose) {
         // test calcPosNegRatio() using image with a few high and low pixels
         ImagePlus imp = IJ.createImage("stripe", "8-bit black", 64, 64, 1);
         ImageProcessor ip = imp.getProcessor();
@@ -150,17 +146,24 @@ public class SIR_histogram implements PlugIn, EProcessor {
         ip.fill(new ij.gui.Roi(0, 1, 48, 1));  // 24 pixels at 80 (mode -20)
         imp.setProcessor(ip);
         IJ.run(imp, "Select All", "");
-        imp.show();
         ImageStatistics stats = new StackStatistics(imp);
         double pnRatio = calcPosNegRatio(stats, 0.005);
-        System.out.println("pnRatio = " + pnRatio);
+        if (verbose) {
+            System.out.println("hist: " + I1l.prn(stats.histogram));
+            System.out.println("min; mode; max = " +
+                    stats.histMin + "; " + stats.dmode + "; " + stats.histMax);
+            System.out.println("pnRatio = " + pnRatio);
+            imp.show();
+        } else {
+            imp.close();
+        }
         boolean testResult = pnRatio > 1.8 && pnRatio < 2.2;
         return testResult;
     }
 
     /** Call selfTest */
     public static void main(String[] args) {
-        System.out.println("selfTest successful? " + selfTest());
+        System.out.println("selfTest successful? " + selfTest(true));
     }
     
     /** Extend ImageJ HistogramWindow for auto log scaling and stack stats. */
