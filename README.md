@@ -66,9 +66,11 @@ Features
 PROJECT STRUCTURE
 =================
 
-- README.md - this file
-- NOTICE.txt  - Notices and attributions required by libraries depended on
+- README.md - This file
 - LICENSE.txt - Project's license
+- AUTHORS.txt  - Authors / contributions
+- CHANGES.txt  - History of versions and changes
+- NOTICE.txt  - Notices and attributions required by libraries depended on
 - build.xml - ant buildfile
 - lib/ - contains soft links to necessary libraries (i.e. ij.jar)
 - src/main/java/ - Application sources (in SIMcheck/ package)
@@ -85,6 +87,7 @@ Eclipse project created using File->New->Project->from Ant build file
 
 Style Notes
 ===========
+
 * simple, modular structure - each check is a standalone plugin
 * exec methods take input images and return results with no GUI calls
 * ImageJ1-like preference for pre- java 5 features (i.e. not many generics)
@@ -95,44 +98,40 @@ Style Notes
 TODO
 ====
 
-* motion check, in log file,
-  - note that they intensity normalized in log
-  - note that also for uneven illumination in Blaze
-* conrast map,
-  - change name of "Z window half-width"
-  - what does "raw Fourier" option do?
-* improve naming of checks, parameters etc. to be more intuitive
-* Wiener filter parameter estimate - document, calibrate
-* discard negatives macro / utility
-
 * 1.0: integration/GUI, tests, documentation & write-up up for release
+      - paper & public web page with EXAMPLES
       - check recon data histogram +/- ratio calc (Lothar found error?)
       - display / warn saturated pixels (try green)
-      - improve log output & names: should be simple, concise & self-documenting
-      - paper & public web page with EXAMPLES
+      - improve log output & names: should be simple, concise & self-explanatory
+        - MCNR: change name of "Z window half-width"
+        - MCNR: what does "raw Fourier" option do?
+      - motion check, in log file,
+        - note that they intensity normalized in log
+        - note that also for uneven illumination in Blaze
+      - Wiener filter parameter estimate - document, calibrate
       - ImagePlus.isHyperstack() = true
-      - SIR_hist with multiple frames
-      - SIR_FFT, update window function to Rainer Heintzmann's
-      - make sure tests and debug not deployed
-      - convert dialog & logging to non-blocking swing GUI
-      - raw -> WF same size as SIR by interpolation (& preserve type??)
-      - bleaching calculation: combine per-9Z and inter-angle decay?
       - SIR_Fourier:
         - one orthogonal slice, not whole stack?
         - finalize scaling: separate for lat & ortho?
-      - final empirical tests, param calibration, tolerances etc.
-      - check preconditions & robustness w.r.t. input data (multi-d, type etc.)
-      - mavenize & make Fiji update site
-      - junit test suite to test/debug non-interactive code
-      - better LUT loading scheme, try to install LUTs into IJ menu?
       - add ResultTable support to ResultSet class
       - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
-
-* 1.1: future features
+      - discard negatives macro / utility
       - bead puddle SI illumination image
         split angles, de-interleave 5 phases, rotate to orthogonal
-      - pre: add statistic for floaty detection
-      - post: k0 angle lines (manual entry?), resolution symmetrical /angle?
+      - mavenize & make Fiji update site
+      - raw -> WF same size as SIR by interpolation (& preserve type??)
+      - convert dialog & logging to non-blocking swing GUI
+      - check preconditions & robustness w.r.t. input data (multi-d, type etc.)
+      - better LUT loading scheme, try to install LUTs into IJ menu?
+      - more junit tests to test/debug non-interactive code
+      - make sure tests and debug not deployed
+      - final empirical tests, param calibration, tolerances etc.
+      - SIR_hist with multiple frames
+      - SIR_FFT, try Rainer's window function
+
+* 1.1: future features
+      - pre: add statistic for floaty / uneven illumination detection
+      - post: k0 angle lines (manual entry?), resolution, symmetrical /angle?
       - post: SIR FFT automatic resolution estimation??
       - pre: FFT check to estimate angles & line-spacing
       - cali: PSF symmetry within tolerance?
