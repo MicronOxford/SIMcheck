@@ -138,7 +138,7 @@ public class SIR_histogram implements PlugIn, EProcessor {
         ImagePlus imp = IJ.createImage("stripe", "8-bit black", 64, 64, 1);
         ImageProcessor ip = imp.getProcessor();
         IJ.run(imp, "Select All", "");
-        ip.setColor(100);
+        ip.setColor(100);  // i.e. mode = 100
         ip.fill();
         ip.setColor(140);
         ip.fill(new ij.gui.Roi(0, 0, 48, 1));  // 48 pixels at 140 (mode + 40)
