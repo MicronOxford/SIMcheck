@@ -104,8 +104,6 @@ TODO
 ====
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
-      - SIR_Fourier:
-        - one orthogonal slice, not whole stack?
       - improve log output & names: should be simple, concise & self-explanatory
         - MCNR: change name of "Z window half-width"
         - MCNR: what does "raw Fourier" option do?

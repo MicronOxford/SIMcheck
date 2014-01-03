@@ -96,6 +96,7 @@ public class SIR_Fourier implements PlugIn, EProcessor {
             OrthoReslicer orthoReslicer = new OrthoReslicer();
             ImagePlus impOrtho = imp2.duplicate();
             impOrtho = orthoReslicer.exec(impOrtho, false);
+            impOrtho = takeCentralZ(impOrtho);
             Calibration calOrtho = impOrtho.getCalibration();
             IJ.showStatus("Fourier transforming slices (orthogonal view)");
             ImagePlus impOrthoF = FFT2D.fftImp(impOrtho);
@@ -117,6 +118,27 @@ public class SIR_Fourier implements PlugIn, EProcessor {
             + "  - asymmetric FFT indicates decreased resolution due to: angle to angle intensity\n"
             + "    variations, angle-specific k0 error, or angle-specific z-modulation issues\n");
         return results;
+    }
+    
+    /** Make a (sub)HyperStack comprising just the central Z slice */
+    ImagePlus takeCentralZ(ImagePlus imp) {
+        String title = imp.getTitle();
+        int[] dims = imp.getDimensions();
+        ImageStack stack = new ImageStack(dims[0], dims[1]);
+        imp.setZ(dims[3] / 2);
+        for (int t = 1; t <= dims[4]; t++) {
+            for (int c = 1; c <= dims[2]; c++) {
+                imp.setC(c);
+                imp.setT(t);
+                ImageProcessor ip = imp.getProcessor();
+                stack.addSlice(ip);
+            }
+        }
+        ImagePlus imp2 = new ImagePlus(title, stack);
+        imp2.setDimensions(dims[2], dims[3], dims[4]);
+        imp2.setCalibration(imp.getCalibration());
+        imp2.setOpenAsHyperStack(true);
+        return imp2;
     }
     
     /** Make radial profile plot for each channel at central Z. */
