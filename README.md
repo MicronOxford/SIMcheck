@@ -104,9 +104,15 @@ TODO
 ====
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
+      - SIR FOURIER: display scaling should preserve angle differences
+        - option to display without window function
+      - option for per-angle profiles for SIR Fourier FFT (specified K0 values)
+        - store k0 values? k0 values in degrees?
       - improve log output & names: should be simple, concise & self-explanatory
         - MCNR: change name of "Z window half-width"
         - MCNR: what does "raw Fourier" option do?
+      - color from channel metadata?
+      - raw data per angle difference: RMS error? (at least some stat)
       - Wiener filter parameter estimate - document, calibrate
       - paper & public web page with EXAMPLES
       - display / warn saturated pixels (try green)
