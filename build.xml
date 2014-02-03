@@ -83,6 +83,7 @@
           <pathelement location="${target.test-classes}"/>
           <pathelement location="${lib}/ij.jar"/>
           <pathelement location="${lib}/junit.jar"/>
+          <pathelement location="${lib}/hamcrest.jar"/>
       </classpath>
       <batchtest fork="yes" todir="${target.test-classes}">
           <fileset dir="${src.test.java}">
