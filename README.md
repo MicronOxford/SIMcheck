@@ -123,6 +123,7 @@ TODO
         split angles, de-interleave 5 phases, rotate to orthogonal
       - mavenize & make Fiji update site
       - raw -> WF same size as SIR by interpolation (& preserve type??)
+        - Julio: tool for merging SIM & widefield data
       - convert dialog & logging to non-blocking swing GUI
       - check preconditions & robustness w.r.t. input data (multi-d, type etc.)
       - better LUT loading scheme, try to install LUTs into IJ menu?
