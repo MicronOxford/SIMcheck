@@ -132,6 +132,7 @@ TODO
       - final empirical tests, param calibration, tolerances etc.
       - SIR_hist with multiple frames
       - SIR_FFT, try Rainer's window function
+      - util for rescaling as per Lothar_macros
 
 * 1.1: future features
       - pre: add statistic for floaty / uneven illumination detection
