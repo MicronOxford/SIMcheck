@@ -154,6 +154,13 @@ public class FFT2D extends FHT {
      * @return new ImagePlus after 2D FFT
      **/
     public static ImagePlus fftImp(ImagePlus impIn) {
+        return fftImp(impIn, 0.125d);
+    }
+    
+    /**
+     * 2D FFT hyperstack, specify window function size as input size fraction.
+     */
+    public static ImagePlus fftImp(ImagePlus impIn, double winFraction) {
         ImagePlus imp = impIn.duplicate();
         Calibration cal = impIn.getCalibration();
         int width = imp.getWidth();
@@ -182,7 +189,7 @@ public class FFT2D extends FHT {
             // See: ij/plugin/FFT.java & ij/ImagePlus.java (search FHT & FFT)
             //      ij/process/FHT.java
             ImageProcessor ip = stack.getProcessor(slice);
-            ip = FFT2D.gaussWindow(ip, 0.125d); 
+            ip = FFT2D.gaussWindow(ip, winFraction); 
             ip = FFT2D.pad(ip, paddedSize);  
             fht = FFT2D.fftSlice(ip, imp);
             ImageProcessor ps = fht.getPowerSpectrum();
@@ -199,6 +206,8 @@ public class FFT2D extends FHT {
         impF.setOpenAsHyperStack(true);
         return impF;
     }
+    
+    
 
     /** 
      * Calculate the padded width and height for an ImagePlus to be

@@ -45,6 +45,7 @@ public class SIR_Fourier implements PlugIn, EProcessor {
     // parameter fields
     public double[] resolutions = {0.10, 0.12, 0.15, 0.2, 0.3, 0.6};
     public double blurRadius = 0.0d;  // 6.0d was default for 512x512
+    public double winFraction = 0.125d;  // window function size, 0-1
     public int setMinChoice = 0;
     public boolean showAxial = false;
     
@@ -54,11 +55,13 @@ public class SIR_Fourier implements PlugIn, EProcessor {
         GenericDialog gd = new GenericDialog("SIR_Fourier");
         imp.getWidth();
         gd.addNumericField("Blur radius (512x512)", blurRadius, 1);
+        gd.addNumericField("Gauss window size 0-1", winFraction, 3);
         gd.addChoice("Crop minimum to", minChoices, "min");
         gd.addCheckbox("Show axial FFT", showAxial);
         gd.showDialog();
         if (gd.wasOKed()) {
             this.blurRadius = gd.getNextNumber();
+            this.winFraction = gd.getNextNumber();
             this.setMinChoice = gd.getNextChoiceIndex();
             this.showAxial = gd.getNextBoolean();
 	        results = exec(imp);
@@ -77,7 +80,7 @@ public class SIR_Fourier implements PlugIn, EProcessor {
         ImagePlus imp2 = imps[0].duplicate();
         
         IJ.showStatus("Fourier transforming slices (lateral view)");
-        ImagePlus impF = FFT2D.fftImp(imp2);
+        ImagePlus impF = FFT2D.fftImp(imp2, winFraction);
         blurRadius *= (double)impF.getWidth() / 512.0d;
         IJ.showStatus("Blurring & rescaling slices (lateral view)");
         impF = displaySettings(impF);  
@@ -99,7 +102,7 @@ public class SIR_Fourier implements PlugIn, EProcessor {
             impOrtho = takeCentralZ(impOrtho);
             Calibration calOrtho = impOrtho.getCalibration();
             IJ.showStatus("Fourier transforming slices (orthogonal view)");
-            ImagePlus impOrthoF = FFT2D.fftImp(impOrtho);
+            ImagePlus impOrthoF = FFT2D.fftImp(impOrtho, winFraction);
             IJ.showStatus("Blurring & rescaling slices (orthogonal view)");
             impOrthoF = resizeAndPad(impOrthoF, cal);
             impOrthoF = displaySettings(impOrthoF);
