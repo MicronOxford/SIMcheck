@@ -111,17 +111,16 @@ TODO
       - improve log output & names: should be simple, concise & self-explanatory
         - MCNR: change name of "Z window half-width"
         - MCNR: what does "raw Fourier" option do?
-      - color from channel metadata?
-      - raw data per angle difference: RMS error? (at least some stat)
       - Wiener filter parameter estimate - document, calibrate
       - paper & public web page with EXAMPLES
+      - mavenize & make Fiji update site
       - display / warn saturated pixels (try green)
       - add ResultTable support to ResultSet class
       - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
       - discard negatives macro / utility
       - bead puddle SI illumination image
         split angles, de-interleave 5 phases, rotate to orthogonal
-      - mavenize & make Fiji update site
+      - color from channel metadata?
       - raw -> WF same size as SIR by interpolation (& preserve type??)
         - Julio: tool for merging SIM & widefield data
       - convert dialog & logging to non-blocking swing GUI
@@ -130,6 +129,7 @@ TODO
       - more junit tests to test/debug non-interactive code
       - make sure tests and debug not deployed
       - final empirical tests, param calibration, tolerances etc.
+      - raw data per angle difference: RMS error? (at least some stat)
       - SIR_hist with multiple frames
       - SIR_FFT, try Rainer's window function
       - util for rescaling as per Lothar_macros
