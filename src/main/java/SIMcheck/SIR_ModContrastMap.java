@@ -37,14 +37,19 @@ public class SIR_ModContrastMap implements PlugIn, EProcessor {
     
     String name = "Reconstructed Data Mod Contrast Map (MCM)";
     ResultSet results = new ResultSet(name);
+    
+    // parameter fields
+    public int phases = 5;
+    public int angles = 3;
     float mcnrMax = 24.0f;
-    float maxPositive = 3276.0f;  // TODO: prompt for value & save as default
+    float maxPositive = 32767.0f;  // TODO: save as default
 
     @Override
     public void run(String arg) {
         GenericDialog gd = new GenericDialog("SIR_Mod_Contrast_Map");
         String[] titles = I1l.collectTitles();
         gd.addMessage(" --- Raw data stack --- ");
+        gd.addNumericField("          Raw data max intensity", maxPositive, 1);
         gd.addChoice("Raw data stack:", titles, titles[0]);
         gd.addMessage(" --- Modulation-Contrast-to-Noise Ratio stack --- ");
         gd.addChoice("MCNR stack:", titles, titles[0]);
@@ -54,6 +59,7 @@ public class SIR_ModContrastMap implements PlugIn, EProcessor {
         // ImagePlus MCNRimp = ModContrast_Map.exec(1, imp, phases, angles);
         gd.showDialog();
         if (gd.wasOKed()) {
+            maxPositive = (float)gd.getNextNumber();
             String rawStackChoice = gd.getNextChoice();
             String MCNRstackChoice = gd.getNextChoice();
             String SIRstackChoice = gd.getNextChoice();
@@ -287,12 +293,9 @@ public class SIR_ModContrastMap implements PlugIn, EProcessor {
                 159, 163, 167, 171, 175, 179, 183, 187, 191, 195, 199, 203,
                 207, 211, 215, 219, 223, 227, 231, 235, 239, 243, 247, 251 };
         for (int i = 1; i < fpixSIR.length; i++) {
-            // FIXME -- raw data index from SIR index is broken!
             int j = i / widthSIR;
             int rawI = (i / 2) % (widthSIR / 2) + ((j / 2) * widthSIR / 2);
-//            int rawI = i / 2 - ((widthSIR / 2) * (i / widthSIR));
             if (wfPix[rawI] > maxPositive - 1) {
-//                IJ.log("> max");
                 fpixRed[i] = 0.0f;
                 fpixGrn[i] = 255.0f;
                 fpixBlu[i] = 0.0f;

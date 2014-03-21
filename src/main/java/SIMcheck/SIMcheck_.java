@@ -193,6 +193,8 @@ public class SIMcheck_ implements PlugIn {
                 if (SIMcheckDialog.getNextBoolean()) {
                     SIR_ModContrastMap sir_mcnr_plugin = 
                         new SIR_ModContrastMap();
+                    sir_mcnr_plugin.phases = phases;
+                    sir_mcnr_plugin.angles = angles;
                     ResultSet results = 
                             sir_mcnr_plugin.exec(
                                     SIstackImp, SIRstackImp, modConImp);
