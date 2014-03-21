@@ -38,11 +38,14 @@ public class SIR_ModContrastMap implements PlugIn, EProcessor {
     String name = "Reconstructed Data Mod Contrast Map (MCM)";
     ResultSet results = new ResultSet(name);
     float mcnrMax = 24.0f;
+    float maxPositive = 3276.0f;  // TODO: prompt for value & save as default
 
     @Override
     public void run(String arg) {
         GenericDialog gd = new GenericDialog("SIR_Mod_Contrast_Map");
         String[] titles = I1l.collectTitles();
+        gd.addMessage(" --- Raw data stack --- ");
+        gd.addChoice("Raw data stack:", titles, titles[0]);
         gd.addMessage(" --- Modulation-Contrast-to-Noise Ratio stack --- ");
         gd.addChoice("MCNR stack:", titles, titles[0]);
         gd.addMessage(" ------------- Reconstructed SI stack ----------- ");
@@ -51,11 +54,13 @@ public class SIR_ModContrastMap implements PlugIn, EProcessor {
         // ImagePlus MCNRimp = ModContrast_Map.exec(1, imp, phases, angles);
         gd.showDialog();
         if (gd.wasOKed()) {
+            String rawStackChoice = gd.getNextChoice();
             String MCNRstackChoice = gd.getNextChoice();
             String SIRstackChoice = gd.getNextChoice();
+            ImagePlus rawImp = ij.WindowManager.getImage(rawStackChoice);
             ImagePlus MCNRimp = ij.WindowManager.getImage(MCNRstackChoice);
             ImagePlus SIRimp = ij.WindowManager.getImage(SIRstackChoice);
-                results = exec(SIRimp, MCNRimp);
+                results = exec(rawImp, SIRimp, MCNRimp);
                 results.report();
         }
     }
@@ -66,13 +71,17 @@ public class SIR_ModContrastMap implements PlugIn, EProcessor {
      * @return ResultSet containing map of SIR intesnsity colored by MCNR
      */
     public ResultSet exec(ImagePlus... imps) {
-        ImagePlus SIRimp = imps[0];
-        ImagePlus MCNRimp = imps[1];
+        ImagePlus rawImp = imps[0];  
+        ImagePlus SIRimp = imps[1];
+        ImagePlus MCNRimp = imps[2];
         if (SIandSIRimpMatch(MCNRimp, SIRimp)) {
         } else {
             IJ.log("  ! SIR_ModContrastMap: MCNR and SIR stack size mismatch");
             return results;
         }
+        // convert raw data imp into pseudo-widefield
+        Util_SI2WF si2wf = new Util_SI2WF();
+        ImagePlus wfImp = si2wf.exec(rawImp, 5, 3);  // TODO, get phases/angles!
         IJ.showStatus("Reconstructed data Mod Contrast Map...");
         ImagePlus SIRimp2 = (ImagePlus) SIRimp.duplicate();
         IJ.run(SIRimp2, "32-bit", "");
@@ -90,7 +99,7 @@ public class SIR_ModContrastMap implements PlugIn, EProcessor {
             ImagePlus SIRimpC = I1l.copyChannel(SIRimp2, c); 
             ImagePlus MCNimpC = I1l.copyChannel(MCNRimp2, c); 
             StackStatistics stats = new ij.process.StackStatistics(SIRimpC);
-            float maxPositive = (float)stats.max; 
+            float chMax = (float)stats.max; 
             int slices = SIRimpC.getStack().getSize();
             ImageStack MCMstackC = new ImageStack(width, height);
             for (int slice = 1; slice <= slices; slice++) {
@@ -105,7 +114,9 @@ public class SIR_ModContrastMap implements PlugIn, EProcessor {
                 FloatProcessor fpBlu = new FloatProcessor(width, height);
                 ImageStack RGBset = new ImageStack(width, height);  // 1 set
                 // 2. copy scaled values from input Processors to new Processors
-                scaledRGBintensities(SIRfp, maxPositive, MCNRfpRsz, 
+                FloatProcessor wfFp = 
+                        (FloatProcessor)wfImp.getStack().getProcessor(slice);
+                scaledRGBintensities(SIRfp, MCNRfpRsz, wfFp, chMax,
                         fpRed, fpGrn, fpBlu);
                 // 3. assemble 1 RGBset (3 slices)
                 ByteProcessor bpRed = (ByteProcessor)fpRed.convertToByte(false);
@@ -206,14 +217,16 @@ public class SIR_ModContrastMap implements PlugIn, EProcessor {
     /** Use input SIR and MCNR values to make output RGB color-coded processors.
      * SIR image intensity combined with MCNR encoded in LUT color map.
      */
-    void scaledRGBintensities(FloatProcessor SIRfp, float maxPositive,
-            FloatProcessor MCNRfp2, FloatProcessor fpRed, FloatProcessor fpGrn,
-            FloatProcessor fpBlu) {
+    void scaledRGBintensities(FloatProcessor SIRfp, FloatProcessor MCNRfp2,
+            FloatProcessor wfFp, float chMax,
+            FloatProcessor fpRed, FloatProcessor fpGrn, FloatProcessor fpBlu) {
+        float[] wfPix = (float[])wfFp.getPixels();
         float[] fpixSIR = (float[])SIRfp.getPixels();
         float[] fpixMCNR = (float[])MCNRfp2.getPixels();
         float[] fpixRed = (float[])fpRed.getPixels();
         float[] fpixGrn = (float[])fpGrn.getPixels();
         float[] fpixBlu = (float[])fpBlu.getPixels();
+        int widthSIR = SIRfp.getWidth();
         final float[] redLUT = 
                 { 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
                 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
@@ -274,13 +287,24 @@ public class SIR_ModContrastMap implements PlugIn, EProcessor {
                 159, 163, 167, 171, 175, 179, 183, 187, 191, 195, 199, 203,
                 207, 211, 215, 219, 223, 227, 231, 235, 239, 243, 247, 251 };
         for (int i = 1; i < fpixSIR.length; i++) {
-            float intensScale = (float) Math.max(
-                    Math.min((fpixSIR[i] / maxPositive), 1.0f), 0.0f);
-            int lutIndex = (int) (255.0f * Math
-                    .min((fpixMCNR[i] / mcnrMax), 1.0f));
-            fpixRed[i] = intensScale * redLUT[lutIndex];
-            fpixGrn[i] = intensScale * grnLUT[lutIndex];
-            fpixBlu[i] = intensScale * bluLUT[lutIndex];
+            // FIXME -- raw data index from SIR index is broken!
+            int j = i / widthSIR;
+            int rawI = (i / 2) % (widthSIR / 2) + ((j / 2) * widthSIR / 2);
+//            int rawI = i / 2 - ((widthSIR / 2) * (i / widthSIR));
+            if (wfPix[rawI] > maxPositive - 1) {
+//                IJ.log("> max");
+                fpixRed[i] = 0.0f;
+                fpixGrn[i] = 255.0f;
+                fpixBlu[i] = 0.0f;
+            } else {
+                float intensScale = (float) Math.max(
+                        Math.min((fpixSIR[i] / chMax), 1.0f), 0.0f);
+                int lutIndex = (int) (255.0f * Math.min(
+                                (fpixMCNR[i] / mcnrMax), 1.0f));
+                fpixRed[i] = intensScale * redLUT[lutIndex];
+                fpixGrn[i] = intensScale * grnLUT[lutIndex];
+                fpixBlu[i] = intensScale * bluLUT[lutIndex];
+            }
         }
     }
 }

@@ -104,8 +104,6 @@ TODO
 ====
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
-      - SIR FOURIER: display scaling should preserve angle differences
-        - option to display without window function
       - option for per-angle profiles for SIR Fourier FFT (specified K0 values)
         - store k0 values? k0 values in degrees?
       - improve log output & names: should be simple, concise & self-explanatory
@@ -125,7 +123,6 @@ TODO
         - Julio: tool for merging SIM & widefield data
       - convert dialog & logging to non-blocking swing GUI
       - check preconditions & robustness w.r.t. input data (multi-d, type etc.)
-      - better LUT loading scheme, try to install LUTs into IJ menu?
       - more junit tests to test/debug non-interactive code
       - make sure tests and debug not deployed
       - final empirical tests, param calibration, tolerances etc.

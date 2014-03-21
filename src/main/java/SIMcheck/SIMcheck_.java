@@ -105,60 +105,60 @@ public class SIMcheck_ implements PlugIn {
             int SIstackChoice = SIMcheckDialog.getNextChoiceIndex();
             int formatChoice = SIMcheckDialog.getNextChoiceIndex();
             if (SIstackChoice == nullTitleIndex) {
-                IJ.log("  ! no raw SI data - cannot perform raw data checks");
+                IJ.log("  ! no raw SI data - required for all checks");
                 // get all raw data choices so SIR booleans make sense
                 for (int nb = 0; nb < RAW_CHECKS; nb++) {
                     SIMcheckDialog.getNextBoolean();
                 }
+            }
+            int SIstackID = wList[SIstackChoice];
+            ImagePlus SIstackImp = ij.WindowManager.getImage(SIstackID);
+            if (!I1l.stackDivisibleBy(SIstackImp, phases * angles)) {
+                IJ.log("  ! invalid raw SI data - raw data checks aborted");
             } else {
-                int SIstackID = wList[SIstackChoice];
-                ImagePlus SIstackImp = ij.WindowManager.getImage(SIstackID);
-                if (!I1l.stackDivisibleBy(SIstackImp, phases * angles)) {
-                    IJ.log("  ! invalid raw SI data - raw data checks aborted");
-                } else {
-                    String SIstackName = SIstackImp.getTitle();
-                    IJ.log("  Using SI stack: " + SIstackName + " (ID "
-                            + SIstackID + ")");
-                    IJ.log("    format: " + formats[formatChoice]);
-                    Util_formats formatConverter = new Util_formats();
-                    if (formatChoice != 0) {
-                        IJ.log("      converting " + formats[formatChoice] 
-                                + " to OMX format");
-                        SIstackImp = formatConverter.exec(
-                                SIstackImp, phases, angles, formatChoice - 1);
-                    }
-                    // do checks on raw SI data
-                    if (SIMcheckDialog.getNextBoolean()) {
-                        Raw_intensity raw_int_plugin = new Raw_intensity();
-                        raw_int_plugin.phases = phases;
-                        raw_int_plugin.angles = angles;
-                        ResultSet results = raw_int_plugin.exec(SIstackImp);
-                        results.report();
-                    }
-                    if (SIMcheckDialog.getNextBoolean()) {
-                        Raw_Fourier raw_fourier_plugin = new Raw_Fourier();
-                        raw_fourier_plugin.phases = phases;
-                        raw_fourier_plugin.angles = angles;
-                        ResultSet results = raw_fourier_plugin.exec(SIstackImp);
-                        results.report();
-                    }
-                    if (SIMcheckDialog.getNextBoolean()) {
-                        Raw_Angle_Difference raw_a_diff_plugin = new Raw_Angle_Difference();
-                        raw_a_diff_plugin.phases = phases;
-                        raw_a_diff_plugin.angles = angles;
-                        ResultSet results = raw_a_diff_plugin.exec(SIstackImp);
-                        results.report();
-                    }
-                    if (SIMcheckDialog.getNextBoolean()) {
-                        Raw_ModContrast raw_MCNR_plugin = new Raw_ModContrast();
-                        raw_MCNR_plugin.phases = phases;
-                        raw_MCNR_plugin.angles = angles;
-                        ResultSet results = raw_MCNR_plugin.exec(SIstackImp);
-                        modConImp = results.getImp(0);
-                        results.report();
-                    }
+                String SIstackName = SIstackImp.getTitle();
+                IJ.log("  Using SI stack: " + SIstackName + " (ID "
+                        + SIstackID + ")");
+                IJ.log("    format: " + formats[formatChoice]);
+                Util_formats formatConverter = new Util_formats();
+                if (formatChoice != 0) {
+                    IJ.log("      converting " + formats[formatChoice] 
+                            + " to OMX format");
+                    SIstackImp = formatConverter.exec(
+                            SIstackImp, phases, angles, formatChoice - 1);
+                }
+                // do checks on raw SI data
+                if (SIMcheckDialog.getNextBoolean()) {
+                    Raw_intensity raw_int_plugin = new Raw_intensity();
+                    raw_int_plugin.phases = phases;
+                    raw_int_plugin.angles = angles;
+                    ResultSet results = raw_int_plugin.exec(SIstackImp);
+                    results.report();
+                }
+                if (SIMcheckDialog.getNextBoolean()) {
+                    Raw_Fourier raw_fourier_plugin = new Raw_Fourier();
+                    raw_fourier_plugin.phases = phases;
+                    raw_fourier_plugin.angles = angles;
+                    ResultSet results = raw_fourier_plugin.exec(SIstackImp);
+                    results.report();
+                }
+                if (SIMcheckDialog.getNextBoolean()) {
+                    Raw_Angle_Difference raw_a_diff_plugin = new Raw_Angle_Difference();
+                    raw_a_diff_plugin.phases = phases;
+                    raw_a_diff_plugin.angles = angles;
+                    ResultSet results = raw_a_diff_plugin.exec(SIstackImp);
+                    results.report();
+                }
+                if (SIMcheckDialog.getNextBoolean()) {
+                    Raw_ModContrast raw_MCNR_plugin = new Raw_ModContrast();
+                    raw_MCNR_plugin.phases = phases;
+                    raw_MCNR_plugin.angles = angles;
+                    ResultSet results = raw_MCNR_plugin.exec(SIstackImp);
+                    modConImp = results.getImp(0);
+                    results.report();
                 }
             }
+            
             
             IJ.log("\n ==== Reconstructed data checks ====");
             int SIRstackChoice = SIMcheckDialog.getNextChoiceIndex();
@@ -194,7 +194,8 @@ public class SIMcheck_ implements PlugIn {
                     SIR_ModContrastMap sir_mcnr_plugin = 
                         new SIR_ModContrastMap();
                     ResultSet results = 
-                            sir_mcnr_plugin.exec(SIRstackImp, modConImp);
+                            sir_mcnr_plugin.exec(
+                                    SIstackImp, SIRstackImp, modConImp);
                     results.report();
                 }
             }
