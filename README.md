@@ -112,12 +112,11 @@ TODO
       - Wiener filter parameter estimate - document, calibrate
       - paper & public web page with EXAMPLES
       - mavenize & make Fiji update site
-      - display / warn saturated pixels (try green)
-      - add ResultTable support to ResultSet class
       - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
       - discard negatives macro / utility
       - bead puddle SI illumination image
         split angles, de-interleave 5 phases, rotate to orthogonal
+      - add ResultTable support to ResultSet class
       - color from channel metadata?
       - raw -> WF same size as SIR by interpolation (& preserve type??)
         - Julio: tool for merging SIM & widefield data
