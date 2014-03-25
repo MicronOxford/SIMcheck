@@ -48,7 +48,7 @@ public class Cal_PatternFocus implements PlugIn {
         gd.addMessage("Requires SI raw data in API OMX (CPZAT) order.");
         gd.addNumericField("Angles", angles, 1);
         gd.addNumericField("Phases", phases, 1);
-        gd.addNumericField("Angle 1 (deg)", angle1, 3);
+        gd.addNumericField("Angle 1 (deg)", angle1, 1);
         gd.showDialog();
         if (gd.wasCanceled()) return;
         if (gd.wasOKed()) {
@@ -75,22 +75,17 @@ public class Cal_PatternFocus implements PlugIn {
         width = imp.getWidth();
         height = imp.getHeight();
         // TODO, check nChannels & nFrames & exit if > 1
-        
         double angleDegrees = 90.0d - angle1;
         ImagePlus[] phase1imps = phase1eachAngle(imp);
         for (int a = 0; a < angles; a++) {
             rotateStripes(phase1imps[a], angleDegrees);
-            results.addImp("Angle " + String.format("%.3f", angleDegrees) + 
+            phase1imps[a] = resliceAndProject(phase1imps[a]);
+            String title = I1l.makeTitle(imp, "APF" + (a + 1));
+            phase1imps[a].setTitle(title);
+            results.addImp("Angle " + String.format("%.1f", angleDegrees) + 
                     " pattern focus", phase1imps[a]);
             angleDegrees += 180.0d / angles;  // angles cover 180 deg
         }
-        int ymin = (int)(height * 0.33);
-        int ymax = (int)(height * 0.67);
-        IJ.log("project over y=" + ymin + "-" + ymax);
-        IJ.log("voxel depth=" + imp.getCalibration().pixelDepth);
-//        IJ.run(imp, "Reslice [/]...", "output=0.125 start=Top avoid");
-        
-        
         return results;
     }
     
@@ -123,6 +118,21 @@ public class Cal_PatternFocus implements PlugIn {
         IJ.log("rotating " + imp2.getTitle() + " by " + angleDeg + " degrees");
         IJ.run(imp2, "Rotate... ", "angle=" + angleDeg +
                 " grid=1 interpolation=Bilinear stack");
+    }
+    
+    /** Reslice to XZ view and max-project along y. */
+    private ImagePlus resliceAndProject(ImagePlus imp2) {
+        // TODO, reslice over range?
+        int ymin = (int)(height * 0.33);
+        int ymax = (int)(height * 0.67);
+        IJ.run(imp2, "Reslice [/]...", "output=" + 
+                imp2.getCalibration().pixelDepth + " start=Top avoid");
+        ImagePlus impResliced = IJ.getImage();
+        IJ.run(impResliced, "Z Project...", "projection=[Max Intensity]");
+        ImagePlus impProjected = IJ.getImage();
+        imp2.close();
+        impResliced.close();
+        return impProjected;
     }
     
     public static void main(String[] args) {
