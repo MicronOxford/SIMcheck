@@ -39,7 +39,7 @@ public class Cal_PatternFocus implements PlugIn {
 	private int height;
 	
     // default parameters
-    double angle1 = 0.00d;      // 1st illumination pattern angle in radians
+    double angle1 = 0.00d;      // 1st illumination pattern angle in degrees
 
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
@@ -48,7 +48,7 @@ public class Cal_PatternFocus implements PlugIn {
         gd.addMessage("Requires SI raw data in API OMX (CPZAT) order.");
         gd.addNumericField("Angles", angles, 1);
         gd.addNumericField("Phases", phases, 1);
-        gd.addNumericField("Angle 1", angle1, 3);
+        gd.addNumericField("Angle 1 (deg)", angle1, 3);
         gd.showDialog();
         if (gd.wasCanceled()) return;
         if (gd.wasOKed()) {
@@ -76,13 +76,13 @@ public class Cal_PatternFocus implements PlugIn {
         height = imp.getHeight();
         // TODO, check nChannels & nFrames & exit if > 1
         
-        double angleRadians = angle1;
+        double angleDegrees = 90.0d - angle1;
         ImagePlus[] phase1imps = phase1eachAngle(imp);
         for (int a = 0; a < angles; a++) {
-            rotateStripes(phase1imps[a], angleRadians);
-            results.addImp("Angle " + String.format("%.3f", angleRadians) + 
+            rotateStripes(phase1imps[a], angleDegrees);
+            results.addImp("Angle " + String.format("%.3f", angleDegrees) + 
                     " pattern focus", phase1imps[a]);
-            angleRadians += Math.PI * 2.0d / 3;
+            angleDegrees += 180.0d / angles;  // angles cover 180 deg
         }
         int ymin = (int)(height * 0.33);
         int ymax = (int)(height * 0.67);
@@ -117,8 +117,9 @@ public class Cal_PatternFocus implements PlugIn {
     }
     
     /** Rotate stripes for each angle to vertical. */
-    private void rotateStripes(ImagePlus imp2, double angleRadians) {
-        double angleDeg = -angleRadians * 180.0d / Math.PI;
+    private void rotateStripes(ImagePlus imp2, double angleDeg) {
+        // FIXME, rotate by angles: -48 72 11 (in IJ, E is 0, in worx N is 0)
+        angleDeg = -angleDeg;
         IJ.log("rotating " + imp2.getTitle() + " by " + angleDeg + " degrees");
         IJ.run(imp2, "Rotate... ", "angle=" + angleDeg +
                 " grid=1 interpolation=Bilinear stack");
