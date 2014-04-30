@@ -109,7 +109,10 @@ TODO
       - improve log output & names: should be simple, concise & self-explanatory
         - MCNR: change name of "Z window half-width"
         - MCNR: what does "raw Fourier" option do?
+      - modify raw MCNR default Z window half-width to 0 where nz=1
       - Wiener filter parameter estimate - document, calibrate
+      - SIR Histogram: extreme X% instead of 0.05%
+      - document need for cropping & offer a solution (a utility)
       - paper & public web page with EXAMPLES
       - mavenize & make Fiji update site
       - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
