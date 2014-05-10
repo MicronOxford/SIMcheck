@@ -94,7 +94,7 @@ Style Notes
 ===========
 
 * simple, modular structure - each check is a standalone plugin
-* exec methods take input images and return ResulSet with no GUI calls
+* plugin exec methods take input images and return ResultSet with no GUI calls
 * no dependencies other than ImageJ1
 * ImageJ1-like preference for pre- java 5 features (i.e. not many generics)
   and reliance on float primitive type for most calculations
@@ -104,42 +104,45 @@ TODO
 ====
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
-      - option for per-angle profiles for SIR Fourier FFT (specified K0 values)
-        - store k0 values? k0 values in degrees?
-      - improve log output & names: should be simple, concise & self-explanatory
-        - MCNR: change name of "Z window half-width"
-        - MCNR: what does "raw Fourier" option do?
-      - modify raw MCNR default Z window half-width to 0 where nz=1
-      - Wiener filter parameter estimate - document, calibrate
-      - SIR Histogram: extreme X% instead of 0.05%
-      - document need for cropping & offer a solution (a utility)
-      - paper & public web page with EXAMPLES
-      - mavenize & make Fiji update site
-      - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
-      - discard negatives macro / utility
-      - bead puddle SI illumination image
-        split angles, de-interleave 5 phases, rotate to orthogonal
-      - add ResultTable support to ResultSet class
-      - color from channel metadata?
-      - raw -> WF same size as SIR by interpolation (& preserve type??)
-        - Julio: tool for merging SIM & widefield data
-      - convert dialog & logging to non-blocking swing GUI
-      - check preconditions & robustness w.r.t. input data (multi-d, type etc.)
-      - more junit tests to test/debug non-interactive code
-      - make sure tests and debug not deployed
-      - final empirical tests, param calibration, tolerances etc.
-      - raw data per angle difference: RMS error? (at least some stat)
-      - SIR_hist with multiple frames
-      - SIR_FFT, try Rainer's window function
-      - util for rescaling as per Lothar_macros
+      - documentation: 
+        - improve log output & names, e.g. Z window half-width, raw Fourier
+        - document need for cropping, and how to do this
+        - make it more self-documenting! 
+        - overview & contents, usage/examples, build/dev, glossary
+        - switch to HTML only (printable); scrap text SIMcheck.html in resources
+        - illustrate usage with pictures, examples (documentation submodule?)
+        - explain all terms (glossary/appendix if necessary)
+      - fixes:
+        - modify raw MCNR default Z window half-width to 0 where nz=1
+        - SIR Fourier scaling issues
+        - SIR Histogram: extreme X% instead of 0.05%
+        - Wiener filter parameter estimate - calibrate, document
+        - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
+        - SIR_hist with multiple frames
+        - bead puddle SI illumination image: test, add multi-channel support?
+      - features:
+        - util for rescaling as per Lothar_macros (discard negatives)
+        - raw data per angle difference: RMS error? (at least some stat)
+        - raw -> WF same size as SIR by interpolation (& preserve type??)
+        - tool for merging SIM & widefield data (Julio)
+      - tests, structure:
+        - final empirical tests, param calibration, tolerances etc.
+        - mavenize & make Fiji update site
+        - add ResultTable support to ResultSet class
+        - more tests to test/debug non-interactive code, preconditions / inputs
+        - make sure tests and debug not deployed
 
 * 1.1: future features
+      - convert dialog & logging to non-blocking swing GUI
+      - post: option for per-angle profiles for SIR Fourier FFT (specified K0 values)
+        - store k0 values? k0 values in degrees?
       - pre: add statistic for floaty / uneven illumination detection
       - post: k0 angle lines (manual entry?), resolution, symmetrical /angle?
       - post: SIR FFT automatic resolution estimation??
       - pre: FFT check to estimate angles & line-spacing
       - cali: PSF symmetry within tolerance?
       - cali: OTF extent, shape & order separation?
+      - pre: plot channel color from channel metadata
 
 
 SIM Reconstruction Problems & Remedies 
