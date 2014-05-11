@@ -96,8 +96,12 @@ public class Raw_ModContrast implements PlugIn, EProcessor {
             phases = (int)gd.getNextNumber();
             zw = (int)gd.getNextNumber();
             doRawFourier = gd.getNextBoolean();
-            results = exec(imp);
-            results.report();
+            if (imp.getNSlices() < (angles * phases * 2 * zw + 1)) {
+                IJ.error("Not enough Z: pick a smaller Z window half-width");
+            } else {
+                results = exec(imp);
+                results.report();
+            }
         }
     }
 
