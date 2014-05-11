@@ -108,7 +108,6 @@ TODO
         - make more self-documenting: improve names & log output & names
         - finish/improve docs, illustrate usage with pictures, examples
       - fixes:
-        - raw angle difference fix
         - N-SIM data testing
         - SIR Fourier scaling issues
         - Wiener filter parameter estimate - calibrate, document

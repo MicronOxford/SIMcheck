@@ -78,9 +78,9 @@ public class Raw_Angle_Difference implements PlugIn, EProcessor {
             nz = nz / (phases * angles);  // take phase & angle out of Z
 
             // factors to normalize angles to highest intensity
-            double[][] normFactors = new double[3][3];  // FIXME, [3][nc]
+            double[][] normFactors = new double[3][nc];
             // total intensities for each [angle][channel] (max 3x3)
-            double[][] totalIntens = new double[3][3];  // FIXME, [3][nc]
+            double[][] totalIntens = new double[3][nc];
 
             ImagePlus projImp = averagePhase(imp, nc, nz, nt, totalIntens);
             calcNormalizationFactors(imp, nc, angles, totalIntens, normFactors);
