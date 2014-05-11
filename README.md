@@ -109,7 +109,6 @@ TODO
         - document need for cropping, and how to do this
         - make it more self-documenting! 
         - overview & contents, usage/examples, build/dev, glossary
-        - switch to HTML only (printable); scrap text SIMcheck.html in resources
         - illustrate usage with pictures, examples (documentation submodule?)
         - explain all terms (glossary/appendix if necessary)
       - fixes:
