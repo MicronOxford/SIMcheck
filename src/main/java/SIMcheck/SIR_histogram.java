@@ -31,7 +31,7 @@ public class SIR_histogram implements PlugIn, EProcessor {
     
     String name = "Reconstructed Data Histograms";
     ResultSet results = new ResultSet(name);
-    double percentile = 0.5;  // 0-100
+    double percentile = 0.05;  // 0-100
     double min_ratio = 6.0;
     double mode_tol = 0.25;
 

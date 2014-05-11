@@ -108,8 +108,6 @@ TODO
         - make more self-documenting: improve names & log output & names
         - finish/improve docs, illustrate usage with pictures, examples
       - fixes:
-        - modify raw MCNR default Z window half-width to 0 where nz=1
-        - SIR Histogram: extreme X% instead of 0.05%
         - raw angle difference fix
         - N-SIM data testing
         - SIR Fourier scaling issues
