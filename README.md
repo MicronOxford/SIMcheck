@@ -105,20 +105,18 @@ TODO
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - documentation: 
-        - improve log output & names, e.g. Z window half-width, raw Fourier
-        - document need for cropping, and how to do this
-        - make it more self-documenting! 
-        - overview & contents, usage/examples, build/dev, glossary
-        - illustrate usage with pictures, examples (documentation submodule?)
-        - explain all terms (glossary/appendix if necessary)
+        - make more self-documenting: improve names & log output & names
+        - finish/improve docs, illustrate usage with pictures, examples
       - fixes:
         - modify raw MCNR default Z window half-width to 0 where nz=1
-        - SIR Fourier scaling issues
         - SIR Histogram: extreme X% instead of 0.05%
+        - raw angle difference fix
+        - N-SIM data testing
+        - SIR Fourier scaling issues
         - Wiener filter parameter estimate - calibrate, document
-        - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
-        - SIR_hist with multiple frames
+        - check all with multiple frames (see SIR_hist) -- fix or document
         - bead puddle SI illumination image: test, add multi-channel support?
+        - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
       - features:
         - util for rescaling as per Lothar_macros (discard negatives)
         - raw data per angle difference: RMS error? (at least some stat)
@@ -127,8 +125,8 @@ TODO
       - tests, structure:
         - final empirical tests, param calibration, tolerances etc.
         - mavenize & make Fiji update site
-        - add ResultTable support to ResultSet class
         - more tests to test/debug non-interactive code, preconditions / inputs
+        - add ResultTable support to ResultSet class
         - make sure tests and debug not deployed
 
 * 1.1: future features
