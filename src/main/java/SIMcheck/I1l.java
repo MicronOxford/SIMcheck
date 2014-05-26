@@ -18,6 +18,7 @@
 package SIMcheck;
 import ij.*;
 import ij.plugin.LutLoader;
+import ij.plugin.ChannelSplitter;
 import ij.process.*;
 import ij.measure.Calibration;
 
@@ -720,6 +721,16 @@ public final class I1l {
             f[i] = f[i] - val;
         }
         return f;
+    }
+    
+    /** Subtract per-channel mode value from all slices in a hyperstack. */
+    public static void subtractMode(ImagePlus imp) {
+        ImagePlus[] imps = ChannelSplitter.split(imp);
+        for (int c = 0; c < imps.length; c++) {
+            double dmode = new StackStatistics(imps[c]).dmode;
+            IJ.run(imps[c], "Subtract...", "value=" + dmode + " stack");
+        }
+        imp.setStack(mergeChannels(imp.getTitle(), imps).getStack());
     }
 
     /** Calculate the variance of a double array.  */

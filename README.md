@@ -108,14 +108,15 @@ TODO
         - make more self-documenting: improve names & log output & names
         - finish/improve docs, illustrate usage with pictures, examples
       - fixes:
+        - SIR Fourier scaling issues / maybe 3D?
         - N-SIM data testing
-        - SIR Fourier scaling issues
         - Wiener filter parameter estimate - calibrate, document
         - check all with multiple frames (see SIR_hist) -- fix or document
         - bead puddle SI illumination image: test, add multi-channel support?
         - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
       - features:
-        - util for rescaling as per Lothar_macros (discard negatives)
+        - util for rescaling as per Lothar_macros (discard negatives) 
+          -- use for FFT?
         - raw data per angle difference: RMS error? (at least some stat)
         - raw -> WF same size as SIR by interpolation (& preserve type??)
         - tool for merging SIM & widefield data (Julio)

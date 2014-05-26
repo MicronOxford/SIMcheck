@@ -45,7 +45,7 @@ public class SIR_Fourier implements PlugIn, EProcessor {
     // parameter fields
     public double[] resolutions = {0.10, 0.12, 0.15, 0.2, 0.3, 0.6};
     public double blurRadius = 0.0d;  // 6.0d was default for 512x512
-    public double winFraction = 0.125d;  // window function size, 0-1
+    public double winFraction = 0.04d;  // window function size, 0-1
     public int setMinChoice = 0;
     public boolean showAxial = false;
     
@@ -78,6 +78,7 @@ public class SIR_Fourier implements PlugIn, EProcessor {
     public ResultSet exec(ImagePlus... imps) {
         Calibration cal = imps[0].getCalibration();
         ImagePlus imp2 = imps[0].duplicate();
+        I1l.subtractMode(imp2);
         
         IJ.showStatus("Fourier transforming slices (lateral view)");
         ImagePlus impF = FFT2D.fftImp(imp2, winFraction);
