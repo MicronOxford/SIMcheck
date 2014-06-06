@@ -114,6 +114,7 @@ TODO
           - gauss window: change to percentage instead of "0-1" (or perhaps
             checkbox)
           - axial crop to mode: needs to be done before edge padding
+        - look into smaller bin sizes for SIR_historgam, check ACTUAL percentage
         - Mod Contrast Map should warn when no mod contrast data, not throw NPE
         - N-SIM data testing
         - Wiener filter parameter estimate - calibrate, document
@@ -121,10 +122,12 @@ TODO
         - bead puddle SI illumination image: test, add multi-channel support?
         - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
       - features:
+        - remove raw FFT from raw checks -- just for calibration
         - util for rescaling as per Lothar_macros (discard negatives) 
           -- use for FFT?
         - stack the "pattern focus" images in one file after auto-scaling the
           3 angles
+        - report per. angle modulation contrast and/or minimum of these
         - save pattern angles as preference
         - find angles automatically for "pattern focus"?
         - raw data per angle difference: RMS error? (at least some stat)
