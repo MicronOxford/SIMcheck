@@ -109,6 +109,11 @@ TODO
         - finish/improve docs, illustrate usage with pictures, examples
       - fixes:
         - SIR Fourier scaling issues / maybe 3D?
+          - also, replace crop-to-min/mean/mode with checkbox: crop to mode or
+            not
+          - gauss window: change to percentage instead of "0-1" (or perhaps
+            checkbox)
+          - axial crop to mode: needs to be done before edge padding
         - N-SIM data testing
         - Wiener filter parameter estimate - calibrate, document
         - check all with multiple frames (see SIR_hist) -- fix or document
@@ -117,6 +122,10 @@ TODO
       - features:
         - util for rescaling as per Lothar_macros (discard negatives) 
           -- use for FFT?
+        - stack the "pattern focus" images in one file after auto-scaling the
+          3 angles
+        - save pattern angles as preference
+        - find angles automatically for "pattern focus"?
         - raw data per angle difference: RMS error? (at least some stat)
         - raw -> WF same size as SIR by interpolation (& preserve type??)
         - tool for merging SIM & widefield data (Julio)
