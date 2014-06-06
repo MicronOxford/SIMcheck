@@ -114,6 +114,7 @@ TODO
           - gauss window: change to percentage instead of "0-1" (or perhaps
             checkbox)
           - axial crop to mode: needs to be done before edge padding
+        - Mod Contrast Map should warn when no mod contrast data, not throw NPE
         - N-SIM data testing
         - Wiener filter parameter estimate - calibrate, document
         - check all with multiple frames (see SIR_hist) -- fix or document
