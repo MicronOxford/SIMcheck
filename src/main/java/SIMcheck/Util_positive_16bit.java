@@ -40,7 +40,7 @@ public class Util_positive_16bit implements PlugIn {
      * @param imp input ImagePlus, i.e. 32-bit reconstructed SIM data
      * @return ImagePlus (16-bit) after discarding below channel mode
      */
-    public ImagePlus exec(ImagePlus imp) {
+    public static ImagePlus exec(ImagePlus imp) {
         String title = I1l.makeTitle(imp, "POS");
         ImagePlus imp2 = imp.duplicate();
         I1l.subtractMode(imp2);

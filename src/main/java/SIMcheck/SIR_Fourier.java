@@ -77,7 +77,7 @@ public class SIR_Fourier implements PlugIn, EProcessor {
      */
     public ResultSet exec(ImagePlus... imps) {
         Calibration cal = imps[0].getCalibration();
-        ImagePlus imp2 = imps[0].duplicate();
+        ImagePlus imp2 = Util_positive_16bit.exec(imps[0].duplicate());
         I1l.subtractMode(imp2);
         
         IJ.showStatus("Fourier transforming slices (lateral view)");
