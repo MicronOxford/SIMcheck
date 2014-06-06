@@ -43,7 +43,9 @@ public class Util_positive_16bit implements PlugIn {
     public ImagePlus exec(ImagePlus imp) {
         String title = I1l.makeTitle(imp, "POS");
         ImagePlus imp2 = imp.duplicate();
-//        IJ.run("Conversions...", " ");
+        I1l.subtractMode(imp2);
+        // TODO: get conversion opts, rescale only if necess, reset conv opts
+        IJ.run("Conversions...", " ");
 //        IJ.run("Conversions...", "scale");
         IJ.run(imp2, "16-bit", "");
         imp2.setTitle(title);
