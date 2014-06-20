@@ -38,7 +38,6 @@ public class SIR_Fourier implements PlugIn, EProcessor {
 
     String name = "Reconstructed Data Fourier Plots";
     ResultSet results = new ResultSet(name);
-    static final String[] minChoices = {"mode", "mean", "min"};
     private static final IndexColorModel fourierLUT = 
             I1l.loadLut("SIMcheck/SIMcheckFourier.lut");
     
@@ -46,7 +45,7 @@ public class SIR_Fourier implements PlugIn, EProcessor {
     public double[] resolutions = {0.10, 0.12, 0.15, 0.2, 0.3, 0.6};
     public double blurRadius = 0.0d;  // 6.0d was default for 512x512
     public double winFraction = 0.04d;  // window function size, 0-1
-    public int setMinChoice = 0;
+    public boolean cropToMode = false;
     public boolean showAxial = false;
     
     @Override
@@ -56,13 +55,13 @@ public class SIR_Fourier implements PlugIn, EProcessor {
         imp.getWidth();
         gd.addNumericField("Blur radius (512x512)", blurRadius, 1);
         gd.addNumericField("Gauss window size 0-1", winFraction, 3);
-        gd.addChoice("Crop minimum to", minChoices, "min");
+        gd.addCheckbox("Crop to Mode", cropToMode);
         gd.addCheckbox("Show axial FFT", showAxial);
         gd.showDialog();
         if (gd.wasOKed()) {
             this.blurRadius = gd.getNextNumber();
             this.winFraction = gd.getNextNumber();
-            this.setMinChoice = gd.getNextChoiceIndex();
+            this.cropToMode = gd.getNextBoolean();
             this.showAxial = gd.getNextBoolean();
 	        results = exec(imp);
 	        results.report();
@@ -214,16 +213,9 @@ public class SIR_Fourier implements PlugIn, EProcessor {
                 gblur.blurGaussian(ip, blurRadius, blurRadius, 0.002);
             }
             ImageStatistics stats = imp.getProcessor().getStatistics();
-            double min;
-            switch (setMinChoice) {
-                case 0:  min = (double)stats.mode;
-                         break;
-                case 1:  min = (double)stats.mean;
-                         break;
-                case 2:  min = (double)stats.min;
-                         break;
-                default: min = (double)stats.min;
-                         break;
+            double min = (double)stats.min;
+            if (cropToMode) {
+                min = (double)stats.mode;
             }
             double max = (double)stats.max;
             ByteProcessor bp = (ByteProcessor)imp.getProcessor();

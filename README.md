@@ -109,8 +109,6 @@ TODO
         - finish/improve docs, illustrate usage with pictures, examples
       - fixes:
         - SIR Fourier scaling issues / maybe 3D?
-          - also, replace crop-to-min/mean/mode with checkbox: crop to mode or
-            not
           - gauss window: change to percentage instead of "0-1" (or perhaps
             checkbox)
           - axial crop to mode: needs to be done before edge padding
