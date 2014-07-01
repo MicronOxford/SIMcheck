@@ -43,10 +43,13 @@ public class SIR_Fourier implements PlugIn, EProcessor {
     
     // parameter fields
     public double[] resolutions = {0.10, 0.12, 0.15, 0.2, 0.3, 0.6};
-    public double blurRadius = 0.0d;  // 6.0d was default for 512x512
-    public double winFraction = 0.04d;  // window function size, 0-1
-    public boolean cropToMode = false;
-    public boolean showAxial = false;
+    public double blurRadius = 6.0d;  // default for 512x512
+    public double winFraction = 0.01d;  // window function size, 0-1
+    public boolean showAxial = false;  // option: show axial FFT? 
+    public boolean applyWinFunc = true;  // option: apply window function?
+    public boolean applyGaussBlur = true;  // option: gaussian blur result?
+    public boolean autoScale = true;  // option: re-scale to mode->max?
+    public boolean falseColor = true;  // option: apply false color LUT?
     
     @Override
     public void run(String arg) {
@@ -55,13 +58,13 @@ public class SIR_Fourier implements PlugIn, EProcessor {
         imp.getWidth();
         gd.addNumericField("Blur radius (512x512)", blurRadius, 1);
         gd.addNumericField("Gauss window size 0-1", winFraction, 3);
-        gd.addCheckbox("Crop to Mode", cropToMode);
+        gd.addCheckbox("Crop to Mode", autoScale);
         gd.addCheckbox("Show axial FFT", showAxial);
         gd.showDialog();
         if (gd.wasOKed()) {
             this.blurRadius = gd.getNextNumber();
             this.winFraction = gd.getNextNumber();
-            this.cropToMode = gd.getNextBoolean();
+            this.autoScale = gd.getNextBoolean();
             this.showAxial = gd.getNextBoolean();
 	        results = exec(imp);
 	        results.report();
@@ -77,7 +80,6 @@ public class SIR_Fourier implements PlugIn, EProcessor {
     public ResultSet exec(ImagePlus... imps) {
         Calibration cal = imps[0].getCalibration();
         ImagePlus imp2 = Util_positive_16bit.exec(imps[0].duplicate());
-        I1l.subtractMode(imp2);
         IJ.showStatus("Fourier transforming slices (lateral view)");
         ImagePlus impF = FFT2D.fftImp(imp2, winFraction);
         blurRadius *= (double)impF.getWidth() / 512.0d;
@@ -213,7 +215,7 @@ public class SIR_Fourier implements PlugIn, EProcessor {
             }
             ImageStatistics stats = imp.getProcessor().getStatistics();
             double min = (double)stats.min;
-            if (cropToMode) {
+            if (autoScale) {
                 min = (double)stats.mode;
             }
             double max = (double)stats.max;

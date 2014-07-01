@@ -732,6 +732,17 @@ public final class I1l {
         }
         imp.setStack(mergeChannels(imp.getTitle(), imps).getStack());
     }
+    
+    /** Subtract per-slice mode from all slices in a hyperstack. */
+    public static void subtractPerSliceMode(ImagePlus imp) {
+        for (int s = 1; s <= imp.getStackSize(); s++) {
+            ImageProcessor ip = imp.getStack().getProcessor(s);
+            ImageStatistics stats = ip.getStatistics();
+            double dmode = stats.dmode;
+            imp.setSliceWithoutUpdate(s);
+            IJ.run(imp, "Subtract...", "value=" + dmode + " slice");
+        }
+    }
 
     /** Calculate the variance of a double array.  */
     public static double variance(double[] d) {
@@ -762,7 +773,7 @@ public final class I1l {
     /** Test method. */
     public static void main(String[] args) {
         System.out.println("Testing I1l.java");
-        ImagePlus wfTest = IJ.openImage("/Users/graemeb/Documents/InTray/SIMcheck/CURRENT_EXAMPLE_FILES/V3_Blaze_medium_DAPI_mismatch_w5_SIR_C3-WF_TEST.tif");
+        ImagePlus wfTest = IJ.openImage("/Users/gball/Documents/InTray/SIMcheck/CURRENT_EXAMPLE_FILES/V3_Blaze_medium_DAPI_mismatch_w5_SIR_C3-WF_TEST.tif");
         // test feature roi stats
         ImageStatistics rawStats = wfTest.getStatistics();
         IJ.log("raw min, mean, max = " + rawStats.min + ", " + rawStats.mean
@@ -770,6 +781,10 @@ public final class I1l {
         ImageStatistics roiStats = featStats(wfTest.getProcessor());
         IJ.log("roi min, mean, max = " + roiStats.min + ", " + roiStats.mean
                 + ", " + roiStats.max);
+        // test subtractPerSliceMode
+        ImagePlus modeTest = IJ.openImage("/Users/gball/Documents/InTray/SIMcheck/Curie_Asymmetric_Freq/Curie-test-crop.tif");
+        I1l.subtractPerSliceMode(modeTest);
+        modeTest.show();
     }
 }
 
