@@ -78,7 +78,6 @@ public class SIR_Fourier implements PlugIn, EProcessor {
         Calibration cal = imps[0].getCalibration();
         ImagePlus imp2 = Util_positive_16bit.exec(imps[0].duplicate());
         I1l.subtractMode(imp2);
-        
         IJ.showStatus("Fourier transforming slices (lateral view)");
         ImagePlus impF = FFT2D.fftImp(imp2, winFraction);
         blurRadius *= (double)impF.getWidth() / 512.0d;

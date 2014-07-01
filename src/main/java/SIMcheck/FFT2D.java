@@ -29,6 +29,8 @@ import ij.plugin.filter.GaussianBlur;
  * @author Graeme Ball <graemeball@gmail.com>
  */
 public class FFT2D extends FHT {
+    
+    private static final double ERROR = 0.000001d;  // tolerance for == 0.0d
 
     public FFT2D(ImageProcessor ip){
         super(ip);
@@ -189,7 +191,9 @@ public class FFT2D extends FHT {
             // See: ij/plugin/FFT.java & ij/ImagePlus.java (search FHT & FFT)
             //      ij/process/FHT.java
             ImageProcessor ip = stack.getProcessor(slice);
-            ip = FFT2D.gaussWindow(ip, winFraction); 
+            if (Math.abs(winFraction) > ERROR) {
+                ip = FFT2D.gaussWindow(ip, winFraction);
+            }
             ip = FFT2D.pad(ip, paddedSize);  
             fht = FFT2D.fftSlice(ip, imp);
             ImageProcessor ps = fht.getPowerSpectrum();

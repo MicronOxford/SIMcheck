@@ -40,7 +40,7 @@ public class Util_FFTstack implements PlugIn {
      * @return ImagePlus after 2D FFT of each slice
      */ 
     public ImagePlus exec(ImagePlus imp) {
-        ImagePlus impF = FFT2D.fftImp(imp);
+        ImagePlus impF = FFT2D.fftImp(imp, 0.0d);
         return impF;
     }
 }
