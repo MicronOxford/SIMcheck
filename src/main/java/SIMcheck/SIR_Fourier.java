@@ -45,27 +45,34 @@ public class SIR_Fourier implements PlugIn, EProcessor {
     public double[] resolutions = {0.10, 0.12, 0.15, 0.2, 0.3, 0.6};
     public double blurRadius = 6.0d;  // default for 512x512
     public double winFraction = 0.01d;  // window function size, 0-1
-    public boolean showAxial = false;  // option: show axial FFT? 
-    public boolean applyWinFunc = true;  // option: apply window function?
-    public boolean applyGaussBlur = true;  // option: gaussian blur result?
-    public boolean autoScale = true;  // option: re-scale to mode->max?
-    public boolean falseColor = true;  // option: apply false color LUT?
+    
+    // options
+    public boolean showAxial = false;  // show axial FFT? 
+    public boolean applyWinFunc = true;  // apply window function?
+    public boolean applyGaussBlur = true;  // gaussian blur result?
+    public boolean autoScale = true;  // re-scale to mode->max?
+    public boolean falseColor = true;  // apply false color LUT?
     
     @Override
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog("SIR_Fourier");
         imp.getWidth();
-        gd.addNumericField("Blur radius (512x512)", blurRadius, 1);
-        gd.addNumericField("Gauss window size 0-1", winFraction, 3);
-        gd.addCheckbox("Crop to Mode", autoScale);
         gd.addCheckbox("Show axial FFT", showAxial);
+        gd.addCheckbox("Window Function", applyWinFunc);
+        gd.addCheckbox("Gaussian Blur", applyGaussBlur);
+        gd.addCheckbox("Auto-scale (mode-max)", autoScale);
+        gd.addCheckbox("False-color LUT", falseColor);
         gd.showDialog();
         if (gd.wasOKed()) {
-            this.blurRadius = gd.getNextNumber();
-            this.winFraction = gd.getNextNumber();
-            this.autoScale = gd.getNextBoolean();
             this.showAxial = gd.getNextBoolean();
+            this.applyWinFunc = gd.getNextBoolean();
+            this.applyGaussBlur = gd.getNextBoolean();
+            this.autoScale = gd.getNextBoolean();
+            this.falseColor = gd.getNextBoolean();
+            if (!applyWinFunc) {
+                winFraction = 0.0d;
+            }
 	        results = exec(imp);
 	        results.report();
         }
@@ -209,7 +216,7 @@ public class SIR_Fourier implements PlugIn, EProcessor {
         gblur.showProgress(false);
         for (int s = 1; s <= ns; s++) {
             imp.setSlice(s);
-            if (blurRadius > 0) {
+            if (applyGaussBlur) {
                 ImageProcessor ip = imp.getProcessor();
                 gblur.blurGaussian(ip, blurRadius, blurRadius, 0.002);
             }
@@ -225,7 +232,7 @@ public class SIR_Fourier implements PlugIn, EProcessor {
             imp.setProcessor(ip);
             IJ.showProgress(s, ns);
         }
-        if (blurRadius > 0) {
+        if (falseColor) {
             double[] displayRange = {0.0d, 255.0d};  // show all
             I1l.applyLUT(imp, fourierLUT, displayRange);
         }
