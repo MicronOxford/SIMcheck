@@ -65,6 +65,7 @@ public class Raw_Fourier implements PlugIn, EProcessor {
      */
     public ResultSet exec(ImagePlus... imps) {
         ImagePlus imp = imps[0];
+        imp = Util_positive_16bit.exec(imp);
         for (int a = 1; a <= angles; a++) {
           	ImagePlus impCurrentA = getImpForAngle(imp, a);
           	String statusString = "Performing FFT for angle " 

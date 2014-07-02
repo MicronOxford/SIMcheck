@@ -156,7 +156,7 @@ public class FFT2D extends FHT {
      * @return new ImagePlus after 2D FFT
      **/
     public static ImagePlus fftImp(ImagePlus impIn) {
-        return fftImp(impIn, 0.125d);
+        return fftImp(impIn, 0.01d);
     }
     
     /**
