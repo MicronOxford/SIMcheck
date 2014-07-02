@@ -92,6 +92,7 @@ public class SIR_Fourier implements PlugIn, EProcessor {
         blurRadius *= (double)impF.getWidth() / 512.0d;
         IJ.showStatus("Blurring & rescaling slices (lateral view)");
         impF = displaySettings(impF);  
+        setLUT(impF);
         impF = overlayResRings(impF, cal);
         I1l.copyStackDims(imps[0], impF);
         impF.setTitle(I1l.makeTitle(imps[0], "FTL"));
@@ -112,8 +113,9 @@ public class SIR_Fourier implements PlugIn, EProcessor {
             IJ.showStatus("Fourier transforming slices (orthogonal view)");
             ImagePlus impOrthoF = FFT2D.fftImp(impOrtho, winFraction);
             IJ.showStatus("Blurring & rescaling slices (orthogonal view)");
-            impOrthoF = resizeAndPad(impOrthoF, cal);
             impOrthoF = displaySettings(impOrthoF);
+            impOrthoF = resizeAndPad(impOrthoF, cal);
+            setLUT(impOrthoF);
             calOrtho.pixelHeight = calOrtho.pixelWidth;  // after resizeAndPad
             impOrthoF = overlayResRings(impOrthoF, calOrtho);
             I1l.copyStackDims(imps[0], impOrthoF);
@@ -208,7 +210,16 @@ public class SIR_Fourier implements PlugIn, EProcessor {
         impOrthoFrsz.setProperty("FHT", impOrthoF.getProperty("FHT"));
         return impOrthoFrsz;
     }
+    
 
+    /** Optional gaussian blur, and select lower end of intensity range. */
+    void setLUT(ImagePlus imp) {
+        if (falseColor) {
+            double[] displayRange = {0.0d, 255.0d};  // show all
+            I1l.applyLUT(imp, fourierLUT, displayRange);
+        }
+    }
+    
     /** Optional gaussian blur, and select lower end of intensity range. */
     ImagePlus displaySettings(ImagePlus imp) {
         int ns = imp.getStackSize();
@@ -231,10 +242,6 @@ public class SIR_Fourier implements PlugIn, EProcessor {
                     (ImageProcessor)setBPminMax(bp, (int)min, (int)max, 255);
             imp.setProcessor(ip);
             IJ.showProgress(s, ns);
-        }
-        if (falseColor) {
-            double[] displayRange = {0.0d, 255.0d};  // show all
-            I1l.applyLUT(imp, fourierLUT, displayRange);
         }
         return imp;
     }
