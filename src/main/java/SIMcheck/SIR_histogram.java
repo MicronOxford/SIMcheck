@@ -31,7 +31,7 @@ public class SIR_histogram implements PlugIn, EProcessor {
     
     String name = "Reconstructed Data Histograms";
     ResultSet results = new ResultSet(name);
-    double percentile = 0.05;  // 0-100
+    double percentile = 0.01;  // 0-100
     double min_ratio = 6.0;
     double mode_tol = 0.25;
 
@@ -127,7 +127,11 @@ public class SIR_histogram implements PlugIn, EProcessor {
             bin -= 1;
             binValue -= histStep;
         }
-        // negTotal may or may not be negative
+        // uncomment to check actual histogram bins used (pc and pixels)
+        //IJ.log("final negPc=" + negPc + ", posPc=" + posPc);
+        //IJ.log("      (" + (negPc * nPixels) +
+        //        ", " + (posPc * nPixels) + " pix)");
+        // since negTotal may or may not be negative...
         double posNegRatio = Math.abs(posTotal / negTotal);  
         return posNegRatio;
     }
