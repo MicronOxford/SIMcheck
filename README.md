@@ -109,23 +109,23 @@ TODO
         - make more self-documenting: improve names & log output & names
         - finish/improve docs, illustrate usage with pictures, examples
       - fixes:
-        - present Raw FFT as 1 stack / montage
         - look into smaller bin sizes for SIR_historgam, check ACTUAL percentage
         - Mod Contrast Map should warn when no mod contrast data, not throw NPE
         - N-SIM data testing
-        - Wiener filter parameter estimate - calibrate, document
         - bead puddle SI illumination image: test, add multi-channel support?
+        - Wiener filter parameter estimate - calibrate, document
         - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
       - features:
         - use raw ROI for raw+SIR data crop (& add Z crop later)
-        - remove raw FFT from raw checks / just for calibration?
         - stack the "pattern focus" images in one file after auto-scaling the
           3 angles
         - report per. angle modulation contrast and/or minimum of these
+        - raw -> WF same size as SIR by interpolation (& preserve type??)
+        - project and/or montage Raw FFT to present as 1 image
+        - OR remove raw FFT from raw checks / just for calibration?
         - save pattern angles as preference
         - find angles automatically for "pattern focus"?
         - raw data per angle difference: RMS error? (at least some stat)
-        - raw -> WF same size as SIR by interpolation (& preserve type??)
         - tool for merging SIM & widefield data (Julio)
       - tests, structure:
         - final empirical tests, param calibration, tolerances etc.
