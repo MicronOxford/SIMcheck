@@ -63,6 +63,8 @@ public class Util_formats implements PlugIn {
      * @return ImagePlus re-ordered into API OMX V2 (CPZAT) order
      */ 
     public ImagePlus exec(ImagePlus imp, int phases, int angles, int format) {
+        this.phases = phases;
+        this.angles = angles;
         this.width = imp.getWidth();
         this.height = imp.getHeight();
         this.nc = imp.getNChannels();
@@ -117,8 +119,8 @@ public class Util_formats implements PlugIn {
 
     /** Convert NSIM data (2D multi-C with tiled P, A) to OMX order (CPZAT) */
     void convertNSIM() {
-        // Nikon N-SIM: 2D only? phases tiled in X, angles tiled in Y
-        // for now, assuming NISM data are CZT dimension order
+        // Nikon N-SIM: phases tiled in X, angles tiled in Y
+        // (assuming NISM data are CZT dimension order)
         if ((width % phases != 0) || (height % angles != 0)) {
             String problem = "Expected NSIM .nd2 with phase/angle tiled in x/y";
             IJ.log(problem);
