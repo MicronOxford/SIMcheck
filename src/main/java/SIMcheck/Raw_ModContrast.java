@@ -128,6 +128,9 @@ public class Raw_ModContrast implements PlugIn, EProcessor {
         } else {
             nz /= phases * angles; // take phases & angles out of nz
         }
+        if (nz < 3) {
+            this.zw = 0;  // do not use Z window when nz is too small
+        }
         int width = imp.getWidth();
         int height = imp.getHeight();
         ImageStack SIMstack = imp.getImageStack(); 
@@ -161,11 +164,13 @@ public class Raw_ModContrast implements PlugIn, EProcessor {
                         int vlen = phases * (zw + 1);  // vector of phases
                         int zStart = 1;
                         int zEnd = 1 + zw;
+                        IJ.log("nz=" + nz);
                         for (int z = 1; z <= nz; z++) {
                             String sliceLabel = "MCNR - C" + c + "/Z" + z
                                     + "/A" + a + "/T" + t;
                             IJ.showStatus(sliceLabel);
                             if (z == 1) {
+                                IJ.log("for Z=1, Z" + zStart + "-" + zEnd);
                                 float[][] frqPix = dftSliceWindow(vlen, 
                                         nc, c, phStart, phEnd, nz, zStart, zEnd,
                                         a, nt, t, SIMstack);
