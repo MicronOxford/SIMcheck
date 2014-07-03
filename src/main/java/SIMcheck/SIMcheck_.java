@@ -167,10 +167,6 @@ public class SIMcheck_ implements PlugIn {
             } else {
                 int SIRstackID = wList[SIRstackChoice];
                 ImagePlus SIRstackImp = ij.WindowManager.getImage(SIRstackID);
-                if (!(SIRstackImp.getStackSize() > 1)) {
-                    IJ.log("  ! invalid SIR data - SIR checks aborted");
-                    return;
-                }
                 String SIRstackName = SIRstackImp.getTitle();
                 IJ.log("  using SIR stack: " + SIRstackName + " (ID "
                         + SIRstackID + ")");
