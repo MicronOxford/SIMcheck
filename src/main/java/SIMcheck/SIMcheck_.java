@@ -40,7 +40,7 @@ public class SIMcheck_ implements PlugIn {
     private int angles = 3;
     private int phases = 5;
     private String[] formats = {"API OMX (CPZAT)", "Zeiss ELYRA (CZTAP)",
-            "Nikon N-SIM (?????)"};
+            "Nikon N-SIM (tiled)"};
 
     @Override
     public void run(String arg) {
@@ -113,20 +113,20 @@ public class SIMcheck_ implements PlugIn {
             }
             int SIstackID = wList[SIstackChoice];
             ImagePlus SIstackImp = ij.WindowManager.getImage(SIstackID);
+            IJ.log("    format: " + formats[formatChoice]);
+            if (formatChoice != 0) {
+                Util_formats formatConverter = new Util_formats();
+                IJ.log("      converting " + formats[formatChoice] 
+                        + " to OMX format");
+                SIstackImp = formatConverter.exec(
+                        SIstackImp, phases, angles, formatChoice - 1);
+            }
             if (!I1l.stackDivisibleBy(SIstackImp, phases * angles)) {
                 IJ.log("  ! invalid raw SI data - raw data checks aborted");
             } else {
                 String SIstackName = SIstackImp.getTitle();
                 IJ.log("  Using SI stack: " + SIstackName + " (ID "
                         + SIstackID + ")");
-                IJ.log("    format: " + formats[formatChoice]);
-                Util_formats formatConverter = new Util_formats();
-                if (formatChoice != 0) {
-                    IJ.log("      converting " + formats[formatChoice] 
-                            + " to OMX format");
-                    SIstackImp = formatConverter.exec(
-                            SIstackImp, phases, angles, formatChoice - 1);
-                }
                 // do checks on raw SI data
                 if (SIMcheckDialog.getNextBoolean()) {
                     Raw_intensity raw_int_plugin = new Raw_intensity();

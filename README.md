@@ -109,10 +109,10 @@ TODO
         - make more self-documenting: improve names & log output
         - finish/improve docs, illustrate usage with pictures, examples
       - fixes:
-        - N-SIM data testing
         - bead puddle SI illumination image: test, add multi-channel support?
-        - Wiener filter parameter estimate - calibrate, document
+        - N-SIM data: report raw 3D SIM data Bio-Formats bug
         - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
+        - Wiener filter parameter estimate - calibrate, document
       - features:
         - use raw ROI for raw+SIR data crop (& add Z crop later)
         - stack the "pattern focus" images in one file after auto-scaling the

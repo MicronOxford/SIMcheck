@@ -30,7 +30,7 @@ public class Util_formats implements PlugIn {
 
     int phases = 5;                                                         
     int angles = 3;                                                         
-    String[] formats = {"Zeiss ELYRA (CZTAP)", "Nikon N-SIM (?????)"};
+    String[] formats = {"Zeiss ELYRA (CZTAP)", "Nikon N-SIM (tiled)"};
     
     private int width, height, nc, nz, nt;
     private ImageStack inStack, outStack;
@@ -70,7 +70,7 @@ public class Util_formats implements PlugIn {
         this.nt = imp.getNFrames();
         this.inStack = imp.getStack();
         this.outStack = null;
-        IJ.log("converting format " + formats[format]);
+        IJ.log("   converting format " + formats[format]);
         if (format == 0) {
             convertELYRA();
         } else if (format == 1) {
