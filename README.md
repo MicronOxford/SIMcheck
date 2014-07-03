@@ -106,11 +106,9 @@ TODO
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - !! Make a 0.95 release with SIR Fourier fixed !!
       - documentation: 
-        - make more self-documenting: improve names & log output & names
+        - make more self-documenting: improve names & log output
         - finish/improve docs, illustrate usage with pictures, examples
       - fixes:
-        - look into smaller bin sizes for SIR_historgam, check ACTUAL percentage
-        - Mod Contrast Map should warn when no mod contrast data, not throw NPE
         - N-SIM data testing
         - bead puddle SI illumination image: test, add multi-channel support?
         - Wiener filter parameter estimate - calibrate, document

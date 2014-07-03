@@ -80,8 +80,17 @@ public class SIR_ModContrastMap implements PlugIn, EProcessor {
         ImagePlus rawImp = imps[0];  
         ImagePlus SIRimp = imps[1];
         ImagePlus MCNRimp = imps[2];
-        if (SIandSIRimpMatch(MCNRimp, SIRimp)) {
-        } else {
+        if (rawImp == null) {
+            IJ.showMessage("Error", "Specify raw data image");
+            return results;
+        } else if (SIRimp == null) {
+            IJ.showMessage("Error", "Specify reconstructed image");
+            return results;
+        } else if (MCNRimp == null) {
+            IJ.showMessage("Error", "Specify modulation contrast image");
+            return results;
+        }
+        if (!SIandSIRimpMatch(MCNRimp, SIRimp)) {
             IJ.log("  ! SIR_ModContrastMap: MCNR and SIR stack size mismatch");
             return results;
         }
@@ -309,5 +318,14 @@ public class SIR_ModContrastMap implements PlugIn, EProcessor {
                 fpixBlu[i] = intensScale * bluLUT[lutIndex];
             }
         }
+    }
+    
+    /* Test method */
+    public static void main(String[] args) {
+        SIR_ModContrastMap mcm = new SIR_ModContrastMap();
+        ImagePlus imp = new ImagePlus();
+        mcm.exec(null, null, null);
+        mcm.exec(imp, null, null);
+        mcm.exec(imp, imp, null);
     }
 }
