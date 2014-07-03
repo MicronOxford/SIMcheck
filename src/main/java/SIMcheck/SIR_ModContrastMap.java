@@ -96,7 +96,7 @@ public class SIR_ModContrastMap implements PlugIn, EProcessor {
         }
         // convert raw data imp into pseudo-widefield
         Util_SI2WF si2wf = new Util_SI2WF();
-        ImagePlus wfImp = si2wf.exec(rawImp, 5, 3);  // TODO, get phases/angles!
+        ImagePlus wfImp = si2wf.exec(rawImp, phases, angles);
         IJ.showStatus("Reconstructed data Mod Contrast Map...");
         ImagePlus SIRimp2 = (ImagePlus) SIRimp.duplicate();
         IJ.run(SIRimp2, "32-bit", "");
