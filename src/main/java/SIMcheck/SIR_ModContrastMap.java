@@ -33,7 +33,7 @@ import java.lang.Math;
  * required.
  * @author Graeme Ball <graemeball@gmail.com>
  */
-public class SIR_ModContrastMap implements PlugIn, EProcessor {
+public class SIR_ModContrastMap implements PlugIn, Executable {
     
     String name = "Reconstructed Data Mod Contrast Map (MCM)";
     ResultSet results = new ResultSet(name);

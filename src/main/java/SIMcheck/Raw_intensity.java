@@ -31,7 +31,7 @@ import java.awt.Color;
  * Each channel is plotted in a different (arbitrary) color.
  * @author Graeme Ball <graemeball@gmail.com>
  */
-public class Raw_intensity implements PlugIn, EProcessor {
+public class Raw_intensity implements PlugIn, Executable {
 
     String name = "Raw Data Intensity profiles";
     ResultSet results = new ResultSet(name);

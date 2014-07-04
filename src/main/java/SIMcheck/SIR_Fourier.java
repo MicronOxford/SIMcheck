@@ -34,7 +34,7 @@ import java.awt.image.IndexColorModel;
  * @see ij.plugin.FFT
  * @see ij.process.FHT
  */
-public class SIR_Fourier implements PlugIn, EProcessor {
+public class SIR_Fourier implements PlugIn, Executable {
 
     String name = "Reconstructed Data Fourier Plots";
     ResultSet results = new ResultSet(name);

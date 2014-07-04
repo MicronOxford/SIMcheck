@@ -29,7 +29,7 @@ import ij.gui.GenericDialog;
  * differences, images ought to appear white/gray!
  * @author Graeme Ball <graemeball@gmail.com>
  */
-public class Raw_Angle_Difference implements PlugIn, EProcessor {
+public class Raw_Angle_Difference implements PlugIn, Executable {
 
     String name = "Raw Data Motion Check";
     ResultSet results = new ResultSet(name);

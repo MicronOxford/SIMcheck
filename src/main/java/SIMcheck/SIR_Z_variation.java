@@ -29,7 +29,7 @@ import ij.process.*;
  * diagnoses refractive index mismatch.
  * @author Graeme Ball <graemeball@gmail.com>
  */
-public class SIR_Z_variation implements PlugIn, EProcessor {
+public class SIR_Z_variation implements PlugIn, Executable {
     
     String name = "Reconstructed data Z minimum variance";
     ResultSet results = new ResultSet(name);

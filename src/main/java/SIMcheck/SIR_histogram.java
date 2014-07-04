@@ -27,7 +27,7 @@ import ij.process.*;
  * negative values to the reconstructed result.
  * @author Graeme Ball <graemeball@gmail.com>
  */
-public class SIR_histogram implements PlugIn, EProcessor {
+public class SIR_histogram implements PlugIn, Executable {
     
     String name = "Reconstructed Data Histograms";
     ResultSet results = new ResultSet(name);

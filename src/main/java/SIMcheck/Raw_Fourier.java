@@ -27,7 +27,7 @@ import ij.IJ;
  * to which a 2D FFT is applied to each slice.
  * @author Graeme Ball <graemeball@gmail.com>
  */ 
-public class Raw_Fourier implements PlugIn, EProcessor {
+public class Raw_Fourier implements PlugIn, Executable {
 
     String name = "Raw Data Fourier plots";
     ResultSet results = new ResultSet(name);

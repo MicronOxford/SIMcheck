@@ -65,7 +65,7 @@ import java.awt.image.IndexColorModel;
  *    where noise amplitude approximated to be equal to highest freq component.
  * </pre>
  */
-public class Raw_ModContrast implements PlugIn, EProcessor {
+public class Raw_ModContrast implements PlugIn, Executable {
 
     String name = "Raw Data Modulation Contrast (MCN)";
     ResultSet results = new ResultSet(name);
