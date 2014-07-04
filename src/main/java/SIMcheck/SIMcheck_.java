@@ -21,6 +21,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
+import ij.gui.Roi;
 import ij.plugin.PlugIn;
 
 /** This plugin displays a GenericDialog and runs the other SIMcheck plugins.
@@ -69,6 +70,7 @@ public class SIMcheck_ implements PlugIn {
         String helpMessage = "    \"Help\" below navigates to Micron web page about SIMcheck\n";
         helpMessage +=       "      or extract SIMcheck.html from SIMcheck_.jar using unzip";
         SIMcheckDialog.addMessage(helpMessage);
+        SIMcheckDialog.addCheckbox("Use SIR ROI for raw & SIR?", false);
         SIMcheckDialog.addMessage("---------------- Raw data -----------------");
         SIMcheckDialog.addChoice("Raw_Data:", titles, titles[0]);
         SIMcheckDialog.addChoice("Data format:", formats, "API OMX (CPZAT)");
@@ -110,6 +112,25 @@ public class SIMcheck_ implements PlugIn {
                 for (int nb = 0; nb < RAW_CHECKS; nb++) {
                     SIMcheckDialog.getNextBoolean();
                 }
+            }
+            int SIRstackChoice = SIMcheckDialog.getNextChoiceIndex();
+            ImagePlus SIRstackImp = null;
+            int SIRstackID = 0;
+            if (SIRstackChoice >= wList.length) {
+                IJ.log("  ! no SIR data - cannot perform SIR data checks");
+            } else {
+                SIRstackID = wList[SIRstackChoice];
+                SIRstackImp = ij.WindowManager.getImage(SIRstackID);
+            }
+            if (SIMcheckDialog.getNextBoolean() && SIRstackImp != null) {
+                // use SIR ROI for raw & SIR images
+                Roi roi = SIRstackImp.getRoi();
+                int x = roi.getBounds().x;
+                int y = roi.getBounds().x;
+                int w = roi.getBounds().width;
+                int h = roi.getBounds().height;
+                IJ.log("TODO: use SIR ROI x,y,w,h " +
+                        x + "," + y + "," + w + "," + h);
             }
             int SIstackID = wList[SIstackChoice];
             ImagePlus SIstackImp = ij.WindowManager.getImage(SIstackID);
@@ -161,12 +182,7 @@ public class SIMcheck_ implements PlugIn {
             
             
             IJ.log("\n ==== Reconstructed data checks ====");
-            int SIRstackChoice = SIMcheckDialog.getNextChoiceIndex();
-            if (SIRstackChoice >= wList.length) {
-                IJ.log("  ! no SIR data - cannot perform SIR data checks");
-            } else {
-                int SIRstackID = wList[SIRstackChoice];
-                ImagePlus SIRstackImp = ij.WindowManager.getImage(SIRstackID);
+            if (SIRstackImp != null) {
                 String SIRstackName = SIRstackImp.getTitle();
                 IJ.log("  using SIR stack: " + SIRstackName + " (ID "
                         + SIRstackID + ")");
