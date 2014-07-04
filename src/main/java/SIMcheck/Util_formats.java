@@ -30,7 +30,7 @@ public class Util_formats implements PlugIn {
 
     int phases = 5;                                                         
     int angles = 3;                                                         
-    String[] formats = {"Zeiss ELYRA (CZTAP)", "Nikon N-SIM (tiled)"};
+    static String[] formats = {"Zeiss ELYRA (CZTAP)", "Nikon N-SIM (tiled)"};
     
     private int width, height, nc, nz, nt;
     private ImageStack inStack, outStack;

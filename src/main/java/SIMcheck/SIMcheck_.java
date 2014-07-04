@@ -34,186 +34,206 @@ import ij.plugin.PlugIn;
  * @author Graeme Ball <graemeball@gmail.com>
  */
 public class SIMcheck_ implements PlugIn {
-
-    private static final int RAW_CHECKS = 4;  // number of raw data checks
     
-    // default choices for angles & phases; and known SIM data formats
-    private int angles = 3;
-    private int phases = 5;
-    private String[] formats = {"API OMX (CPZAT)", "Zeiss ELYRA (CZTAP)",
-            "Nikon N-SIM (tiled)"};
+    private static final String none = "[None]";  // no image
+    private static final String omx = "API OMX (CPZAT)";
 
+    // options with default values
+    private boolean doCrop = false;
+    private int zFirst = 1;
+    private int zLast = 1;
+    private ImagePlus impRaw = null;
+    private int formatChoice = 0;
+    private int phases = 5;
+    private int angles = 3;
+    private boolean doIntensity = true;
+    private boolean doRawFourier = true;
+    private boolean doAngleDifference = true;
+    private boolean doMCNR = true;
+    private ImagePlus impMCNR = null;
+    private ImagePlus impRecon = null;
+    private boolean doHistogram = true;
+    private boolean doZvar = true;
+    private boolean doReconFourier = true;
+    private boolean doMCNRmap = true;
+    private Crop crop = new Crop();
+
+    /** Crop ROI */
+    private class Crop {
+        int x = 0;
+        int y = 0;
+        int w = 0;  // width
+        int h = 0;  // height
+        int zFirst = 1;
+        int zLast = 1;
+    }
+    
     @Override
     public void run(String arg) {
-        /// get existing images so user can choose raw and reconstructed data
-        int[] wList = WindowManager.getIDList();
-        if (wList == null) {
+        String[] titles = I1l.cat(new String[] {none}, I1l.collectTitles());
+        String[] formats = I1l.cat(new String[] {omx}, Util_formats.formats);
+        if (titles.length < 2) {
             IJ.noImage();
             return;
         }
-        String[] titles = new String[wList.length + 1];
-        int nullTitleIndex = wList.length;
-        for (int i = 0; i <= wList.length; i++) {
-            if (i != wList.length) {
-                titles[i] = WindowManager.getImage(wList[i]).getTitle();
-            } else {
-                titles[i] = "[None]";  // extra title for "no image" appended
-            }
-        }
-        GenericDialog SIMcheckDialog = new GenericDialog("SIMcheck (v0.9)");
-        SIMcheckDialog
-                .addMessage( "--------------- INSTRUCTIONS ---------------");
-        SIMcheckDialog
-                .addMessage( "  1. Choose a raw and/or reconstructed SI data stacks.");
-        SIMcheckDialog
-                .addMessage( "  2. Tick boxes for checks you would like to run & click OK.");
-        String helpMessage = "    \"Help\" below navigates to Micron web page about SIMcheck\n";
-        helpMessage +=       "      or extract SIMcheck.html from SIMcheck_.jar using unzip";
-        SIMcheckDialog.addMessage(helpMessage);
-        SIMcheckDialog.addCheckbox("Use SIR ROI for raw & SIR?", false);
-        SIMcheckDialog.addMessage("---------------- Raw data -----------------");
-        SIMcheckDialog.addChoice("Raw_Data:", titles, titles[0]);
-        SIMcheckDialog.addChoice("Data format:", formats, "API OMX (CPZAT)");
-        SIMcheckDialog.addNumericField("angles", angles, 1);
-        SIMcheckDialog.addNumericField("phases", phases, 1);
-        SIMcheckDialog.addCheckbox("Raw_Intensity_Profile", true);
-        SIMcheckDialog.addCheckbox("Raw_Fourier_Plots", true);
-        SIMcheckDialog.addCheckbox("Raw_Angle_Difference", true);
-        SIMcheckDialog.addCheckbox("Raw_Modulation_Contrast", true);
-        SIMcheckDialog.addMessage("------------ Reconstructed data ------------");
-        SIMcheckDialog.addChoice("Reconstructed_Data:", titles, titles[nullTitleIndex]);
-        SIMcheckDialog.addCheckbox("SIR_Histogram", true);
-        SIMcheckDialog.addCheckbox("SIR_Z_Variation", true);
-        SIMcheckDialog.addCheckbox("SIR_Fourier Plot", true);
-        SIMcheckDialog.addCheckbox(
-                "SIR_Mod_Contrast_Map (requires Raw Mod Contrast)", true);
-        SIMcheckDialog.addHelp(
+        GenericDialog gd = new GenericDialog("SIMcheck (v0.9)");
+        gd.addMessage(
+                "--------------- INSTRUCTIONS ---------------");
+        gd.addMessage(
+                "  1. Choose a raw and/or reconstructed SI data stacks.");
+        gd.addMessage(
+                "  2. Tick boxes for checks you would like to run & click OK.");
+        String helpMessage =
+                "    \"Help\" below navigates to Micron web page about SIMcheck\n";
+        helpMessage +=
+                "      or extract SIMcheck.html from SIMcheck_.jar using unzip";
+        gd.addMessage(helpMessage);
+        
+        // present options
+        gd.addCheckbox("Use reconstructed data ROI to crop images?", doCrop);
+        gd.addNumericField("* first Z (crop)", crop.zFirst, 0);
+        gd.addNumericField("* last Z (crop)", crop.zLast, 0);
+        gd.addMessage("---------------- Raw data -----------------");
+        gd.addChoice("Raw_Data:", titles, titles[1]);
+        gd.addChoice("Data format:", formats, omx);
+        gd.addNumericField("angles", angles, 0);
+        gd.addNumericField("phases", phases, 0);
+        gd.addCheckbox("Raw_Intensity_Profile", doIntensity);
+        gd.addCheckbox("Raw_Fourier_Plots", doRawFourier);
+        gd.addCheckbox("Raw_Angle_Difference", doAngleDifference);
+        gd.addCheckbox("Raw_Modulation_Contrast", doMCNR);
+        gd.addMessage("------------ Reconstructed data ------------");
+        gd.addChoice("Reconstructed_Data:", titles, titles[0]);
+        gd.addCheckbox("SIR_Histogram", doHistogram);
+        gd.addCheckbox("SIR_Z_Variation", doZvar);
+        gd.addCheckbox("SIR_Fourier Plot", doReconFourier);
+        gd.addCheckbox(
+                "SIR_Mod_Contrast_Map (requires Raw Mod Contrast)", doMCNRmap);
+        gd.addHelp(
                 "http://www.micron.ox.ac.uk/microngroup/software/SIMcheck.html");
-        SIMcheckDialog.showDialog();
+        gd.showDialog();
 
-        if (SIMcheckDialog.wasOKed()) {
-            IJ.log(   "\n   =====================      "
-                    + "\n                      SIMcheck        "
-                    + "\n   =====================      ");
-            angles = (int)SIMcheckDialog.getNextNumber();
-            phases = (int)SIMcheckDialog.getNextNumber();
-            ImagePlus modConImp = null; // to hold modulation contrast map
-                                           // for re-use in SIR quality map
-            // open B&C and channels tools
-            IJ.run("Brightness/Contrast...");
-            IJ.run("Channels Tool... ", "");
-
-            IJ.log("\n ==== Raw data checks ====");
-            int SIstackChoice = SIMcheckDialog.getNextChoiceIndex();
-            int formatChoice = SIMcheckDialog.getNextChoiceIndex();
-            if (SIstackChoice == nullTitleIndex) {
-                IJ.log("  ! no raw SI data - required for all checks");
-                // get all raw data choices so SIR booleans make sense
-                for (int nb = 0; nb < RAW_CHECKS; nb++) {
-                    SIMcheckDialog.getNextBoolean();
-                }
+        // collect options
+        if (gd.wasOKed()) {
+            doCrop = gd.getNextBoolean();
+            crop.zFirst = (int)gd.getNextNumber();
+            crop.zLast = (int)gd.getNextNumber();
+            String rawTitle = titles[gd.getNextChoiceIndex()];
+            if (!rawTitle.equals(none)) {
+                impRaw = WindowManager.getImage(rawTitle);
             }
-            int SIRstackChoice = SIMcheckDialog.getNextChoiceIndex();
-            ImagePlus SIRstackImp = null;
-            int SIRstackID = 0;
-            if (SIRstackChoice >= wList.length) {
-                IJ.log("  ! no SIR data - cannot perform SIR data checks");
-            } else {
-                SIRstackID = wList[SIRstackChoice];
-                SIRstackImp = ij.WindowManager.getImage(SIRstackID);
+            formatChoice = gd.getNextChoiceIndex();
+            angles = (int)gd.getNextNumber();
+            phases = (int)gd.getNextNumber();
+            doIntensity = gd.getNextBoolean();
+            doRawFourier = gd.getNextBoolean();
+            doAngleDifference = gd.getNextBoolean();
+            doMCNR = gd.getNextBoolean();
+            String reconTitle = titles[gd.getNextChoiceIndex()];
+            if (!reconTitle.equals(none)) {
+                impRecon = WindowManager.getImage(reconTitle);
             }
-            if (SIMcheckDialog.getNextBoolean() && SIRstackImp != null) {
-                // use SIR ROI for raw & SIR images
-                Roi roi = SIRstackImp.getRoi();
-                int x = roi.getBounds().x;
-                int y = roi.getBounds().x;
-                int w = roi.getBounds().width;
-                int h = roi.getBounds().height;
-                IJ.log("TODO: use SIR ROI x,y,w,h " +
-                        x + "," + y + "," + w + "," + h);
-            }
-            int SIstackID = wList[SIstackChoice];
-            ImagePlus SIstackImp = ij.WindowManager.getImage(SIstackID);
-            IJ.log("    format: " + formats[formatChoice]);
-            if (formatChoice != 0) {
-                Util_formats formatConverter = new Util_formats();
-                IJ.log("      converting " + formats[formatChoice] 
-                        + " to OMX format");
-                SIstackImp = formatConverter.exec(
-                        SIstackImp, phases, angles, formatChoice - 1);
-            }
-            if (!I1l.stackDivisibleBy(SIstackImp, phases * angles)) {
-                IJ.log("  ! invalid raw SI data - raw data checks aborted");
-            } else {
-                String SIstackName = SIstackImp.getTitle();
-                IJ.log("  Using SI stack: " + SIstackName + " (ID "
-                        + SIstackID + ")");
-                // do checks on raw SI data
-                if (SIMcheckDialog.getNextBoolean()) {
-                    Raw_intensity raw_int_plugin = new Raw_intensity();
-                    raw_int_plugin.phases = phases;
-                    raw_int_plugin.angles = angles;
-                    ResultSet results = raw_int_plugin.exec(SIstackImp);
-                    results.report();
-                }
-                if (SIMcheckDialog.getNextBoolean()) {
-                    Raw_Fourier raw_fourier_plugin = new Raw_Fourier();
-                    raw_fourier_plugin.phases = phases;
-                    raw_fourier_plugin.angles = angles;
-                    ResultSet results = raw_fourier_plugin.exec(SIstackImp);
-                    results.report();
-                }
-                if (SIMcheckDialog.getNextBoolean()) {
-                    Raw_Angle_Difference raw_a_diff_plugin = new Raw_Angle_Difference();
-                    raw_a_diff_plugin.phases = phases;
-                    raw_a_diff_plugin.angles = angles;
-                    ResultSet results = raw_a_diff_plugin.exec(SIstackImp);
-                    results.report();
-                }
-                if (SIMcheckDialog.getNextBoolean()) {
-                    Raw_ModContrast raw_MCNR_plugin = new Raw_ModContrast();
-                    raw_MCNR_plugin.phases = phases;
-                    raw_MCNR_plugin.angles = angles;
-                    ResultSet results = raw_MCNR_plugin.exec(SIstackImp);
-                    modConImp = results.getImp(0);
-                    results.report();
-                }
-            }
-            
-            
-            IJ.log("\n ==== Reconstructed data checks ====");
-            if (SIRstackImp != null) {
-                String SIRstackName = SIRstackImp.getTitle();
-                IJ.log("  using SIR stack: " + SIRstackName + " (ID "
-                        + SIRstackID + ")");
-                // do checks on SIR reconstructed data
-                if (SIMcheckDialog.getNextBoolean()) {
-                    SIR_histogram sir_hist_plugin = new SIR_histogram();
-                    ResultSet results = sir_hist_plugin.exec(SIRstackImp);
-                    results.report();
-                }
-                if (SIMcheckDialog.getNextBoolean()) {
-                    SIR_Z_variation sir_z_var_plugin = new SIR_Z_variation();
-                    ResultSet results = sir_z_var_plugin.exec(SIRstackImp);
-                    results.report();
-                }
-                if (SIMcheckDialog.getNextBoolean()) {
-                    SIR_Fourier sir_fourier_plugin = new SIR_Fourier();
-                    ResultSet results = sir_fourier_plugin.exec(SIRstackImp);
-                    results.report();
-                }
-                if (SIMcheckDialog.getNextBoolean()) {
-                    SIR_ModContrastMap sir_mcnr_plugin = 
-                        new SIR_ModContrastMap();
-                    sir_mcnr_plugin.phases = phases;
-                    sir_mcnr_plugin.angles = angles;
-                    ResultSet results = 
-                            sir_mcnr_plugin.exec(
-                                    SIstackImp, SIRstackImp, modConImp);
-                    results.report();
-                }
-            }
-            IJ.log("\n\n\n");
+            doHistogram = gd.getNextBoolean();
+            doZvar = gd.getNextBoolean();
+            doReconFourier = gd.getNextBoolean();
+            doMCNRmap = gd.getNextBoolean();
+            // TODO, FIXME, deal with Cancel gracefully (do not exec below)
         }
+
+        // format conversion, check, crop, open tools to work with ouput
+        if (formatChoice != 0) {
+            Util_formats formatConverter = new Util_formats();
+            IJ.log("      converting " + formats[formatChoice] +
+                    " to OMX format");
+            impRaw = formatConverter.exec(
+                    impRaw, phases, angles, formatChoice - 1);
+        }
+        if (!I1l.stackDivisibleBy(impRaw, phases * angles)) {
+            IJ.log("  ! invalid raw SI data - raw data checks aborted");
+            impRaw = null;
+        }
+        if (doCrop && impRecon != null) {
+            Roi roi = impRecon.getRoi();
+            crop.x = roi.getBounds().x;
+            crop.y = roi.getBounds().y;
+            crop.w = roi.getBounds().width;
+            crop.h = roi.getBounds().height;
+            impRecon.deleteRoi();
+            // TODO, crop recon
+            if (impRaw != null) {
+                // TODO, crop raw
+            }
+        }
+        IJ.run("Brightness/Contrast...");
+        IJ.run("Channels Tool... ", "");
+        
+        // run checks, report results
+        IJ.log(   "\n   =====================      "
+                + "\n                      SIMcheck        "
+                + "\n   =====================      ");
+
+        if (impRaw != null) {
+            IJ.log("\n ==== Raw data checks ====");
+            IJ.log("  Using SI stack: " + impRaw.getTitle());
+            // do checks on raw SI data
+            if (doIntensity) {
+                Raw_intensity raw_int_plugin = new Raw_intensity();
+                raw_int_plugin.phases = phases;
+                raw_int_plugin.angles = angles;
+                ResultSet results = raw_int_plugin.exec(impRaw);
+                results.report();
+            }
+            if (doRawFourier) {
+                Raw_Fourier raw_fourier_plugin = new Raw_Fourier();
+                raw_fourier_plugin.phases = phases;
+                raw_fourier_plugin.angles = angles;
+                ResultSet results = raw_fourier_plugin.exec(impRaw);
+                results.report();
+            }
+            if (doAngleDifference) {
+                Raw_Angle_Difference raw_a_diff_plugin = new Raw_Angle_Difference();
+                raw_a_diff_plugin.phases = phases;
+                raw_a_diff_plugin.angles = angles;
+                ResultSet results = raw_a_diff_plugin.exec(impRaw);
+                results.report();
+            }
+            if (doMCNR) {
+                Raw_ModContrast raw_MCNR_plugin = new Raw_ModContrast();
+                raw_MCNR_plugin.phases = phases;
+                raw_MCNR_plugin.angles = angles;
+                ResultSet results = raw_MCNR_plugin.exec(impRaw);
+                impMCNR = results.getImp(0);
+                results.report();
+            }
+        }
+        
+        if (impRecon != null) {
+            IJ.log("\n ==== Reconstructed data checks ====");
+            IJ.log("  using SIR stack: " + impRecon.getTitle());
+            if (doHistogram) {
+                SIR_histogram sir_hist_plugin = new SIR_histogram();
+                ResultSet results = sir_hist_plugin.exec(impRecon);
+                results.report();
+            }
+            if (doZvar) {
+                SIR_Z_variation sir_z_var_plugin = new SIR_Z_variation();
+                ResultSet results = sir_z_var_plugin.exec(impRecon);
+                results.report();
+            }
+            if (doReconFourier) {
+                SIR_Fourier sir_fourier_plugin = new SIR_Fourier();
+                ResultSet results = sir_fourier_plugin.exec(impRecon);
+                results.report();
+            }
+            if (doMCNRmap) {
+                SIR_ModContrastMap sir_mcnr_plugin = 
+                    new SIR_ModContrastMap();
+                sir_mcnr_plugin.phases = phases;
+                sir_mcnr_plugin.angles = angles;
+                ResultSet results = sir_mcnr_plugin.exec(impRaw, impRecon, impMCNR);
+                results.report();
+            }
+        }
+        IJ.log("\n\n\n");
     }
 }

@@ -195,20 +195,23 @@ public final class I1l {
         System.arraycopy(arr2, 0, result, arr1.length, arr2.length);
         return result;
     }
+
+    /** Concatenate arr2 to the end of arr1. */
+    public static String[] cat(String[] arr1, String[] arr2) {
+        String[] result = new String[arr1.length + arr2.length];
+        System.arraycopy(arr1, 0, result, 0, arr1.length);
+        System.arraycopy(arr2, 0, result, arr1.length, arr2.length);
+        return result;
+    }
         
     /** Collect and return an array of title Strings from all windows. */
     static String[] collectTitles() {
         int[] wList = WindowManager.getIDList();
-        if (wList==null) {
-            IJ.noImage();
-            return null;
-        }else{
-            String[] titles = new String[wList.length];
-            for (int i = 0; i < wList.length; i++) {
-                titles[i] = WindowManager.getImage(wList[i]).getTitle();
-            }
-            return titles;
+        String[] titles = new String[wList.length];
+        for (int i = 0; i < wList.length; i++) {
+            titles[i] = WindowManager.getImage(wList[i]).getTitle();
         }
+        return titles;
     }
 
     /** Copy src calibrations to dest. */
