@@ -19,11 +19,11 @@
 package SIMcheck;
 import ij.*;
 import ij.plugin.*;
-import ij.plugin.filter.*;
 import ij.process.*;
 import ij.gui.GenericDialog;
 import ij.IJ;
-import ij.measure.*;
+import ij.gui.*;
+import java.awt.Color;
 
 /** This plugin takes raw SI data (1C, 1T) for a bead lawn and shows
  * an axial side-view of the illumination pattern for the first phase.
@@ -43,11 +43,11 @@ public class Cal_PatternFocus implements PlugIn {
 
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
-        int nz = imp.getNSlices() / (phases * angles);
         GenericDialog gd = new GenericDialog("Caibrate Pattern Focus");
         gd.addMessage("Requires SI raw data in API OMX (CPZAT) order.");
         gd.addNumericField("Angles", angles, 1);
         gd.addNumericField("Phases", phases, 1);
+        // NB. in IJ, E is 0, in worx N is 0 (CCW is +ve in both cases)
         gd.addNumericField("Angle 1 (deg)", angle1, 1);
         gd.showDialog();
         if (gd.wasCanceled()) return;
@@ -74,16 +74,22 @@ public class Cal_PatternFocus implements PlugIn {
         ImagePlus imp = imps[0];
         width = imp.getWidth();
         height = imp.getHeight();
-        // TODO, check nChannels & nFrames & exit if > 1
+        if (imp.getNChannels() > 1 || imp.getNFrames() > 1) {
+            IJ.showMessage("Error", name + " only works for 1 channel/frame");
+            return results;
+        }
         double angleDegrees = 90.0d - angle1;
         ImagePlus[] phase1imps = phase1eachAngle(imp);
         for (int a = 0; a < angles; a++) {
             rotateStripes(phase1imps[a], angleDegrees);
-            phase1imps[a] = resliceAndProject(phase1imps[a]);
+            results.addImp("Angle " + (a + 1) + " rotated SI image (" +
+                    String.format("%.1f", angleDegrees) +
+                    " degrees CCW from E)", phase1imps[a]);
+            phase1imps[a] = resliceAndProject(phase1imps[a].duplicate());
             String title = I1l.makeTitle(imp, "APF" + (a + 1));
             phase1imps[a].setTitle(title);
-            results.addImp("Angle " + String.format("%.1f", angleDegrees) + 
-                    " pattern focus", phase1imps[a]);
+            results.addImp("Angle " + (a + 1) + " pattern focus",
+                    phase1imps[a]);
             angleDegrees += 180.0d / angles;  // angles cover 180 deg
         }
         return results;
@@ -105,7 +111,8 @@ public class Cal_PatternFocus implements PlugIn {
                     }
                 }
             }
-            phase1Imps[a] = new ImagePlus("SI Pattern P1, A" + (a + 1), stack);
+            phase1Imps[a] = new ImagePlus("Rotated SI Pattern P1, A" + (a + 1),
+                    stack);
             I1l.copyCal(imp, phase1Imps[a]);
         }
         return phase1Imps;
@@ -113,18 +120,24 @@ public class Cal_PatternFocus implements PlugIn {
     
     /** Rotate stripes for each angle to vertical. */
     private void rotateStripes(ImagePlus imp2, double angleDeg) {
-        // FIXME, rotate by angles: -48 72 11 (in IJ, E is 0, in worx N is 0)
         angleDeg = -angleDeg;
         IJ.log("rotating " + imp2.getTitle() + " by " + angleDeg + " degrees");
         IJ.run(imp2, "Rotate... ", "angle=" + angleDeg +
                 " grid=1 interpolation=Bilinear stack");
+        // draw central vertical line to visually check angle after rotation 
+        imp2.setOverlay((Roi)(new Line(width / 2, 0, width / 2, height)),
+                Color.YELLOW, 1, Color.YELLOW);
+        imp2.setSlice(imp2.getNSlices() / 2);
+        imp2.updateAndDraw();
     }
     
     /** Reslice to XZ view and max-project along y. */
     private ImagePlus resliceAndProject(ImagePlus imp2) {
-        // TODO, reslice over range?
-        int ymin = (int)(height * 0.33);
-        int ymax = (int)(height * 0.67);
+        imp2.show();
+        // reslice over central half of rotated image
+        int ymin = (int)(height * 0.25);
+        int ymax = (int)(height * 0.75);
+        imp2.setRoi(0, ymin, width, ymax - ymin);
         IJ.run(imp2, "Reslice [/]...", "output=" + 
                 imp2.getCalibration().pixelDepth + " start=Top avoid");
         ImagePlus impResliced = IJ.getImage();

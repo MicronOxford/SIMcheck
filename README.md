@@ -109,14 +109,14 @@ TODO
         - make more self-documenting: improve names & log output
         - finish/improve docs, illustrate usage with pictures, examples
       - fixes:
-        - bead puddle SI illumination image: test, add multi-channel support?
         - N-SIM data: report raw 3D SIM data Bio-Formats bug
         - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
         - Wiener filter parameter estimate - calibrate, document
       - features:
         - use raw ROI for raw+SIR data crop (& add Z crop later)
-        - stack the "pattern focus" images in one file after auto-scaling the
-          3 angles
+        - bead puddle SI illumination image:
+          - improve angle input: line selection and/or worx format angle in rad
+          - stack the "pattern focus" images in one file after auto-scaling
         - report per. angle modulation contrast and/or minimum of these
         - raw -> WF same size as SIR by interpolation (& preserve type??)
         - project and/or montage Raw FFT to present as 1 image
@@ -128,6 +128,11 @@ TODO
       - tests, structure:
         - final empirical tests, param calibration, tolerances etc.
         - mavenize & make Fiji update site
+        - structure:
+          - private plugin methods
+          - .name to toString(),
+          - .test() method to test private methods
+          - split I1l-> J & I1l
         - more tests to test/debug non-interactive code, preconditions / inputs
         - add ResultTable support to ResultSet class
         - make sure tests and debug not deployed
