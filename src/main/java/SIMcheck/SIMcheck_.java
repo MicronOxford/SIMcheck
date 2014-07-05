@@ -23,6 +23,7 @@ import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.Roi;
 import ij.plugin.PlugIn;
+import ij.plugin.Duplicator;
 
 /** This plugin displays a GenericDialog and runs the other SIMcheck plugins.
  * <ul>
@@ -158,10 +159,14 @@ public class SIMcheck_ implements PlugIn {
             crop.y = roi.getBounds().y;
             crop.w = roi.getBounds().width;
             crop.h = roi.getBounds().height;
-            impRecon.deleteRoi();
-            // TODO, crop recon
+            // TODO, log crop parameters
+            int[] d = impRecon.getDimensions();
+            String impReconTitle = I1l.makeTitle(impRecon, "CRP");
+            impRecon = new Duplicator().run(impRecon, 
+                    1, d[2], crop.zFirst, crop.zLast, 1, d[4]);
+            impRecon.setTitle(impReconTitle);
             if (impRaw != null) {
-                // TODO, crop raw
+                IJ.log("*** TODO: crop raw! ***");
             }
         }
         IJ.run("Brightness/Contrast...");
