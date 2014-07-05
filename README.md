@@ -113,7 +113,6 @@ TODO
         - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
         - Wiener filter parameter estimate - calibrate, document
       - features:
-        - use raw ROI for raw+SIR data crop (& add Z crop later)
         - bead puddle SI illumination image:
           - improve angle input: line selection and/or worx format angle in rad
           - stack the "pattern focus" images in one file after auto-scaling
