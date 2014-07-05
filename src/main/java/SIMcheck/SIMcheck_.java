@@ -19,11 +19,13 @@ package SIMcheck;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.Roi;
 import ij.plugin.PlugIn;
 import ij.plugin.Duplicator;
+import ij.process.ImageProcessor;
 
 /** This plugin displays a GenericDialog and runs the other SIMcheck plugins.
  * <ul>
@@ -138,7 +140,11 @@ public class SIMcheck_ implements PlugIn {
             doZvar = gd.getNextBoolean();
             doReconFourier = gd.getNextBoolean();
             doMCNRmap = gd.getNextBoolean();
-            // TODO, FIXME, deal with Cancel gracefully (do not exec below)
+            IJ.log(   "\n   =====================      "
+                    + "\n                      SIMcheck        "
+                    + "\n   =====================      ");
+        } else {
+            return;  // bail out upon cancel
         }
 
         // format conversion, check, crop, open tools to work with ouput
@@ -159,6 +165,10 @@ public class SIMcheck_ implements PlugIn {
             crop.y = roi.getBounds().y;
             crop.w = roi.getBounds().width;
             crop.h = roi.getBounds().height;
+            IJ.log("\n      Cropping to Reconstructed image ROI:");
+            IJ.log("        x, y, width, height = " + crop.x + ", " + crop.y +
+                    ", " + crop.w + ", " + crop.h);
+            IJ.log("        slices Z = " + crop.zFirst + "-" + crop.zLast);
             // TODO, log crop parameters
             int[] d = impRecon.getDimensions();
             String impReconTitle = I1l.makeTitle(impRecon, "CRP");
@@ -173,10 +183,6 @@ public class SIMcheck_ implements PlugIn {
         IJ.run("Channels Tool... ", "");
         
         // run checks, report results
-        IJ.log(   "\n   =====================      "
-                + "\n                      SIMcheck        "
-                + "\n   =====================      ");
-
         if (impRaw != null) {
             IJ.log("\n ==== Raw data checks ====");
             IJ.log("  Using SI stack: " + impRaw.getTitle());
@@ -211,7 +217,6 @@ public class SIMcheck_ implements PlugIn {
                 results.report();
             }
         }
-        
         if (impRecon != null) {
             IJ.log("\n ==== Reconstructed data checks ====");
             IJ.log("  using SIR stack: " + impRecon.getTitle());
@@ -240,5 +245,46 @@ public class SIMcheck_ implements PlugIn {
             }
         }
         IJ.log("\n\n\n");
+    }
+
+    /** Split hyperstack, returning new ImagePlus for angle requested.
+     * Assumes API V2 OMX CPZAT channel order. 
+     */
+    public static ImagePlus getImpForAngle(ImagePlus imp, int a,
+            int phases, int angles) {
+    	int nc = imp.getNChannels();
+      	int nz = imp.getNSlices();
+      	int nt = imp.getNFrames();
+      	nz = nz / (phases * angles);  // take phase & angle out of Z
+      	int sliceIn = 0;
+      	int sliceOut = 0;
+      	int width = imp.getWidth();
+        int height = imp.getHeight();
+      	ImageStack stackAll = imp.getStack();
+      	ImageStack stackOut = new ImageStack(width, height);
+    	for (int t = 1; t <= nt; t++) {
+            for (int z = 1; z <= nz; z++) {
+                for (int p = 1; p <= phases; p++) {
+                    for (int c = 1; c <= nc; c++) {
+                        sliceIn = (t - 1) * (nc * phases * nz * angles);
+                        sliceIn += (a - 1) * (nc * phases * nz);
+                        sliceIn += (z - 1) * (nc * phases);
+                        sliceIn += (p - 1) * nc;
+                        sliceIn += c;
+                        sliceOut++;  
+                        ImageProcessor ip = stackAll.getProcessor(sliceIn);
+                        stackOut.addSlice(String.valueOf(sliceOut), ip);
+                    }
+                }
+            }
+        }
+    	String title = I1l.makeTitle(imp, "A" + a);
+        ImagePlus impOut = new ImagePlus(title, stackOut);
+        impOut.setDimensions(nc, nz * phases, nt);
+        I1l.copyCal(imp, impOut);
+        int centralZ = ((nz / 2) * phases) - phases + 1;  // 1st phase
+        impOut.setPosition(1, centralZ, 1);
+        impOut.setOpenAsHyperStack(true);
+        return impOut;
     }
 }

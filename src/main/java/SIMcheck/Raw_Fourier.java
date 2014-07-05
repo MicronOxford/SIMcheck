@@ -19,7 +19,6 @@
 package SIMcheck;
 import ij.*;
 import ij.plugin.*;
-import ij.process.*;
 import ij.gui.GenericDialog; 
 import ij.IJ;
 
@@ -84,7 +83,8 @@ public class Raw_Fourier implements PlugIn, Executable {
         ImagePlus imp = imps[0];
         imp = Util_positive_16bit.exec(imp);
         for (int a = 1; a <= angles; a++) {
-          	ImagePlus impCurrentA = getImpForAngle(imp, a);
+          	ImagePlus impCurrentA = SIMcheck_.getImpForAngle(
+          	        imp, a, phases, angles);
           	String statusString = "Performing FFT for angle " 
           			+ Integer.toString(a);
           	IJ.showStatus(statusString);
@@ -96,46 +96,6 @@ public class Raw_Fourier implements PlugIn, Executable {
         results.addInfo("Fourier-transformed raw data", 
                 "check for clean 1st & 2nd order spots");
         return results;
-    }
-    
-    /** Split hyperstack, returning new ImagePlus for angle requested.
-     * Assumes API V2 OMX CPZAT channel order. 
-     */
-    ImagePlus getImpForAngle(ImagePlus impAll, int a) {
-    	int nc = impAll.getNChannels();
-      	int nz = impAll.getNSlices();
-      	int nt = impAll.getNFrames();
-      	nz = nz / (phases * angles);  // take phase & angle out of Z
-      	int sliceIn = 0;
-      	int sliceOut = 0;
-      	int width = impAll.getWidth();
-        int height = impAll.getHeight();
-      	ImageStack stackAll = impAll.getStack();
-      	ImageStack stackOut = new ImageStack(width, height);
-    	for (int t = 1; t <= nt; t++) {
-            for (int z = 1; z <= nz; z++) {
-                for (int p = 1; p <= phases; p++) {
-                    for (int c = 1; c <= nc; c++) {
-                        sliceIn = (t - 1) * (nc * phases * nz * angles);
-                        sliceIn += (a - 1) * (nc * phases * nz);
-                        sliceIn += (z - 1) * (nc * phases);
-                        sliceIn += (p - 1) * nc;
-                        sliceIn += c;
-                        sliceOut++;  
-                        ImageProcessor ip = stackAll.getProcessor(sliceIn);
-                        stackOut.addSlice(String.valueOf(sliceOut), ip);
-                    }
-                }
-            }
-        }
-    	String title = I1l.makeTitle(impAll, "A" + a);
-        ImagePlus impOut = new ImagePlus(title, stackOut);
-        impOut.setDimensions(nc, nz * phases, nt);
-        I1l.copyCal(impAll, impOut);
-        int centralZ = ((nz / 2) * phases) - phases + 1;  // 1st phase
-        impOut.setPosition(1, centralZ, 1);
-        impOut.setOpenAsHyperStack(true);
-        return impOut;
     }
 }
 
