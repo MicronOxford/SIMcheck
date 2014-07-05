@@ -43,8 +43,6 @@ public class SIMcheck_ implements PlugIn {
 
     // options with default values
     private boolean doCrop = false;
-    private int zFirst = 1;
-    private int zLast = 1;
     private ImagePlus impRaw = null;
     private int formatChoice = 0;
     private int phases = 5;
@@ -159,7 +157,9 @@ public class SIMcheck_ implements PlugIn {
             IJ.log("  ! invalid raw SI data - raw data checks aborted");
             impRaw = null;
         }
-        if (doCrop && impRecon != null) {
+        if (doCrop && impRecon != null && impRecon.getRoi() != null) {
+            // TODO: duplicate both images instead of destructive crop?
+            // Do recon image crop
             Roi roi = impRecon.getRoi();
             crop.x = roi.getBounds().x;
             crop.y = roi.getBounds().y;
@@ -169,15 +169,39 @@ public class SIMcheck_ implements PlugIn {
             IJ.log("        x, y, width, height = " + crop.x + ", " + crop.y +
                     ", " + crop.w + ", " + crop.h);
             IJ.log("        slices Z = " + crop.zFirst + "-" + crop.zLast);
-            // TODO, log crop parameters
             int[] d = impRecon.getDimensions();
             String impReconTitle = I1l.makeTitle(impRecon, "CRP");
             impRecon = new Duplicator().run(impRecon, 
                     1, d[2], crop.zFirst, crop.zLast, 1, d[4]);
             impRecon.setTitle(impReconTitle);
             if (impRaw != null) {
-                IJ.log("*** TODO: crop raw! ***");
+                // Do raw image crop
+                // 1) crop to Z range: tricky since Zobs = phase, Ztrue, angle
+                ImageStack cropStack = null;
+                ImagePlus imp2 = null;
+                for (int a = 1; a <= angles; a++) {
+                    imp2 = getImpForAngle(impRaw, a, phases, angles);
+                    int zFirst = 1 + (crop.zFirst - 1) * phases;
+                    imp2 = new Duplicator().run(imp2, 1, d[2], zFirst,
+                            crop.zLast * phases, 1, d[4]);
+                    if (a == 1) {
+                        cropStack = imp2.getStack();
+                    } else {
+                        cropStack = I1l.cat(cropStack, imp2.getStack());
+                    }
+                }
+                int nz = (crop.zLast - crop.zFirst + 1) * phases * angles;
+                impRaw.setStack(cropStack);
+                impRaw.setDimensions(d[2], nz , d[4]);
+                impRaw.setOpenAsHyperStack(true);
+                impRaw.setTitle(I1l.makeTitle(impRaw, "CRP"));
+                // 2) crop to ROI derived from recon ROI (raw dims = 1/2 recon)
+                impRaw.setRoi(new Roi(crop.x / 2, crop.y / 2,
+                        crop.w / 2, crop.h / 2));
+                IJ.run(impRaw, "Crop", "");
             }
+        } else if (doCrop && impRecon != null) {
+            IJ.log("      ! cannot crop: reconstructed image requires ROI");
         }
         IJ.run("Brightness/Contrast...");
         IJ.run("Channels Tool... ", "");
