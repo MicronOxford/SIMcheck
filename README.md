@@ -113,8 +113,6 @@ TODO
         - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
         - Wiener filter parameter estimate - calibrate, document
       - features:
-        - bead puddle SI illumination image:
-          - stack the "pattern focus" images in one file after auto-scaling
         - report per. angle modulation contrast and/or minimum of these
         - raw -> WF same size as SIR by interpolation (& preserve type??)
         - project and/or montage Raw FFT to present as 1 image

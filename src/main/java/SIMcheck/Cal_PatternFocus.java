@@ -25,6 +25,7 @@ import ij.IJ;
 import ij.gui.*;
 import java.awt.Font;
 import java.awt.Color;
+import ij.plugin.StackCombiner;
 
 /** This plugin takes raw SI data (1C, 1T) for a bead lawn and shows
  * an axial side-view of the illumination pattern for the first phase.
@@ -96,20 +97,32 @@ public class Cal_PatternFocus implements PlugIn {
         }
         double angleDegrees = 90.0d - angle1;
         ImagePlus[] phase1imps = phase1eachAngle(imp);
+        ImagePlus montage = null;
+        StackCombiner comb = new StackCombiner();
         for (int a = 0; a < angles; a++) {
             rotateStripes(phase1imps[a], angleDegrees);
             results.addImp("Angle " + (a + 1) + " rotated SI image (" +
                     String.format("%.1f", angleDegrees) +
                     " degrees CCW from E)", phase1imps[a]);
             phase1imps[a] = resliceAndProject(phase1imps[a].duplicate());
-            String label = "APF" + (a + 1);
-            String title = I1l.makeTitle(imp, label);
+            String label = "A" + (a + 1);
+            String title = I1l.makeTitle(imp, "APF" + (a + 1));
             phase1imps[a].setTitle(title);
             drawLabel(phase1imps[a], label);
-            results.addImp("Angle " + (a + 1) + " pattern focus",
-                    phase1imps[a]);
+            if (a == 0) {
+                montage = phase1imps[a].duplicate();
+            } else {
+                ImageStack montageStack = comb.combineVertically(
+                        montage.getStack(), phase1imps[a].getStack());
+                montage.setStack(montageStack);
+            }
             angleDegrees += 180.0d / angles;  // angles cover 180 deg
         }
+        for (int a = 0; a < angles; a++) {
+            phase1imps[a].close();
+        }
+        montage.setTitle(I1l.makeTitle(imp, "APF"));
+        results.addImp("Angles 1-" + angles + " pattern focus", montage);
         return results;
     }
     
