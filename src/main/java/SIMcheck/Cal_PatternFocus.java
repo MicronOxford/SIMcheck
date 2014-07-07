@@ -23,6 +23,7 @@ import ij.process.*;
 import ij.gui.GenericDialog;
 import ij.IJ;
 import ij.gui.*;
+
 import java.awt.Color;
 
 /** This plugin takes raw SI data (1C, 1T) for a bead lawn and shows
@@ -37,9 +38,13 @@ public class Cal_PatternFocus implements PlugIn {
 	int angles = 3;
 	private int width;
 	private int height;
+	private static final String[] angleMethods = {
+	    "degrees (IJ)", "radians (OMX)", "IJ line selection**"
+	};
 	
     // default parameters
     double angle1 = 0.00d;      // 1st illumination pattern angle in degrees
+    String angleMethod = angleMethods[0];
 
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
@@ -48,13 +53,24 @@ public class Cal_PatternFocus implements PlugIn {
         gd.addNumericField("Angles", angles, 1);
         gd.addNumericField("Phases", phases, 1);
         // NB. in IJ, E is 0, in worx N is 0 (CCW is +ve in both cases)
-        gd.addNumericField("Angle 1 (deg)", angle1, 1);
+        gd.addNumericField("Angle 1 (deg, IJ)", angle1, 1);
+        gd.addNumericField("Angle 1 (rad, OMX)", Math.toRadians(angle1), 1);
+        gd.addRadioButtonGroup("Method to specify angle", angleMethods,
+                1, angleMethods.length, angleMethods[0]);
+        gd.addMessage("** for 1st angle, draw line from bottom to top (0-180)");
         gd.showDialog();
         if (gd.wasCanceled()) return;
         if (gd.wasOKed()) {
+            angleMethod = gd.getNextRadioButton();
             angles = (int)gd.getNextNumber();
             phases = (int)gd.getNextNumber();
-            angle1 = (double)gd.getNextNumber();
+            if (angleMethod.equals(angleMethods[0])) {
+                angle1 = (double)gd.getNextNumber();
+            } else if (angleMethod.equals(angleMethods[0])) {
+                angle1 = Math.toDegrees((double)gd.getNextNumber());
+            } else {
+                angle1 = imp.getRoi().getAngle();
+            }
         }
         if (!I1l.stackDivisibleBy(imp, phases * angles)) {
             IJ.showMessage( "Calibrate Pattern Focus", 

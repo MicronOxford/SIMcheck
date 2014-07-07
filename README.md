@@ -114,7 +114,6 @@ TODO
         - Wiener filter parameter estimate - calibrate, document
       - features:
         - bead puddle SI illumination image:
-          - improve angle input: line selection and/or worx format angle in rad
           - stack the "pattern focus" images in one file after auto-scaling
         - report per. angle modulation contrast and/or minimum of these
         - raw -> WF same size as SIR by interpolation (& preserve type??)
