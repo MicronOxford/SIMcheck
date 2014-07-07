@@ -42,8 +42,7 @@ Features
     Check          |        Statistic(s)            |       Comments
 ------------------ | ------------------------------ | -----------------------
  Cal phases        | phase step & range stable?     | +k0 angles, linespacing
- Cal grating, TODO | grating clean?                 |  grating image
- Cal PSF, TODO     | SNR, symmetry, posn&focus OK?  | 
+ Cal pattern focus | clean PSF, no "zipper" pattern | 
 
 ----------------------------------
 2: Pre-processing, Raw Data Checks
@@ -52,7 +51,7 @@ Features
     Check          |        Statistic(s)             |      Comments
 ------------------ | ------------------------------- | ---------------------
  Raw Angle Diff    |  no colored differences?        |    threshold/stat?
- Raw Z Profile     |  bleaching and angle diffs OK?  | 
+ Raw Intensity Prf |  bleaching and angle intensity  |
  Raw Fourier plots |  SI pattern correct & regular?  |    TODO? k0 & linspc
  Raw Mod Contrast  |  feature MCNR acceptable?       |    Wiener par
 
@@ -62,8 +61,8 @@ Features
 
     Check          |        Statistic(s)              |     Comments
 ------------------ | -------------------------------- | --------------------
- SIR Histogram     |  +ve/-ve ratio acceptable?       | top/bottom 0.5%
- SIR Z variation   |  stdev of miniumum vs. mean      | shows mismatch
+ SIR Histogram     |  +ve/-ve ratio acceptable?       | top/bottom 0.01%
+ SIR Z variation   |  stdev of miniumum vs. mean      | shows OTF mismatch
  SIR Fourier Plot  |  symmetry+profile OK? +res/angle | +radial profile
  SIR MCNR Map      |  None - for visual inspection    | MCNR + intensity
 
@@ -94,7 +93,8 @@ Style Notes
 ===========
 
 * simple, modular structure - each check is a standalone plugin
-* plugin exec methods take input images and return ResultSet with no GUI calls
+* plugin exec methods take input images and return ResultSet
+  (no GUI calls within exec when easily avoidable)
 * no dependencies other than ImageJ1
 * ImageJ1-like preference for pre- java 5 features (i.e. not many generics)
   and reliance on float primitive type for most calculations
@@ -114,13 +114,10 @@ TODO
         - Wiener filter parameter estimate - calibrate, document
       - features:
         - report per. angle modulation contrast and/or minimum of these
-        - raw -> WF same size as SIR by interpolation (& preserve type??)
+        - SIR Fourier pattern angles (save as preference?), profiles
         - project and/or montage Raw FFT to present as 1 image
-        - OR remove raw FFT from raw checks / just for calibration?
-        - save pattern angles as preference
-        - find angles automatically for "pattern focus"?
-        - raw data per angle difference: RMS error? (at least some stat)
-        - tool for merging SIM & widefield data (Julio)
+          - OR, remove raw FFT from raw checks / just for calibration?
+        - raw data angle difference (floaty): RMS error? (at least some stat)
       - tests, structure:
         - final empirical tests, param calibration, tolerances etc.
         - mavenize & make Fiji update site
@@ -134,16 +131,16 @@ TODO
         - make sure tests and debug not deployed
 
 * 1.1: future features
-      - 3D FFT
       - convert dialog & logging to non-blocking swing GUI
-      - post: option for per-angle profiles for SIR Fourier FFT (specified K0 values)
-        - store k0 values? k0 values in degrees?
-      - pre: add statistic for floaty / uneven illumination detection
-      - post: k0 angle lines (manual entry?), resolution, symmetrical /angle?
+      - util: merge/shuffle:-
+        - tool for merging SIM & widefield data (Julio)
+        - raw -> WF same size as SIR by interpolation (& preserve type??)
+        - re-order channels
+      - pre: estimate angles & line-spacing for FFT, pattern focus
+      - 3D FFT
       - post: SIR FFT automatic resolution estimation??
-      - pre: FFT check to estimate angles & line-spacing
-      - cali: PSF symmetry within tolerance?
-      - cali: OTF extent, shape & order separation?
+      - cal: PSF symmetry within tolerance?
+      - cal: OTF extent, shape & order separation?
       - pre: plot channel color from channel metadata
 
 
