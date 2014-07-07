@@ -113,11 +113,11 @@ TODO
         - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
         - Wiener filter parameter estimate - calibrate, document
       - features:
-        - report per. angle modulation contrast and/or minimum of these
-        - SIR Fourier pattern angles (save as preference?), profiles
+        - raw data angle difference (floaty): RMS error? (at least some stat)
+        - SIR Fourier pattern angles (use "SIMcheck.angle1" pref), profiles
+        - report per. angle modulation contrast and/or minimum of these?
         - project and/or montage Raw FFT to present as 1 image
           - OR, remove raw FFT from raw checks / just for calibration?
-        - raw data angle difference (floaty): RMS error? (at least some stat)
       - tests, structure:
         - final empirical tests, param calibration, tolerances etc.
         - mavenize & make Fiji update site

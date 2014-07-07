@@ -54,8 +54,9 @@ public class Cal_PatternFocus implements PlugIn {
         gd.addNumericField("Angles", angles, 1);
         gd.addNumericField("Phases", phases, 1);
         // NB. in IJ, E is 0, in worx N is 0 (CCW is +ve in both cases)
+        angle1 = ij.Prefs.get("SIMcheck.angle1", angle1);
         gd.addNumericField("Angle 1 (deg, IJ)", angle1, 1);
-        gd.addNumericField("Angle 1 (rad, OMX)", Math.toRadians(angle1), 1);
+        gd.addNumericField("Angle 1 (rad, OMX)", Math.toRadians(angle1), 2);
         gd.addRadioButtonGroup("Method to specify angle", angleMethods,
                 1, angleMethods.length, angleMethods[0]);
         gd.addMessage("** for 1st angle, draw line from bottom to top (0-180)");
@@ -72,6 +73,7 @@ public class Cal_PatternFocus implements PlugIn {
             } else {
                 angle1 = imp.getRoi().getAngle();
             }
+            ij.Prefs.set("SIMcheck.angle1", angle1);
         }
         if (!I1l.stackDivisibleBy(imp, phases * angles)) {
             IJ.showMessage( "Calibrate Pattern Focus", 
