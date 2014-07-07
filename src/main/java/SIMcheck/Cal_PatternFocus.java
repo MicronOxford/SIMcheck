@@ -23,7 +23,7 @@ import ij.process.*;
 import ij.gui.GenericDialog;
 import ij.IJ;
 import ij.gui.*;
-
+import java.awt.Font;
 import java.awt.Color;
 
 /** This plugin takes raw SI data (1C, 1T) for a bead lawn and shows
@@ -102,13 +102,25 @@ public class Cal_PatternFocus implements PlugIn {
                     String.format("%.1f", angleDegrees) +
                     " degrees CCW from E)", phase1imps[a]);
             phase1imps[a] = resliceAndProject(phase1imps[a].duplicate());
-            String title = I1l.makeTitle(imp, "APF" + (a + 1));
+            String label = "APF" + (a + 1);
+            String title = I1l.makeTitle(imp, label);
             phase1imps[a].setTitle(title);
+            drawLabel(phase1imps[a], label);
             results.addImp("Angle " + (a + 1) + " pattern focus",
                     phase1imps[a]);
             angleDegrees += 180.0d / angles;  // angles cover 180 deg
         }
         return results;
+    }
+    
+    /** Draw size 12 white text at the top left of the image. */
+    private static void drawLabel(ImagePlus imp, String text) {
+        IJ.setForegroundColor(255, 255, 255);
+        ImageProcessor ip = imp.getProcessor();
+        ip.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        ip.setColor(Color.WHITE);
+        ip.drawString(text, 5, 17);
+        imp.setProcessor(ip);
     }
     
     /** Return 1 stack per angle, first phase only. */
