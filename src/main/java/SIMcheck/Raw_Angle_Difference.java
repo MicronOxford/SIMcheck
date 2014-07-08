@@ -82,7 +82,9 @@ public class Raw_Angle_Difference implements PlugIn, Executable {
             // total intensities for each [angle][channel] (max 3x3)
             double[][] totalIntens = new double[3][nc];
 
+            // TODO, RMS error between angles
             ImagePlus projImp = averagePhase(imp, nc, nz, nt, totalIntens);
+            recordRmsErr(imp, projImp);
             calcNormalizationFactors(imp, nc, angles, totalIntens, normFactors);
             ImagePlus colorImp = colorAngles(imp, projImp, nc, nz, normFactors);
             results.addImp("false-colored angles (C, M, Y)", colorImp);
@@ -93,6 +95,52 @@ public class Raw_Angle_Difference implements PlugIn, Executable {
                     + " to drift, floating particles or uneven illumination");
         }
         return results;
+    }
+    
+    /** For each channel of phase-projected raw SIM data, calculate RMS error 
+     * versus mean projection over all Z and t for all angles (averaging over
+     * angles) and add these per-channel stats to results. 
+     */
+    private void recordRmsErr(ImagePlus impRaw, ImagePlus impPP) {
+        Util_SI2WF si2wf = new Util_SI2WF();
+        ImagePlus impWf = si2wf.exec(impRaw, phases, angles);
+        int nc = impPP.getNChannels() / angles;
+        int nz = impPP.getNSlices();
+        int nt = impPP.getNFrames();
+        int nPP = angles * nz * nt;  // num of PP slices per channel
+        double[] rmsErr = new double[nc];
+        int slicePP = 0;
+        int sliceWf = 0;
+        for (int t = 0; t < nt; t++) {
+            for (int z = 0; z < nz; z++) {
+                for (int c = 0; c < nc; c++) {
+                    float[] wfPix = (float[])impWf.getStack().
+                            getProcessor(++sliceWf).getPixels();
+                    for (int a = 1; a <= angles; a++) {
+                        float[] ppPix = (float[])impPP.getStack().
+                                getProcessor(++slicePP).getPixels();
+                        rmsErr[c] += rmsErr(ppPix, wfPix) / nPP;
+                        // TODO: normalize to av intensity? ; test!
+                    }
+                }
+            }
+        }
+        for (int c = 0; c < nc; c++) {
+            results.addStat("RMS error for Ch=" + (c + 1), rmsErr[c]);
+        }
+    }
+    
+    /** Calculate root mean square error between arr1 and arr2. */
+    double rmsErr(float[] arr1, float[] arr2) {
+        if (arr1.length != arr2.length) {
+            throw new IllegalArgumentException("arrays must have same length");
+        }
+        double sqErr = 0.0d;
+        int n = arr1.length;
+        for (int i = 0; i < n; i++) {
+            sqErr += Math.pow(arr1[i] - arr2[i], 2);
+        }
+        return Math.sqrt(sqErr / n);
     }
 
     /** Arrange and run average projections of the 5 phases each CZAT. **/
@@ -136,6 +184,7 @@ public class Raw_Angle_Difference implements PlugIn, Executable {
             }
         }
         ImagePlus projImp = new ImagePlus(I1l.makeTitle(imp, "PPJ"), avStack);
+        // NB. angles now folded into "channels" dim: C1A1,C1A2,C1A3,C2A1...
         projImp.setDimensions(nc * angles, nz, nt);
         return projImp;
     }

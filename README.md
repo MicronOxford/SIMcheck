@@ -123,8 +123,9 @@ TODO
         - mavenize & make Fiji update site
         - structure:
           - private plugin methods
-          - .name to toString(),
           - .test() method to test private methods
+          - all static global prefs & methods in main SIMcheck_ class
+          - .name to toString()?
           - split I1l-> J & I1l
         - more tests to test/debug non-interactive code, preconditions / inputs
         - add ResultTable support to ResultSet class
