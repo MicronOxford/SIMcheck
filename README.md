@@ -105,9 +105,8 @@ TODO
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - !! Make a 0.95 release with SIR Fourier fixed !!
-        - FFT: zero-fill before WF
         - raw Fourier: projection(s), with full FFT stack as utility
-        - make sure all checks use cropped data, move crop -> utility
+        - move crop -> utility
         - combine crop + autoscale?
         - store CAMERA_BITDEPTH value
       - documentation: 
