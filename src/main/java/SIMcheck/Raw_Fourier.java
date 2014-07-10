@@ -17,6 +17,8 @@
  */ 
 
 package SIMcheck;
+import java.awt.image.ColorModel;
+
 import ij.*;
 import ij.plugin.*;
 import ij.gui.GenericDialog; 
@@ -53,7 +55,7 @@ public class Raw_Fourier implements PlugIn, Executable {
             		"Error: stack size not consistent with phases/angles.");
             return;                                                             
         }
-        results = exec(imp);
+        results = exec2(imp);
         results.report();
     }
 
@@ -82,6 +84,8 @@ public class Raw_Fourier implements PlugIn, Executable {
     public ResultSet exec2(ImagePlus... imps) {
         ImagePlus imp = imps[0];
         imp = Util_positive_16bit.exec(imp);
+        ImagePlus montage = null;
+        StackCombiner comb = new StackCombiner();
         for (int a = 1; a <= angles; a++) {
           	ImagePlus impCurrentA = SIMcheck_.getImpForAngle(
           	        imp, a, phases, angles);
@@ -91,8 +95,32 @@ public class Raw_Fourier implements PlugIn, Executable {
           	impCurrentA = FFT2D.fftImp(impCurrentA);
           	String title = I1l.makeTitle(imp, "FT" + a);
           	impCurrentA.setTitle(title);
-          	results.addImp("2D FFT for angle " + a, impCurrentA);
+          	IJ.run(impCurrentA, "Z Project...", "projection=[Max Intensity]");
+          	impCurrentA = ij.WindowManager.getCurrentImage();
+          	for (int c = 1; c <= impCurrentA.getNChannels(); c++) {
+          	    impCurrentA.setC(c);
+          	    IJ.run(impCurrentA, "Enhance Contrast", "saturated=0.35");
+          	    I1l.drawLabel(impCurrentA, "A" + a);
+          	}
+          	impCurrentA.setC(1);
+          	if (a == 1) {
+          	    montage = impCurrentA.duplicate();
+          	} else {
+          	    ImageStack montageStack = comb.combineHorizontally(
+          	            montage.getStack(), impCurrentA.getStack());
+          	    montage.setStack(montageStack);
+          	}
+          	impCurrentA.close();
         }
+        if (montage.isComposite()) {
+            CompositeImage cim = (CompositeImage)montage;
+            cim.setMode(CompositeImage.GRAYSCALE);
+        } else {
+            ColorModel cm = ij.LookUpTable.createGrayscaleColorModel(false);
+            montage.getStack().setColorModel(cm);
+        }
+        montage.setTitle(I1l.makeTitle(imps[0], "FTA1-" + angles));
+      	results.addImp("2D FFT montage for angles 1-" + angles, montage);
         results.addInfo("Fourier-transformed raw data", 
                 "check for clean 1st & 2nd order spots");
         return results;

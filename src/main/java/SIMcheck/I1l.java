@@ -22,6 +22,8 @@ import ij.plugin.ChannelSplitter;
 import ij.process.*;
 import ij.measure.Calibration;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.Polygon;
 import java.awt.image.*;
 import java.io.IOException;
@@ -788,6 +790,16 @@ public final class I1l {
         ImagePlus modeTest = IJ.openImage("/Users/gball/Documents/InTray/SIMcheck/Curie_Asymmetric_Freq/Curie-test-crop.tif");
         I1l.subtractPerSliceMode(modeTest);
         modeTest.show();
+    }
+
+    /** Draw size 12 white text at the top left of the image. */
+    public static void drawLabel(ImagePlus imp, String text) {
+        IJ.setForegroundColor(255, 255, 255);
+        ImageProcessor ip = imp.getProcessor();
+        ip.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        ip.setColor(Color.WHITE);
+        ip.drawString(text, 5, 17);
+        imp.setProcessor(ip);
     }
 }
 

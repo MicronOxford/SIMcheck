@@ -23,8 +23,9 @@ import ij.process.*;
 import ij.gui.GenericDialog;
 import ij.IJ;
 import ij.gui.*;
-import java.awt.Font;
+
 import java.awt.Color;
+
 import ij.plugin.StackCombiner;
 
 /** This plugin takes raw SI data (1C, 1T) for a bead lawn and shows
@@ -110,7 +111,7 @@ public class Cal_PatternFocus implements PlugIn {
             String label = "A" + (a + 1);
             String title = I1l.makeTitle(imp, "APF" + (a + 1));
             phase1imps[a].setTitle(title);
-            drawLabel(phase1imps[a], label);
+            I1l.drawLabel(phase1imps[a], label);
             if (a == 0) {
                 montage = phase1imps[a].duplicate();
             } else {
@@ -126,16 +127,6 @@ public class Cal_PatternFocus implements PlugIn {
         montage.setTitle(I1l.makeTitle(imp, "APF"));
         results.addImp("Angles 1-" + angles + " pattern focus", montage);
         return results;
-    }
-    
-    /** Draw size 12 white text at the top left of the image. */
-    private static void drawLabel(ImagePlus imp, String text) {
-        IJ.setForegroundColor(255, 255, 255);
-        ImageProcessor ip = imp.getProcessor();
-        ip.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        ip.setColor(Color.WHITE);
-        ip.drawString(text, 5, 17);
-        imp.setProcessor(ip);
     }
     
     /** Return 1 stack per angle, first phase only. */
