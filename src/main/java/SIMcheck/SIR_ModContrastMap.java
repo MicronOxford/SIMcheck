@@ -53,7 +53,7 @@ public class SIR_ModContrastMap implements PlugIn, Executable {
         gd.addChoice("Raw data stack:", titles, titles[0]);
         gd.addNumericField("       Detector Max Intensity", camMax, 0);
         gd.addMessage(" --- Modulation-Contrast-to-Noise Ratio stack --- ");
-        gd.addCheckbox("Calculate MCNR stack from raw data?", false);
+        gd.addCheckbox("Calculate MCNR stack from raw data?", true);
         gd.addChoice("OR, specify MCNR stack:", titles, titles[0]);
         gd.addMessage(" ------------- Reconstructed SI stack ----------- ");
         gd.addChoice("SIR stack:", titles, titles[0]);
@@ -207,7 +207,8 @@ public class SIR_ModContrastMap implements PlugIn, Executable {
     /** Method to resize a FloatProcessor - IJ's doesn't work or doesn't update
      * size info :-(
      */
-    FloatProcessor fpResize(FloatProcessor fpIn, int newWidth, int newHeight) {
+    private FloatProcessor fpResize(
+            FloatProcessor fpIn, int newWidth, int newHeight) {
         int oldWidth = fpIn.getWidth();
         int oldHeight = fpIn.getHeight();
         float[] oldPixels = (float[]) fpIn.getPixels();
@@ -240,9 +241,11 @@ public class SIR_ModContrastMap implements PlugIn, Executable {
     }
 
     /** Use input SIR and MCNR values to make output RGB color-coded processors.
-     * SIR image intensity combined with MCNR encoded in LUT color map.
+     * SIR image intensity combined with MCNR encoded in LUT color map. Also
+     * colors saturated pixels green.
      */
-    void scaledRGBintensities(FloatProcessor SIRfp, FloatProcessor MCNRfp2,
+    private void scaledRGBintensities(
+            FloatProcessor SIRfp, FloatProcessor MCNRfp2,
             FloatProcessor wfFp, float chMax,
             FloatProcessor fpRed, FloatProcessor fpGrn, FloatProcessor fpBlu) {
         float[] wfPix = (float[])wfFp.getPixels();
@@ -330,12 +333,13 @@ public class SIR_ModContrastMap implements PlugIn, Executable {
         }
     }
     
-    /* Test method */
+    /** Interactive test method */
     public static void main(String[] args) {
-        SIR_ModContrastMap mcm = new SIR_ModContrastMap();
-        ImagePlus imp = new ImagePlus();
-        mcm.exec(null, null, null);
-        mcm.exec(imp, null, null);
-        mcm.exec(imp, imp, null);
+        new ImageJ();
+        ImagePlus raw = IJ.openImage("src/test/resources/TestRaw.tif");
+        ImagePlus recon = IJ.openImage("src/test/resources/TestRecon.tif");
+        raw.show();
+        recon.show();
+        IJ.runPlugIn(SIR_ModContrastMap.class.getName(), "");
     }
 }
