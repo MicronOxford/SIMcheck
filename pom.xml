@@ -1,0 +1,135 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                      http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>uk.ac.ox.micron</groupId>
+  <artifactId>SIMcheck</artifactId>
+  <version>0.9.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>SIMcheck</name>
+  <description>ImageJ plugin suite for super-resolution structured illumination microscopy data quality control.</description>
+  <url>http://www2.bioch.ox.ac.uk/microngroup/software/SIMCheck.shtml</url>
+  <inceptionYear>2012</inceptionYear>
+
+  <licenses>
+    <license>
+      <name>GNU General Public License</name>
+      <url>https://gnu.org/licenses/gpl.html</url>
+      <distribution>repo</distribution>
+      <comments>Version 3 of the License or (at your option) any later version.</comments>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Graeme Ball</name>
+      <email>graemeball@googlemail.com</email>
+      <roles>
+        <role>developer</role>
+      </roles>
+    </developer>
+  </developers>
+
+  <contributors>
+    <contributor>
+      <name>Ian Dobbie</name>
+      <email>ian.dobbie@bioch.ox.ac.uk</email>
+      <roles>
+        <role>developer</role>
+        <role>scientific advisor</role>
+      </roles>
+    </contributor>
+    <contributor>
+      <name>Lothar Schermelleh</name>
+      <email>lothar.schermelleh@bioch.ox.ac.uk</email>
+      <roles>
+        <role>developer</role>
+        <role>scientific advisor</role>
+      </roles>
+    </contributor>
+    <contributor>
+      <name>Rainer Kaufmann</name>
+      <email>rainer@strubi.ox.ac.uk</email>
+      <roles>
+        <role>developer</role>
+        <role>scientific advisor</role>
+      </roles>
+    </contributor>
+  </contributors>
+
+  <scm>
+    <connection>scm:git:git://github.com/MicronOxford/SIMcheck</connection>
+    <developerConnection>scm:git:git@github.com:MicronOxford/SIMcheck</developerConnection>
+    <tag>HEAD</tag>
+    <url>http://github.com/MicronOxford/SIMcheck</url>
+  </scm>
+  <issueManagement>
+    <system>GitHub Issues</system>
+    <url>http://github.com/MicronOxford/SIMcheck/issues</url>
+  </issueManagement>
+  <!--
+    TODO we should set a continuous build, probably Travis in which
+         case we should then set a ciManagement element here.
+  -->
+
+  <dependencies>
+    <dependency>
+      <groupId>net.imagej</groupId>
+      <artifactId>ij</artifactId>
+      <version>RELEASE</version>
+    </dependency>
+
+    <!-- Test dependencies -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>RELEASE</version>
+    <!--
+      FIXME: This is actually being used outside the test directory in:
+        * src/main/java/SIMcheck/FFT2DTest.java
+        * src/main/java/SIMcheck/I1lTest.java
+      and when it is fixed, we uncommente the scope.
+       -->
+<!--      <scope>test</scope>-->
+    </dependency>
+  </dependencies>
+
+  <repositories>
+    <!-- Where maven can go look and download our build dependencies. -->
+    <repository>
+      <id>imagej.public</id>
+      <url>http://maven.imagej.net/content/groups/public</url>
+    </repository>
+  </repositories>
+
+  <build>
+    <plugins>
+      <!--
+        We need to configure the JDK version to use because Maven builds
+        with version 1.3 by default which does not support:
+          * annotations
+          * variable-arity methods
+          * generics
+          * for-each loops
+          * static import declarations
+      -->
+      <plugin>
+         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <!--
+          Since Maven 3, we really need to specify a version number for
+          plugins, but RELEASE and LATEST are only valid for dependencies.
+        -->
+        <version>2.3.2</version>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+     </plugins>
+  </build>
+
+</project>
