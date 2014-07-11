@@ -58,6 +58,13 @@
         <role>scientific advisor</role>
       </roles>
     </contributor>
+    <contributor>
+      <name>David Susano Pinto</name>
+      <email>david.pinto@bioch.ox.ac.uk</email>
+      <roles>
+        <role>developer</role>
+      </roles>
+    </contributor>
   </contributors>
 
   <scm>
