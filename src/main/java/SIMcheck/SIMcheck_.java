@@ -26,6 +26,7 @@ import ij.gui.Roi;
 import ij.plugin.PlugIn;
 import ij.plugin.Duplicator;
 import ij.process.ImageProcessor;
+import ij.ImageJ;
 
 /** This plugin displays a GenericDialog and runs the other SIMcheck plugins.
  * <ul>
@@ -163,7 +164,6 @@ public class SIMcheck_ implements PlugIn {
             impRaw = null;
         }
         if (doCrop && impRecon != null && impRecon.getRoi() != null) {
-            // TODO: duplicate both images instead of destructive crop?
             // Do recon image crop
             Roi roi = impRecon.getRoi();
             crop.x = roi.getBounds().x;
@@ -320,5 +320,15 @@ public class SIMcheck_ implements PlugIn {
         impOut.setPosition(1, centralZ, 1);
         impOut.setOpenAsHyperStack(true);
         return impOut;
+    }
+    
+    /** Create ImageJ instance & run SIMcheck for interactive testing. */
+    public static void main(String args[]) {
+        new ImageJ();
+        ImagePlus raw = IJ.openImage("src/test/resources/TestRaw.tif");
+        ImagePlus recon = IJ.openImage("src/test/resources/TestRecon.tif");
+        raw.show();
+        recon.show();
+        IJ.runPlugIn(SIMcheck_.class.getName(), "");
     }
 }
