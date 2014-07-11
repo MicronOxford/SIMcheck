@@ -6,6 +6,7 @@ The PRIMARY AUTHOR of the project is:
 
 Additional Coders:
   * Ian Dobbie
+  * David Susano Pinto (carandraug)
 
 Additional CONTRIBUTORS who provided intellectual input are:
   * Lothar Schermelleh
