@@ -58,6 +58,7 @@ public class SIMcheck_ implements PlugIn {
     private boolean doReconFourier = true;
     private boolean doMCNRmap = true;
     private Crop crop = new Crop();
+    private float camMax = 32767.0f;  // detector max, default 15-bit
 
     /** Crop ROI */
     private class Crop {
@@ -73,6 +74,7 @@ public class SIMcheck_ implements PlugIn {
     public void run(String arg) {
         String[] titles = I1l.cat(new String[] {none}, I1l.collectTitles());
         String[] formats = I1l.cat(new String[] {omx}, Util_formats.formats);
+        camMax = (float)ij.Prefs.get("SIMcheck.camMax", camMax);
         if (titles.length < 2) {
             IJ.noImage();
             return;
@@ -91,9 +93,6 @@ public class SIMcheck_ implements PlugIn {
         gd.addMessage(helpMessage);
         
         // present options
-        gd.addCheckbox("Use reconstructed data ROI to crop images?", doCrop);
-        gd.addNumericField("* first Z (crop)", crop.zFirst, 0);
-        gd.addNumericField("* last Z (crop)", crop.zLast, 0);
         gd.addMessage("---------------- Raw data -----------------");
         gd.addChoice("Raw_Data:", titles, titles[1]);
         gd.addChoice("Data format:", formats, omx);
@@ -103,6 +102,7 @@ public class SIMcheck_ implements PlugIn {
         gd.addCheckbox("Raw_Fourier_Plots", doRawFourier);
         gd.addCheckbox("Raw_Angle_Difference", doAngleDifference);
         gd.addCheckbox("Raw_Modulation_Contrast", doMCNR);
+        gd.addNumericField(".   Detector Max Intensity", camMax, 0);
         gd.addMessage("------------ Reconstructed data ------------");
         gd.addChoice("Reconstructed_Data:", titles, titles[0]);
         gd.addCheckbox("SIR_Histogram", doHistogram);
@@ -110,15 +110,15 @@ public class SIMcheck_ implements PlugIn {
         gd.addCheckbox("SIR_Fourier Plot", doReconFourier);
         gd.addCheckbox(
                 "SIR_Mod_Contrast_Map (requires Raw Mod Contrast)", doMCNRmap);
+        gd.addCheckbox("Use reconstructed data ROI to crop images?", doCrop);
+        gd.addNumericField("* first Z (crop)", crop.zFirst, 0);
+        gd.addNumericField("* last Z (crop)", crop.zLast, 0);
         gd.addHelp(
                 "http://www.micron.ox.ac.uk/microngroup/software/SIMcheck.html");
         gd.showDialog();
 
         // collect options
         if (gd.wasOKed()) {
-            doCrop = gd.getNextBoolean();
-            crop.zFirst = (int)gd.getNextNumber();
-            crop.zLast = (int)gd.getNextNumber();
             String rawTitle = titles[gd.getNextChoiceIndex()];
             if (!rawTitle.equals(none)) {
                 impRaw = WindowManager.getImage(rawTitle);
@@ -130,6 +130,8 @@ public class SIMcheck_ implements PlugIn {
             doRawFourier = gd.getNextBoolean();
             doAngleDifference = gd.getNextBoolean();
             doMCNR = gd.getNextBoolean();
+            camMax = (float)gd.getNextNumber();
+            ij.Prefs.set("SIMcheck.camMax", camMax);
             String reconTitle = titles[gd.getNextChoiceIndex()];
             if (!reconTitle.equals(none)) {
                 impRecon = WindowManager.getImage(reconTitle);
@@ -138,6 +140,9 @@ public class SIMcheck_ implements PlugIn {
             doZvar = gd.getNextBoolean();
             doReconFourier = gd.getNextBoolean();
             doMCNRmap = gd.getNextBoolean();
+            doCrop = gd.getNextBoolean();
+            crop.zFirst = (int)gd.getNextNumber();
+            crop.zLast = (int)gd.getNextNumber();
             IJ.log(   "\n   =====================      "
                     + "\n                      SIMcheck        "
                     + "\n   =====================      ");
@@ -267,7 +272,9 @@ public class SIMcheck_ implements PlugIn {
                     new SIR_ModContrastMap();
                 sir_mcnr_plugin.phases = phases;
                 sir_mcnr_plugin.angles = angles;
-                ResultSet results = sir_mcnr_plugin.exec(impRaw, impRecon, impMCNR);
+                sir_mcnr_plugin.camMax = camMax;
+                ResultSet results = sir_mcnr_plugin.exec(
+                        impRaw, impRecon, impMCNR);
                 results.report();
             }
         }

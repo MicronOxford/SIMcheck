@@ -42,14 +42,14 @@ public class SIR_ModContrastMap implements PlugIn, Executable {
     public int phases = 5;
     public int angles = 3;
     float mcnrMax = 24.0f;
-    float maxPositive = 32767.0f;  // TODO: save as default
+    float camMax = 32767.0f;  // TODO: save as default
 
     @Override
     public void run(String arg) {
         GenericDialog gd = new GenericDialog("SIR_Mod_Contrast_Map");
         String[] titles = I1l.collectTitles();
         gd.addMessage(" --- Raw data stack --- ");
-        gd.addNumericField("          Raw data max intensity", maxPositive, 1);
+        gd.addNumericField("          Raw data max intensity", camMax, 1);
         gd.addChoice("Raw data stack:", titles, titles[0]);
         gd.addMessage(" --- Modulation-Contrast-to-Noise Ratio stack --- ");
         gd.addChoice("MCNR stack:", titles, titles[0]);
@@ -59,15 +59,17 @@ public class SIR_ModContrastMap implements PlugIn, Executable {
         // ImagePlus MCNRimp = ModContrast_Map.exec(1, imp, phases, angles);
         gd.showDialog();
         if (gd.wasOKed()) {
-            maxPositive = (float)gd.getNextNumber();
+            camMax = (float)gd.getNextNumber();
             String rawStackChoice = gd.getNextChoice();
             String MCNRstackChoice = gd.getNextChoice();
             String SIRstackChoice = gd.getNextChoice();
+//            camMax = (float)gd.getNextNumber();
+//            ij.Prefs.set("SIMcheck.camMax", camMax);
             ImagePlus rawImp = ij.WindowManager.getImage(rawStackChoice);
             ImagePlus MCNRimp = ij.WindowManager.getImage(MCNRstackChoice);
             ImagePlus SIRimp = ij.WindowManager.getImage(SIRstackChoice);
-                results = exec(rawImp, SIRimp, MCNRimp);
-                results.report();
+            results = exec(rawImp, SIRimp, MCNRimp);
+            results.report();
         }
     }
 
@@ -304,7 +306,7 @@ public class SIR_ModContrastMap implements PlugIn, Executable {
         for (int i = 1; i < fpixSIR.length; i++) {
             int j = i / widthSIR;
             int rawI = (i / 2) % (widthSIR / 2) + ((j / 2) * widthSIR / 2);
-            if (wfPix[rawI] > maxPositive - 1) {
+            if (wfPix[rawI] > camMax - 1) {
                 fpixRed[i] = 0.0f;
                 fpixGrn[i] = 255.0f;
                 fpixBlu[i] = 0.0f;
