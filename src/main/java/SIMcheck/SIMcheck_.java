@@ -171,9 +171,12 @@ public class SIMcheck_ implements PlugIn {
             IJ.log("        slices Z = " + crop.zFirst + "-" + crop.zLast);
             int[] d = impRecon.getDimensions();
             String impReconTitle = I1l.makeTitle(impRecon, "CRP");
-            impRecon = new Duplicator().run(impRecon, 
+            ImagePlus impRecon2 = new Duplicator().run(impRecon, 
                     1, d[2], crop.zFirst, crop.zLast, 1, d[4]);
-            impRecon.setTitle(impReconTitle);
+            impRecon2.setTitle(impReconTitle);
+            impRecon.close();
+            impRecon = impRecon2;
+            impRecon.show();
             if (impRaw != null) {
                 // Do raw image crop
                 // 1) crop to Z range: tricky since Zobs = phase, Ztrue, angle
