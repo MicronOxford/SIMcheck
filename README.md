@@ -105,7 +105,7 @@ TODO
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - !! Make a 0.95 release with SIR Fourier fixed !!
-        - store CAMERA_BITDEPTH value
+        - fix MCM >max / green color bug, ensure camMax pref is saved/reloaded
         - move crop -> utility?
       - documentation: 
         - make more self-documenting: improve names & log output

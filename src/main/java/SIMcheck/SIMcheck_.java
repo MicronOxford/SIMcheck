@@ -102,7 +102,7 @@ public class SIMcheck_ implements PlugIn {
         gd.addCheckbox("Raw_Fourier_Plots", doRawFourier);
         gd.addCheckbox("Raw_Angle_Difference", doAngleDifference);
         gd.addCheckbox("Raw_Modulation_Contrast", doMCNR);
-        gd.addNumericField(".   Detector Max Intensity", camMax, 0);
+        gd.addNumericField("    Detector Max Intensity", camMax, 0);
         gd.addMessage("------------ Reconstructed data ------------");
         gd.addChoice("Reconstructed_Data:", titles, titles[0]);
         gd.addCheckbox("SIR_Histogram", doHistogram);

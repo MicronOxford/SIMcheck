@@ -21,6 +21,7 @@ import ij.*;
 import ij.process.*;
 import ij.plugin.*;
 import ij.gui.GenericDialog;
+
 import java.lang.Math;
 
 /** This plugin summarizes reconstructed data intensity and modulation 
@@ -42,31 +43,38 @@ public class SIR_ModContrastMap implements PlugIn, Executable {
     public int phases = 5;
     public int angles = 3;
     float mcnrMax = 24.0f;
-    float camMax = 32767.0f;  // TODO: save as default
+    float camMax = 32767.0f;
 
     @Override
     public void run(String arg) {
         GenericDialog gd = new GenericDialog("SIR_Mod_Contrast_Map");
         String[] titles = I1l.collectTitles();
         gd.addMessage(" --- Raw data stack --- ");
-        gd.addNumericField("          Raw data max intensity", camMax, 1);
         gd.addChoice("Raw data stack:", titles, titles[0]);
+        gd.addNumericField("       Detector Max Intensity", camMax, 0);
         gd.addMessage(" --- Modulation-Contrast-to-Noise Ratio stack --- ");
-        gd.addChoice("MCNR stack:", titles, titles[0]);
+        gd.addCheckbox("Calculate MCNR stack from raw data?", false);
+        gd.addChoice("OR, specify MCNR stack:", titles, titles[0]);
         gd.addMessage(" ------------- Reconstructed SI stack ----------- ");
         gd.addChoice("SIR stack:", titles, titles[0]);
-        // TODO - offer the option of running MCNR calc from here?
-        // ImagePlus MCNRimp = ModContrast_Map.exec(1, imp, phases, angles);
+        
         gd.showDialog();
         if (gd.wasOKed()) {
-            camMax = (float)gd.getNextNumber();
             String rawStackChoice = gd.getNextChoice();
+            camMax = (float)gd.getNextNumber();
+            ij.Prefs.set("SIMcheck.camMax", camMax);
             String MCNRstackChoice = gd.getNextChoice();
             String SIRstackChoice = gd.getNextChoice();
-//            camMax = (float)gd.getNextNumber();
-//            ij.Prefs.set("SIMcheck.camMax", camMax);
             ImagePlus rawImp = ij.WindowManager.getImage(rawStackChoice);
-            ImagePlus MCNRimp = ij.WindowManager.getImage(MCNRstackChoice);
+            ImagePlus MCNRimp = null;
+            if (gd.getNextBoolean()) {
+                Raw_ModContrast raw_MCNR_plugin = new Raw_ModContrast();
+                raw_MCNR_plugin.phases = phases;
+                raw_MCNR_plugin.angles = angles;
+                MCNRimp = raw_MCNR_plugin.exec(rawImp).getImp(0);
+            } else {
+                MCNRimp = ij.WindowManager.getImage(MCNRstackChoice);
+            }
             ImagePlus SIRimp = ij.WindowManager.getImage(SIRstackChoice);
             results = exec(rawImp, SIRimp, MCNRimp);
             results.report();
