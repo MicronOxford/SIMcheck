@@ -12,13 +12,24 @@ reliability of Structured Illumination Microscopy (SIM) data.
 * Further help is available
 [here](http://www.micron.ox.ac.uk/microngroup/software/SIMcheck.html)
 
-The code is arranged in a conventional Maven-like structure and includes
-an ant build script that can copy the resulting SIMcheck_.jar to a local
-plugin folder. Before building the project, first make a ./lib/ directory 
-containing a soft link to the ij.jar from the desired ImageJ version,
-as well as a soft link to junit.jar. The built result will be copied
-to ./plugins/ so soft-link this to your ImageJ plugins folder. Type "ant"
-to build the default (all) target and restart ImageJ or Help->Refresh Menus
+The project was recently converted to the maven build and dependency
+management tool (the previous ant build setup is described in the 
+next paragraph below). A solution for local deployment of the latest
+maven build is still being worked on, and there is no Fiji update site
+yet. To build, run
+
+    mvn package
+
+
+The code has always been arranged in a conventional Maven-like structure,
+and previously came with an ant build script that copied the resulting
+SIMcheck_.jar to a local plugin folder. It was necessary, before building
+the project, to create a ./lib/ directory containing a soft link to the
+ij.jar from the desired ImageJ version, as well as a soft link to junit.jar.
+The built result was then copied to ./plugins/ so this needed to be
+soft-linked to your ImageJ plugins folder. Typing "ant" to build the
+default (all) target and restarting ImageJ or Help->Refresh Menus gave
+access to the newly built plugin package.
 
 Copyright Graeme Ball and Micron Oxford, Department of Biochemistry, 
 University of Oxford. License GPL unless stated otherwise in a given file.
@@ -121,8 +132,8 @@ TODO
         - project and/or montage Raw FFT to present as 1 image
           - OR, remove raw FFT from raw checks / just for calibration?
       - tests, structure:
+        - solution for local deployment of the latest build for testing
         - final empirical tests, param calibration, tolerances etc.
-        - mavenize & make Fiji update site
         - structure:
           - private plugin methods
           - .test() method to test private methods
@@ -132,6 +143,8 @@ TODO
         - more tests to test/debug non-interactive code, preconditions / inputs
         - add ResultTable support to ResultSet class
         - make sure tests and debug not deployed
+        - work out strategy for test data distribution
+        - set up Fiji update site
 
 * 1.1: future features
       - convert dialog & logging to non-blocking swing GUI
