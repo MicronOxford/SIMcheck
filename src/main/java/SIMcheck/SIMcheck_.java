@@ -34,6 +34,7 @@ import ij.ImageJ;
  * <li>collects important parameters (data type, number of angles etc.)</li>
  * <li>displays instructions and has help button pointing to website</li>
  * <li>is blocking and has no exec method</li>
+ * <li>contains some static utility methods only relevant to SIM data</li>
  * </ul>
  * @author Graeme Ball <graemeball@gmail.com>
  */
@@ -282,10 +283,10 @@ public class SIMcheck_ implements PlugIn {
     }
 
     /** Split hyperstack, returning new ImagePlus for angle requested.
-     * Assumes API V2 OMX CPZAT channel order. 
+     * Assumes API V2 OMX CPZAT channel order.
      */
-    public static ImagePlus getImpForAngle(ImagePlus imp, int a,
-            int phases, int angles) {
+    static ImagePlus getImpForAngle(
+            ImagePlus imp, int a, int phases, int angles) {
     	int nc = imp.getNChannels();
       	int nz = imp.getNSlices();
       	int nt = imp.getNFrames();
@@ -322,13 +323,19 @@ public class SIMcheck_ implements PlugIn {
         return impOut;
     }
     
-    /** Create ImageJ instance & run SIMcheck for interactive testing. */
-    public static void main(String args[]) {
+    /** Create ImageJ instance & load test data for interactive testing:
+     * also used by other plugins in the package. */
+    static void setupInteractiveTest() {
         new ImageJ();
         ImagePlus raw = IJ.openImage("src/test/resources/TestRaw.tif");
         ImagePlus recon = IJ.openImage("src/test/resources/TestRecon.tif");
         raw.show();
         recon.show();
+    }
+    
+    /** Interactive test. */
+    public static void main(String args[]) {
+        setupInteractiveTest();
         IJ.runPlugIn(SIMcheck_.class.getName(), "");
     }
 }
