@@ -39,16 +39,17 @@ public class Cal_Phases implements PlugIn {
 
     String name = "Calibration check phases";
     ResultSet results = new ResultSet(name);
-	int phases = 5;
-	int angles = 3;
-	ImagePlus imp;
-	Calibration cal;
 	
-    // default parameters
-    double gaussRad = 0.08;      // gaussian radius in units of image width
-    double stripeWidth = 0.005;  // width of stripes in units of image width
-    double peakStdev = 6;        // stdevs above background for peaks
-    int peakPosTolerance = 6;    // allowed deviation from ideal position in px
+    // parameter / option fields
+    public int phases = 5;
+	public int angles = 3;
+	public double gaussRad = 0.08;  // gaussian radius, units of image width
+	public double stripeWidth = 0.005;  // units of image width
+	public double peakStdev = 6;  // stdevs above background for peaks
+	public int peakPosTolerance = 6;  // allowed deviation from ideal in pixels
+	
+	private ImagePlus imp;
+	private Calibration cal;
     private int zFirst = 1;
     private int zLast = 1;
     private int width = 0;
@@ -216,7 +217,7 @@ public class Cal_Phases implements PlugIn {
             ImageStack stackPlots = new ImageStack(pltW, pltH); 
 
             for (int c = 1; c <= nc; c++) {
-                String colName = "A" + a + "/C" + c;
+//                String colName = "A" + a + "/C" + c;
                 IJ.log("\n= Channel " + c + " =");
                 double[] positionStdevs = peakPositionStdevs(peakSets[c - 1]);
                 double[] phaseStats = plotPhases(
@@ -246,7 +247,7 @@ public class Cal_Phases implements PlugIn {
     }
     
     /** Determine if padding necessary for FFT, update result width/height */
-    void setResultSize(ImagePlus imp) {
+    private void setResultSize(ImagePlus imp) {
         int paddedSize = FFT2D.calcPadSize(imp);
         if (paddedSize != width || paddedSize != height) {
             doPadding = true;
@@ -256,7 +257,7 @@ public class Cal_Phases implements PlugIn {
     }
     
     /** Complex FFT an ImageProcessor, returining Amp, Phase FloatProcessors */
-    FloatProcessor[] complexFFT(ImageProcessor ip) {
+    private FloatProcessor[] complexFFT(ImageProcessor ip) {
         ip = FFT2D.gaussWindow(ip, 0.08d);
         if (doPadding) {
             ip = FFT2D.pad(ip, width);
@@ -292,19 +293,19 @@ public class Cal_Phases implements PlugIn {
     }
     
     // TODO, temporary
-    void logPosMaxima(Polygon maxima) {
-        if (maxima != null) {
-            for (int i = 0; i < maxima.npoints; i++) {
-                int x = maxima.xpoints[i];
-                int y = maxima.ypoints[i];
-                double r = I1l.calcFourierR(x, y, width, height, cal);
-                IJ.log("x,y,r:" + x + "," + y + "," + r + cal.getUnit() + "/c");
-            }
-        }
-    }
+//    private void logPosMaxima(Polygon maxima) {
+//        if (maxima != null) {
+//            for (int i = 0; i < maxima.npoints; i++) {
+//                int x = maxima.xpoints[i];
+//                int y = maxima.ypoints[i];
+//                double r = I1l.calcFourierR(x, y, width, height, cal);
+//                IJ.log("x,y,r:" + x + "," + y + "," + r + cal.getUnit() + "/c");
+//            }
+//        }
+//    }
     
     /** Peak pair? i.e. on line through center at equal distance? */
-    static boolean isPeakPair(Polygon peaks, int w, int h, int tol) {
+    private static boolean isPeakPair(Polygon peaks, int w, int h, int tol) {
         boolean ispeakPair = true;
         int[] x = {peaks.xpoints[0], w / 2, peaks.xpoints[1]};
         int[] y = {peaks.ypoints[0], h / 2, peaks.ypoints[1]};
@@ -325,7 +326,7 @@ public class Cal_Phases implements PlugIn {
 
     /** Calculate angle between peak pair and x-axis (radians) */
     // TODO, check
-    public static double calcKangle(Polygon peakPlus, int w, int h) {
+    private static double calcKangle(Polygon peakPlus, int w, int h) {
         if (peakPlus == null) {
             return Double.NaN;
         }
@@ -336,7 +337,7 @@ public class Cal_Phases implements PlugIn {
     }
     
     /** Calculate SI line spacing based on 1st or 2nd order peak positions */
-    public static double calcLineSpacing(Polygon peakPair, int w, int h, 
+    private static double calcLineSpacing(Polygon peakPair, int w, int h, 
             Calibration cal, int order) {
         if (peakPair == null) {
             return Double.NaN;
@@ -359,7 +360,7 @@ public class Cal_Phases implements PlugIn {
     }
     
     /** Select k+, i.e. x > 0, from a pair of peaks and return as new Polygon */
-    public static Polygon selectPeakPlus(Polygon peakPair, int w) {
+    private static Polygon selectPeakPlus(Polygon peakPair, int w) {
         if (peakPair == null) return null;
         Polygon peakPlus;
         int[] xpt = new int[1];
@@ -376,6 +377,7 @@ public class Cal_Phases implements PlugIn {
     }
     
     /** Return standard deviation of array of single point Polygon coords */
+    // TODO: move to util class?
     double[] peakPositionStdevs(Polygon[] peakSets) {
         // TODO, test me
         String debug = "  filtered peak+ position ";
@@ -406,7 +408,8 @@ public class Cal_Phases implements PlugIn {
     }
     
     /** Return median x,y coordinates of a set */ 
-    public static Polygon medianCoords(Polygon[] coordSetRaw) {
+    // TODO: check median x,y pair below are valid & move to util class?
+    static Polygon medianCoords(Polygon[] coordSetRaw) {
         Polygon[] coordSet = filterNull(coordSetRaw);
         int len = coordSet.length;
         int[] x = new int[len];
@@ -421,6 +424,7 @@ public class Cal_Phases implements PlugIn {
     }
     
     /** Filter out null Polygons from an array of Polygons */
+    // TODO: move to util class
     static Polygon[] filterNull(Polygon[] coordSetRaw) {
         int rawLen = coordSetRaw.length;
         int flen = 0;
@@ -444,7 +448,8 @@ public class Cal_Phases implements PlugIn {
      * Positional standard deviation for 2D x, y coordinates in Polygon[] 
      * where each Polygon contains a single coordiate pair only.
      */
-    public static double stdev2D(Polygon[] pos) {
+    // TODO: move to util class
+    static double stdev2D(Polygon[] pos) {
         double stdev = 0;
         double xm = 0, ym = 0;
         for (int i = 0; i < pos.length; i++) {
@@ -462,30 +467,32 @@ public class Cal_Phases implements PlugIn {
     }
     
     /** Write a series of phase measurements as a column to a ResultsTable */
-    void writeResults(ResultsTable rt, String colName, float[] phaseSet) {
-        //  To enable writing in columns, both addValue and setValue are
-        //  called - addValue prevents prior columns disappearing,
-        //  setValue actually writes values to correct row.
-        //  It's a hack: I found ResultsTable awkward to use.
-        int p = 0;  // phase
-        for (int s = 0; s < phaseSet.length; s++) {
-            if (s + 1 > rt.getCounter()) {
-                rt.incrementCounter();
-            }
-            if (s % phases == 0) {
-                p = 0;
-            }
-            rt.addValue(colName, phaseSet[s]);
-            rt.setValue(colName, s, phaseSet[s]);
-            String rowLabel = "Z" + s / phases + "/P" + p;
-            rt.setLabel(rowLabel, s);
-            p++;
-        }
-        
-    }
+//    private void writeResults(
+//            ResultsTable rt, String colName, float[] phaseSet) {
+//        //  To enable writing in columns, both addValue and setValue are
+//        //  called - addValue prevents prior columns disappearing,
+//        //  setValue actually writes values to correct row.
+//        //  It's a hack: I found ResultsTable awkward to use.
+//        int p = 0;  // phase
+//        for (int s = 0; s < phaseSet.length; s++) {
+//            if (s + 1 > rt.getCounter()) {
+//                rt.incrementCounter();
+//            }
+//            if (s % phases == 0) {
+//                p = 0;
+//            }
+//            rt.addValue(colName, phaseSet[s]);
+//            rt.setValue(colName, s, phaseSet[s]);
+//            String rowLabel = "Z" + s / phases + "/P" + p;
+//            rt.setLabel(rowLabel, s);
+//            p++;
+//        }
+//        
+//    }
     
     /** Plot phase step series and return step, offset stdevs */
-    double[] plotPhases(float[] phaseSet, double[] positionStdevs, ImageStack stackPlots) {
+    private double[] plotPhases(float[] phaseSet, double[] positionStdevs,
+            ImageStack stackPlots) {
         phaseSet = unwrapPhaseCycles(phaseSet);
         float plotMin = I1l.min(phaseSet);
         float plotMax = I1l.max(phaseSet);
@@ -524,14 +531,14 @@ public class Cal_Phases implements PlugIn {
     }
     
     /** Unwrap phase discontinuities in a set of cycles */
-    float[] unwrapPhaseCycles(float[] rawPhaseSet) {
+    private float[] unwrapPhaseCycles(float[] rawPhaseSet) {
         // unwrap discontinuities over first phase of each cycle
         return unwrapPhaseCycle(rawPhaseSet);
         // unwrap discontinuities over phases within each cycle
     }
     
     /** Unwrap phase discontinuities in a single cycle, relative to first */
-    float[] unwrapPhaseCycle(float[] rawPhaseSet) {
+    private float[] unwrapPhaseCycle(float[] rawPhaseSet) {
         float[] phaseSet = rawPhaseSet.clone();
         int len = phaseSet.length;
 //        int sign = -1;  // i.e. the slope
@@ -570,9 +577,9 @@ public class Cal_Phases implements PlugIn {
     }
     
     /** Return phase step and offset stdev */
-    double[] analyzePhases(float[] phaseSet) {
+    private double[] analyzePhases(float[] phaseSet) {
         double[] phaseStats = {0.0d, 0.0d};
-        if (phaseMeasurementSeriesUnbrokenForLongEnough(phaseSet)) {
+        if (phaseMeasurementSeriesLongEnough(phaseSet)) {
             // 2. TODO, step stdev
             int nsteps = 0;
             for (int i = 0; i < phaseSet.length; i++) {
@@ -603,7 +610,7 @@ public class Cal_Phases implements PlugIn {
     
     
     /** Require at least (2 * phases) measurements without gap */
-    boolean phaseMeasurementSeriesUnbrokenForLongEnough(float[] phaseSet) {
+    private boolean phaseMeasurementSeriesLongEnough(float[] phaseSet) {
         int thisRun = 0;
         int longestRun = 0;
         for (int i = 0; i < phaseSet.length; i++) {
@@ -630,7 +637,7 @@ public class Cal_Phases implements PlugIn {
      * about image center within tol.
      * Returns Polygon containing peak pair x,y coords or null if failed.
      */
-    static Polygon filterPeakPair(Polygon peaks, FloatProcessor fp,
+    private static Polygon filterPeakPair(Polygon peaks, FloatProcessor fp,
             int tol) {
         int npeaks = peaks.npoints;
         if (npeaks < 2) {

@@ -32,22 +32,24 @@ import ij.plugin.StackCombiner;
  * an axial side-view of the illumination pattern for the first phase.
  * @author Graeme Ball <graemeball@gmail.com>
  **/
-public class Cal_PatternFocus implements PlugIn {
+public class Cal_PatternFocus implements PlugIn, Executable {
 
     String name = "Calibration check pattern focus";
     ResultSet results = new ResultSet(name);
-	int phases = 5;
-	int angles = 3;
+	
 	private int width;
 	private int height;
 	private static final String[] angleMethods = {
 	    "degrees (IJ)", "radians (OMX)", "IJ line selection**"
 	};
 	
-    // default parameters
-    double angle1 = 0.00d;      // 1st illumination pattern angle in degrees
-    String angleMethod = angleMethods[0];
-
+	// parameter fields
+	public int phases = 5;
+	public int angles = 3;
+	public double angle1 = 0.00d;  // 1st illumination pattern angle in degrees
+	public String angleMethod = angleMethods[0];
+	
+    @Override
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog("Caibrate Pattern Focus");
@@ -182,8 +184,12 @@ public class Cal_PatternFocus implements PlugIn {
         return impProjected;
     }
     
+    /** Interactive test method. */
     public static void main(String[] args) {
-        System.out.println("Testing...");
+        new ImageJ();
+        ImagePlus stripes = IJ.openImage("src/test/resources/TestStripes.tif");
+        stripes.show();
+        IJ.runPlugIn(Cal_PatternFocus.class.getName(), "");
     }
     
 }
