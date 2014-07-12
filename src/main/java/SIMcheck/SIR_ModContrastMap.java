@@ -42,8 +42,8 @@ public class SIR_ModContrastMap implements PlugIn, Executable {
     // parameter fields
     public int phases = 5;
     public int angles = 3;
-    float mcnrMax = 24.0f;
-    float camMax = 32767.0f;
+    public float camMax = 32767.0f;
+    public float mcnrMax = 24.0f;
 
     @Override
     public void run(String arg) {

@@ -131,7 +131,7 @@ public class Raw_Angle_Difference implements PlugIn, Executable {
     }
     
     /** Calculate root mean square error between arr1 and arr2. */
-    double rmsErr(float[] arr1, float[] arr2) {
+    private double rmsErr(float[] arr1, float[] arr2) {
         if (arr1.length != arr2.length) {
             throw new IllegalArgumentException("arrays must have same length");
         }
@@ -144,7 +144,7 @@ public class Raw_Angle_Difference implements PlugIn, Executable {
     }
 
     /** Arrange and run average projections of the 5 phases each CZAT. **/
-    ImagePlus averagePhase(ImagePlus imp, int nc, int nz, int nt,
+    private ImagePlus averagePhase(ImagePlus imp, int nc, int nz, int nt,
             double[][] intens) {
         ImageStack stack = imp.getStack();
         ImageStack Pset = new ImageStack(imp.getWidth(), imp.getHeight());
@@ -190,7 +190,8 @@ public class Raw_Angle_Difference implements PlugIn, Executable {
     }
 
     /** Average a set of slices (mean projection). **/
-    ImageProcessor averageSlices(ImagePlus imp, ImageStack stack, int nslices) {
+    private ImageProcessor averageSlices(
+            ImagePlus imp, ImageStack stack, int nslices) {
         int width = imp.getWidth();
         int height = imp.getHeight();
         int npix = width * height;  // per slice
@@ -198,7 +199,8 @@ public class Raw_Angle_Difference implements PlugIn, Executable {
         FloatProcessor oip = new FloatProcessor(width, height);
         avpix = (float[])oip.getPixels();
         for (int s = 1; s <= nslices; s++) {
-            FloatProcessor fp = (FloatProcessor)stack.getProcessor(s).convertToFloat();
+            FloatProcessor fp =
+                    (FloatProcessor)stack.getProcessor(s).convertToFloat();
             float[] fpixels = (float[])fp.getPixels();
             for (int i = 0; i < npix; i++) {
                 avpix[i] += fpixels[i];
@@ -213,7 +215,7 @@ public class Raw_Angle_Difference implements PlugIn, Executable {
 
 
     /** Calculate factors to normalize to highest intensity in angle group. **/
-    void calcNormalizationFactors(ImagePlus imp, int nc, int na,
+    private void calcNormalizationFactors(ImagePlus imp, int nc, int na,
             double[][] intens, double[][] normFactor) {
         for(int c = 0; c < nc; c++){
             double maxIntensity = 0;
@@ -230,8 +232,8 @@ public class Raw_Angle_Difference implements PlugIn, Executable {
 
 
     /** Create RGB stacks colored Cyan, Magenta, Yellow for Angles 1, 2, 3 **/
-    ImagePlus colorAngles(ImagePlus imp, ImagePlus projImp, int nc, int nz,
-            double[][] normFactor) {
+    private ImagePlus colorAngles(ImagePlus imp, ImagePlus projImp,
+            int nc, int nz, double[][] normFactor) {
         int nt = projImp.getNFrames();  // after phase removal
         // average phases and make new stack to hold RGB result
         ImageStack projStack = projImp.getStack();

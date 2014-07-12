@@ -273,7 +273,7 @@ public class Raw_ModContrast implements PlugIn, Executable {
     }
     
     /** Estimate optimum Wiener filter setting for reconstruction using MCNR. */
-    double estimWiener(double mcnr) {
+    private double estimWiener(double mcnr) {
         /* Wiener filter parameter inversely proportional to noise variance
          * using dataset where MCNR = 4.6 sigma^2 has optimal Wiener = 0.04
          *   x / 4.6^2  = 0.004, => x = 0.085 and Wiener = 0.085 / (MCNR^2)
@@ -282,8 +282,10 @@ public class Raw_ModContrast implements PlugIn, Executable {
     }
     
     /** Calculate DFT for window orthogonal to an XY slice. */
-    float[][] dftSliceWindow(int vlen, int nc, int c, int phStart, int phEnd, 
-            int nz, int zStart, int zEnd, int a, int nt, int t, ImageStack stack) {
+    private float[][] dftSliceWindow(
+            int vlen, int nc, int c, int phStart, int phEnd,
+            int nz, int zStart, int zEnd,
+            int a, int nt, int t, ImageStack stack) {
         int[] sliceList = I1l.sliceList(nc, c, c, phases, phStart, phEnd, 
                 nz, zStart, zEnd, angles, a, a, nt, t, t);
         float[][] vp = I1l.stack2arr(stack, sliceList);
@@ -297,7 +299,7 @@ public class Raw_ModContrast implements PlugIn, Executable {
      * vlen is nphases * (2*zw + 1), covering 2pi radians per nphases.
      * @return array index of order, first occurrence, counting from 0
      */
-    int calcOrderPos(int order, int vlen) {
+    private int calcOrderPos(int order, int vlen) {
         return vlen * order / phases;
     }
 
@@ -305,7 +307,8 @@ public class Raw_ModContrast implements PlugIn, Executable {
      * where freq is SI illumination frequency from Fourier transform of
      * phases, and pixels are from a linearized 2D XY array.
      */
-    FloatProcessor calcModContrast(float[][] freqPix, FloatProcessor fp) {
+    private FloatProcessor calcModContrast(
+            float[][] freqPix, FloatProcessor fp) {
         /* SI illumination 1st order Contrast-to-Noise Ratio (CNR1):- 
          * CNR12 = (k1/k0) / (N0/k0) = k1/N0 
          * where k1 is the amplitude of the 1st order modulation 
@@ -332,7 +335,8 @@ public class Raw_ModContrast implements PlugIn, Executable {
     }
 
     /** Average mod contrast for different angles. */
-    ImageStack averageAngles(ImageStack stackAZ, int nz, ImageStack avStack) {
+    private ImageStack averageAngles(
+            ImageStack stackAZ, int nz, ImageStack avStack) {
         int width = stackAZ.getWidth();
         int height = stackAZ.getHeight();
         for (int z = 1; z <= nz; z++) {

@@ -134,7 +134,7 @@ public class SIR_Fourier implements PlugIn, Executable {
     }
     
     /** Make a (sub)HyperStack comprising just the central Z slice */
-    ImagePlus takeCentralZ(ImagePlus imp) {
+    private ImagePlus takeCentralZ(ImagePlus imp) {
         String title = imp.getTitle();
         int[] dims = imp.getDimensions();
         ImageStack stack = new ImageStack(dims[0], dims[1]);
@@ -155,7 +155,7 @@ public class SIR_Fourier implements PlugIn, Executable {
     }
     
     /** Make radial profile plot for each channel at central Z. */
-    ImagePlus makeRadialProfiles(ImagePlus imp) {
+    private ImagePlus makeRadialProfiles(ImagePlus imp) {
         int nc = imp.getNChannels();
         int nz = imp.getNSlices();
         ImagePlus[] profiles = new ImagePlus[nc];
@@ -174,7 +174,7 @@ public class SIR_Fourier implements PlugIn, Executable {
     }
     
     /** Resize impOrthoF for same y pixel size as impF & pad square with 0s */
-    ImagePlus resizeAndPad(ImagePlus impOrthoF, Calibration cal) {
+    private ImagePlus resizeAndPad(ImagePlus impOrthoF, Calibration cal) {
         int width = impOrthoF.getHeight();
         int height = impOrthoF.getHeight();
         int depth = impOrthoF.getNSlices();
@@ -213,7 +213,7 @@ public class SIR_Fourier implements PlugIn, Executable {
     
 
     /** Optional gaussian blur, and select lower end of intensity range. */
-    void setLUT(ImagePlus imp) {
+    private void setLUT(ImagePlus imp) {
         if (falseColor) {
             double[] displayRange = {0.0d, 255.0d};  // show all
             I1l.applyLUT(imp, fourierLUT, displayRange);
@@ -221,7 +221,7 @@ public class SIR_Fourier implements PlugIn, Executable {
     }
     
     /** Optional gaussian blur, and select lower end of intensity range. */
-    ImagePlus displaySettings(ImagePlus imp) {
+    private ImagePlus displaySettings(ImagePlus imp) {
         int ns = imp.getStackSize();
         GaussianBlur gblur = new GaussianBlur();
         gblur.showProgress(false);
@@ -247,7 +247,7 @@ public class SIR_Fourier implements PlugIn, Executable {
     }
     
     /** Set ByteProcessor range min to inMax to output range 0 to outMax. */
-    ByteProcessor setBPminMax(ByteProcessor bp, 
+    private ByteProcessor setBPminMax(ByteProcessor bp, 
             int min, int inMax, int outMax) {
         if (min < 0 || inMax > 255 || outMax > 255) {
             throw new IllegalArgumentException("invalid min or max for 8-bit");
@@ -274,7 +274,7 @@ public class SIR_Fourier implements PlugIn, Executable {
      * Overlay resolution rings on each slice of a Fourier ImagePlus. 
      *  NB. raw (non-FFT) imp is required for original calibrations.
      */
-    ImagePlus overlayResRings(ImagePlus Fimp, Calibration cal) {
+    private ImagePlus overlayResRings(ImagePlus Fimp, Calibration cal) {
         String unit = cal.getUnit();
         if (!(unit.startsWith(""+IJ.micronSymbol) || unit.startsWith("u") 
                 || unit.startsWith("micro"))) {

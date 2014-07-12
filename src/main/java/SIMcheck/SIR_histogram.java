@@ -31,9 +31,10 @@ public class SIR_histogram implements PlugIn, Executable {
     
     String name = "Reconstructed Data Histograms";
     ResultSet results = new ResultSet(name);
-    double percentile = 0.01;  // 0-100
-    double min_ratio = 6.0;
-    double mode_tol = 0.25;
+    
+    // parameter fields
+    public double percentile = 0.01;  // use 0-100% of histogram extrema
+    public double modeTol = 0.25;  // mode should be within modeTol*stdev of 0
 
     @Override
     public void run(String arg) {
@@ -54,10 +55,10 @@ public class SIR_histogram implements PlugIn, Executable {
         for (int c = 1; c <= nc; c++){
             ImagePlus imp2 = I1l.copyChannel(imps[0], c);
             StackStatistics stats = new StackStatistics(imp2);
-            if (Math.abs(stats.dmode) > (stats.stdDev*mode_tol)) {
+            if (Math.abs(stats.dmode) > (stats.stdDev*modeTol)) {
                 IJ.log("  ! warning, ch" + c + " histogram mode=" 
                         + Math.round(stats.dmode) 
-                        + " not within " + mode_tol + " stdev of 0\n");
+                        + " not within " + modeTol + " stdev of 0\n");
             }
             if (stats.histMin < stats.dmode) {
                 // caluclate +ve / -ve ratio if histogram has negatives

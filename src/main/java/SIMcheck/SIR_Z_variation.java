@@ -112,7 +112,7 @@ public class SIR_Z_variation implements PlugIn, Executable {
     }
 
     /**  Return a new ImagePlus containing a single channel of the input. */
-    ImagePlus singleChannel(ImagePlus imp, int channel) {
+    private ImagePlus singleChannel(ImagePlus imp, int channel) {
         int stackSize = imp.getStackSize();
         int channels = imp.getNChannels();
         ImageStack nuStack = new ImageStack(imp.getWidth(),imp.getHeight());
