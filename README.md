@@ -132,15 +132,15 @@ TODO
         - project and/or montage Raw FFT to present as 1 image
           - OR, remove raw FFT from raw checks / just for calibration?
       - tests, structure:
-        - solution for local deployment of the latest build for testing
         - final empirical tests, param calibration, tolerances etc.
         - structure:
-          - private plugin methods
-          - .test() method to test private methods
           - all static global prefs & methods in main SIMcheck_ class
-          - .name to toString()?
-          - split I1l-> J & I1l
-        - more tests to test/debug non-interactive code, preconditions / inputs
+          - move more static methods -> utils, split I1l-> J & I1l
+        - tidy up tests:
+          - .main() for interactive test, .test() to test private methods?
+          - more tests to test/debug non-interactive code, preconditions / inputs
+          - unit tests to run without test data (repo needs to build)
+          - nice, compact test data suite for distribution
         - add ResultTable support to ResultSet class
         - make sure tests and debug not deployed
         - work out strategy for test data distribution

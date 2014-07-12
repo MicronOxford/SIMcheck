@@ -187,8 +187,8 @@ public class Cal_PatternFocus implements PlugIn, Executable {
     /** Interactive test method. */
     public static void main(String[] args) {
         new ImageJ();
-        ImagePlus stripes = IJ.openImage("src/test/resources/TestStripes.tif");
-        stripes.show();
+        ImagePlus lawn = IJ.openImage("src/test/resources/BeadLawn.tif");
+        lawn.show();
         IJ.runPlugIn(Cal_PatternFocus.class.getName(), "");
     }
     
