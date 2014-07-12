@@ -27,8 +27,10 @@ import ij.gui.GenericDialog;
  **/ 
 public class Util_SI2WF implements PlugIn {
     
-    int phases = 5;                                                         
-    int angles = 3;                                                         
+    // parameter fields
+    public int phases = 5;                                                         
+    public int angles = 3;                                                         
+    
     private static ImagePlus projImg = null;  // intermediate & final results
 
     @Override 
@@ -76,7 +78,7 @@ public class Util_SI2WF implements PlugIn {
     }
 
     /** Average projections of 5 phases, 3 angles for each CZT **/
-    ImagePlus averagePandA(ImagePlus imp, int nc, int nz, int nt) {
+    private ImagePlus averagePandA(ImagePlus imp, int nc, int nz, int nt) {
         ImageStack stack = imp.getStack(); 
         ImageStack PAset = new ImageStack(imp.getWidth(), imp.getHeight());
         ImageStack avStack = new ImageStack(imp.getWidth(), imp.getHeight());
@@ -123,7 +125,8 @@ public class Util_SI2WF implements PlugIn {
     }
 
     /** Average slices (32-bit floats). */
-    ImageProcessor avSlices(ImagePlus imp, ImageStack stack, int slices) {
+    private ImageProcessor avSlices(
+            ImagePlus imp, ImageStack stack, int slices) {
         int width = imp.getWidth();                                             
         int height = imp.getHeight();
         int len = width * height;

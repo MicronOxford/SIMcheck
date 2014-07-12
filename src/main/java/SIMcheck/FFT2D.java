@@ -30,7 +30,8 @@ import ij.plugin.filter.GaussianBlur;
  */
 public class FFT2D extends FHT {
     
-    private static final double ERROR = 0.000001d;  // tolerance for == 0.0d
+    // tolerance to check if a double precision float is approx. equal to 0
+    private static final double ZERO_TOL = 0.000001d;
 
     public FFT2D(ImageProcessor ip){
         super(ip);
@@ -191,7 +192,7 @@ public class FFT2D extends FHT {
             // See: ij/plugin/FFT.java & ij/ImagePlus.java (search FHT & FFT)
             //      ij/process/FHT.java
             ImageProcessor ip = stack.getProcessor(slice);
-            if (Math.abs(winFraction) > ERROR) {
+            if (Math.abs(winFraction) > ZERO_TOL) {
                 ip = FFT2D.gaussWindow(ip, winFraction);
             }
             ip = FFT2D.pad(ip, paddedSize);  
@@ -284,7 +285,7 @@ public class FFT2D extends FHT {
     }
 
     /** Calculate phase using real + imaginary components. **/
-    static float calcPhase(float re, float im) {
+    private static float calcPhase(float re, float im) {
         if (re > 0) {
             return (float)Math.atan((double)im/re);
         }else if ((re < 0) && (im >= 0)) {

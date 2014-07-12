@@ -28,9 +28,14 @@ import ij.gui.GenericDialog;
  */ 
 public class Util_formats implements PlugIn {
 
-    int phases = 5;                                                         
-    int angles = 3;                                                         
-    static String[] formats = {"Zeiss ELYRA (CZTAP)", "Nikon N-SIM (tiled)"};
+    // supported formats
+    public static String[] formats = {
+        "Zeiss ELYRA (CZTAP)",
+        "Nikon N-SIM (tiled)"};
+
+    // parameter fields
+    public int phases = 5;                                                         
+    public int angles = 3;                                                         
     
     private int width, height, nc, nz, nt;
     private ImageStack inStack, outStack;
@@ -89,7 +94,7 @@ public class Util_formats implements PlugIn {
     }
     
     /** Convert ELYRA data (CZTAP order) to OMX order (CPZAT) */
-    void convertELYRA() {
+    private void convertELYRA() {
         // ELYRA data, angles and phases encoded in time dimension
         if (nt < phases * angles) {
             String problem = "Expected ELYRA .czi with phase/angle in time dim";
@@ -118,7 +123,7 @@ public class Util_formats implements PlugIn {
     }
 
     /** Convert NSIM data (2D multi-C with tiled P, A) to OMX order (CPZAT) */
-    void convertNSIM() {
+    private void convertNSIM() {
         // Nikon N-SIM: phases tiled in X, angles tiled in Y
         // (assuming NISM data are CZT dimension order)
         if ((width % phases != 0) || (height % angles != 0)) {
