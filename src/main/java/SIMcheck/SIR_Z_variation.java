@@ -95,8 +95,8 @@ public class SIR_Z_variation implements PlugIn, Executable {
             plot.addPoints(zPlanes, sliceMeans, Plot.LINE);
             plot.setLineWidth(1);
             plots[c - 1] = plot.getImagePlus();
-            double nstdev = Math.sqrt(I1l.variance(sliceMinima)) / 
-                    I1l.mean(sliceMeans);
+            double nstdev = Math.sqrt(J.variance(sliceMinima)) / 
+                    J.mean(sliceMeans);
             results.addStat("  channel " + c + " normalized stdev", nstdev);
             
         }

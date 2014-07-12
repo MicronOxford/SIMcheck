@@ -154,7 +154,7 @@ public class SIR_histogram implements PlugIn, Executable {
         ImageStatistics stats = new StackStatistics(imp);
         double pnRatio = calcPosNegRatio(stats, 0.005);
         if (verbose) {
-            System.out.println("hist: " + I1l.prn(stats.histogram));
+            System.out.println("hist: " + J.prn(stats.histogram));
             System.out.println("min; mode; max = " +
                     stats.histMin + "; " + stats.dmode + "; " + stats.histMax);
             System.out.println("pnRatio = " + pnRatio);

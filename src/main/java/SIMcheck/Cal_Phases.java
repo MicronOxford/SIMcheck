@@ -223,7 +223,7 @@ public class Cal_Phases implements PlugIn {
                 double[] positionStdevs = peakPositionStdevs(peakSets[c - 1]);
                 double[] phaseStats = plotPhases(
                         phaseSets[c - 1], positionStdevs, stackPlots);
-                double avPosStdev = I1l.mean(positionStdevs);
+                double avPosStdev = J.mean(positionStdevs);
                 results.addStat("a" + a + " c" + c + " peak postion stdev", 
                         avPosStdev);
 
@@ -233,8 +233,8 @@ public class Cal_Phases implements PlugIn {
                         phaseStats[0]);
                 results.addStat("a" + a + " c" + c + " phase offset stdev", 
                         phaseStats[1]);
-                IJ.log("  line spacing = " + I1l.mean(lineSpacings[c - 1]));
-                IJ.log("  k angle = " + I1l.mean(kAngles[c - 1]));
+                IJ.log("  line spacing = " + J.mean(lineSpacings[c - 1]));
+                IJ.log("  k angle = " + J.mean(kAngles[c - 1]));
             }
             title = I1l.makeTitle(imp, "A" + a + "_PPL");
             plotImps[a - 1] = new ImagePlus(title, stackPlots);
@@ -419,8 +419,8 @@ public class Cal_Phases implements PlugIn {
             x[i] = coordSet[i].xpoints[0];
             y[i] = coordSet[i].ypoints[0];
         }
-        int[] xm = {I1l.median(x)};
-        int[] ym = {I1l.median(y)};
+        int[] xm = {J.median(x)};
+        int[] ym = {J.median(y)};
         return new Polygon(xm, ym, 1);
     }
     
@@ -495,8 +495,8 @@ public class Cal_Phases implements PlugIn {
     private double[] plotPhases(float[] phaseSet, double[] positionStdevs,
             ImageStack stackPlots) {
         phaseSet = unwrapPhaseCycles(phaseSet);
-        float plotMin = I1l.min(phaseSet);
-        float plotMax = I1l.max(phaseSet);
+        float plotMin = J.min(phaseSet);
+        float plotMax = J.max(phaseSet);
         double[] phaseStats = analyzePhases(phaseSet);
         Plot plot = new Plot("Phase plot", "Z,P", "phase (radians)");
         plot.setLineWidth(1);
@@ -600,7 +600,7 @@ public class Cal_Phases implements PlugIn {
                     }
                 }
             }
-            phaseStats[0] = Math.sqrt(I1l.variance(steps));
+            phaseStats[0] = Math.sqrt(J.variance(steps));
             // 3. TODO, offset stdev
         } else {
             phaseStats[0] = phaseStats[1] = Double.NaN;
@@ -649,9 +649,9 @@ public class Cal_Phases implements PlugIn {
             peakIntens[pk] = 
                     fp.getPixelValue(peaks.xpoints[pk], peaks.ypoints[pk]);
         }
-        int indexMax1 = I1l.maxIndex(peakIntens);
+        int indexMax1 = J.maxIndex(peakIntens);
         peakIntens[indexMax1] = 0;  // so we don't find 1st max again...
-        int indexMax2 = I1l.maxIndex(peakIntens);
+        int indexMax2 = J.maxIndex(peakIntens);
         int[] filtPkX = {peaks.xpoints[indexMax1], peaks.xpoints[indexMax2]};
         int[] filtPkY = {peaks.ypoints[indexMax1], peaks.ypoints[indexMax2]};
         Polygon filteredPeaks = new Polygon(filtPkX, filtPkY, 2);
