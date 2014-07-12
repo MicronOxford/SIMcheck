@@ -29,6 +29,7 @@ import ij.measure.*;
 
 import java.awt.Color;
 import java.awt.Polygon;
+
 import ij.gui.*;
 
 /** This plugin takes raw SI data for an even field of fluorescence and
@@ -660,16 +661,34 @@ public class Cal_Phases implements PlugIn {
             return null;  
         }
     }
-
-    public static void main(String[] args) {
-        System.out.println("Testing...");
+    
+    /** Unit test runner for private methods: return true if all OK. */
+    boolean test(boolean verbose) {
+        boolean pass = true;
+        // calcFourierR
         Calibration cal = new Calibration();
         cal.pixelWidth = 0.082;
         cal.pixelHeight = 0.082;
         double r1 = I1l.calcFourierR(144, 77, 256, 256, cal);
-        System.out.println("expect r = 0.40, r1 = " + r1);
+        double r1Expect = 0.40d;
         double r2 = I1l.calcFourierR(95, 231, 256, 256, cal);
-        System.out.println("expect r = 0.19, r2 = " + r2);
+        double r2Expect = 0.19d;
+        pass = J.approxEq(r1, r1Expect) && J.approxEq(r2, r2Expect);
+        if (verbose) {
+            System.out.println("expect r = " + r1Expect + ", r1 = " + r1);
+            System.out.println("expect r = " + r2Expect + ", r2 = " + r2);
+        }
+        return pass;
+    }
+
+    /** Interactive test method. */
+    public static void main(String[] args) {
+        Cal_Phases plugin = new Cal_Phases();
+        System.out.println("private methods test OK? " + plugin.test(true));
+        new ImageJ();
+        ImagePlus lawn = IJ.openImage("src/test/resources/BeadLawn.tif");
+        lawn.show();
+        IJ.runPlugIn(Cal_Phases.class.getName(), "");
     }
     
 }

@@ -184,8 +184,16 @@ public class Cal_PatternFocus implements PlugIn, Executable {
         return impProjected;
     }
     
+    /** Unit test runner for private methods, returns true if all OK. */
+    boolean test(boolean verbose) {
+        boolean pass = true;
+        return pass;
+    }
+    
     /** Interactive test method. */
     public static void main(String[] args) {
+        Cal_PatternFocus plugin = new Cal_PatternFocus();
+        System.out.println("private methods test OK? " + plugin.test(true));
         new ImageJ();
         ImagePlus lawn = IJ.openImage("src/test/resources/BeadLawn.tif");
         lawn.show();

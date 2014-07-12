@@ -32,7 +32,7 @@ import java.util.Arrays;
 
 /** 
  * I1l (<b>I</b>mageJ <b>1</b> <b>l</b>ibrary) is a class containing static
- * utility methods for ImageJ1 and java array / math. How good is your font?
+ * utility methods for ImageJ1. How good is your font?
  * @author Graeme Ball <graemeball@gmail.com>
  */
 public final class I1l {
