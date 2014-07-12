@@ -133,9 +133,6 @@ TODO
           - OR, remove raw FFT from raw checks / just for calibration?
       - tests, structure:
         - final empirical tests, param calibration, tolerances etc.
-        - structure:
-          - all static global prefs & methods in main SIMcheck_ class
-          - move more static methods -> utils, split I1l-> J & I1l
         - tidy up tests:
           - .main() for interactive test, .test() to test private methods?
           - more tests to test/debug non-interactive code, preconditions / inputs

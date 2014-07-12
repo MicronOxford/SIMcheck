@@ -52,7 +52,7 @@ public final class I1l {
         for (int a = 0; a < na; a++) {
             for (int b = 0; b < nb; b++){
                 abAns[a][b] = (float)( 
-                        (2 * Math.sqrt((double)ab[a][b])) + (3 / 8));
+                        (2 * Math.sqrt((double)ab[a][b])) + (3.0d / 8));
             }
         }
         return abAns;
@@ -128,7 +128,7 @@ public final class I1l {
         return tempImp.getStack().getProcessor(1);                                  
     }
 
-    /** Calculate angle in radians using given x, y coords */
+    /** Calculate angle in radians CCW from E using given x, y coords. */
     public static double calcAngle(double x, double y) {
         if (x > 0) {
             return Math.atan(y / x);
@@ -227,11 +227,6 @@ public final class I1l {
             int currentSlice = src.getCurrentSlice();
             dest.setSlice(currentSlice);
         }
-    }
-    
-    /** Euclidean distance */
-    public static double dist(double x1, double y1, double x2, double y2) {
-        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2) / 2);
     }
     
     /** Divide two FloatProcessors of identical dimensions, fpN / fpD. */

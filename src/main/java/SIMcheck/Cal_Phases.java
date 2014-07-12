@@ -317,8 +317,8 @@ public class Cal_Phases implements PlugIn {
             ispeakPair = false;
         }
         // peaks equal distance from center?
-        double dist0 = I1l.dist(x[0], y[0], x[1], y[1]);
-        double dist1 = I1l.dist(x[2], y[2], x[1], y[1]);
+        double dist0 = J.dist(x[0], y[0], x[1], y[1]);
+        double dist1 = J.dist(x[2], y[2], x[1], y[1]);
         if (Math.abs(dist1 - dist0) > tol) {
             ispeakPair = false;
         }
@@ -398,7 +398,7 @@ public class Cal_Phases implements PlugIn {
             }
             stdevs[cyc] = stdev2D(peakSet) + 0.0001f;
             Polygon setMedCoord = medianCoords(peakSet);
-            if (I1l.dist(medCoord.xpoints[0], medCoord.ypoints[0], 
+            if (J.dist(medCoord.xpoints[0], medCoord.ypoints[0], 
                     setMedCoord.xpoints[0], setMedCoord.ypoints[0]) 
                     > (double)peakPosTolerance) {
                 stdevs[cyc] = -stdevs[cyc];  // FIXME, -ve indicates outside tolerance
