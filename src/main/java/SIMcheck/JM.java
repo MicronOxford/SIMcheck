@@ -29,11 +29,6 @@ public class JM {
     
     /** Utility class should not be instantiated. */
     private JM() {}
-    
-    /** Return true if d1 and d2 equal within APPROX_EQ_TOL. */
-    public static boolean approxEq(double d1, double d2) {
-        return Math.abs((d1 - d2) * 2 / (d1 + d2)) < APPROX_EQ_TOL;
-    }
 
     /** 
      * Add two 1D float arrays of the same length, element by element.
@@ -48,6 +43,30 @@ public class JM {
             result[i] = f1[i] + f2[i];
         }
         return result;
+    }
+    
+    /** 
+     * Apply an Anscombe variance stabilizing transform to a 2D float array:
+     * <pre>x-&gt;[2*sqrt(x)]+3/8</pre>
+     * @param ab 2D array of floats 
+     * @return Anscome-transformed 2D array same shape as input
+     */
+    public static float[][] anscombe(float[][] ab) {
+        int nb = ab[0].length;
+        int na = ab.length;
+        float[][] abAns = new float[na][nb];
+        for (int a = 0; a < na; a++) {
+            for (int b = 0; b < nb; b++){
+                abAns[a][b] = (float)( 
+                        (2 * Math.sqrt((double)ab[a][b])) + (3.0d / 8));
+            }
+        }
+        return abAns;
+    }
+
+    /** Return true if d1 and d2 equal within APPROX_EQ_TOL. */
+    public static boolean approxEq(double d1, double d2) {
+        return Math.abs((d1 - d2) * 2 / (d1 + d2)) < APPROX_EQ_TOL;
     }
 
     /** Concatenate arr2 to the end of arr1. */
@@ -239,22 +258,5 @@ public class JM {
         return variance;
     }
 
-    /** 
-     * Apply an Anscombe variance stabilizing transform to a 2D float array:
-     * <pre>x-&gt;[2*sqrt(x)]+3/8</pre>
-     * @param ab 2D array of floats 
-     * @return Anscome-transformed 2D array same shape as input
-     */
-    public static float[][] anscombe(float[][] ab) {
-        int nb = ab[0].length;
-        int na = ab.length;
-        float[][] abAns = new float[na][nb];
-        for (int a = 0; a < na; a++) {
-            for (int b = 0; b < nb; b++){
-                abAns[a][b] = (float)( 
-                        (2 * Math.sqrt((double)ab[a][b])) + (3.0d / 8));
-            }
-        }
-        return abAns;
-    }
+    
 }
