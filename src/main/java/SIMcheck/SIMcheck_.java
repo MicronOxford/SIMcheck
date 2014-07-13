@@ -74,8 +74,8 @@ public class SIMcheck_ implements PlugIn {
     
     @Override
     public void run(String arg) {
-        String[] titles = J.cat(new String[] {none}, I1l.collectTitles());
-        String[] formats = J.cat(new String[] {omx}, Util_formats.formats);
+        String[] titles = JM.cat(new String[] {none}, I1l.collectTitles());
+        String[] formats = JM.cat(new String[] {omx}, Util_formats.formats);
         camMax = (float)ij.Prefs.get("SIMcheck.camMax", camMax);
         if (titles.length < 2) {
             IJ.noImage();

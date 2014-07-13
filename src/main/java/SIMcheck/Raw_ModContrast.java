@@ -289,7 +289,7 @@ public class Raw_ModContrast implements PlugIn, Executable {
         int[] sliceList = I1l.sliceList(nc, c, c, phases, phStart, phEnd, 
                 nz, zStart, zEnd, angles, a, a, nt, t, t);
         float[][] vp = I1l.stack2arr(stack, sliceList);
-        vp = I1l.anscombe(vp);
+        vp = JM.anscombe(vp);
         vp = I1l.normalizeInner(vp);
         vp = DFT1D.dftOuter(vp);
         return vp;
@@ -326,10 +326,10 @@ public class Raw_ModContrast implements PlugIn, Executable {
         float[] order2pix = new float[npix]; 
         System.arraycopy(freqPix[order1pos], 0, order1pix, 0, npix);
         System.arraycopy(freqPix[order2pos], 0, order2pix, 0, npix);
-        float noiseStdev = (float)Math.sqrt(J.variance(freqPix[noiseSlice]));
-        float[] modContrast = J.add(J.sq(order1pix), J.sq(order2pix));
-        modContrast = J.sqrt(modContrast);
-        modContrast = J.div(modContrast, noiseStdev);
+        float noiseStdev = (float)Math.sqrt(JM.variance(freqPix[noiseSlice]));
+        float[] modContrast = JM.add(JM.sq(order1pix), JM.sq(order2pix));
+        modContrast = JM.sqrt(modContrast);
+        modContrast = JM.div(modContrast, noiseStdev);
         fp.setPixels(modContrast); 
         return fp;
     }
@@ -346,9 +346,9 @@ public class Raw_ModContrast implements PlugIn, Executable {
                 int slice = z + (nz * (a - 1));
                 FloatProcessor fp = (FloatProcessor)stackAZ.getProcessor(slice);
                 float[] fpixels = (float[]) fp.getPixels();
-                newpixels = J.add(newpixels, fpixels);
+                newpixels = JM.add(newpixels, fpixels);
             }
-            newpixels = J.div(newpixels, angles);
+            newpixels = JM.div(newpixels, angles);
             avFp.setPixels(newpixels);
             avStack.addSlice(avFp);
         }

@@ -20,16 +20,15 @@ package SIMcheck;
 import java.util.Arrays;
 
 /** 
- * J is a class containing static utility methods for java (i.e. methods
- * that would be nice to have built into the language and standard libs).
+ * JM is a class containing static utility methods for simple Java Math.
  * @author Graeme Ball <graemeball@gmail.com>
  */
-public class J {
+public class JM {
     
     private static final double APPROX_EQ_TOL = 0.05d;  // i.e. 5% tolerance
     
     /** Utility class should not be instantiated. */
-    private J() {}
+    private JM() {}
     
     /** Return true if d1 and d2 equal within APPROX_EQ_TOL. */
     public static boolean approxEq(double d1, double d2) {
@@ -77,6 +76,11 @@ public class J {
             output[i] = (float)d[i];
         }
         return output;
+    }
+    
+    /** Euclidean distance */
+    public static double dist(double x1, double y1, double x2, double y2) {
+        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2) / 2);
     }
 
     /** Divide each element of a float array by a float. */
@@ -181,42 +185,6 @@ public class J {
         return min;
     }
 
-    /** Convert array to string for printing. */
-    public static String prn(double[] arr) {
-        String arrString = "";
-        for (int i = 0; i < arr.length; i++) {
-            arrString += " " + arr[i];
-        }
-        return arrString;
-    }
-
-    /** Convert array to string for printing. */
-    public static String prn(float[] arr) {
-        String arrString = "";
-        for (int i = 0; i < arr.length; i++) {
-            arrString += " " + arr[i];
-        }
-        return arrString;
-    }
-
-    /** Convert array to string for printing. */
-    public static String prn(long[] arr) {
-        String arrString = "";
-        for (int i = 0; i < arr.length; i++) {
-            arrString += " " + arr[i];
-        }
-        return arrString;
-    }
-
-    /** Convert array to string for printing. */
-    public static String prn(int[] arr) {
-        String arrString = "";
-        for (int i = 0; i < arr.length; i++) {
-            arrString += " " + arr[i];
-        }
-        return arrString;
-    }
-
     /** Square each element of a float array. */                                
     public static float[] sq(float[] f) {                                       
         int len = f.length;                                                     
@@ -271,9 +239,22 @@ public class J {
         return variance;
     }
 
-    /** Euclidean distance */
-    public static double dist(double x1, double y1, double x2, double y2) {
-        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2) / 2);
+    /** 
+     * Apply an Anscombe variance stabilizing transform to a 2D float array:
+     * <pre>x-&gt;[2*sqrt(x)]+3/8</pre>
+     * @param ab 2D array of floats 
+     * @return Anscome-transformed 2D array same shape as input
+     */
+    public static float[][] anscombe(float[][] ab) {
+        int nb = ab[0].length;
+        int na = ab.length;
+        float[][] abAns = new float[na][nb];
+        for (int a = 0; a < na; a++) {
+            for (int b = 0; b < nb; b++){
+                abAns[a][b] = (float)( 
+                        (2 * Math.sqrt((double)ab[a][b])) + (3.0d / 8));
+            }
+        }
+        return abAns;
     }
-
 }

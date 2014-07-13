@@ -17,6 +17,8 @@
  */ 
 
 package SIMcheck;
+import java.util.Arrays;
+
 import ij.*;
 import ij.plugin.PlugIn;
 import ij.gui.HistogramWindow;
@@ -154,7 +156,7 @@ public class SIR_histogram implements PlugIn, Executable {
         ImageStatistics stats = new StackStatistics(imp);
         double pnRatio = calcPosNegRatio(stats, 0.005);
         if (verbose) {
-            System.out.println("hist: " + J.prn(stats.histogram));
+            System.out.println("hist: " + Arrays.toString(stats.histogram));
             System.out.println("min; mode; max = " +
                     stats.histMin + "; " + stats.dmode + "; " + stats.histMax);
             System.out.println("pnRatio = " + pnRatio);

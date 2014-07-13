@@ -135,8 +135,8 @@ public class Raw_intensity implements PlugIn, Executable {
             plot.addPoints(pzat_no, avIntensities, 1);
 
             /// (1) "Channel decay"
-            double[] xSlice = J.f2d(pzat_no);
-            double[] yIntens = J.f2d(avIntensities);
+            double[] xSlice = JM.f2d(pzat_no);
+            double[] yIntens = JM.f2d(avIntensities);
             //  fitting with y=a*exp(bx)  ; fitter returns a, b, R^2
             //   e.g. x=ln((2/3)/b) for 2/3 original intensity (<33% decay)
             CurveFitter expFitter = new CurveFitter(xSlice, yIntens);
@@ -155,7 +155,7 @@ public class Raw_intensity implements PlugIn, Executable {
                 float[] yIntens3 = new float[np*nz];
                 System.arraycopy(avIntensities, (angle - 1) * np * nz, 
                 		yIntens3, 0, np * nz);
-                angleMeans[angle-1] = J.mean(yIntens3);
+                angleMeans[angle-1] = JM.mean(yIntens3);
             }
             double largestDiff = 0;
             for (int angle=1; angle<=na; angle++) {
@@ -167,7 +167,7 @@ public class Raw_intensity implements PlugIn, Executable {
                 }
             }
             // normalize largest av intensity diff using max intensity angle
-            float maxAngleIntensity = J.max(angleMeans);
+            float maxAngleIntensity = JM.max(angleMeans);
             largestDiff = (double)100 * largestDiff / (double)maxAngleIntensity;
             results.addStat("Channel " + Integer.toString(channel) 
                     + " max intensity difference between angles (%)",

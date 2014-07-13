@@ -34,9 +34,9 @@ public class I1lTest {
     
     @Test
         public final void testCat() {
-            assertArrayEquals(J.cat(new int[] {1, 2}, new int[] {3}), 
+            assertArrayEquals(JM.cat(new int[] {1, 2}, new int[] {3}), 
                     new int[] {1, 2, 3});
-            assertArrayEquals(J.cat(new int[0], new int[] {1, 2}), 
+            assertArrayEquals(JM.cat(new int[0], new int[] {1, 2}), 
                     new int[] {1, 2});
         }
 

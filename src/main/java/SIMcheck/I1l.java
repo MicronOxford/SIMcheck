@@ -40,25 +40,6 @@ public final class I1l {
     private I1l() {}
     
     /** 
-     * Apply an Anscombe variance stabilizing transform to a 2D float array:
-     * <pre>x-&gt;[2*sqrt(x)]+3/8</pre>
-     * @param ab 2D array of floats 
-     * @return Anscome-transformed 2D array same shape as input
-     */
-    public static float[][] anscombe(float[][] ab) {
-        int nb = ab[0].length;
-        int na = ab.length;
-        float[][] abAns = new float[na][nb];
-        for (int a = 0; a < na; a++) {
-            for (int b = 0; b < nb; b++){
-                abAns[a][b] = (float)( 
-                        (2 * Math.sqrt((double)ab[a][b])) + (3.0d / 8));
-            }
-        }
-        return abAns;
-    }
-
-    /** 
      * Apply a LUT to an ImagePlus and set its display range for meaningful
      * interpretation.
      * @param  imp ImagePlus to which LUT will be applied
@@ -234,7 +215,7 @@ public final class I1l {
         FloatProcessor result = (FloatProcessor)fpN.duplicate();
         float[] pixN = (float[])fpN.getPixels();
         float[] pixD = (float[])fpD.getPixels();
-        result.setPixels((Object)J.div(pixN, pixD));
+        result.setPixels((Object)JM.div(pixN, pixD));
         return result;
     }
     
@@ -345,11 +326,11 @@ public final class I1l {
         float[][] abOut = new float[alen][blen];
         float bav = 0.0f;
         for (int a = 0; a < alen; a++) {
-            bav += J.mean(ab[a]);
+            bav += JM.mean(ab[a]);
         }
         bav /= alen;
         for (int a = 0; a < alen; a++) {
-            float scaleFactor = bav / J.mean(ab[a]);
+            float scaleFactor = bav / JM.mean(ab[a]);
             for (int b = 0; b < blen; b++) {
                 abOut[a][b] = (float)(ab[a][b] * scaleFactor);
             }
@@ -409,7 +390,7 @@ public final class I1l {
                     dimPositions[dimPosIndex++] = args[a + 1];        
                     dimPositions[dimPosIndex++] = args[a];        
                 }
-                result = J.cat(result, new int[] {stackSliceNo(dimPositions)});
+                result = JM.cat(result, new int[] {stackSliceNo(dimPositions)});
             }
         } else {
             // start from highest dim: evaluate 1st non-closed dim encountered
@@ -418,7 +399,7 @@ public final class I1l {
                     do {
                         int temp = args[a + 2];
                         args[a + 2] = args[a + 1];
-                        result = J.cat(result, sliceList(args));  // RECURSE
+                        result = JM.cat(result, sliceList(args));  // RECURSE
                         args[a + 2] = temp;
                         args[a + 1]++;
                     } while (args[a + 1] <= args[a + 2]);
