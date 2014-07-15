@@ -116,6 +116,7 @@ TODO
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - !! Make a 0.95 release ASAP with SIR Fourier fixed !!
+        - decide on raw Fourier output format (currently montage in standalone)
         - fix MCM >max / green color bug, ensure camMax pref is saved/reloaded
       - documentation: 
         - make more self-documenting: improve names & log output
