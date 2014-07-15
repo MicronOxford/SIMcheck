@@ -4,6 +4,10 @@
                       http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
+  <properties>
+    <project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
+  </properties>
+
   <groupId>uk.ac.ox.micron</groupId>
   <artifactId>SIMcheck</artifactId>
   <version>0.9.1-SNAPSHOT</version>
@@ -94,13 +98,7 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>RELEASE</version>
-    <!--
-      FIXME: This is actually being used outside the test directory in:
-        * src/main/java/SIMcheck/FFT2DTest.java
-        * src/main/java/SIMcheck/I1lTest.java
-      and when it is fixed, we uncommente the scope.
-       -->
-<!--      <scope>test</scope>-->
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
