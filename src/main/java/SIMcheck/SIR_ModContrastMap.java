@@ -335,7 +335,9 @@ public class SIR_ModContrastMap implements PlugIn, Executable {
     
     /** Interactive test method */
     public static void main(String[] args) {
-        SIMcheck_.setupInteractiveTest();
+        new ImageJ();
+        TestData.raw.show();
+        TestData.recon.show();
         IJ.runPlugIn(SIR_ModContrastMap.class.getName(), "");
     }
 }

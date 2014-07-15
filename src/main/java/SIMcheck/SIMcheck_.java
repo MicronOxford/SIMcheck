@@ -323,19 +323,11 @@ public class SIMcheck_ implements PlugIn {
         return impOut;
     }
     
-    /** Create ImageJ instance & load test data for interactive testing:
-     * also used by other plugins in the package. */
-    static void setupInteractiveTest() {
-        new ImageJ();
-        ImagePlus raw = IJ.openImage("src/test/resources/TestRaw.tif");
-        ImagePlus recon = IJ.openImage("src/test/resources/TestRecon.tif");
-        raw.show();
-        recon.show();
-    }
-    
     /** Interactive test. */
     public static void main(String args[]) {
-        setupInteractiveTest();
+        new ImageJ();
+        TestData.raw.show();
+        TestData.recon.show();
         IJ.runPlugIn(SIMcheck_.class.getName(), "");
     }
 }

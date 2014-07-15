@@ -524,21 +524,22 @@ public final class I1l {
         }
     }
 
-    /** Test method. */
+    /** Interactive test method. */
     public static void main(String[] args) {
         System.out.println("Testing I1l.java");
-        ImagePlus wfTest = IJ.openImage("/Users/gball/Documents/InTray/SIMcheck/CURRENT_EXAMPLE_FILES/V3_Blaze_medium_DAPI_mismatch_w5_SIR_C3-WF_TEST.tif");
+        ImagePlus impRecon = IJ.openImage("src/test/resources/TestRecon.tif");
+        impRecon.show();
         // test feature roi stats
-        ImageStatistics rawStats = wfTest.getStatistics();
+        ImageStatistics rawStats = impRecon.getStatistics();
         IJ.log("raw min, mean, max = " + rawStats.min + ", " + rawStats.mean
                 + ", " + rawStats.max);
-        ImageStatistics roiStats = featStats(wfTest.getProcessor());
+        ImageStatistics roiStats = featStats(impRecon.getProcessor());
         IJ.log("roi min, mean, max = " + roiStats.min + ", " + roiStats.mean
                 + ", " + roiStats.max);
         // test subtractPerSliceMode
-        ImagePlus modeTest = IJ.openImage("/Users/gball/Documents/InTray/SIMcheck/Curie_Asymmetric_Freq/Curie-test-crop.tif");
-        I1l.subtractPerSliceMode(modeTest);
-        modeTest.show();
+        ImagePlus impSub = impRecon.duplicate();
+        I1l.subtractPerSliceMode(impSub);
+        impSub.show();
     }
 
 }

@@ -18,6 +18,7 @@
 package SIMcheck;
 
 import ij.IJ;
+import ij.ImageJ;
 import ij.ImagePlus;
 import ij.plugin.PlugIn;
 
@@ -42,5 +43,12 @@ public class Util_FFTstack implements PlugIn {
     public ImagePlus exec(ImagePlus imp) {
         ImagePlus impF = FFT2D.fftImp(imp, 0.01d);
         return impF;
+    }
+    
+    /** Interactive test method. */
+    public static void main(String[] args) {
+        new ImageJ();
+        TestData.raw.show();
+        IJ.runPlugIn(Util_FFTstack.class.getName(), "");
     }
 }

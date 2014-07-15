@@ -195,8 +195,7 @@ public class Cal_PatternFocus implements PlugIn, Executable {
         Cal_PatternFocus plugin = new Cal_PatternFocus();
         System.out.println("private methods test OK? " + plugin.test(true));
         new ImageJ();
-        ImagePlus lawn = IJ.openImage("src/test/resources/BeadLawn.tif");
-        lawn.show();
+        TestData.lawn.show();
         IJ.runPlugIn(Cal_PatternFocus.class.getName(), "");
     }
     
