@@ -86,7 +86,7 @@ public class SIR_Fourier implements PlugIn, Executable {
      */
     public ResultSet exec(ImagePlus... imps) {
         Calibration cal = imps[0].getCalibration();
-        ImagePlus imp2 = Util_positive_16bit.exec(imps[0].duplicate());
+        ImagePlus imp2 = Util_Rescale.exec(imps[0].duplicate());
         IJ.showStatus("Fourier transforming slices (lateral view)");
         ImagePlus impF = FFT2D.fftImp(imp2, winFraction);
         blurRadius *= (double)impF.getWidth() / 512.0d;

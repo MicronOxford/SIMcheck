@@ -18,6 +18,7 @@
 package SIMcheck;
 
 import ij.IJ;
+import ij.ImageJ;
 import ij.ImagePlus;
 import ij.plugin.PlugIn;
 
@@ -25,7 +26,7 @@ import ij.plugin.PlugIn;
  * This plugin discards values below channel mode and converts to 16-bit.
  * @author Graeme Ball <graemeball@gmail.com>
  */
-public class Util_positive_16bit implements PlugIn {
+public class Util_Rescale implements PlugIn {
 
     @Override
     public void run(String arg) {
@@ -45,10 +46,18 @@ public class Util_positive_16bit implements PlugIn {
         ImagePlus imp2 = imp.duplicate();
         I1l.subtractPerSliceMode(imp2);
         // TODO: get conversion opts, rescale only if necess, reset conv opts
+        // TODO: option to "discard negatives" where not much background
         IJ.run("Conversions...", " ");
 //        IJ.run("Conversions...", "scale");
         IJ.run(imp2, "16-bit", "");
         imp2.setTitle(title);
         return imp2;
+    }
+    
+    /** Interactive test method. */
+    public static void main(String[] args) {
+        new ImageJ();
+        TestData.recon.show();
+        IJ.runPlugIn(Util_Rescale.class.getName(), "");
     }
 }

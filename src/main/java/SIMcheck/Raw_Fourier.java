@@ -67,7 +67,7 @@ public class Raw_Fourier implements PlugIn, Executable {
     public ResultSet exec(ImagePlus... imps) {
         ImagePlus imp = imps[0];
         String title = I1l.makeTitle(imp, "FFT");
-        imp = Util_positive_16bit.exec(imp);        
+        imp = Util_Rescale.exec(imp);        
         imp = FFT2D.fftImp(imp);
         imp.setTitle(title);
         results.addImp("Raw data 2D FFT ", imp);
@@ -83,7 +83,7 @@ public class Raw_Fourier implements PlugIn, Executable {
      */
     public ResultSet exec2(ImagePlus... imps) {
         ImagePlus imp = imps[0];
-        imp = Util_positive_16bit.exec(imp);
+        imp = Util_Rescale.exec(imp);
         ImagePlus montage = null;
         StackCombiner comb = new StackCombiner();
         for (int a = 1; a <= angles; a++) {
