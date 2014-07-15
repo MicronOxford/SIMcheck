@@ -118,6 +118,7 @@ TODO
       - !! Make a 0.95 release ASAP with SIR Fourier fixed !!
         - decide on raw Fourier output format (currently montage in standalone)
         - fix MCM >max / green color bug, ensure camMax pref is saved/reloaded
+        - AUTHORS & NOTICE
       - documentation: 
         - make more self-documenting: improve names & log output
         - finish/improve docs, illustrate usage with pictures, examples
