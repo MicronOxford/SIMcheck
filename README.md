@@ -83,9 +83,7 @@ PROJECT STRUCTURE
 
 - README.md - This file
 - LICENSE.txt - Project's license
-- AUTHORS.txt  - Authors / contributions
 - CHANGES.txt  - History of versions and changes
-- NOTICE.txt  - Notices and attributions required by libraries depended on
 - pom.xml - maven Project Object Model describing dependencies, build etc.
 - src/main/java/ - Application sources (in SIMcheck/ package)
 - src/main/resources/ - Application resources (IJ menu config, html help text)
@@ -115,7 +113,6 @@ TODO
       - !! Make a 0.95 release ASAP with SIR Fourier fixed !!
         - fix MCM >max / green color bug, ensure camMax pref is saved/reloaded
         - decide on raw Fourier output format (currently montage in standalone)
-        - NOTICE
       - documentation: 
         - make more self-documenting: improve names & log output
         - finish/improve docs, illustrate usage with pictures, examples
