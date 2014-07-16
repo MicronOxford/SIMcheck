@@ -92,7 +92,6 @@ PROJECT STRUCTURE
 - target/ - output SIMcheck_.jar file
 - target/classes/ - build output .class files
 - target/test-classes/ - classes produced by tests
-- docs/ - documentation (output from javadoc)
 
 
 Style Notes
@@ -116,6 +115,7 @@ TODO
       - documentation: 
         - make more self-documenting: improve names & log output
         - finish/improve docs, illustrate usage with pictures, examples
+        - mvn javadoc plugin to generate javadocs?
       - fixes:
         - N-SIM data: report raw 3D SIM data Bio-Formats bug
         - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
