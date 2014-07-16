@@ -16,7 +16,7 @@ The project was recently converted to the maven build and dependency
 management tool (the previous ant build setup is described in the 
 next paragraph below). A solution for local deployment of the latest
 maven build is still being worked on, and there is no Fiji update site
-yet. To build, run
+yet. To build, run the following (.jar file appears in ./target/):-
 
     mvn package
 
@@ -86,18 +86,15 @@ PROJECT STRUCTURE
 - AUTHORS.txt  - Authors / contributions
 - CHANGES.txt  - History of versions and changes
 - NOTICE.txt  - Notices and attributions required by libraries depended on
-- build.xml - ant buildfile
-- lib/ - contains soft links to necessary libraries (i.e. ij.jar)
+- pom.xml - maven Project Object Model describing dependencies, build etc.
 - src/main/java/ - Application sources (in SIMcheck/ package)
 - src/main/resources/ - Application resources (IJ menu config, html help text)
 - src/test/java/ - Test sources
 - src/test/resources/ - Test resources
 - target/ - output SIMcheck_.jar file
-- target/classes/ - for build output .class files
+- target/classes/ - build output .class files
 - target/test-classes/ - classes produced by tests
 - docs/ - documentation (output from javadoc)
-
-Eclipse project created using File->New->Project->from Ant build file
 
 
 Style Notes
@@ -106,7 +103,7 @@ Style Notes
 * simple, modular structure - each check is a standalone plugin
 * plugin exec methods take input images and return ResultSet
   (no GUI calls within exec when easily avoidable)
-* no dependencies other than ImageJ1
+* no dependencies other than ImageJ1, apart from JUnit for testing
 * ImageJ1-like preference for pre- java 5 features (i.e. not many generics)
   and reliance on float primitive type for most calculations
 
@@ -116,9 +113,9 @@ TODO
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - !! Make a 0.95 release ASAP with SIR Fourier fixed !!
-        - decide on raw Fourier output format (currently montage in standalone)
         - fix MCM >max / green color bug, ensure camMax pref is saved/reloaded
-        - AUTHORS & NOTICE
+        - decide on raw Fourier output format (currently montage in standalone)
+        - NOTICE
       - documentation: 
         - make more self-documenting: improve names & log output
         - finish/improve docs, illustrate usage with pictures, examples
