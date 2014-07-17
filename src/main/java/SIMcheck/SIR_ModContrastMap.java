@@ -123,6 +123,7 @@ public class SIR_ModContrastMap implements PlugIn, Executable {
         for (int c = 1; c <= nc; c++) {
             ImagePlus SIRimpC = I1l.copyChannel(SIRimp2, c); 
             ImagePlus MCNimpC = I1l.copyChannel(MCNRimp2, c); 
+            ImagePlus wfImpC = I1l.copyChannel(wfImp, c); 
             StackStatistics stats = new ij.process.StackStatistics(SIRimpC);
             float chMax = (float)stats.max; 
             int slices = SIRimpC.getStack().getSize();
@@ -140,7 +141,7 @@ public class SIR_ModContrastMap implements PlugIn, Executable {
                 ImageStack RGBset = new ImageStack(width, height);  // 1 set
                 // 2. copy scaled values from input Processors to new Processors
                 FloatProcessor wfFp = 
-                        (FloatProcessor)wfImp.getStack().getProcessor(slice);
+                        (FloatProcessor)wfImpC.getStack().getProcessor(slice);
                 scaledRGBintensities(SIRfp, MCNRfpRsz, wfFp, chMax,
                         fpRed, fpGrn, fpBlu);
                 // 3. assemble 1 RGBset (3 slices)
