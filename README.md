@@ -110,7 +110,6 @@ TODO
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - !! Make a 0.95 release ASAP with SIR Fourier fixed !!
-        - make sure SIMcheck_ dilaog uses new raw fourier montage, remove old code
         - SIR Fourier, do last rescale before blur
       - documentation: 
         - make more self-documenting: improve names & log output

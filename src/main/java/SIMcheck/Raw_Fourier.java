@@ -56,25 +56,8 @@ public class Raw_Fourier implements PlugIn, Executable {
             		"Error: stack size not consistent with phases/angles.");
             return;                                                             
         }
-        results = exec2(imp);
+        results = exec(imp);
         results.report();
-    }
-
-    /** Execute plugin functionality: perform 2D FFT on each slice after
-     * applying positive 16-bit utility.
-     * @param imps first imp should be input raw SI data ImagePlus
-     * @return ResultSet containing stack after FFT, order same as input
-     */
-    public ResultSet exec(ImagePlus... imps) {
-        ImagePlus imp = imps[0];
-        String title = I1l.makeTitle(imp, "FFT");
-//        imp = Util_Rescale.exec(imp);        
-        imp = FFT2D.fftImp(imp);
-        imp.setTitle(title);
-        results.addImp("Raw data 2D FFT ", imp);
-        results.addInfo("Fourier-transformed raw data", 
-                "check for clean 1st & 2nd order spots");
-        return results;
     }
 
     /** Execute plugin functionality (old version): split angles into separate
@@ -82,7 +65,7 @@ public class Raw_Fourier implements PlugIn, Executable {
      * @param imps first imp should be input raw SI data ImagePlus
      * @return ResultSet containing FFTs for each angle
      */
-    public ResultSet exec2(ImagePlus... imps) {
+    public ResultSet exec(ImagePlus... imps) {
         ImagePlus imp = imps[0];
         ImagePlus montage = null;
         StackCombiner comb = new StackCombiner();
