@@ -225,6 +225,7 @@ public class SIR_Fourier implements PlugIn, Executable {
         int ns = imp.getStackSize();
         GaussianBlur gblur = new GaussianBlur();
         gblur.showProgress(false);
+        // FIXME!! do blur after rescaling
         for (int s = 1; s <= ns; s++) {
             imp.setSlice(s);
             if (applyGaussBlur) {
