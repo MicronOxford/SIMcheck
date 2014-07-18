@@ -240,37 +240,14 @@ public class SIR_Fourier implements PlugIn, Executable {
             double max = (double)stats.max;
             ByteProcessor bp = (ByteProcessor)imp.getProcessor();
             ImageProcessor ip = 
-                    (ImageProcessor)setBPminMax(bp, (int)min, (int)max, 255);
+                    (ImageProcessor)I1l.setBPminMax(
+                            bp, (int)min, (int)max, 255);
             imp.setProcessor(ip);
             IJ.showProgress(s, ns);
         }
         return imp;
     }
     
-    /** Set ByteProcessor range min to inMax to output range 0 to outMax. */
-    private ByteProcessor setBPminMax(ByteProcessor bp, 
-            int min, int inMax, int outMax) {
-        if (min < 0 || inMax > 255 || outMax > 255) {
-            throw new IllegalArgumentException("invalid min or max for 8-bit");
-        }
-        byte[] bpix = (byte[])bp.getPixels();
-        int range = inMax - min; 
-        for (int i = 0; i < bpix.length; i++) {
-            int scaledPix = (int)bpix[i] & 0xff;
-            if (scaledPix > inMax) {
-                scaledPix = inMax;
-            }
-            scaledPix -= min;
-            if (scaledPix < 0) {
-                scaledPix = 0;
-            }
-            scaledPix = (int)(outMax * ((double)scaledPix / range));
-            bpix[i] = (byte)scaledPix;
-        }
-        bp.setPixels(bpix);
-        return bp;
-    }
-  
     /** 
      * Overlay resolution rings on each slice of a Fourier ImagePlus. 
      *  NB. raw (non-FFT) imp is required for original calibrations.

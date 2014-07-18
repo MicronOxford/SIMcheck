@@ -241,6 +241,13 @@ public final class I1l {
         return maskedIp.getStatistics();
     }
     
+    /** Get ImageStatistics for a single channel of an ImagePlus. */
+    public static ImageStatistics getStatsForChannel(
+            ImagePlus imp, int channel) {
+        ImagePlus impC = I1l.copyChannel(imp, channel);
+        return impC.getStatistics();
+    }
+    
     /** Filter peaks based on Fourier radial position (freq) rMin to rMax */
     public static Polygon filterPeaksRadial(Polygon peaks, Calibration cal, 
             int w, int h, double rMin, double rMax) {
@@ -336,6 +343,43 @@ public final class I1l {
             }
         }
         return abOut;
+    }
+    
+    /** Rescale an 8-bit stack to range 0-255 for input range min to max. */
+    public static void rescale8bitToMinMax(
+            ImagePlus imp, double min, double max) {
+        int nSlices = imp.getStackSize();
+        for (int s = 1; s <= nSlices; s++) {
+            imp.setSlice(s);
+            ByteProcessor bp = (ByteProcessor)imp.getProcessor();
+            ImageProcessor ip = 
+                    (ImageProcessor)setBPminMax(bp, (int)min, (int)max, 255);
+            imp.setProcessor(ip);
+        }
+    }
+    
+    /** Set ByteProcessor range min to inMax to output range 0 to outMax. */
+    public static ByteProcessor setBPminMax(ByteProcessor bp, 
+            int min, int inMax, int outMax) {
+        if (min < 0 || inMax > 255 || outMax > 255) {
+            throw new IllegalArgumentException("invalid min or max for 8-bit");
+        }
+        byte[] bpix = (byte[])bp.getPixels();
+        int range = inMax - min; 
+        for (int i = 0; i < bpix.length; i++) {
+            int scaledPix = (int)bpix[i] & 0xff;
+            if (scaledPix > inMax) {
+                scaledPix = inMax;
+            }
+            scaledPix -= min;
+            if (scaledPix < 0) {
+                scaledPix = 0;
+            }
+            scaledPix = (int)(outMax * ((double)scaledPix / range));
+            bpix[i] = (byte)scaledPix;
+        }
+        bp.setPixels(bpix);
+        return bp;
     }
     
     /**

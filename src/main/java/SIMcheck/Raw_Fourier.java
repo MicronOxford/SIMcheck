@@ -21,6 +21,7 @@ import java.awt.image.ColorModel;
 
 import ij.*;
 import ij.plugin.*;
+import ij.process.ImageStatistics;
 import ij.gui.GenericDialog; 
 import ij.IJ;
 
@@ -67,7 +68,7 @@ public class Raw_Fourier implements PlugIn, Executable {
     public ResultSet exec(ImagePlus... imps) {
         ImagePlus imp = imps[0];
         String title = I1l.makeTitle(imp, "FFT");
-        imp = Util_Rescale.exec(imp);        
+//        imp = Util_Rescale.exec(imp);        
         imp = FFT2D.fftImp(imp);
         imp.setTitle(title);
         results.addImp("Raw data 2D FFT ", imp);
@@ -83,7 +84,6 @@ public class Raw_Fourier implements PlugIn, Executable {
      */
     public ResultSet exec2(ImagePlus... imps) {
         ImagePlus imp = imps[0];
-        imp = Util_Rescale.exec(imp);
         ImagePlus montage = null;
         StackCombiner comb = new StackCombiner();
         for (int a = 1; a <= angles; a++) {
@@ -97,11 +97,18 @@ public class Raw_Fourier implements PlugIn, Executable {
           	impCurrentA.setTitle(title);
           	IJ.run(impCurrentA, "Z Project...", "projection=[Max Intensity]");
           	impCurrentA = ij.WindowManager.getCurrentImage();
-          	for (int c = 1; c <= impCurrentA.getNChannels(); c++) {
-          	    impCurrentA.setC(c);
-          	    IJ.run(impCurrentA, "Enhance Contrast", "saturated=0.35");
-          	    I1l.drawLabel(impCurrentA, "A" + a);
+          	int nChannels = impCurrentA.getNChannels();
+          	ImagePlus[] impChannels = new ImagePlus[nChannels];
+          	for (int c = 1; c <= nChannels; c++) {
+          	    ImagePlus impC = I1l.copyChannel(impCurrentA, c);
+          	    ImageStatistics stats = impC.getStatistics();
+          	    double newMin = stats.dmode - stats.stdDev;
+          	    I1l.rescale8bitToMinMax(impC, newMin, stats.max);
+          	    I1l.drawLabel(impC, "A" + a);
+          	    impChannels[c - 1] = impC;
           	}
+          	impCurrentA.close();
+          	impCurrentA = I1l.mergeChannels("FFT_A" + a, impChannels);
           	impCurrentA.setC(1);
           	if (a == 1) {
           	    montage = impCurrentA.duplicate();
@@ -112,18 +119,19 @@ public class Raw_Fourier implements PlugIn, Executable {
           	}
           	impCurrentA.close();
         }
-        if (montage.isComposite()) {
-            CompositeImage cim = (CompositeImage)montage;
-            cim.setMode(CompositeImage.GRAYSCALE);
-        } else {
-            ColorModel cm = ij.LookUpTable.createGrayscaleColorModel(false);
-            montage.getStack().setColorModel(cm);
-        }
+        IJ.run(montage, "Grays", "");
         montage.setTitle(I1l.makeTitle(imps[0], "FTA1-" + angles));
       	results.addImp("2D FFT montage for angles 1-" + angles, montage);
         results.addInfo("Fourier-transformed raw data", 
                 "check for clean 1st & 2nd order spots");
         return results;
+    }
+    
+    /** Interactive test method */
+    public static void main(String[] args) {
+        new ImageJ();
+        TestData.raw.show();
+        IJ.runPlugIn(Raw_Fourier.class.getName(), "");
     }
 }
 
