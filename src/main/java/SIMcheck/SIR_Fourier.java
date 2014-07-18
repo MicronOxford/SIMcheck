@@ -225,23 +225,20 @@ public class SIR_Fourier implements PlugIn, Executable {
         int ns = imp.getStackSize();
         GaussianBlur gblur = new GaussianBlur();
         gblur.showProgress(false);
-        // FIXME!! do blur after rescaling
         for (int s = 1; s <= ns; s++) {
             imp.setSlice(s);
+            ImageProcessor ip = imp.getProcessor();
+            ImageStatistics stats = imp.getProcessor().getStatistics();
+            int min = (int)stats.min;
+            if (autoScale) {
+                min = (int)stats.mode;
+            }
+            int max = (int)stats.max;
+            ByteProcessor bp = (ByteProcessor)imp.getProcessor();
+            ip = (ImageProcessor)I1l.setBPminMax(bp, min, max, 255);
             if (applyGaussBlur) {
-                ImageProcessor ip = imp.getProcessor();
                 gblur.blurGaussian(ip, blurRadius, blurRadius, 0.002);
             }
-            ImageStatistics stats = imp.getProcessor().getStatistics();
-            double min = (double)stats.min;
-            if (autoScale) {
-                min = (double)stats.mode;
-            }
-            double max = (double)stats.max;
-            ByteProcessor bp = (ByteProcessor)imp.getProcessor();
-            ImageProcessor ip = 
-                    (ImageProcessor)I1l.setBPminMax(
-                            bp, (int)min, (int)max, 255);
             imp.setProcessor(ip);
             IJ.showProgress(s, ns);
         }

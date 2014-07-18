@@ -110,7 +110,10 @@ TODO
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - !! Make a 0.95 release ASAP with SIR Fourier fixed !!
-        - SIR Fourier, do last rescale before blur
+        - check latest Fourier fixes
+        - check format conversion utility
+        - check renaming / log output tweaks
+        - change camMax to camBitDepth?
       - documentation: 
         - make more self-documenting: improve names & log output
         - finish/improve docs, illustrate usage with pictures, examples
