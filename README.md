@@ -110,24 +110,47 @@ TODO
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - !! Make a 0.95 release ASAP with SIR Fourier fixed !!
-        - check latest Fourier fixes
-        - check format conversion utility
-        - check renaming / log output tweaks
+        - SIR Fourier:
+          - Show axial FFT
+          - Window Function / suppress edge artifacts
+          - Auto-scale FFT (Mode-Max)
+          - Blur & False-color LUT
+        - SIR Fourier: rescale stack max to 255
+
+        - crop:-
+          - check multi-channel composite images
+          - default to all if no ROI
+          - move to separate utility?
+        - check pattern focus:-
+          - hide intermediate windows by default
+          - radians: need to add 90 to results of rad->deg?
+        - SIR hist: log number of pixels, tweak text (see Lothar 16/7,
+                    'Skype today at 3pm?')
+        - check format conversion utility (see Justin)
         - change camMax to camBitDepth?
+        - check renaming / log output tweaks (see Justin)
+
       - documentation: 
         - make more self-documenting: improve names & log output
         - finish/improve docs, illustrate usage with pictures, examples
         - mvn javadoc plugin to generate javadocs?
       - fixes:
         - N-SIM data: report raw 3D SIM data Bio-Formats bug
+        - angle labels etc. should be overlaid, not drawn
+        - 'SIR data Z minimum variance': make more robust, or move to cal?
         - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
         - Wiener filter parameter estimate - calibrate, document
       - features:
         - raw data angle difference (floaty): RMS error? (at least some stat)
-        - SIR Fourier pattern angles (use "SIMcheck.angle1" pref), profiles
+        - SIR Fourier:-
+          - lat: pattern angles (use "SIMcheck.angle1" pref), 3 color profiles
+          - axial FFT: project over central slice range, not just 1
+          - axial FFT: profile plot?
+          - option to not discard negatives before FFT?
         - report per. angle modulation contrast and/or minimum of these?
         - project and/or montage Raw FFT to present as 1 image
           - OR, remove raw FFT from raw checks / just for calibration?
+        - raw Fourier central Z: explain /annotate output
       - tests, structure:
         - final empirical tests, param calibration, tolerances etc.
         - tidy up tests:
