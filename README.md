@@ -110,11 +110,6 @@ TODO
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - !! Make a 0.95 release ASAP with SIR Fourier fixed !!
-        - SIR Fourier:
-          - Show axial FFT
-          - Window Function / suppress edge artifacts
-          - Auto-scale FFT (Mode-Max)
-          - Blur & False-color LUT
         - SIR Fourier: rescale stack max to 255
 
         - crop:-

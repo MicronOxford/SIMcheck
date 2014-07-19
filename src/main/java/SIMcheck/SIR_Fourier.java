@@ -49,9 +49,8 @@ public class SIR_Fourier implements PlugIn, Executable {
     // options
     public boolean showAxial = false;  // show axial FFT? 
     public boolean applyWinFunc = true;  // apply window function?
-    public boolean applyGaussBlur = true;  // gaussian blur result?
     public boolean autoScale = true;  // re-scale to mode->max?
-    public boolean falseColor = true;  // apply false color LUT?
+    public boolean blurAndLUT = true;  // blur & apply false color LUT?
     
     @Override
     public void run(String arg) {
@@ -59,17 +58,16 @@ public class SIR_Fourier implements PlugIn, Executable {
         GenericDialog gd = new GenericDialog("SIR_Fourier");
         imp.getWidth();
         gd.addCheckbox("Show axial FFT", showAxial);
-        gd.addCheckbox("Window Function", applyWinFunc);
-        gd.addCheckbox("Gaussian Blur", applyGaussBlur);
+        gd.addCheckbox("Window Function**", applyWinFunc);
         gd.addCheckbox("Auto-scale (mode-max)", autoScale);
-        gd.addCheckbox("False-color LUT", falseColor);
+        gd.addCheckbox("Blur & False-color LUT", blurAndLUT);
+        gd.addMessage("** suppress edge artifacts");
         gd.showDialog();
         if (gd.wasOKed()) {
             this.showAxial = gd.getNextBoolean();
             this.applyWinFunc = gd.getNextBoolean();
-            this.applyGaussBlur = gd.getNextBoolean();
             this.autoScale = gd.getNextBoolean();
-            this.falseColor = gd.getNextBoolean();
+            this.blurAndLUT = gd.getNextBoolean();
             if (!applyWinFunc) {
                 winFraction = 0.0d;
             }
@@ -214,7 +212,7 @@ public class SIR_Fourier implements PlugIn, Executable {
 
     /** Optional gaussian blur, and select lower end of intensity range. */
     private void setLUT(ImagePlus imp) {
-        if (falseColor) {
+        if (blurAndLUT) {
             double[] displayRange = {0.0d, 255.0d};  // show all
             I1l.applyLUT(imp, fourierLUT, displayRange);
         }
@@ -236,7 +234,7 @@ public class SIR_Fourier implements PlugIn, Executable {
             int max = (int)stats.max;
             ByteProcessor bp = (ByteProcessor)imp.getProcessor();
             ip = (ImageProcessor)I1l.setBPminMax(bp, min, max, 255);
-            if (applyGaussBlur) {
+            if (blurAndLUT) {
                 gblur.blurGaussian(ip, blurRadius, blurRadius, 0.002);
             }
             imp.setProcessor(ip);
