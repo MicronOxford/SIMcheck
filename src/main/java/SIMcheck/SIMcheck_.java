@@ -160,17 +160,24 @@ public class SIMcheck_ implements PlugIn {
             impRaw = formatConverter.exec(
                     impRaw, phases, angles, formatChoice - 1);
         }
-        if (!I1l.stackDivisibleBy(impRaw, phases * angles)) {
+        if (impRaw != null && !I1l.stackDivisibleBy(impRaw, phases * angles)) {
             IJ.log("  ! invalid raw SI data - raw data checks aborted");
             impRaw = null;
         }
-        if (doCrop && impRecon != null && impRecon.getRoi() != null) {
-            // Do recon image crop
+        if (doCrop && impRecon != null) {
             Roi roi = impRecon.getRoi();
-            crop.x = roi.getBounds().x;
-            crop.y = roi.getBounds().y;
-            crop.w = roi.getBounds().width;
-            crop.h = roi.getBounds().height;
+            if (impRecon.getRoi() == null) {
+                crop.x = 0;
+                crop.y = 0;
+                crop.w = impRecon.getWidth();
+                crop.h = impRecon.getHeight();
+            } else {
+                crop.x = roi.getBounds().x;
+                crop.y = roi.getBounds().y;
+                crop.w = roi.getBounds().width;
+                crop.h = roi.getBounds().height;
+            }
+            // Do recon image crop
             IJ.log("\n      Cropping to Reconstructed image ROI:");
             IJ.log("        x, y, width, height = " + crop.x + ", " + crop.y +
                     ", " + crop.w + ", " + crop.h);

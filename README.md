@@ -112,7 +112,6 @@ TODO
       - !! Make a 0.95 release ASAP with SIR Fourier fixed !!
         - crop:-
           - check multi-channel composite images
-          - default to all if no ROI
           - move to separate utility?
         - check pattern focus:-
           - hide intermediate windows by default
