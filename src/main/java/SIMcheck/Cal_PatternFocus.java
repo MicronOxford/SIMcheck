@@ -46,7 +46,7 @@ public class Cal_PatternFocus implements PlugIn, Executable {
 	// parameter fields
 	public int phases = 5;
 	public int angles = 3;
-	public double angle1 = 0.00d;  // 1st illumination pattern angle in degrees
+	public double angle1 = 0.00d;  // 1st pattern angle (IJ: deg CCW from E)
 	public String angleMethod = angleMethods[0];
 	public boolean showRotated = false;
 	
@@ -57,10 +57,10 @@ public class Cal_PatternFocus implements PlugIn, Executable {
         gd.addMessage("Requires SI raw data in API OMX (CPZAT) order.");
         gd.addNumericField("Angles", angles, 1);
         gd.addNumericField("Phases", phases, 1);
-        // NB. in IJ, E is 0, in worx N is 0 (CCW is +ve in both cases)
+        // NB. in IJ, East is 0, in worx North is 0 (CCW is +ve in both cases)
         angle1 = ij.Prefs.get("SIMcheck.angle1", angle1);
         gd.addNumericField("Angle 1 (deg, IJ)", angle1, 1);
-        gd.addNumericField("Angle 1 (rad, OMX)", Math.toRadians(angle1), 2);
+        gd.addNumericField("Angle 1 (rad, OMX)", ij2omx(angle1), 2);
         gd.addRadioButtonGroup("Method to specify angle", angleMethods,
                 1, angleMethods.length, angleMethods[0]);
         gd.addCheckbox("Show rotated illumination patterns?", showRotated);
@@ -73,8 +73,9 @@ public class Cal_PatternFocus implements PlugIn, Executable {
             phases = (int)gd.getNextNumber();
             if (angleMethod.equals(angleMethods[0])) {
                 angle1 = (double)gd.getNextNumber();
-            } else if (angleMethod.equals(angleMethods[0])) {
-                angle1 = Math.toDegrees((double)gd.getNextNumber());
+            } else if (angleMethod.equals(angleMethods[1])) {
+                gd.getNextNumber();  // angle in degrees: discard!
+                angle1 = omx2ij((double)gd.getNextNumber());
             } else {
                 angle1 = imp.getRoi().getAngle();
             }
@@ -96,6 +97,7 @@ public class Cal_PatternFocus implements PlugIn, Executable {
      * @return ResultSet containing 3 projections
      */
     public ResultSet exec(ImagePlus... imps) {
+        IJ.log("exec got angle1=" + angle1);
         ImagePlus imp = imps[0];
         width = imp.getWidth();
         height = imp.getHeight();
@@ -188,11 +190,39 @@ public class Cal_PatternFocus implements PlugIn, Executable {
         impResliced.close();
         return impProjected;
     }
+
+    /** Convert ImageJ angle (degrees CCW from E) to OMX (rad CCW from N). */
+    private static double ij2omx(double angle) {
+        return Math.toRadians(angle - 90.0d);
+    }
+    
+    /** Convert OMX angle (radians CCW from N) to IJ (deg CCW from E). */
+    private static double omx2ij(double angle) {
+        double angleDeg = Math.toDegrees(angle) + 90.0d;
+        if (angleDeg < 0.0d) {
+            return 180.0d + angleDeg;
+        } else {
+            return angleDeg;
+        }
+    }
     
     /** Unit test runner for private methods, returns true if all OK. */
     boolean test(boolean verbose) {
-        boolean pass = true;
-        return pass;
+        boolean passAll = true;
+        double[] omxAngles = {-0.84d, -1.88d, 0.20d};
+        double[] ijAngles = {42.0d, 162.0d, 102.0d};
+        if (verbose) { IJ.log("* testing ij2omx() and omx2ij() conversions:"); }
+        for (int i = 0; i < ijAngles.length; i++) {
+            boolean pass = JM.approxEq(ijAngles[i], omx2ij(omxAngles[i]));
+            // ij2omx is complicated to test: may not give angle with same sign
+            if (verbose) {
+                IJ.log(ijAngles[i] + " -> ij2omx -> " + ij2omx(ijAngles[i]));
+                IJ.log(omxAngles[i] + " -> omx2ij -> " + omx2ij(omxAngles[i]));
+                IJ.log(ijAngles[i] + "deg ~= " + omxAngles[i] + "rad? " + pass);
+            }
+            passAll = passAll && pass;
+        }
+        return passAll;
     }
     
     /** Interactive test method. */
@@ -205,3 +235,4 @@ public class Cal_PatternFocus implements PlugIn, Executable {
     }
     
 }
+

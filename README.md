@@ -112,8 +112,6 @@ TODO
       - !! Make a 0.95 release ASAP with SIR Fourier fixed !!
         - crop:-
           - move to separate utility?
-        - check pattern focus:-
-          - radians: need to add 90 to results of rad->deg?
         - SIR hist: log number of pixels, tweak text (see Lothar 16/7,
                     'Skype today at 3pm?')
         - check format conversion utility (see Justin)
@@ -127,6 +125,7 @@ TODO
       - fixes:
         - N-SIM data: report raw 3D SIM data Bio-Formats bug
         - ensure all hyperstack results are CompositeImage instances?
+        - change all "API" references to "OMX"
         - angle labels etc. should be overlaid, not drawn
         - 'SIR data Z minimum variance': make more robust, or move to cal?
         - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
@@ -139,8 +138,6 @@ TODO
           - axial FFT: profile plot?
           - option to not discard negatives before FFT?
         - report per. angle modulation contrast and/or minimum of these?
-        - project and/or montage Raw FFT to present as 1 image
-          - OR, remove raw FFT from raw checks / just for calibration?
         - raw Fourier central Z: explain /annotate output
       - tests, structure:
         - final empirical tests, param calibration, tolerances etc.
