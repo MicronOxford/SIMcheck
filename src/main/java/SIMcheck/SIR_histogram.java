@@ -37,6 +37,9 @@ public class SIR_histogram implements PlugIn, Executable {
     // parameter fields
     public double percentile = 0.01;  // use 0-100% of histogram extrema
     public double modeTol = 0.25;  // mode should be within modeTol*stdev of 0
+    
+    private int nNegPixels = 0;
+    private int nPosPixels = 0;
 
     @Override
     public void run(String arg) {
@@ -71,6 +74,8 @@ public class SIR_histogram implements PlugIn, Executable {
                         + " intensities for channel " + c;
                 results.addStat(statDescription, 
                         (double)((int)(posNegRatio * 10)) / 10);
+                results.addInfo("pixels above / below mode (Ch " + c + "): ",
+                        nNegPixels + "/" + nPosPixels);
                 
             } else {
                 results.addInfo("  ! histogram minimum above mode for channel "
@@ -98,7 +103,7 @@ public class SIR_histogram implements PlugIn, Executable {
      * @param pc (0-1) fraction of histogram to use at lower AND upper ends
      * @return (Imax - Imode) / (Imode - Imin), i.e. positive / negative ratio 
      */
-    static double calcPosNegRatio(ImageStatistics stats, double pc) {
+    double calcPosNegRatio(ImageStatistics stats, double pc) {
         int[] hist = stats.histogram;
         // find hist step (bin size), and number of pixels in image 
         double histStep = (stats.histMax - stats.histMin)
@@ -131,16 +136,15 @@ public class SIR_histogram implements PlugIn, Executable {
             binValue -= histStep;
         }
         // uncomment to check actual histogram bins used (pc and pixels)
-        //IJ.log("final negPc=" + negPc + ", posPc=" + posPc);
-        //IJ.log("      (" + (negPc * nPixels) +
-        //        ", " + (posPc * nPixels) + " pix)");
+        nNegPixels = (int)(negPc * nPixels);
+        nPosPixels = (int)(posPc * nPixels);
         // since negTotal may or may not be negative...
         double posNegRatio = Math.abs(posTotal / negTotal);  
         return posNegRatio;
     }
 
     /** test private methods, return true if all OK */
-    static boolean selfTest(boolean verbose) {
+    static boolean test(boolean verbose) {
         // test calcPosNegRatio() using image with a few high and low pixels
         ImagePlus imp = IJ.createImage("stripe", "8-bit black", 64, 64, 1);
         ImageProcessor ip = imp.getProcessor();
@@ -154,12 +158,15 @@ public class SIR_histogram implements PlugIn, Executable {
         imp.setProcessor(ip);
         IJ.run(imp, "Select All", "");
         ImageStatistics stats = new StackStatistics(imp);
-        double pnRatio = calcPosNegRatio(stats, 0.005);
+        SIR_histogram plugin = new SIR_histogram();
+        double pnRatio = plugin.calcPosNegRatio(stats, 0.005);
         if (verbose) {
             System.out.println("hist: " + Arrays.toString(stats.histogram));
             System.out.println("min; mode; max = " +
                     stats.histMin + "; " + stats.dmode + "; " + stats.histMax);
             System.out.println("pnRatio = " + pnRatio);
+            System.out.println("nNegPixels = " + plugin.nNegPixels);
+            System.out.println("nPosPixels = " + plugin.nPosPixels);
             imp.show();
         } else {
             imp.close();
@@ -171,7 +178,7 @@ public class SIR_histogram implements PlugIn, Executable {
 
     /** Call selfTest */
     public static void main(String[] args) {
-        System.out.println("selfTest successful? " + selfTest(true));
+        System.out.println("selfTest successful? " + test(true));
     }
     
     /** Extend ImageJ HistogramWindow for auto log scaling and stack stats. */
