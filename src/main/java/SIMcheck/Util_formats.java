@@ -55,9 +55,13 @@ public class Util_formats implements PlugIn {
             angles = (int)gd.getNextNumber();                                   
             phases = (int)gd.getNextNumber();                                   
             formatChoice = gd.getNextChoiceIndex();
-        }                                                                       
-        ImagePlus convertedImp = exec(imp, phases, angles, formatChoice);
-        convertedImp.show();
+        } 
+        try {
+            ImagePlus convertedImp = exec(imp, phases, angles, formatChoice);
+            convertedImp.show();
+        } catch (IllegalArgumentException e) {
+            IJ.showMessage("Bad input", e.getMessage());
+        }
     }
 
     /** Execute plugin functionality:
@@ -97,13 +101,14 @@ public class Util_formats implements PlugIn {
     private void convertELYRA() {
         // ELYRA data, angles and phases encoded in time dimension
         // FIXME: recent .czi have ZA in Z, P in time
-        if (nt < phases * angles) {
-            String problem = "Expected ELYRA .czi with phase/angle in time dim";
-            IJ.log(problem);
-            throw new IllegalArgumentException(problem);
+        if (nt % phases != 0 || nz % angles != 0) {
+            String issue = "For raw ELYRA data expect phases in T, angles in Z";
+            IJ.log(issue);
+            throw new IllegalArgumentException(issue);
         }
         // remove phases & angles for true number of frames
-        nt = nt / (phases * angles);
+        nt /= phases;
+        nz /= angles;
         this.outStack = new ImageStack(width, height);
         // loop through in desired output order: OMX API (CPZAT)
         for (int t = 1; t <= nt; t++) {
@@ -113,7 +118,7 @@ public class Util_formats implements PlugIn {
                         for (int c = 1; c <= nc; c++) {
                             // Zeiss ELYRA (CZTAP)
                             int inSlice = I1l.stackSliceNo( 
-                                    c, nc, z, nz, t, nt, a, angles, p, phases);
+                                    c, nc, z, nz, a, angles, p, phases, t, nt);
                             ImageProcessor ip = inStack.getProcessor(inSlice);
                             outStack.addSlice(ip);
                         }
