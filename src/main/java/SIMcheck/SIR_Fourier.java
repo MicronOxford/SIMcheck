@@ -123,9 +123,11 @@ public class SIR_Fourier implements PlugIn, Executable {
             calOrtho.pixelHeight = calOrtho.pixelWidth;  // after resizeAndPad
             impOrthoF = overlayResRings(impOrthoF, calOrtho);
             I1l.copyStackDims(imps[0], impOrthoF);
+            impOrthoF.setPosition(1, impF.getNSlices() / 2, 1);
             impOrthoF.setTitle(I1l.makeTitle(imps[0], "FTO"));
             results.addImp("orthogonal / axial (XZ)", impOrthoF);
         }
+        impF.setPosition(1, impF.getNSlices() / 2, 1);
         results.addInfo(
             "Fourier plots (XY, and optionally XZ)", 
             " to check for artifacts and assess average resolution\n"
