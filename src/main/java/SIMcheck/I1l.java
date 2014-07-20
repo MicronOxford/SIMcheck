@@ -48,8 +48,7 @@ public final class I1l {
      */
     public static void applyLUT(ImagePlus imp, 
             IndexColorModel cm, double[] displayRange ) {
-        if (imp.isComposite() && 
-                ((CompositeImage)imp).getMode() == CompositeImage.GRAYSCALE) {
+        if (imp.isComposite()) {
             CompositeImage cimp = (CompositeImage)imp;
             cimp.setMode(CompositeImage.COLOR);
             int saveC = cimp.getChannel();
@@ -59,14 +58,14 @@ public final class I1l {
             }
             imp.setC(saveC);
         } else {
-            ImageProcessor ip = imp.getChannelProcessor();
-            if (imp.isComposite()) {
-                ((CompositeImage)imp).setChannelColorModel(cm);
+            if (imp.getStackSize() > 1) {
+                ImageStack stack = imp.getStack();
+                stack.setColorModel(cm);
+                imp.setStack(stack);
             } else {
+                ImageProcessor ip = imp.getProcessor();
                 ip.setColorModel(cm);
-            }
-            if (imp.getStackSize()>1) {
-                imp.getStack().setColorModel(cm);
+                imp.setProcessor(ip);
             }
         }
         imp.setDisplayRange(displayRange[0], displayRange[1]);

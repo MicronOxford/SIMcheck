@@ -90,6 +90,9 @@ public class SIR_Fourier implements PlugIn, Executable {
         blurRadius *= (double)impF.getWidth() / 512.0d;
         IJ.showStatus("Blurring & rescaling slices (lateral view)");
         impF = displaySettings(impF);  
+        if (imps[0].isComposite()) {
+            impF = new CompositeImage(impF);
+        }
         setLUT(impF);
         impF = overlayResRings(impF, cal);
         I1l.copyStackDims(imps[0], impF);
@@ -113,6 +116,7 @@ public class SIR_Fourier implements PlugIn, Executable {
             IJ.showStatus("Blurring & rescaling slices (orthogonal view)");
             impOrthoF = displaySettings(impOrthoF);
             impOrthoF = resizeAndPad(impOrthoF, cal);
+            // TODO, for multi-frame images, ensure impOrthoF is composite
             setLUT(impOrthoF);
             calOrtho.pixelHeight = calOrtho.pixelWidth;  // after resizeAndPad
             impOrthoF = overlayResRings(impOrthoF, calOrtho);
