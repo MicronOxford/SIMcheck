@@ -110,8 +110,6 @@ TODO
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - !! Make a 0.95 release ASAP with SIR Fourier fixed !!
-        - SIR Fourier: rescale stack max to 255
-
         - crop:-
           - check multi-channel composite images
           - default to all if no ROI
