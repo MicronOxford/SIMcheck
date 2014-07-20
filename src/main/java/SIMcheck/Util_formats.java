@@ -96,6 +96,7 @@ public class Util_formats implements PlugIn {
     /** Convert ELYRA data (CZTAP order) to OMX order (CPZAT) */
     private void convertELYRA() {
         // ELYRA data, angles and phases encoded in time dimension
+        // FIXME: recent .czi have ZA in Z, P in time
         if (nt < phases * angles) {
             String problem = "Expected ELYRA .czi with phase/angle in time dim";
             IJ.log(problem);

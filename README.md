@@ -110,7 +110,10 @@ TODO
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - !! Make a 0.95 release ASAP with SIR Fourier fixed !!
-        - check format conversion utility (see Justin)
+        - ELYRA format:
+          - fix raw data conversion (A in Z, P in T)
+          - document that reconstructed image should be taken from czi
+            (processed data have 3 channels: recon, decon pseudoWF, WF)
         - SIR hist: log number of pixels, tweak text (see Lothar 16/7,
                     'Skype today at 3pm?')
         - change camMax to camBitDepth?
@@ -130,6 +133,7 @@ TODO
         - 'SIR data Z minimum variance': make more robust, or move to cal?
         - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
         - Wiener filter parameter estimate - calibrate, document
+        - N-SIM format: add support for time
       - features:
         - raw data angle difference (floaty): RMS error? (at least some stat)
         - SIR Fourier:-
