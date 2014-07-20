@@ -93,6 +93,7 @@ public class SIR_Fourier implements PlugIn, Executable {
         if (imps[0].isComposite()) {
             impF = new CompositeImage(impF);
         }
+        rescale(impF);
         setLUT(impF);
         impF = overlayResRings(impF, cal);
         I1l.copyStackDims(imps[0], impF);
@@ -117,6 +118,7 @@ public class SIR_Fourier implements PlugIn, Executable {
             impOrthoF = displaySettings(impOrthoF);
             impOrthoF = resizeAndPad(impOrthoF, cal);
             // TODO, for multi-frame images, ensure impOrthoF is composite
+            rescale(impOrthoF);
             setLUT(impOrthoF);
             calOrtho.pixelHeight = calOrtho.pixelWidth;  // after resizeAndPad
             impOrthoF = overlayResRings(impOrthoF, calOrtho);
@@ -133,6 +135,24 @@ public class SIR_Fourier implements PlugIn, Executable {
             + "  - asymmetric FFT indicates decreased resolution due to: angle to angle intensity\n"
             + "    variations, angle-specific k0 error, or angle-specific z-modulation issues\n");
         return results;
+    }
+    
+    /** Rescale 8-bit image to fill up to max 255. */
+    private void rescale(ImagePlus imp) {
+        int nc = imp.getNChannels();
+        ImagePlus[] imps = new ImagePlus[nc];
+        for (int c = 0; c < nc; c++) {
+            imps[c] = I1l.copyChannel(imp, c + 1);
+            StackStatistics stats = new StackStatistics(imps[c]);
+            int ns = imps[c].getStackSize();
+            for (int s = 1; s <= ns; s++) {
+                imps[c].setSlice(s);
+                ByteProcessor bp = (ByteProcessor)imps[c].getProcessor();
+                bp = I1l.setBPminMax(bp, 0, (int)stats.max, 255);
+                imps[c].setProcessor((ImageProcessor)bp);
+            }
+        }
+        imp.setStack(I1l.mergeChannels("impsMerged", imps).getStack());
     }
     
     /** Make a (sub)HyperStack comprising just the central Z slice */
