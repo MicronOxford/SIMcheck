@@ -17,7 +17,6 @@
  */ 
 
 package SIMcheck;
-import java.awt.image.ColorModel;
 
 import ij.*;
 import ij.plugin.*;
