@@ -78,6 +78,7 @@ public class Util_formats implements PlugIn {
         this.inStack = imp.getStack();
         this.outStack = null;
         IJ.log("   converting format " + formats[format]);
+        IJ.log("   got dims nc,nz,nt = " + nc + "," + nz + "," + nt);
         if (format == 0) {
             convertELYRA();
         } else if (format == 1) {
@@ -122,7 +123,7 @@ public class Util_formats implements PlugIn {
         }
     }
 
-    /** Convert NSIM data (2D multi-C with tiled P, A) to OMX order (CPZAT) */
+    /** Convert NSIM data (P & A tiled, multiple C & Z) to OMX order (CPZAT). */
     private void convertNSIM() {
         // Nikon N-SIM: phases tiled in X, angles tiled in Y
         // (assuming NISM data are CZT dimension order)
@@ -136,6 +137,10 @@ public class Util_formats implements PlugIn {
         this.outStack = new ImageStack(realWidth, realHeight);
         Duplicator dup = new Duplicator();
         ImagePlus imp = new ImagePlus("raw", inStack);
+        imp.show();  // otherwise imp.setRoi() is ignored :-/
+        ImagePlus impCrop = null;  // for a single output slice
+        // TODO: add outer time (frame) loop
+        int slice = 1;
         for (int a = 1; a <= angles; a++) {
             for (int z = 1; z <= nz; z++) {
                 for (int p = 1; p <= phases; p++) {
@@ -144,12 +149,15 @@ public class Util_formats implements PlugIn {
                         int roiX = realWidth * (p - 1);
                         int roiY = realHeight * (a - 1);
                         imp.setRoi(roiX, roiY, realWidth, realHeight);
-                        String slice = "C" + c + "/P" + p + "/Z" + z + "/A" + a;
-                        outStack.addSlice(slice, 
-                                dup.run(imp, c, c).getStack().getProcessor(1));
+                        imp.updateImage();
+                        String label = "C" + c + "/P" + p + "/Z" + z + "/A" + a;
+                        impCrop = dup.run(imp, c, c, z, z, 1, 1);
+                        outStack.addSlice(impCrop.getProcessor());
+                        outStack.setSliceLabel(label, slice++);
                     }
                 }
             }
-        }   
+        }
+        imp.close();
     }
 }

@@ -110,12 +110,12 @@ TODO
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - !! Make a 0.95 release ASAP with SIR Fourier fixed !!
-        - crop:-
-          - move to separate utility?
+        - check format conversion utility (see Justin)
         - SIR hist: log number of pixels, tweak text (see Lothar 16/7,
                     'Skype today at 3pm?')
-        - check format conversion utility (see Justin)
         - change camMax to camBitDepth?
+        - crop:-
+          - move to separate utility?
         - check renaming / log output tweaks (see Justin, Ian, Lothar)
 
       - documentation: 
