@@ -78,7 +78,6 @@ public class Util_formats implements PlugIn {
         this.inStack = imp.getStack();
         this.outStack = null;
         IJ.log("   converting format " + formats[format]);
-        IJ.log("   got dims nc,nz,nt = " + nc + "," + nz + "," + nt);
         if (format == 0) {
             convertELYRA();
         } else if (format == 1) {
@@ -137,6 +136,7 @@ public class Util_formats implements PlugIn {
         this.outStack = new ImageStack(realWidth, realHeight);
         Duplicator dup = new Duplicator();
         ImagePlus imp = new ImagePlus("raw", inStack);
+        imp.setDimensions(nc, nz, nt);
         imp.show();  // otherwise imp.setRoi() is ignored :-/
         ImagePlus impCrop = null;  // for a single output slice
         // TODO: add outer time (frame) loop
@@ -148,8 +148,8 @@ public class Util_formats implements PlugIn {
                         // rectangular ROIs to copy tiles, coords for top left
                         int roiX = realWidth * (p - 1);
                         int roiY = realHeight * (a - 1);
+                        imp.setPosition(c, z, 1);
                         imp.setRoi(roiX, roiY, realWidth, realHeight);
-                        imp.updateImage();
                         String label = "C" + c + "/P" + p + "/Z" + z + "/A" + a;
                         impCrop = dup.run(imp, c, c, z, z, 1, 1);
                         outStack.addSlice(impCrop.getProcessor());
