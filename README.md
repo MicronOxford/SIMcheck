@@ -110,10 +110,6 @@ TODO
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - !! Make a 0.95 release ASAP with SIR Fourier fixed !!
-        - ELYRA format:
-          - fix raw data conversion (A in Z, P in T)
-          - document that reconstructed image should be taken from czi
-            (processed data have 3 channels: recon, decon pseudoWF, WF)
         - SIR hist: log number of pixels, tweak text (see Lothar 16/7,
                     'Skype today at 3pm?')
         - change camMax to camBitDepth?
@@ -123,17 +119,20 @@ TODO
 
       - documentation: 
         - make more self-documenting: improve names & log output
+        - for ELYRA reconstructed .czi, discard WF and decon-WF
+          (processed data have 3 channels: recon, decon pseudoWF, WF)
         - finish/improve docs, illustrate usage with pictures, examples
         - mvn javadoc plugin to generate javadocs?
       - fixes:
-        - N-SIM data: report raw 3D SIM data Bio-Formats bug
+        - N-SIM data: report raw 3D SIM data Bio-Formats bugs
+          - cannot open Chris / Nikon data
+          - .nd2 from Justin mixes up Z and T
         - ensure all hyperstack results are CompositeImage instances?
         - change all "API" references to "OMX"
         - angle labels etc. should be overlaid, not drawn
         - 'SIR data Z minimum variance': make more robust, or move to cal?
         - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
         - Wiener filter parameter estimate - calibrate, document
-        - N-SIM format: add support for time
       - features:
         - raw data angle difference (floaty): RMS error? (at least some stat)
         - SIR Fourier:-
