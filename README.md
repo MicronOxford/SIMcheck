@@ -111,16 +111,14 @@ TODO
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - !! Make a 0.95 release ASAP with SIR Fourier fixed !!
         - crop:-
-          - check multi-channel composite images
           - move to separate utility?
         - check pattern focus:-
-          - hide intermediate windows by default
           - radians: need to add 90 to results of rad->deg?
         - SIR hist: log number of pixels, tweak text (see Lothar 16/7,
                     'Skype today at 3pm?')
         - check format conversion utility (see Justin)
         - change camMax to camBitDepth?
-        - check renaming / log output tweaks (see Justin)
+        - check renaming / log output tweaks (see Justin, Ian, Lothar)
 
       - documentation: 
         - make more self-documenting: improve names & log output
@@ -128,6 +126,7 @@ TODO
         - mvn javadoc plugin to generate javadocs?
       - fixes:
         - N-SIM data: report raw 3D SIM data Bio-Formats bug
+        - ensure all hyperstack results are CompositeImage instances?
         - angle labels etc. should be overlaid, not drawn
         - 'SIR data Z minimum variance': make more robust, or move to cal?
         - finish & refactor Cal_Phases: unwrap (+test case), stats and structure

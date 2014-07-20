@@ -48,6 +48,7 @@ public class Cal_PatternFocus implements PlugIn, Executable {
 	public int angles = 3;
 	public double angle1 = 0.00d;  // 1st illumination pattern angle in degrees
 	public String angleMethod = angleMethods[0];
+	public boolean showRotated = false;
 	
     @Override
     public void run(String arg) {
@@ -62,6 +63,7 @@ public class Cal_PatternFocus implements PlugIn, Executable {
         gd.addNumericField("Angle 1 (rad, OMX)", Math.toRadians(angle1), 2);
         gd.addRadioButtonGroup("Method to specify angle", angleMethods,
                 1, angleMethods.length, angleMethods[0]);
+        gd.addCheckbox("Show rotated illumination patterns?", showRotated);
         gd.addMessage("** for 1st angle, draw line from bottom to top (0-180)");
         gd.showDialog();
         if (gd.wasCanceled()) return;
@@ -77,6 +79,7 @@ public class Cal_PatternFocus implements PlugIn, Executable {
                 angle1 = imp.getRoi().getAngle();
             }
             ij.Prefs.set("SIMcheck.angle1", angle1);
+            showRotated = gd.getNextBoolean();
         }
         if (!I1l.stackDivisibleBy(imp, phases * angles)) {
             IJ.showMessage( "Calibrate Pattern Focus", 
@@ -106,9 +109,11 @@ public class Cal_PatternFocus implements PlugIn, Executable {
         StackCombiner comb = new StackCombiner();
         for (int a = 0; a < angles; a++) {
             rotateStripes(phase1imps[a], angleDegrees);
-            results.addImp("Angle " + (a + 1) + " rotated SI image (" +
-                    String.format("%.1f", angleDegrees) +
-                    " degrees CCW from E)", phase1imps[a]);
+            if (showRotated) {
+                results.addImp("Angle " + (a + 1) + " rotated SI image (" +
+                        String.format("%.1f", angleDegrees) +
+                        " degrees CCW from E)", phase1imps[a]);
+            }
             phase1imps[a] = resliceAndProject(phase1imps[a].duplicate());
             String label = "A" + (a + 1);
             String title = I1l.makeTitle(imp, "APF" + (a + 1));
