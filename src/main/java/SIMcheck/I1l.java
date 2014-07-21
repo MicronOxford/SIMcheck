@@ -55,6 +55,7 @@ public final class I1l {
             for (int c = 1; c <= cimp.getNChannels(); c++) {
                 cimp.setC(c);
                 cimp.setChannelColorModel(cm);
+                cimp.setDisplayRange(displayRange[0], displayRange[1]);
             }
             imp.setC(saveC);
         } else {
@@ -67,8 +68,8 @@ public final class I1l {
                 ip.setColorModel(cm);
                 imp.setProcessor(ip);
             }
+            imp.setDisplayRange(displayRange[0], displayRange[1]);
         }
-        imp.setDisplayRange(displayRange[0], displayRange[1]);
     }
 
     /** 

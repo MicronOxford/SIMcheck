@@ -21,8 +21,8 @@ package SIMcheck;
 import ij.*;
 import ij.process.*;
 import ij.plugin.*;
-import ij.plugin.HyperStackConverter;
 import ij.gui.GenericDialog;
+
 import java.awt.image.IndexColorModel;
 
 /** This plugin displays a modulation contrast map for raw SI data. 
@@ -244,6 +244,7 @@ public class Raw_ModContrast implements PlugIn, Executable {
         impResult.setT(1);
         impResult.setOpenAsHyperStack(true);
         if (!doRawFourier) {
+            impResult = (ImagePlus)(new CompositeImage(impResult));
             I1l.applyLUT(impResult, mcnrLUT, displayRange);
             results.addImp("modulation contrast-to-noise ratio image", 
                     impResult);
@@ -354,19 +355,31 @@ public class Raw_ModContrast implements PlugIn, Executable {
         }
         return avStack;
     }
+    
+    /** Test private methods. */
+    static boolean test(boolean verbose) {
+        boolean allPass = true;
+        Raw_ModContrast plugin = new Raw_ModContrast();
+        // calcOrderPos
+        int[][] orderVlenPos = new int[][] {  // tests assume phases = 5
+                {0, 15, 0}, {1, 15, 3}, {1, 10, 2}, {2, 15, 6}, {2, 10, 4}};
+        for (int[] OVP : orderVlenPos) {
+            int position = plugin.calcOrderPos(OVP[0], OVP[1]);
+            boolean pass = position == OVP[2];
+            if (verbose) {
+                System.out.printf("  calcOrderPos(%d, %d) -> %d? %s\n",
+                        OVP[0], OVP[1], OVP[2], pass ? "true" : "false");
+            }
+            allPass = allPass && pass;
+        }
+        return allPass;
+    }
 
+    /** Interactive test method. */
     public static void main (String[] args) {
-        Raw_ModContrast raw_mcnr = new Raw_ModContrast();
-        System.out.println("Testing calcOrderPos()");
-        System.out.println("  calcOrderPos(0, 15) -> 0? " 
-                + raw_mcnr.calcOrderPos(0, 15));
-        System.out.println("  calcOrderPos(1, 15) -> 3? " 
-                + raw_mcnr.calcOrderPos(1, 15));
-        System.out.println("  calcOrderPos(1, 10) -> 2? " 
-                + raw_mcnr.calcOrderPos(1, 10));
-        System.out.println("  calcOrderPos(2, 15) -> 6? " 
-                + raw_mcnr.calcOrderPos(2, 15));
-        System.out.println("  calcOrderPos(2, 10) -> 4? " 
-                + raw_mcnr.calcOrderPos(2, 10));
+        IJ.log("All private methods test OK? " + test(true));
+        new ImageJ();
+        TestData.raw.show();
+        IJ.runPlugIn(Raw_ModContrast.class.getName(), "");
     }
 }
