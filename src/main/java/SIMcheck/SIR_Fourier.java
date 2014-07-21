@@ -50,7 +50,7 @@ public class SIR_Fourier implements PlugIn, Executable {
     public boolean showAxial = false;  // show axial FFT? 
     public boolean applyWinFunc = true;  // apply window function?
     public boolean autoScale = true;  // re-scale to mode->max?
-    public boolean blurAndLUT = true;  // blur & apply false color LUT?
+    public boolean blurAndLUT = false;  // blur & apply false color LUT?
     
     @Override
     public void run(String arg) {
@@ -241,6 +241,11 @@ public class SIR_Fourier implements PlugIn, Executable {
         if (blurAndLUT) {
             double[] displayRange = {0.0d, 255.0d};  // show all
             I1l.applyLUT(imp, fourierLUT, displayRange);
+        } else {
+            if (imp.isComposite()) {
+                CompositeImage ci = (CompositeImage)imp;
+                ci.setMode(IJ.GRAYSCALE);
+            }
         }
     }
     
@@ -319,11 +324,8 @@ public class SIR_Fourier implements PlugIn, Executable {
     
     /** main method for testing */
     public static void main(String[] args) {
-        System.out.println("Testing SIR_Fourier.java");
         new ImageJ();
-        ImagePlus impTest = IJ.openImage(
-        		"/Users/graemeb/Workspace/SIMcheck/test_images/Test/"
-        		+ "V3_DAPI_good_3Dsmall.tif");
+        ImagePlus impTest = TestData.recon;
         impTest.show();
         OrthoReslicer orthoReslicer = new OrthoReslicer();
         ImagePlus impOrtho = orthoReslicer.exec(impTest, false);
@@ -356,5 +358,7 @@ public class SIR_Fourier implements PlugIn, Executable {
         impPadded.setStack(paddedStack);
         impPadded.setTitle("padded");
         impPadded.show();
+        IJ.selectWindow(impTest.getID());
+        IJ.runPlugIn(SIR_Fourier.class.getName(), "");
     }
 }
