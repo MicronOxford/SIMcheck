@@ -109,28 +109,24 @@ TODO
 ====
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
-      - !! Make a 0.95 release ASAP with SIR Fourier fixed !!
-        - crop:-
-          - move to separate utility?
-        - check renaming / log output tweaks:
-          - see Justin
-          - Ian
-          - Lothar, 16/7, 'Skype today at 3pm?'
+      - !! Make a 0.95 release ASAP with SIR Fourier & other bugs fixed !!
+        - crop: move to separate utility?
+        - check renaming / log output tweaks (& update this README)
+        - close unused intermediate results to keep out of Windows list!
 
       - documentation: 
-        - make more self-documenting: improve names & log output
+        - finish/improve docs, illustrate usage with pictures, examples
         - for ELYRA reconstructed .czi, discard WF and decon-WF
           (processed data have 3 channels: recon, decon pseudoWF, WF)
-        - finish/improve docs, illustrate usage with pictures, examples
-        - mvn javadoc plugin to generate javadocs?
+        - see google hit for "maven attach source and javadoc artifacts"
       - fixes:
         - N-SIM data: report raw 3D SIM data Bio-Formats bugs
           - cannot open Chris / Nikon data
           - .nd2 from Justin mixes up Z and T
-        - angle labels etc. should be overlaid, not drawn
+        - Wiener filter parameter estimate - calibrate, document
         - 'SIR data Z minimum variance': make more robust, or move to cal?
         - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
-        - Wiener filter parameter estimate - calibrate, document
+        - angle labels etc. should be overlaid, not drawn
       - features:
         - raw data angle difference (floaty): RMS error? (at least some stat)
         - SIR Fourier:-
@@ -140,23 +136,21 @@ TODO
           - option to not discard negatives before FFT?
         - report per. angle modulation contrast and/or minimum of these?
         - raw Fourier central Z: explain /annotate output
+        - raw -> WF same size as SIR by interpolation (& preserve type??)
       - tests, structure:
         - final empirical tests, param calibration, tolerances etc.
         - tidy up tests:
           - .main() for interactive test, .test() to test private methods?
           - more tests to test/debug non-interactive code, preconditions / inputs
-          - unit tests to run without test data (repo needs to build)
+          - unit tests to run without test data (download should build easily)
           - nice, compact test data suite for distribution
-        - add ResultTable support to ResultSet class
-        - make sure tests and debug not deployed
         - work out strategy for test data distribution
-        - set up Fiji update site
+        - add ResultTable support to ResultSet class
 
 * 1.1: future features
       - convert dialog & logging to non-blocking swing GUI
       - util: merge/shuffle:-
         - tool for merging SIM & widefield data (Julio)
-        - raw -> WF same size as SIR by interpolation (& preserve type??)
         - re-order channels
       - pre: estimate angles & line-spacing for FFT, pattern focus
       - 3D FFT
