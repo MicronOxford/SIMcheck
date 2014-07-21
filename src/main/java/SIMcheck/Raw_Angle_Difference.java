@@ -42,7 +42,7 @@ public class Raw_Angle_Difference implements PlugIn, Executable {
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);
-        gd.addMessage("Requires SI raw data in API OMX (CPZAT) order.");
+        gd.addMessage("Requires SI raw data in OMX (CPZAT) order.");
         gd.addNumericField("Angles", angles, 1);
         gd.addNumericField("Phases", phases, 1);
         gd.showDialog();

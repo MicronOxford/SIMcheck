@@ -22,7 +22,7 @@ import ij.process.*;
 import ij.gui.GenericDialog; 
 
 /** This plugin converts a SIM image to a pseudo-wide-field image by averaging
- * phases and angles. Assumes API OMX V2 CPZAT input channel order.
+ * phases and angles. Assumes OMX V2 CPZAT input channel order.
  * @author Graeme Ball <graemeball@gmail.com>
  **/ 
 public class Util_SI2WF implements PlugIn {
@@ -38,7 +38,7 @@ public class Util_SI2WF implements PlugIn {
         ImagePlus imp = IJ.getImage();
         // TODO: option for padding to SIR result size for comparison
         GenericDialog gd = new GenericDialog("Raw SI data to Pseudo-Wide-Field");                   
-        gd.addMessage("Requires SI raw data in API OMX (CPZAT) order.");        
+        gd.addMessage("Requires SI raw data in OMX (CPZAT) order.");        
         gd.addNumericField("Angles", angles, 1);                               
         gd.addNumericField("Phases", phases, 1);
         gd.showDialog();                                                        

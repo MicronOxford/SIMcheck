@@ -41,7 +41,7 @@ public class Raw_Fourier implements PlugIn, Executable {
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);                   
-        gd.addMessage("Requires SI raw data in API OMX (CPZAT) order.");        
+        gd.addMessage("Requires SI raw data in OMX (CPZAT) order.");        
         gd.addNumericField("angles", angles, 1 );                               
         gd.addNumericField("phases", phases, 1 );                               
         gd.showDialog();                                                        

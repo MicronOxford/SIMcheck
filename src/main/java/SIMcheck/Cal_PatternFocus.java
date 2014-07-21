@@ -54,7 +54,7 @@ public class Cal_PatternFocus implements PlugIn, Executable {
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog("Caibrate Pattern Focus");
-        gd.addMessage("Requires SI raw data in API OMX (CPZAT) order.");
+        gd.addMessage("Requires SI raw data in OMX (CPZAT) order.");
         gd.addNumericField("Angles", angles, 1);
         gd.addNumericField("Phases", phases, 1);
         // NB. in IJ, East is 0, in worx North is 0 (CCW is +ve in both cases)

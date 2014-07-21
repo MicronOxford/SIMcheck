@@ -72,7 +72,7 @@ public class Cal_Phases implements PlugIn {
             zLast = nz;
         }
         GenericDialog gd = new GenericDialog("Caibrate Phases");
-        gd.addMessage("Requires SI raw data in API OMX (CPZAT) order.");
+        gd.addMessage("Requires SI raw data in OMX (CPZAT) order.");
         gd.addNumericField("Angles", angles, 1);
         gd.addNumericField("Phases", phases, 1);
         gd.addNumericField("first Z slice to analyze", zFirst, 1);

@@ -45,7 +45,7 @@ public class Raw_intensity implements PlugIn, Executable {
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);
-        gd.addMessage("Requires raw SI data in API OMX (CPZAT) order.");
+        gd.addMessage("Requires raw SI data in OMX (CPZAT) order.");
         gd.addNumericField("Angles", angles, 1);
         gd.addNumericField("Phases", phases, 1);
         gd.showDialog();
@@ -64,7 +64,7 @@ public class Raw_intensity implements PlugIn, Executable {
     }
 
     /** Execute plugin functionality: create a plot of intensity profile per 
-     * channel. Assumes API OMX CPZAT dimension order.
+     * channel. Assumes OMX CPZAT dimension order.
      * @param imps input raw SI data ImagePlus should be first imp
      * @return ResultSet containing intensity profile plots
      */

@@ -22,7 +22,7 @@ import ij.process.*;
 import ij.gui.GenericDialog; 
 
 /** This plugin converts a SIM image from any supported format into the 
- * API OMX V2 format. Output hyperstacks arranged in CPZAT order. 
+ * OMX V2 format. Output hyperstacks arranged in CPZAT order. 
  * Supported formats are: Zeiss ELYRA &amp; Nikon N-SIM (TODO).
  * @author Graeme Ball <graemeball@gmail.com>
  */ 
@@ -44,7 +44,7 @@ public class Util_formats implements PlugIn {
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog("SIM Formats");
-        gd.addMessage("Conversion to API OMX (CPZAT) order.");        
+        gd.addMessage("Conversion to OMX (CPZAT) order.");        
         int formatChoice = 0;  // default choice (=ELYRA)
         gd.addNumericField("Angles", angles, 1);
         gd.addNumericField("Phases", phases, 1);
@@ -69,7 +69,7 @@ public class Util_formats implements PlugIn {
      * @param phases number of phases                                   
      * @param angles number of angles                                   
      * @param format number: 0=ELYRA, 1=NSIM
-     * @return ImagePlus re-ordered into API OMX V2 (CPZAT) order
+     * @return ImagePlus re-ordered into OMX V2 (CPZAT) order
      */ 
     public ImagePlus exec(ImagePlus imp, int phases, int angles, int format) {
         this.phases = phases;
@@ -110,7 +110,7 @@ public class Util_formats implements PlugIn {
         nt /= phases;
         nz /= angles;
         this.outStack = new ImageStack(width, height);
-        // loop through in desired output order: OMX API (CPZAT)
+        // loop through in desired output order: OMX (CPZAT)
         for (int t = 1; t <= nt; t++) {
             for (int a = 1; a <= angles; a++) {
                 for (int z = 1; z <= nz; z++) {

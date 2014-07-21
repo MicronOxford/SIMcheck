@@ -41,7 +41,7 @@ import ij.ImageJ;
 public class SIMcheck_ implements PlugIn {
     
     private static final String none = "[None]";  // no image
-    private static final String omx = "API OMX (CPZAT)";
+    private static final String omx = "OMX (CPZAT)";
 
     // options with default values
     private boolean doCrop = false;
@@ -290,7 +290,7 @@ public class SIMcheck_ implements PlugIn {
     }
 
     /** Split hyperstack, returning new ImagePlus for angle requested.
-     * Assumes API V2 OMX CPZAT channel order.
+     * Assumes V2 OMX CPZAT channel order.
      */
     static ImagePlus getImpForAngle(
             ImagePlus imp, int a, int phases, int angles) {

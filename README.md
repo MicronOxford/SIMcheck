@@ -127,7 +127,6 @@ TODO
         - N-SIM data: report raw 3D SIM data Bio-Formats bugs
           - cannot open Chris / Nikon data
           - .nd2 from Justin mixes up Z and T
-        - change all "API" references to "OMX"
         - angle labels etc. should be overlaid, not drawn
         - 'SIR data Z minimum variance': make more robust, or move to cal?
         - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
