@@ -60,7 +60,7 @@ public class SIMcheck_ implements PlugIn {
     private boolean doReconFourier = true;
     private boolean doMCNRmap = true;
     private Crop crop = new Crop();
-    private float camMax = 32767.0f;  // detector max, default 15-bit
+    private int camBitDepth = 16;
 
     /** Crop ROI */
     private class Crop {
@@ -76,7 +76,7 @@ public class SIMcheck_ implements PlugIn {
     public void run(String arg) {
         String[] titles = JM.cat(new String[] {none}, I1l.collectTitles());
         String[] formats = JM.cat(new String[] {omx}, Util_formats.formats);
-        camMax = (float)ij.Prefs.get("SIMcheck.camMax", camMax);
+        camBitDepth = (int)ij.Prefs.get("SIMcheck.camBitDepth", camBitDepth);
         if (titles.length < 2) {
             IJ.noImage();
             return;
@@ -104,7 +104,7 @@ public class SIMcheck_ implements PlugIn {
         gd.addCheckbox("Raw_Fourier_Plots", doRawFourier);
         gd.addCheckbox("Raw_Angle_Difference", doAngleDifference);
         gd.addCheckbox("Raw_Modulation_Contrast", doMCNR);
-        gd.addNumericField("    Detector Max Intensity", camMax, 0);
+        gd.addNumericField("    Camera Bit Depth", camBitDepth, 0);
         gd.addMessage("------------ Reconstructed data ------------");
         gd.addChoice("Reconstructed_Data:", titles, titles[0]);
         gd.addCheckbox("SIR_Histogram", doHistogram);
@@ -132,8 +132,8 @@ public class SIMcheck_ implements PlugIn {
             doRawFourier = gd.getNextBoolean();
             doAngleDifference = gd.getNextBoolean();
             doMCNR = gd.getNextBoolean();
-            camMax = (float)gd.getNextNumber();
-            ij.Prefs.set("SIMcheck.camMax", camMax);
+            camBitDepth = (int)gd.getNextNumber();
+            ij.Prefs.set("SIMcheck.camBitDepth", camBitDepth);
             String reconTitle = titles[gd.getNextChoiceIndex()];
             if (!reconTitle.equals(none)) {
                 impRecon = WindowManager.getImage(reconTitle);
@@ -280,7 +280,7 @@ public class SIMcheck_ implements PlugIn {
                     new SIR_ModContrastMap();
                 sir_mcnr_plugin.phases = phases;
                 sir_mcnr_plugin.angles = angles;
-                sir_mcnr_plugin.camMax = camMax;
+                sir_mcnr_plugin.camBitDepth = camBitDepth;
                 ResultSet results = sir_mcnr_plugin.exec(
                         impRaw, impRecon, impMCNR);
                 results.report();

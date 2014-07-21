@@ -110,7 +110,10 @@ TODO
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - !! Make a 0.95 release ASAP with SIR Fourier fixed !!
-        - change camMax to camBitDepth?
+          - Without False color LUT (option 4 unchecked) the FFT should be
+            displayed in grayscale. In your latest version it is displayed in
+            RGB, which was not the case in the previous versions. 
+          - "Blur&False Color LUT" option should probably not be active by default. 
         - crop:-
           - move to separate utility?
         - check renaming / log output tweaks:

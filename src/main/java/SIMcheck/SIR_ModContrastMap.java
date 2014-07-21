@@ -42,16 +42,17 @@ public class SIR_ModContrastMap implements PlugIn, Executable {
     // parameter fields
     public int phases = 5;
     public int angles = 3;
-    public float camMax = 32767.0f;
+    public int camBitDepth = 16;
     public float mcnrMax = 24.0f;
 
     @Override
     public void run(String arg) {
         GenericDialog gd = new GenericDialog("SIR_Mod_Contrast_Map");
         String[] titles = I1l.collectTitles();
+        camBitDepth = (int)ij.Prefs.get("SIMcheck.camBitDepth", camBitDepth);
         gd.addMessage(" --- Raw data stack --- ");
         gd.addChoice("Raw data stack:", titles, titles[0]);
-        gd.addNumericField("       Detector Max Intensity", camMax, 0);
+        gd.addNumericField("       Camera Bit Depth", camBitDepth, 0);
         gd.addMessage(" --- Modulation-Contrast-to-Noise Ratio stack --- ");
         gd.addCheckbox("Calculate MCNR stack from raw data?", true);
         gd.addChoice("OR, specify MCNR stack:", titles, titles[0]);
@@ -61,8 +62,8 @@ public class SIR_ModContrastMap implements PlugIn, Executable {
         gd.showDialog();
         if (gd.wasOKed()) {
             String rawStackChoice = gd.getNextChoice();
-            camMax = (float)gd.getNextNumber();
-            ij.Prefs.set("SIMcheck.camMax", camMax);
+            camBitDepth = (int)gd.getNextNumber();
+            ij.Prefs.set("SIMcheck.camBitDepth", camBitDepth);
             String MCNRstackChoice = gd.getNextChoice();
             String SIRstackChoice = gd.getNextChoice();
             ImagePlus rawImp = ij.WindowManager.getImage(rawStackChoice);
@@ -318,7 +319,7 @@ public class SIR_ModContrastMap implements PlugIn, Executable {
         for (int i = 1; i < fpixSIR.length; i++) {
             int j = i / widthSIR;
             int rawI = (i / 2) % (widthSIR / 2) + ((j / 2) * widthSIR / 2);
-            if (wfPix[rawI] > camMax - 1) {
+            if (wfPix[rawI] > Math.pow(2, camBitDepth) - 2) {
                 fpixRed[i] = 0.0f;
                 fpixGrn[i] = 255.0f;
                 fpixBlu[i] = 0.0f;
