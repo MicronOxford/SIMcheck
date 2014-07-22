@@ -49,6 +49,11 @@ public class SIR_ModContrastMap implements PlugIn, Executable {
     public void run(String arg) {
         GenericDialog gd = new GenericDialog("SIR_Mod_Contrast_Map");
         String[] titles = I1l.collectTitles();
+        if (titles.length < 2) {
+            IJ.showMessage("Error", "Did not find at least 2 images" +
+                    " (raw and recon)");
+            return;
+        }
         camBitDepth = (int)ij.Prefs.get("SIMcheck.camBitDepth", camBitDepth);
         gd.addMessage(" --- Raw data stack --- ");
         gd.addChoice("Raw data stack:", titles, titles[0]);

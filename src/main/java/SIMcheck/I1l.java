@@ -157,12 +157,16 @@ public final class I1l {
                                                                                 
     /** Collect and return an array of title Strings from all windows. */
     public static String[] collectTitles() {
-        int[] wList = WindowManager.getIDList();
-        String[] titles = new String[wList.length];
-        for (int i = 0; i < wList.length; i++) {
-            titles[i] = WindowManager.getImage(wList[i]).getTitle();
+        if (WindowManager.getWindowCount() > 0) {
+            int[] wList = WindowManager.getIDList();
+            String[] titles = new String[wList.length];
+            for (int i = 0; i < wList.length; i++) {
+                titles[i] = WindowManager.getImage(wList[i]).getTitle();
+            }
+            return titles;
+        } else {
+            return new String[0]; // no windows!
         }
-        return titles;
     }
 
     /** Copy src calibrations to dest. */
