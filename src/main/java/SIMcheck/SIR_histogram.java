@@ -89,6 +89,11 @@ public class SIR_histogram implements PlugIn, Executable {
         }
         String title = "log-scaled intensity counts in gray";
         ImagePlus impAllPlots = I1l.mergeChannels(title, plots);
+        // TODO: clear Reconstructed Data Histogram Channel N windows
+        //       from Window list after the plugin exits ()
+        for (int c = 1; c <= nc; c++) {
+            plots[c - 1].close();  // only seems to fully close 1st channel
+        }
         impAllPlots.setDimensions(nc, 1, 1);
         impAllPlots.setOpenAsHyperStack(true);
         results.addImp(title, impAllPlots);

@@ -89,7 +89,7 @@ public class Raw_Fourier implements PlugIn, Executable {
           	    I1l.drawLabel(impC, "A" + a);
           	    impChannels[c - 1] = impC;
           	}
-          	impCurrentA.close();
+          	impCurrentA.getWindow().close();
           	impCurrentA = I1l.mergeChannels("FFT_A" + a, impChannels);
           	impCurrentA.setC(1);
           	if (a == 1) {
@@ -99,7 +99,9 @@ public class Raw_Fourier implements PlugIn, Executable {
           	            montage.getStack(), impCurrentA.getStack());
           	    montage.setStack(montageStack);
           	}
-          	impCurrentA.close();
+          	// TODO: clear MAX_<originalTitle>_FT2.tif and "FT3.tif
+          	//       from Window list after the plugin exits ()
+          	impCurrentA.close();  // only seems to fully close "FT1.tif
         }
         IJ.run(montage, "Grays", "");
         montage.setTitle(I1l.makeTitle(imps[0], "FTA1-" + angles));

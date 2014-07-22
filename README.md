@@ -112,7 +112,6 @@ TODO
       - !! Make a 0.95 release ASAP with SIR Fourier & other bugs fixed !!
         - crop: move to separate utility?
         - check renaming / log output tweaks (& update this README)
-        - close unused intermediate results to keep out of Windows list!
 
       - documentation: 
         - finish/improve docs, illustrate usage with pictures, examples
@@ -127,6 +126,7 @@ TODO
         - 'SIR data Z minimum variance': make more robust, or move to cal?
         - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
         - angle labels etc. should be overlaid, not drawn
+        - remove unused intermediate results from Windows list
       - features:
         - raw data angle difference (floaty): RMS error? (at least some stat)
         - SIR Fourier:-
