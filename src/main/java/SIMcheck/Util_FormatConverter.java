@@ -26,7 +26,7 @@ import ij.gui.GenericDialog;
  * Supported formats are: Zeiss ELYRA &amp; Nikon N-SIM (TODO).
  * @author Graeme Ball <graemeball@gmail.com>
  */ 
-public class Util_formats implements PlugIn {
+public class Util_FormatConverter implements PlugIn {
 
     // supported formats
     public static String[] formats = {

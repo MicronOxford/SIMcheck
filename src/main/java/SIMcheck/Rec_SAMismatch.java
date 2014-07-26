@@ -24,14 +24,15 @@ import ij.plugin.PlugIn;
 import ij.gui.Plot;
 import ij.process.*;
 
-/** This plugin takes SIR reconstructed data and produces produces
- * plots of slice minima and summarizes their standard deviation, which 
- * diagnoses refractive index mismatch.
+/** This plugin takes reconstructed data and produces produces plots of
+ * slice minimum and average feature intensity, as well as summarising standard
+ * deviation of the minimum to diagnose refractive index mismatch between
+ * the sample and PSF.
  * @author Graeme Ball <graemeball@gmail.com>
  */
-public class SIR_Z_variation implements PlugIn, Executable {
+public class Rec_SAMismatch implements PlugIn, Executable {
     
-    String name = "Reconstructed data Z minimum variance";
+    String name = "Reconstructed Data Sperical Aberration Mismatch";
     ResultSet results = new ResultSet(name);
     
     public void run(String arg) {
@@ -41,8 +42,8 @@ public class SIR_Z_variation implements PlugIn, Executable {
     }
 
     /** Execute plugin functionality: plot slice minimum and feature mean
-     * scaled to stack mode as zero point, and report variance of minima. 
-     * @param imps reconstructed SIR data ImagePlus should be first imp
+     * scaled to stack mode as zero point, and report stdDev of minima. 
+     * @param imps reconstructed data ImagePlus should be first imp
      * @return ResultSet containing plots of mnimum and mean variation 
      */
      public ResultSet exec(ImagePlus... imps) {  
@@ -82,7 +83,7 @@ public class SIR_Z_variation implements PlugIn, Executable {
                 }
             }
             Plot plot = new Plot(
-                    "SIR normalized min variation, C" + c,
+                    "Reconstructed normalized min variation, C" + c,
                     "Z plane", "slice feature means (gray) & minima (black)");
             // display 20% beyond min and max
             plotMin -= 0.2 * Math.abs(plotMin);

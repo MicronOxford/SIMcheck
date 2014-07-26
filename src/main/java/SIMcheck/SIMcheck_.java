@@ -75,7 +75,7 @@ public class SIMcheck_ implements PlugIn {
     @Override
     public void run(String arg) {
         String[] titles = JM.cat(new String[] {none}, I1l.collectTitles());
-        String[] formats = JM.cat(new String[] {omx}, Util_formats.formats);
+        String[] formats = JM.cat(new String[] {omx}, Util_FormatConverter.formats);
         camBitDepth = (int)ij.Prefs.get("SIMcheck.camBitDepth", camBitDepth);
         if (titles.length < 2) {
             IJ.noImage();
@@ -100,18 +100,18 @@ public class SIMcheck_ implements PlugIn {
         gd.addChoice("Data format:", formats, omx);
         gd.addNumericField("angles", angles, 0);
         gd.addNumericField("phases", phases, 0);
-        gd.addCheckbox("Raw_Intensity_Profile", doIntensity);
-        gd.addCheckbox("Raw_Fourier_Plots", doRawFourier);
-        gd.addCheckbox("Raw_Angle_Difference", doAngleDifference);
-        gd.addCheckbox("Raw_Modulation_Contrast", doMCNR);
+        gd.addCheckbox("Intensity_Profile", doIntensity);
+        gd.addCheckbox("Fourier_Plots", doRawFourier);
+        gd.addCheckbox("Angle_Difference", doAngleDifference);
+        gd.addCheckbox("Modulation_Contrast", doMCNR);
         gd.addNumericField("    Camera Bit Depth", camBitDepth, 0);
         gd.addMessage("------------ Reconstructed data ------------");
         gd.addChoice("Reconstructed_Data:", titles, titles[0]);
-        gd.addCheckbox("SIR_Histogram", doHistogram);
-        gd.addCheckbox("SIR_Z_Variation", doZvar);
-        gd.addCheckbox("SIR_Fourier Plot", doReconFourier);
+        gd.addCheckbox("Intensity Histograms", doHistogram);
+        gd.addCheckbox("Spherical Aberration Mismatch", doZvar);
+        gd.addCheckbox("Fourier Plots", doReconFourier);
         gd.addCheckbox(
-                "SIR_Mod_Contrast_Map (requires Raw Mod Contrast)", doMCNRmap);
+                "Mod_Contrast_Map (requires Raw Mod Contrast)", doMCNRmap);
         gd.addCheckbox("Use reconstructed data ROI to crop images?", doCrop);
         gd.addNumericField("* first Z (crop)", crop.zFirst, 0);
         gd.addNumericField("* last Z (crop)", crop.zLast, 0);
@@ -154,7 +154,7 @@ public class SIMcheck_ implements PlugIn {
 
         // format conversion, check, crop, open tools to work with ouput
         if (formatChoice != 0) {
-            Util_formats formatConverter = new Util_formats();
+            Util_FormatConverter formatConverter = new Util_FormatConverter();
             IJ.log("      converting " + formats[formatChoice] +
                     " to OMX format");
             impRaw = formatConverter.exec(
@@ -228,7 +228,7 @@ public class SIMcheck_ implements PlugIn {
             IJ.log("  Using SI stack: " + impRaw.getTitle());
             // do checks on raw SI data
             if (doIntensity) {
-                Raw_intensity raw_int_plugin = new Raw_intensity();
+                Raw_IntensityProfiles raw_int_plugin = new Raw_IntensityProfiles();
                 raw_int_plugin.phases = phases;
                 raw_int_plugin.angles = angles;
                 ResultSet results = raw_int_plugin.exec(impRaw);
@@ -242,7 +242,7 @@ public class SIMcheck_ implements PlugIn {
                 results.report();
             }
             if (doAngleDifference) {
-                Raw_Angle_Difference raw_a_diff_plugin = new Raw_Angle_Difference();
+                Raw_MotionCheck raw_a_diff_plugin = new Raw_MotionCheck();
                 raw_a_diff_plugin.phases = phases;
                 raw_a_diff_plugin.angles = angles;
                 ResultSet results = raw_a_diff_plugin.exec(impRaw);
@@ -259,29 +259,28 @@ public class SIMcheck_ implements PlugIn {
         }
         if (impRecon != null) {
             IJ.log("\n ==== Reconstructed data checks ====");
-            IJ.log("  using SIR stack: " + impRecon.getTitle());
+            IJ.log("  using reconstructed stack: " + impRecon.getTitle());
             if (doHistogram) {
-                SIR_histogram sir_hist_plugin = new SIR_histogram();
-                ResultSet results = sir_hist_plugin.exec(impRecon);
+                Rec_Histograms histPlugin = new Rec_Histograms();
+                ResultSet results = histPlugin.exec(impRecon);
                 results.report();
             }
             if (doZvar) {
-                SIR_Z_variation sir_z_var_plugin = new SIR_Z_variation();
-                ResultSet results = sir_z_var_plugin.exec(impRecon);
+                Rec_SAMismatch mismatchPlugin = new Rec_SAMismatch();
+                ResultSet results = mismatchPlugin.exec(impRecon);
                 results.report();
             }
             if (doReconFourier) {
-                SIR_Fourier sir_fourier_plugin = new SIR_Fourier();
-                ResultSet results = sir_fourier_plugin.exec(impRecon);
+                Rec_FourierPlots fourierResPlugin = new Rec_FourierPlots();
+                ResultSet results = fourierResPlugin.exec(impRecon);
                 results.report();
             }
             if (doMCNRmap) {
-                SIR_ModContrastMap sir_mcnr_plugin = 
-                    new SIR_ModContrastMap();
-                sir_mcnr_plugin.phases = phases;
-                sir_mcnr_plugin.angles = angles;
-                sir_mcnr_plugin.camBitDepth = camBitDepth;
-                ResultSet results = sir_mcnr_plugin.exec(
+                Rec_ModContrastMap modConMapPlugin = new Rec_ModContrastMap();
+                modConMapPlugin.phases = phases;
+                modConMapPlugin.angles = angles;
+                modConMapPlugin.camBitDepth = camBitDepth;
+                ResultSet results = modConMapPlugin.exec(
                         impRaw, impRecon, impMCNR);
                 results.report();
             }

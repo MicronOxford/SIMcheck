@@ -29,7 +29,7 @@ import ij.gui.GenericDialog;
  * differences, images ought to appear white/gray!
  * @author Graeme Ball <graemeball@gmail.com>
  */
-public class Raw_Angle_Difference implements PlugIn, Executable {
+public class Raw_MotionCheck implements PlugIn, Executable {
 
     String name = "Raw Data Motion Check";
     ResultSet results = new ResultSet(name);
@@ -102,7 +102,7 @@ public class Raw_Angle_Difference implements PlugIn, Executable {
      * angles) and add these per-channel stats to results. 
      */
     private void recordRmsErr(ImagePlus impRaw, ImagePlus impPP) {
-        Util_SI2WF si2wf = new Util_SI2WF();
+        Util_SItoPseudoWidefield si2wf = new Util_SItoPseudoWidefield();
         ImagePlus impWf = si2wf.exec(impRaw, phases, angles);
         int nc = impPP.getNChannels() / angles;
         int nz = impPP.getNSlices();

@@ -26,7 +26,7 @@ import ij.plugin.PlugIn;
  * This plugin carries out ImageJ's 2D FFT on each slice of a stack. 
  * @author Graeme Ball <graemeball@gmail.com>
  */ 
-public class Util_FFTstack implements PlugIn {
+public class Util_StackFFT2D implements PlugIn {
 
     @Override 
     public void run(String arg) {
@@ -49,6 +49,6 @@ public class Util_FFTstack implements PlugIn {
     public static void main(String[] args) {
         new ImageJ();
         TestData.raw.show();
-        IJ.runPlugIn(Util_FFTstack.class.getName(), "");
+        IJ.runPlugIn(Util_StackFFT2D.class.getName(), "");
     }
 }

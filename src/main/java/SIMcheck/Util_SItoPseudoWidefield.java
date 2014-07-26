@@ -25,7 +25,7 @@ import ij.gui.GenericDialog;
  * phases and angles. Assumes OMX V2 CPZAT input channel order.
  * @author Graeme Ball <graemeball@gmail.com>
  **/ 
-public class Util_SI2WF implements PlugIn {
+public class Util_SItoPseudoWidefield implements PlugIn {
     
     // parameter fields
     public int phases = 5;                                                         
@@ -36,8 +36,8 @@ public class Util_SI2WF implements PlugIn {
     @Override 
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
-        // TODO: option for padding to SIR result size for comparison
-        GenericDialog gd = new GenericDialog("Raw SI data to Pseudo-Wide-Field");                   
+        // TODO: option for padding to reconstructed result size for comparison
+        GenericDialog gd = new GenericDialog("Raw SI data to Pseudo-Widefield");                   
         gd.addMessage("Requires SI raw data in OMX (CPZAT) order.");        
         gd.addNumericField("Angles", angles, 1);                               
         gd.addNumericField("Phases", phases, 1);

@@ -26,14 +26,14 @@ import ij.gui.*;
 import ij.IJ;
 import java.awt.Color;
 
-/** This plugin plots a Z-axis profile for each channel of raw SI data to
- * evaluate bleaching as phase, Z, angle and time are incremented.
+/** This plugin plots slice average intensity for each channel of raw SI data
+ * to evaluate bleaching as phase, Z, angle and time are incremented.
  * Each channel is plotted in a different (arbitrary) color.
  * @author Graeme Ball <graemeball@gmail.com>
  */
-public class Raw_intensity implements PlugIn, Executable {
+public class Raw_IntensityProfiles implements PlugIn, Executable {
 
-    String name = "Raw Data Intensity profiles";
+    String name = "Raw Data Intensity Profiles";
     ResultSet results = new ResultSet(name);
 
     // parameter fields

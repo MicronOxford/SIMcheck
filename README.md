@@ -61,10 +61,10 @@ Features
 
     Check          |        Statistic(s)             |      Comments
 ------------------ | ------------------------------- | ---------------------
- Raw Angle Diff    |  no colored differences?        |    threshold/stat?
- Raw Intensity Prf |  bleaching and angle intensity  |
- Raw Fourier plots |  SI pattern correct & regular?  |    TODO? k0 & linspc
- Raw Mod Contrast  |  feature MCNR acceptable?       |    Wiener par
+ Angle Diff    |  no colored differences?        |    threshold/stat?
+ Intensity Prf |  bleaching and angle intensity  |
+ Fourier plots |  SI pattern correct & regular?  |    TODO? k0 & linspc
+ Mod Contrast  |  feature MCNR acceptable?       |    Wiener par
 
 -----------------------------
 3: Post-reconstruction Checks
@@ -72,10 +72,10 @@ Features
 
     Check          |        Statistic(s)              |     Comments
 ------------------ | -------------------------------- | --------------------
- SIR Histogram     |  +ve/-ve ratio acceptable?       | top/bottom 0.01%
- SIR Z variation   |  stdev of miniumum vs. mean      | shows OTF mismatch
- SIR Fourier Plot  |  symmetry+profile OK? +res/angle | +radial profile
- SIR MCNR Map      |  None - for visual inspection    | MCNR + intensity
+ Histogram     |  +ve/-ve ratio acceptable?       | top/bottom 0.01%
+ Z variation   |  stdev of miniumum vs. mean      | shows OTF mismatch
+ Fourier Plot  |  symmetry+profile OK? +res/angle | +radial profile
+ MCNR Map      |  None - for visual inspection    | MCNR + intensity
 
 
 PROJECT STRUCTURE
@@ -109,9 +109,19 @@ TODO
 ====
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
-      - !! Make a 0.95 release ASAP with SIR Fourier & other bugs fixed !!
-        - crop: move to separate utility?
-        - check renaming / log output tweaks (& update this README)
+      - !! Make a 0.95 release ASAP with rec Fourier & other bugs fixed !!
+        - renaming etc.
+          - make check names & results more consistent, improve log output
+          - change OMX to GE OMX
+          - try stats & results (pass/uncertain/fail) in summary table
+        - "Fourier Plots": option for non-mode zero-point (no BG)
+        - spherical aberration mismatch check: axis always symmetrical about zero?
+        - crop function: 
+          - improve lay-out in main dialog, add "Zlast" or similar
+          - move to separate utility
+        - Fourier Projections
+          - document power-of-2 and that cropping causes problems
+          - think of stat(s): spots over angles, 1st vs second, stability?
 
       - documentation: 
         - finish/improve docs, illustrate usage with pictures, examples
@@ -119,24 +129,21 @@ TODO
           (processed data have 3 channels: recon, decon pseudoWF, WF)
         - see google hit for "maven attach source and javadoc artifacts"
       - fixes:
-        - N-SIM data: report raw 3D SIM data Bio-Formats bugs
-          - cannot open Chris / Nikon data
-          - .nd2 from Justin mixes up Z and T
         - Wiener filter parameter estimate - calibrate, document
-        - 'SIR data Z minimum variance': make more robust, or move to cal?
+        - test / finish spherical aberration mismatch check
         - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
         - angle labels etc. should be overlaid, not drawn
         - remove unused intermediate results from Windows list
       - features:
         - raw data angle difference (floaty): RMS error? (at least some stat)
-        - SIR Fourier:-
+        - rec Fourier:-
           - lat: pattern angles (use "SIMcheck.angle1" pref), 3 color profiles
           - axial FFT: project over central slice range, not just 1
           - axial FFT: profile plot?
           - option to not discard negatives before FFT?
         - report per. angle modulation contrast and/or minimum of these?
         - raw Fourier central Z: explain /annotate output
-        - raw -> WF same size as SIR by interpolation (& preserve type??)
+        - raw -> WF same size as rec by interpolation (& preserve type??)
       - tests, structure:
         - final empirical tests, param calibration, tolerances etc.
         - tidy up tests:
@@ -154,7 +161,7 @@ TODO
         - re-order channels
       - pre: estimate angles & line-spacing for FFT, pattern focus
       - 3D FFT
-      - post: SIR FFT automatic resolution estimation??
+      - post: rec FFT automatic resolution estimation??
       - cal: PSF symmetry within tolerance?
       - cal: OTF extent, shape & order separation?
       - pre: plot channel color from channel metadata

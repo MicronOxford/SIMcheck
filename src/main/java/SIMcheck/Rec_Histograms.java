@@ -29,9 +29,9 @@ import ij.process.*;
  * negative values to the reconstructed result.
  * @author Graeme Ball <graemeball@gmail.com>
  */
-public class SIR_histogram implements PlugIn, Executable {
+public class Rec_Histograms implements PlugIn, Executable {
     
-    String name = "Reconstructed Data Histograms";
+    String name = "Reconstructed Data Intensity Histograms";
     ResultSet results = new ResultSet(name);
     
     // parameter fields
@@ -50,7 +50,7 @@ public class SIR_histogram implements PlugIn, Executable {
 
     /** Execute plugin functionality: plot histogram and calculate +ve/-ve
      * ratio. 
-     * @param imps reconstructed SIR data ImagePlus should be first imp
+     * @param imps reconstructed data ImagePlus should be first imp
      * @return ResultSet containing histogram plots                                  
      */
     public ResultSet exec(ImagePlus... imps) { 
@@ -163,7 +163,7 @@ public class SIR_histogram implements PlugIn, Executable {
         imp.setProcessor(ip);
         IJ.run(imp, "Select All", "");
         ImageStatistics stats = new StackStatistics(imp);
-        SIR_histogram plugin = new SIR_histogram();
+        Rec_Histograms plugin = new Rec_Histograms();
         double pnRatio = plugin.calcPosNegRatio(stats, 0.005);
         if (verbose) {
             System.out.println("hist: " + Arrays.toString(stats.histogram));

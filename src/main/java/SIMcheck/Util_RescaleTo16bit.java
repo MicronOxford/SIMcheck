@@ -26,7 +26,7 @@ import ij.plugin.PlugIn;
  * This plugin discards values below channel mode and converts to 16-bit.
  * @author Graeme Ball <graemeball@gmail.com>
  */
-public class Util_Rescale implements PlugIn {
+public class Util_RescaleTo16bit implements PlugIn {
 
     @Override
     public void run(String arg) {
@@ -58,6 +58,6 @@ public class Util_Rescale implements PlugIn {
     public static void main(String[] args) {
         new ImageJ();
         TestData.recon.show();
-        IJ.runPlugIn(Util_Rescale.class.getName(), "");
+        IJ.runPlugIn(Util_RescaleTo16bit.class.getName(), "");
     }
 }

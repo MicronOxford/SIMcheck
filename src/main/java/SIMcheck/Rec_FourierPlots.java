@@ -34,7 +34,7 @@ import java.awt.image.IndexColorModel;
  * @see ij.plugin.FFT
  * @see ij.process.FHT
  */
-public class SIR_Fourier implements PlugIn, Executable {
+public class Rec_FourierPlots implements PlugIn, Executable {
 
     String name = "Reconstructed Data Fourier Plots";
     ResultSet results = new ResultSet(name);
@@ -55,7 +55,7 @@ public class SIR_Fourier implements PlugIn, Executable {
     @Override
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
-        GenericDialog gd = new GenericDialog("SIR_Fourier");
+        GenericDialog gd = new GenericDialog(name);
         imp.getWidth();
         gd.addCheckbox("Show axial FFT", showAxial);
         gd.addCheckbox("Window Function**", applyWinFunc);
@@ -77,14 +77,14 @@ public class SIR_Fourier implements PlugIn, Executable {
     }
 
     /** 
-     * Execute plugin functionality: for SIR and ortho-resliced, perform 
-     * 2D FFT on each slice, blur, apply LUT and draw resolution rings.
-     * @param imps reconstructed SIR data ImagePlus should be first imp
+     * Execute plugin functionality: for reconstructed and ortho-resliced,
+     * perform 2D FFT on each slice, blur, apply LUT and draw resolution rings.
+     * @param imps reconstructed data ImagePlus should be first imp
      * @return ResultSet containing FFT imp, ortho FFT imp, radial profile plot 
      */
     public ResultSet exec(ImagePlus... imps) {
         Calibration cal = imps[0].getCalibration();
-        ImagePlus imp2 = Util_Rescale.exec(imps[0].duplicate());
+        ImagePlus imp2 = Util_RescaleTo16bit.exec(imps[0].duplicate());
         IJ.showStatus("Fourier transforming slices (lateral view)");
         ImagePlus impF = FFT2D.fftImp(imp2, winFraction);
         blurRadius *= (double)impF.getWidth() / 512.0d;
@@ -359,6 +359,6 @@ public class SIR_Fourier implements PlugIn, Executable {
         impPadded.setTitle("padded");
         impPadded.show();
         IJ.selectWindow(impTest.getID());
-        IJ.runPlugIn(SIR_Fourier.class.getName(), "");
+        IJ.runPlugIn(Rec_FourierPlots.class.getName(), "");
     }
 }

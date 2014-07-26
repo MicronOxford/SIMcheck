@@ -36,9 +36,9 @@ import ij.gui.*;
  * calculates illumination pattern phase-step and offset stability.
  * @author Graeme Ball <graemeball@gmail.com>
  **/
-public class Cal_Phases implements PlugIn {
+public class Cal_PhaseSteps implements PlugIn {
 
-    String name = "Calibration check phases";
+    String name = "Phase Steps";
     ResultSet results = new ResultSet(name);
 	
     // parameter / option fields
@@ -288,7 +288,7 @@ public class Cal_Phases implements PlugIn {
 //        IJ.log("maxima in band order " + order);
 //        logPosMaxima(maxima);
 //        IJ.log("brightest 2 maxima in 1st order band");
-        maxima = Cal_Phases.filterPeakPair(maxima, fp, peakPosTolerance);  
+        maxima = Cal_PhaseSteps.filterPeakPair(maxima, fp, peakPosTolerance);  
 //        logPosMaxima(maxima);
         return maxima;
     }
@@ -683,12 +683,12 @@ public class Cal_Phases implements PlugIn {
 
     /** Interactive test method. */
     public static void main(String[] args) {
-        Cal_Phases plugin = new Cal_Phases();
+        Cal_PhaseSteps plugin = new Cal_PhaseSteps();
         System.out.println("private methods test OK? " + plugin.test(true));
         new ImageJ();
         ImagePlus lawn = IJ.openImage("src/test/resources/BeadLawn.tif");
         lawn.show();
-        IJ.runPlugIn(Cal_Phases.class.getName(), "");
+        IJ.runPlugIn(Cal_PhaseSteps.class.getName(), "");
     }
     
 }
