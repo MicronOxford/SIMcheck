@@ -67,8 +67,9 @@ import java.awt.image.IndexColorModel;
  */
 public class Raw_ModContrast implements PlugIn, Executable {
 
-    String name = "Raw Data Modulation Contrast (MCN)";
-    ResultSet results = new ResultSet(name);
+    public static final String name = "Modulation Contrast";
+    public static final String TLA = "MCN";
+    private ResultSet results = new ResultSet(name);
     private static final IndexColorModel mcnrLUT = 
             I1l.loadLut("SIMcheck/MCNR.lut");
     
@@ -83,7 +84,7 @@ public class Raw_ModContrast implements PlugIn, Executable {
     public void run(String arg) {
         ImagePlus imp; 
         imp = IJ.getImage();
-        GenericDialog gd = new GenericDialog("Raw Data Modulation Contrast");
+        GenericDialog gd = new GenericDialog(name);
         gd.addNumericField("Angles", angles, 1);
         gd.addNumericField("Phases", phases, 1);
         gd.addNumericField("Z window half-width", zw, 1);
@@ -223,7 +224,7 @@ public class Raw_ModContrast implements PlugIn, Executable {
         if (doRawFourier) {
             newTitle = I1l.makeTitle(imps[0], "PFT");  
         } else {
-            newTitle = I1l.makeTitle(imps[0], "MCN");  
+            newTitle = I1l.makeTitle(imps[0], TLA);  
         }
         if (doRawFourier) {
             int fourierLen = phases * ((2 * zw) + 1);
@@ -248,24 +249,25 @@ public class Raw_ModContrast implements PlugIn, Executable {
             I1l.applyLUT(impResult, mcnrLUT, displayRange);
             results.addImp("modulation contrast-to-noise ratio image", 
                     impResult);
-            results.addInfo("Modulation contrast-to-noise ratio (MCNR)",
-                    "color LUT display shows MCNR value,\n"
-                    + "   purple is inadequate (3 or less), red is an"
-                    + " acceptable value of 6+, orange is good,\n"
-                    + "   yellow-white is very good-excellent).");
+            results.addInfo("How to interpret",
+                    "color LUT display shows MCNR value...\n"
+                    + "  - purple is inadequate (3 or less)\n"
+                    + "  - red is an acceptable value of 6+\n"
+                    + "  - orange is good\n"
+                    + "  - yellow-white is very good-excellent");
             for (int c = 1; c <= nc; c++) {
                 ImagePlus impC = I1l.copyChannel(impResult, c);
                 double featMCNR = I1l.stackFeatMean(impC);
-                results.addStat("C" + c + " estimated feature MCNR = ", 
+                results.addStat("Channel " + c + " estimated feature MCNR = ", 
                         featMCNR);
-                results.addStat("C" + c + " estimated Wiener optimum = ", 
+                results.addStat("Channel " + c + " estimated Wiener optimum = ", 
                         estimWiener(featMCNR));
             }
         } else {
             IJ.run(impResult, "Enhance Contrast", "saturated=0.35");
-            results.addImp("raw Fourier transforms of phases", 
+            results.addImp("Raw Fourier transforms of phases for central Z", 
                     impResult);
-            results.addInfo("Raw Fourier transforms of phases for central Z",
+            results.addInfo("How to interpret",
                     "Z dimension now corresponds to frequency / order,\n"
                     + "  from 0 order (low freq) to highest freq,"
                     + " back to low freq; for each angle in turn.");

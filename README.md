@@ -112,7 +112,6 @@ TODO
       - !! Make a 0.95 release ASAP with rec Fourier & other bugs fixed !!
         - renaming etc.
           - make check names & results more consistent, improve log output
-          - change OMX to GE OMX
           - try stats & results (pass/uncertain/fail) in summary table
         - "Fourier Plots": option for non-mode zero-point (no BG)
         - spherical aberration mismatch check: axis always symmetrical about zero?

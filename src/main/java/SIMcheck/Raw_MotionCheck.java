@@ -31,8 +31,9 @@ import ij.gui.GenericDialog;
  */
 public class Raw_MotionCheck implements PlugIn, Executable {
 
-    String name = "Raw Data Motion Check";
-    ResultSet results = new ResultSet(name);
+    public static final String name = "Motion Check";
+    public static final String TLA = "MOT";
+    private ResultSet results = new ResultSet(name);
 
     // parameter fields
     public int phases = 5;
@@ -53,7 +54,7 @@ public class Raw_MotionCheck implements PlugIn, Executable {
             phases = (int)gd.getNextNumber();
         }
         if(!I1l.stackDivisibleBy(imp, phases * angles)){
-            IJ.showMessage( "Raw Data Motion Check",
+            IJ.showMessage(name,
                     "Error: stack size not consistent with phases/angles.");
             return;
         }
@@ -67,10 +68,10 @@ public class Raw_MotionCheck implements PlugIn, Executable {
      */
     public ResultSet exec(ImagePlus... imps) {
         ImagePlus imp = imps[0];
-        IJ.showStatus("Raw data motion check...");
+        IJ.showStatus(name + "...");
         if (angles != 3) {
-            IJ.showMessage("Raw Data Motion Check",
-                    "This plugin only works for 3 angles currently.");
+            IJ.showMessage(name,
+                    "Sorry, this plugin only works for 3 angles.");
         } else {
             int nc = imp.getNChannels();
             int nz = imp.getNSlices();
@@ -87,11 +88,11 @@ public class Raw_MotionCheck implements PlugIn, Executable {
             recordRmsErr(imp, projImp);
             calcNormalizationFactors(imp, nc, angles, totalIntens, normFactors);
             ImagePlus colorImp = colorAngles(imp, projImp, nc, nz, normFactors);
-            results.addImp("false-colored angles (C, M, Y)", colorImp);
-            results.addInfo("False-colored angles",
+            results.addImp("false-colored angle data (C, M, Y)", colorImp);
+            results.addInfo("How to interpret",
                     "phases averaged, angles normalized, colored Cyan,"
                     + " Magenta, Yellow for angles 1, 2 & 3 \n"
-                    + "  (non-white indicates differences between angles due"
+                    + "  - non-white indicates differences between angles due"
                     + " to drift, floating particles or uneven illumination");
         }
         return results;
@@ -126,7 +127,7 @@ public class Raw_MotionCheck implements PlugIn, Executable {
             }
         }
         for (int c = 0; c < nc; c++) {
-            results.addStat("RMS error for Ch=" + (c + 1), rmsErr[c]);
+            results.addStat("RMS error for Channel " + (c + 1), rmsErr[c]);
         }
     }
     
@@ -300,11 +301,18 @@ public class Raw_MotionCheck implements PlugIn, Executable {
                 }
             }
         }
-        ImagePlus colorImp = new ImagePlus(I1l.makeTitle(imp, "APJ"), RBGstack);
+        ImagePlus colorImp = new ImagePlus(I1l.makeTitle(imp, TLA), RBGstack);
         colorImp.setDimensions(nc, nz, nt);
         int centralZ = nz / 2;
         colorImp.setPosition(1, centralZ, 1);
         colorImp.setOpenAsHyperStack(true);
         return colorImp;
+    }
+    
+    /** Interactive test method */
+    public static void main(String[] args) {
+        new ImageJ();
+        TestData.raw.show();
+        IJ.runPlugIn(Raw_MotionCheck.class.getName(), "");
     }
 }

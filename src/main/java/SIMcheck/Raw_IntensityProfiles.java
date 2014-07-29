@@ -24,6 +24,7 @@ import ij.process.*;
 import ij.measure.*;
 import ij.gui.*;
 import ij.IJ;
+
 import java.awt.Color;
 
 /** This plugin plots slice average intensity for each channel of raw SI data
@@ -33,8 +34,9 @@ import java.awt.Color;
  */
 public class Raw_IntensityProfiles implements PlugIn, Executable {
 
-    String name = "Raw Data Intensity Profiles";
-    ResultSet results = new ResultSet(name);
+    public static final String name = "Intensity Profiles";
+    public static final String TLA = "IPL";
+    private ResultSet results = new ResultSet(name);
 
     // parameter fields
     public int phases = 5;
@@ -55,7 +57,7 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
             phases = (int)gd.getNextNumber();
         }
         if (!I1l.stackDivisibleBy(imp, phases * angles)) {
-            IJ.showMessage("Raw Data Intensity Profiles", 
+            IJ.showMessage(name, 
             		"Error: stack size not consistent with phases/angles.");
             return;
         }
@@ -85,7 +87,7 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
 
         float[] avIntensities = new float[totalPlanes / nc];
         float[] pzat_no = new float[totalPlanes / nc];
-        Plot plot = new Plot("Raw Data Intensity Profiles", 
+        Plot plot = new Plot(I1l.makeTitle(imp, TLA), 
         		"Slices in order: Phase, Z, Angle, Time (C1=blu,C2=grn,C3=red)",
         		"Average Intensity per. Plane", pzat_no, avIntensities);
 
@@ -174,11 +176,17 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
                     (double)Math.round(largestDiff));
         }
         results.addImp("per. channel intensity profiles", plot.getImagePlus());
-        results.addInfo("Intensity statistics", 
+        results.addInfo("How to interpret",
                 "large intensity differences of several 10's"
                 + " of % between Angles\n   or over Z window (" + zwin
                 + " sections) used to reconstruct a slice produce artifacts.");
         return results;
     }
     
+    /** Interactive test method */
+    public static void main(String[] args) {
+        new ImageJ();
+        TestData.raw.show();
+        IJ.runPlugIn(Raw_IntensityProfiles.class.getName(), "");
+    }
 }

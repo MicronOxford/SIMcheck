@@ -49,10 +49,10 @@ public class SIMcheck_ implements PlugIn {
     private int formatChoice = 0;
     private int phases = 5;
     private int angles = 3;
-    private boolean doIntensity = true;
-    private boolean doRawFourier = true;
-    private boolean doAngleDifference = true;
-    private boolean doMCNR = true;
+    private boolean doIntensityProfiles = true;
+    private boolean doFourierProjections = true;
+    private boolean doMotionCheck = true;
+    private boolean doModContrast = true;
     private ImagePlus impMCNR = null;
     private ImagePlus impRecon = null;
     private boolean doHistogram = true;
@@ -85,13 +85,11 @@ public class SIMcheck_ implements PlugIn {
         gd.addMessage(
                 "--------------- INSTRUCTIONS ---------------");
         gd.addMessage(
-                "  1. Choose a raw and/or reconstructed SI data stacks.");
+                "  1. Choose a raw and/or reconstructed SIM data stacks.");
         gd.addMessage(
                 "  2. Tick boxes for checks you would like to run & click OK.");
         String helpMessage =
-                "    \"Help\" below navigates to Micron web page about SIMcheck\n";
-        helpMessage +=
-                "      or extract SIMcheck.html from SIMcheck_.jar using unzip";
+                "    \"Help\" button below navigates to the SIMcheck web page.";
         gd.addMessage(helpMessage);
         
         // present options
@@ -100,10 +98,10 @@ public class SIMcheck_ implements PlugIn {
         gd.addChoice("Data format:", formats, omx);
         gd.addNumericField("angles", angles, 0);
         gd.addNumericField("phases", phases, 0);
-        gd.addCheckbox("Intensity_Profile", doIntensity);
-        gd.addCheckbox("Fourier_Plots", doRawFourier);
-        gd.addCheckbox("Angle_Difference", doAngleDifference);
-        gd.addCheckbox("Modulation_Contrast", doMCNR);
+        gd.addCheckbox(Raw_IntensityProfiles.name, doIntensityProfiles);
+        gd.addCheckbox(Raw_FourierProjections.name, doFourierProjections);
+        gd.addCheckbox(Raw_MotionCheck.name, doMotionCheck);
+        gd.addCheckbox(Raw_ModContrast.name, doModContrast);
         gd.addNumericField("    Camera Bit Depth", camBitDepth, 0);
         gd.addMessage("------------ Reconstructed data ------------");
         gd.addChoice("Reconstructed_Data:", titles, titles[0]);
@@ -128,10 +126,10 @@ public class SIMcheck_ implements PlugIn {
             formatChoice = gd.getNextChoiceIndex();
             angles = (int)gd.getNextNumber();
             phases = (int)gd.getNextNumber();
-            doIntensity = gd.getNextBoolean();
-            doRawFourier = gd.getNextBoolean();
-            doAngleDifference = gd.getNextBoolean();
-            doMCNR = gd.getNextBoolean();
+            doIntensityProfiles = gd.getNextBoolean();
+            doFourierProjections = gd.getNextBoolean();
+            doMotionCheck = gd.getNextBoolean();
+            doModContrast = gd.getNextBoolean();
             camBitDepth = (int)gd.getNextNumber();
             ij.Prefs.set("SIMcheck.camBitDepth", camBitDepth);
             String reconTitle = titles[gd.getNextChoiceIndex()];
@@ -227,32 +225,32 @@ public class SIMcheck_ implements PlugIn {
             IJ.log("\n ==== Raw data checks ====");
             IJ.log("  Using SI stack: " + impRaw.getTitle());
             // do checks on raw SI data
-            if (doIntensity) {
-                Raw_IntensityProfiles raw_int_plugin = new Raw_IntensityProfiles();
-                raw_int_plugin.phases = phases;
-                raw_int_plugin.angles = angles;
-                ResultSet results = raw_int_plugin.exec(impRaw);
+            if (doIntensityProfiles) {
+                Raw_IntensityProfiles ipf = new Raw_IntensityProfiles();
+                ipf.phases = phases;
+                ipf.angles = angles;
+                ResultSet results = ipf.exec(impRaw);
                 results.report();
             }
-            if (doRawFourier) {
-                Raw_Fourier raw_fourier_plugin = new Raw_Fourier();
-                raw_fourier_plugin.phases = phases;
-                raw_fourier_plugin.angles = angles;
-                ResultSet results = raw_fourier_plugin.exec(impRaw);
+            if (doFourierProjections) {
+                Raw_FourierProjections fpj = new Raw_FourierProjections();
+                fpj.phases = phases;
+                fpj.angles = angles;
+                ResultSet results = fpj.exec(impRaw);
                 results.report();
             }
-            if (doAngleDifference) {
-                Raw_MotionCheck raw_a_diff_plugin = new Raw_MotionCheck();
-                raw_a_diff_plugin.phases = phases;
-                raw_a_diff_plugin.angles = angles;
-                ResultSet results = raw_a_diff_plugin.exec(impRaw);
+            if (doMotionCheck) {
+                Raw_MotionCheck mot = new Raw_MotionCheck();
+                mot.phases = phases;
+                mot.angles = angles;
+                ResultSet results = mot.exec(impRaw);
                 results.report();
             }
-            if (doMCNR) {
-                Raw_ModContrast raw_MCNR_plugin = new Raw_ModContrast();
-                raw_MCNR_plugin.phases = phases;
-                raw_MCNR_plugin.angles = angles;
-                ResultSet results = raw_MCNR_plugin.exec(impRaw);
+            if (doModContrast) {
+                Raw_ModContrast mcn = new Raw_ModContrast();
+                mcn.phases = phases;
+                mcn.angles = angles;
+                ResultSet results = mcn.exec(impRaw);
                 impMCNR = results.getImp(0);
                 results.report();
             }

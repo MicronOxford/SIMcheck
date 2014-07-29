@@ -28,10 +28,11 @@ import ij.IJ;
  * to which a 2D FFT is applied to each slice.
  * @author Graeme Ball <graemeball@gmail.com>
  */ 
-public class Raw_Fourier implements PlugIn, Executable {
+public class Raw_FourierProjections implements PlugIn, Executable {
 
-    String name = "Raw Data Fourier plots";
-    ResultSet results = new ResultSet(name);
+    public static final String name = "Fourier Projections";
+    public static final String TLA = "FPJ";
+    private ResultSet results = new ResultSet(name);
 
     // parameter fields
     public int phases = 5;                                                         
@@ -51,7 +52,7 @@ public class Raw_Fourier implements PlugIn, Executable {
             phases = (int)gd.getNextNumber();                                   
         }                                                                       
         if (!I1l.stackDivisibleBy(imp, phases * angles)) {    
-            IJ.showMessage("Raw Data Fourier Plots",
+            IJ.showMessage(name,
             		"Error: stack size not consistent with phases/angles.");
             return;                                                             
         }
@@ -104,10 +105,11 @@ public class Raw_Fourier implements PlugIn, Executable {
           	impCurrentA.close();  // only seems to fully close "FT1.tif
         }
         IJ.run(montage, "Grays", "");
-        montage.setTitle(I1l.makeTitle(imps[0], "FTA1-" + angles));
-      	results.addImp("2D FFT montage for angles 1-" + angles, montage);
-        results.addInfo("Fourier-transformed raw data", 
-                "check for clean 1st & 2nd order spots");
+        montage.setTitle(I1l.makeTitle(imps[0], TLA));
+      	results.addImp("2D FFT max projection montage for angles 1-" + angles,
+      	        montage);
+        results.addInfo("How to interpret", 
+                "look for clean 1st & 2nd order spots, similar across angles.");
         return results;
     }
     
@@ -115,7 +117,7 @@ public class Raw_Fourier implements PlugIn, Executable {
     public static void main(String[] args) {
         new ImageJ();
         TestData.raw.show();
-        IJ.runPlugIn(Raw_Fourier.class.getName(), "");
+        IJ.runPlugIn(Raw_FourierProjections.class.getName(), "");
     }
 }
 
