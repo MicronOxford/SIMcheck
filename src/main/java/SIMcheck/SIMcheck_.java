@@ -55,10 +55,10 @@ public class SIMcheck_ implements PlugIn {
     private boolean doModContrast = true;
     private ImagePlus impMCNR = null;
     private ImagePlus impRecon = null;
-    private boolean doHistogram = true;
-    private boolean doZvar = true;
-    private boolean doReconFourier = true;
-    private boolean doMCNRmap = true;
+    private boolean doHistograms = true;
+    private boolean doSAMismatch = true;
+    private boolean doFourierPlots = true;
+    private boolean doModContrastMap = true;
     private Crop crop = new Crop();
     private int camBitDepth = 16;
 
@@ -105,11 +105,11 @@ public class SIMcheck_ implements PlugIn {
         gd.addNumericField("    Camera Bit Depth", camBitDepth, 0);
         gd.addMessage("------------ Reconstructed data ------------");
         gd.addChoice("Reconstructed_Data:", titles, titles[0]);
-        gd.addCheckbox("Intensity Histograms", doHistogram);
-        gd.addCheckbox("Spherical Aberration Mismatch", doZvar);
-        gd.addCheckbox("Fourier Plots", doReconFourier);
-        gd.addCheckbox(
-                "Mod_Contrast_Map (requires Raw Mod Contrast)", doMCNRmap);
+        gd.addCheckbox(Rec_IntensityHistogram.name, doHistograms);
+        gd.addCheckbox(Rec_SAMismatch.name, doSAMismatch);
+        gd.addCheckbox(Rec_FourierPlots.name, doFourierPlots);
+        gd.addCheckbox(Rec_ModContrastMap.name +
+                " (requires Raw Mod Contrast)", doModContrastMap);
         gd.addCheckbox("Use reconstructed data ROI to crop images?", doCrop);
         gd.addNumericField("* first Z (crop)", crop.zFirst, 0);
         gd.addNumericField("* last Z (crop)", crop.zLast, 0);
@@ -136,10 +136,10 @@ public class SIMcheck_ implements PlugIn {
             if (!reconTitle.equals(none)) {
                 impRecon = WindowManager.getImage(reconTitle);
             }
-            doHistogram = gd.getNextBoolean();
-            doZvar = gd.getNextBoolean();
-            doReconFourier = gd.getNextBoolean();
-            doMCNRmap = gd.getNextBoolean();
+            doHistograms = gd.getNextBoolean();
+            doSAMismatch = gd.getNextBoolean();
+            doFourierPlots = gd.getNextBoolean();
+            doModContrastMap = gd.getNextBoolean();
             doCrop = gd.getNextBoolean();
             crop.zFirst = (int)gd.getNextNumber();
             crop.zLast = (int)gd.getNextNumber();
@@ -222,7 +222,7 @@ public class SIMcheck_ implements PlugIn {
         
         // run checks, report results
         if (impRaw != null) {
-            IJ.log("\n ==== Raw data checks ====");
+            IJ.log("\n ==== Raw Data Checks ====");
             IJ.log("  Using SI stack: " + impRaw.getTitle());
             // do checks on raw SI data
             if (doIntensityProfiles) {
@@ -256,30 +256,29 @@ public class SIMcheck_ implements PlugIn {
             }
         }
         if (impRecon != null) {
-            IJ.log("\n ==== Reconstructed data checks ====");
+            IJ.log("\n ==== Reconstructed Data Checks ====");
             IJ.log("  using reconstructed stack: " + impRecon.getTitle());
-            if (doHistogram) {
-                Rec_Histograms histPlugin = new Rec_Histograms();
-                ResultSet results = histPlugin.exec(impRecon);
+            if (doHistograms) {
+                Rec_IntensityHistogram rih = new Rec_IntensityHistogram();
+                ResultSet results = rih.exec(impRecon);
                 results.report();
             }
-            if (doZvar) {
-                Rec_SAMismatch mismatchPlugin = new Rec_SAMismatch();
-                ResultSet results = mismatchPlugin.exec(impRecon);
+            if (doSAMismatch) {
+                Rec_SAMismatch sam = new Rec_SAMismatch();
+                ResultSet results = sam.exec(impRecon);
                 results.report();
             }
-            if (doReconFourier) {
-                Rec_FourierPlots fourierResPlugin = new Rec_FourierPlots();
-                ResultSet results = fourierResPlugin.exec(impRecon);
+            if (doFourierPlots) {
+                Rec_FourierPlots ftx = new Rec_FourierPlots();
+                ResultSet results = ftx.exec(impRecon);
                 results.report();
             }
-            if (doMCNRmap) {
-                Rec_ModContrastMap modConMapPlugin = new Rec_ModContrastMap();
-                modConMapPlugin.phases = phases;
-                modConMapPlugin.angles = angles;
-                modConMapPlugin.camBitDepth = camBitDepth;
-                ResultSet results = modConMapPlugin.exec(
-                        impRaw, impRecon, impMCNR);
+            if (doModContrastMap) {
+                Rec_ModContrastMap mcm = new Rec_ModContrastMap();
+                mcm.phases = phases;
+                mcm.angles = angles;
+                mcm.camBitDepth = camBitDepth;
+                ResultSet results = mcm.exec(impRaw, impRecon, impMCNR);
                 results.report();
             }
         }

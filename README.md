@@ -111,7 +111,6 @@ TODO
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - !! Make a 0.95 release ASAP with rec Fourier & other bugs fixed !!
         - renaming etc.
-          - make check names & results more consistent, improve log output
           - try stats & results (pass/uncertain/fail) in summary table
         - "Fourier Plots": option for non-mode zero-point (no BG)
         - spherical aberration mismatch check: axis always symmetrical about zero?
@@ -128,9 +127,10 @@ TODO
           (processed data have 3 channels: recon, decon pseudoWF, WF)
         - see google hit for "maven attach source and javadoc artifacts"
       - fixes:
-        - Wiener filter parameter estimate - calibrate, document
         - test / finish spherical aberration mismatch check
+        - Wiener filter parameter estimate - calibrate, document
         - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
+        - recon FT radial profile scale / units
         - angle labels etc. should be overlaid, not drawn
         - remove unused intermediate results from Windows list
       - features:

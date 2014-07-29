@@ -29,10 +29,11 @@ import ij.process.*;
  * negative values to the reconstructed result.
  * @author Graeme Ball <graemeball@gmail.com>
  */
-public class Rec_Histograms implements PlugIn, Executable {
+public class Rec_IntensityHistogram implements PlugIn, Executable {
     
-    String name = "Reconstructed Data Intensity Histograms";
-    ResultSet results = new ResultSet(name);
+    public static final String name = "Reconstructed Intensity Histogram";
+    public static final String TLA = "RIH";
+    private ResultSet results = new ResultSet(name);
     
     // parameter fields
     public double percentile = 0.01;  // use 0-100% of histogram extrema
@@ -54,7 +55,7 @@ public class Rec_Histograms implements PlugIn, Executable {
      * @return ResultSet containing histogram plots                                  
      */
     public ResultSet exec(ImagePlus... imps) { 
-        IJ.showStatus("Reconstructed data histograms...");
+        IJ.showStatus(name + "...");
         int nc = imps[0].getNChannels();
         ImagePlus[] plots = new ImagePlus[nc];
         for (int c = 1; c <= nc; c++){
@@ -69,12 +70,12 @@ public class Rec_Histograms implements PlugIn, Executable {
                 // caluclate +ve / -ve ratio if histogram has negatives
                 double posNegRatio = calcPosNegRatio(
                 		stats, (double)percentile / 100);
-                String statDescription = "Ratio of extreme " 
-                        + Double.toString(percentile) + "% positive/negative"
-                        + " intensities for channel " + c;
+                String statDescription = "Ratio of "
+                        + Double.toString(percentile) + "% max / min"
+                        + " intensities for Channel " + c;
                 results.addStat(statDescription, 
                         (double)((int)(posNegRatio * 10)) / 10);
-                results.addInfo("pixels above / below mode (Ch " + c + "): ",
+                results.addInfo("  Number of max / min pixels (Ch " + c + ")",
                         nNegPixels + "/" + nPosPixels);
                 
             } else {
@@ -82,12 +83,12 @@ public class Rec_Histograms implements PlugIn, Executable {
                         + Integer.toString(c), 
                         "unable to calculate +ve/-ve intensity ratio");
             }
-            String newTitle = "Reconstructed Data Histogram Channel " + c;
+            String newTitle = "Intensity Histogram Channel " + c;
             EhistWindow histW = new EhistWindow(newTitle, imp2, stats);
             histW.setVisible(false);
             plots[c - 1] = histW.getImagePlus();
         }
-        String title = "log-scaled intensity counts in gray";
+        String title = I1l.makeTitle(imps[0], TLA);
         ImagePlus impAllPlots = I1l.mergeChannels(title, plots);
         // TODO: clear Reconstructed Data Histogram Channel N windows
         //       from Window list after the plugin exits ()
@@ -96,9 +97,11 @@ public class Rec_Histograms implements PlugIn, Executable {
         }
         impAllPlots.setDimensions(nc, 1, 1);
         impAllPlots.setOpenAsHyperStack(true);
-        results.addImp(title, impAllPlots);
-        results.addInfo("Intensity ratio above / below mode", 
-                "<3 inadequate, 3-6 low, 6-12 good, >12 excellent");
+        results.addImp("intensity counts in black, log-scaled counts in gray",
+                impAllPlots);
+        results.addInfo("How to interpret",
+                "Intensity ratio of pixels at histogram max / min,\n" +
+                "  <3 inadequate, 3-6 low, 6-12 good, >12 excellent");
         return results;
     }
 
@@ -163,7 +166,7 @@ public class Rec_Histograms implements PlugIn, Executable {
         imp.setProcessor(ip);
         IJ.run(imp, "Select All", "");
         ImageStatistics stats = new StackStatistics(imp);
-        Rec_Histograms plugin = new Rec_Histograms();
+        Rec_IntensityHistogram plugin = new Rec_IntensityHistogram();
         double pnRatio = plugin.calcPosNegRatio(stats, 0.005);
         if (verbose) {
             System.out.println("hist: " + Arrays.toString(stats.histogram));
@@ -184,6 +187,9 @@ public class Rec_Histograms implements PlugIn, Executable {
     /** Call selfTest */
     public static void main(String[] args) {
         System.out.println("selfTest successful? " + test(true));
+        new ImageJ();
+        TestData.recon.show();
+        IJ.runPlugIn(Rec_IntensityHistogram.class.getName(), "");
     }
     
     /** Extend ImageJ HistogramWindow for auto log scaling and stack stats. */

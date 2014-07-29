@@ -36,8 +36,11 @@ import java.awt.image.IndexColorModel;
  */
 public class Rec_FourierPlots implements PlugIn, Executable {
 
-    String name = "Reconstructed Data Fourier Plots";
-    ResultSet results = new ResultSet(name);
+    public static final String name = "Fourier Plots";
+    public static final String TLA1 = "FTL";  // Fourier Transform Lateral
+    public static final String TLA2 = "FTR";  // FT Radial profile
+    public static final String TLA3 = "FTO";  // FT Orthogonal (XZ)
+    private ResultSet results = new ResultSet(name);
     private static final IndexColorModel fourierLUT = 
             I1l.loadLut("SIMcheck/SIMcheckFourier.lut");
     
@@ -78,7 +81,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
 
     /** 
      * Execute plugin functionality: for reconstructed and ortho-resliced,
-     * perform 2D FFT on each slice, blur, apply LUT and draw resolution rings.
+     * 2D FFT each slice and draw resolution rings (optional blur+LUT).
      * @param imps reconstructed data ImagePlus should be first imp
      * @return ResultSet containing FFT imp, ortho FFT imp, radial profile plot 
      */
@@ -97,12 +100,12 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         setLUT(impF);
         impF = overlayResRings(impF, cal);
         I1l.copyStackDims(imps[0], impF);
-        impF.setTitle(I1l.makeTitle(imps[0], "FTL"));
-        results.addImp("lateral (XY)", impF);
+        impF.setTitle(I1l.makeTitle(imps[0], TLA1));
+        results.addImp("Fourier Transform Lateral (XY)", impF);
         // radial profile of lateral FFT
         ImagePlus radialProfiles = makeRadialProfiles(impF);
-        radialProfiles.setTitle(I1l.makeTitle(imps[0], "FTR"));
-        results.addImp("lateral Fourier radial profiles (central Z)", 
+        radialProfiles.setTitle(I1l.makeTitle(imps[0], TLA2));
+        results.addImp("Fourier Transform Radial profile (lateral, central Z)", 
                 radialProfiles);
         /// for orthogonal (axial) view, reslice first
         if (showAxial) {
@@ -124,18 +127,21 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             impOrthoF = overlayResRings(impOrthoF, calOrtho);
             I1l.copyStackDims(imps[0], impOrthoF);
             impOrthoF.setPosition(1, impF.getNSlices() / 2, 1);
-            impOrthoF.setTitle(I1l.makeTitle(imps[0], "FTO"));
-            results.addImp("orthogonal / axial (XZ)", impOrthoF);
+            impOrthoF.setTitle(I1l.makeTitle(imps[0], TLA3));
+            results.addImp("Fourier Transform Orthogonal (XZ)", impOrthoF);
         }
         impF.setPosition(1, impF.getNSlices() / 2, 1);
         results.addInfo(
-            "Fourier plots (XY, and optionally XZ)", 
-            " to check for artifacts and assess average resolution\n"
+            "How to interpret", 
+            " Fourier plots show spatial frequency (i.e. size / resolution),\n"
+            + " highlighting reconstruction artifacts and average resolution:\n"
             + "  - spots in XY Fourier spectrum indicate periodic XY patterns\n"
             + "  - flat Fourier spectrum (plateau in radial profile) indicates\n"
-            + "    weaker high frequency information and poor resolution\n"
-            + "  - asymmetric FFT indicates decreased resolution due to: angle to angle intensity\n"
-            + "    variations, angle-specific k0 error, or angle-specific z-modulation issues\n");
+            + "    lack of high frequency signal and poor resolution\n"
+            + "  - asymmetric FFT indicates decreased resolution due to:\n"
+            + "    - angle to angle intensity variations\n"
+            + "    - angle-specific illumination pattern ('k0') fit error\n"
+            + "    - angle-specific z-modulation issues\n");
         return results;
     }
     

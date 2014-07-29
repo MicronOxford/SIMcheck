@@ -32,8 +32,9 @@ import ij.process.*;
  */
 public class Rec_SAMismatch implements PlugIn, Executable {
     
-    String name = "Reconstructed Data Sperical Aberration Mismatch";
-    ResultSet results = new ResultSet(name);
+    public static final String name = "Sperical Aberration Mismatch";
+    public static final String TLA = "SAM";
+    private ResultSet results = new ResultSet(name);
     
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
@@ -47,7 +48,7 @@ public class Rec_SAMismatch implements PlugIn, Executable {
      * @return ResultSet containing plots of mnimum and mean variation 
      */
      public ResultSet exec(ImagePlus... imps) {  
-        IJ.showStatus("Reconstructed data minimum plot...");
+        IJ.showStatus(name + "...");
         int nc = imps[0].getNChannels();
         ImagePlus[] plots = new ImagePlus[nc];
         for (int c = 1; c <= nc; c++) {
@@ -98,17 +99,19 @@ public class Rec_SAMismatch implements PlugIn, Executable {
             plots[c - 1] = plot.getImagePlus();
             double nstdev = Math.sqrt(JM.variance(sliceMinima)) / 
                     JM.mean(sliceMeans);
-            results.addStat("  channel " + c + " normalized stdev", nstdev);
+            results.addStat("Channel " + c + " normalized stdDev", nstdev);
             
         }
-        String title = "slice feature means (gray) & minima (black)";
+        String title = I1l.makeTitle(imps[0], TLA);
         ImagePlus impAllPlots = I1l.mergeChannels(title, plots);
         impAllPlots.setDimensions(nc, 1, 1);
         impAllPlots.setOpenAsHyperStack(true);
-        results.addImp(title, impAllPlots);
-        results.addInfo("Standard deviation of minimum", "high value with"
-                + " respect to mean feature intensity indicates\n"
-                + "    sample / PSF Refractive Index mismatch.");
+        results.addImp("slice feature means (gray) & minima (black)",
+                impAllPlots);
+        results.addInfo("How to interpret", 
+                "high standard deviation of slice minimum intensity\n" +
+                " with respect to slice average feature intensity" +
+                " indicates sample / PSF \nSpherical Aberration mismatch.");
         return results;
     }
 
@@ -127,5 +130,12 @@ public class Rec_SAMismatch implements PlugIn, Executable {
         ImagePlus imp2 = new ImagePlus(nuTitle, nuStack);
         imp2.setDimensions(1, imp.getNSlices(), imp.getNFrames());  // 1 channel
         return imp2;
+    }
+    
+    /** Interactive test method */
+    public static void main(String[] args) {
+        new ImageJ();
+        TestData.recon.show();
+        IJ.runPlugIn(Rec_SAMismatch.class.getName(), "");
     }
 }

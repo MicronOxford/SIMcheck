@@ -36,8 +36,9 @@ import java.lang.Math;
  */
 public class Rec_ModContrastMap implements PlugIn, Executable {
     
-    String name = "Reconstructed Data Mod Contrast Map (MCN)";
-    ResultSet results = new ResultSet(name);
+    public static final String name = "Modulation Contrast Map";
+    public static final String TLA = "MCM";
+    private ResultSet results = new ResultSet(name);
     
     // parameter fields
     public int phases = 5;
@@ -113,8 +114,8 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
         // convert raw data imp into pseudo-widefield
         Util_SItoPseudoWidefield si2wf = new Util_SItoPseudoWidefield();
         ImagePlus wfImp = si2wf.exec(impRaw, phases, angles);
-        IJ.showStatus("Reconstructed data Mod Contrast Map...");
-        ImagePlus impRec2 = (ImagePlus) impRec.duplicate();
+        IJ.showStatus(name + "...");
+        ImagePlus impRec2 = (ImagePlus)impRec.duplicate();
         IJ.run(impRec2, "32-bit", "");
         ImagePlus impMCNR2 = (ImagePlus)impMCNR.duplicate();
         IJ.run(impRec2, "Enhance Contrast", "saturated=0.35 process_all use");
@@ -179,10 +180,11 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
         int Tmid = nt / 2;
         outImp.setPosition(Cmid, Zmid, Tmid);
         I1l.copyCal(impRec2, outImp);
-        results.addImp("raw data mod contrast with reconstructed intensities", 
+        results.addImp("reconstructed intensities, mod contrast color LUT",
                 outImp);
-        results.addInfo("Modulation contrast", 
-                "0-3 purple (inadequate), to 6 red (acceptable),\n"
+        results.addInfo("How to interpret", "Mod contrast color LUT" +
+                " indicates superresolution signal\n strength in raw data: " + 
+                " 0-3 purple (inadequate), to 6 red (acceptable),\n"
                 + "    to 12 orange (good), to 18 yellow (very good), " 
                 + "to 24 white (excellent).");
         return results;
