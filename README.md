@@ -110,21 +110,36 @@ TODO
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - !! Make a 0.95 release ASAP with rec Fourier & other bugs fixed !!
-        - renaming etc.
-          - try stats & results (pass/uncertain/fail) in summary table
+        - renaming / dialog / output updates:-
+          - tweak main dialog text
+          - angles & phases sig figs
+          - check / util renaming
+          - move spher aberr to calibration tools
+          - remove dv extensions for check outputs
+          - calibration bar on MCNR & modcontrast map
+          - rename Illumination Pattern Focus -> SI Pattern Focus
+            (& SI Phase Steps)
+          - plot titles & axis labels, distinguish plot / image
+        - notification when all checks done, and tile windows
+        - bug: Raw_ModulationContrast standalone does not run
+        - bug: mod contrast map does not work with crop (stack size mismatch)
+        - re-order cal checks: pattern focus, then phase step
+        - re-order utilities: Stack FFT, Format Converter
         - "Fourier Plots": option for non-mode zero-point (no BG)
-        - spherical aberration mismatch check: axis always symmetrical about zero?
-        - crop function: 
+        - "Fourier Plots": reslice then blur then apply LUT
+        - crop function:
           - improve lay-out in main dialog, add "Zlast" or similar
           - move to separate utility
-        - Fourier Projections
-          - document power-of-2 and that cropping causes problems
-          - think of stat(s): spots over angles, 1st vs second, stability?
+        - utilties should autoscale (stack FFT, threshold & 16-bit)
+        - SI pattern focus: reslice with interp, autoscale, flicker corr?
+        - log text update & auto-format to 55 char line length
+        - raw Fourier central Z: explain /annotate output
 
       - documentation: 
         - finish/improve docs, illustrate usage with pictures, examples
         - for ELYRA reconstructed .czi, discard WF and decon-WF
           (processed data have 3 channels: recon, decon pseudoWF, WF)
+        - Fourier proj: document power-of-2 and that cropping causes problems
         - see google hit for "maven attach source and javadoc artifacts"
       - fixes:
         - test / finish spherical aberration mismatch check
@@ -134,15 +149,22 @@ TODO
         - angle labels etc. should be overlaid, not drawn
         - remove unused intermediate results from Windows list
       - features:
+        - summary table of stats & results (pass/uncertain/fail)
         - raw data angle difference (floaty): RMS error? (at least some stat)
         - rec Fourier:-
           - lat: pattern angles (use "SIMcheck.angle1" pref), 3 color profiles
           - axial FFT: project over central slice range, not just 1
           - axial FFT: profile plot?
           - option to not discard negatives before FFT?
+        - better name for motion check
+        - window positioning: dialog to top left, ...
+        - Intensity Histogram: different zero-points for images w/o BG
+        - cropping selection after / during main dialog
+        - spherical aberration mismatch check: axis always symmetrical about 0?
         - report per. angle modulation contrast and/or minimum of these?
-        - raw Fourier central Z: explain /annotate output
+        - Fourier proj stat(s)? spots over angles, 1st vs second, stability?
         - raw -> WF same size as rec by interpolation (& preserve type??)
+        - cal check: intensity fluctuations
       - tests, structure:
         - final empirical tests, param calibration, tolerances etc.
         - tidy up tests:
