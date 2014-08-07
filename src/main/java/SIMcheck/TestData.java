@@ -37,5 +37,8 @@ public interface TestData {
 
     public static final ImagePlus asymm = 
             IJ.openImage("src/test/resources/TestAsymm.tif");
+
+    public static final ImagePlus elyra = 
+            IJ.openImage("src/test/resources/TestElyra.tif");
     
 }

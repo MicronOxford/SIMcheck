@@ -30,7 +30,7 @@ public class Util_FormatConverter implements PlugIn {
 
     // supported formats
     public static String[] formats = {
-        "Zeiss ELYRA (CZTAP)",
+        "Zeiss ELYRA (CZAPT)",
         "Nikon N-SIM (tiled)"};
 
     // parameter fields
@@ -100,9 +100,8 @@ public class Util_FormatConverter implements PlugIn {
     /** Convert ELYRA data (CZTAP order) to OMX order (CPZAT) */
     private void convertELYRA() {
         // ELYRA data, angles and phases encoded in time dimension
-        // FIXME: recent .czi have ZA in Z, P in time
         if (nt % phases != 0 || nz % angles != 0) {
-            String issue = "For raw ELYRA data expect phases in T, angles in Z";
+            String issue = "For raw ELYRA data expect angles in Z, phases in T";
             IJ.log(issue);
             throw new IllegalArgumentException(issue);
         }
@@ -116,7 +115,7 @@ public class Util_FormatConverter implements PlugIn {
                 for (int z = 1; z <= nz; z++) {
                     for (int p = 1; p <= phases; p++) {
                         for (int c = 1; c <= nc; c++) {
-                            // Zeiss ELYRA (CZTAP)
+                            // Zeiss ELYRA (CZAPT)
                             int inSlice = I1l.stackSliceNo( 
                                     c, nc, z, nz, a, angles, p, phases, t, nt);
                             ImageProcessor ip = inStack.getProcessor(inSlice);
@@ -167,5 +166,12 @@ public class Util_FormatConverter implements PlugIn {
             }
         }
         imp.close();
+    }
+    
+    /** Interactive test method */
+    public static void main(String[] args) {
+        new ImageJ();
+        TestData.elyra.show();
+        IJ.runPlugIn(Util_FormatConverter.class.getName(), "");
     }
 }
