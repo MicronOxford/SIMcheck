@@ -121,7 +121,6 @@ TODO
             (& SI Phase Steps)
           - plot titles & axis labels, distinguish plot / image
         - notification when all checks done, and tile windows
-        - bug: Raw_ModulationContrast standalone does not run
         - bug: mod contrast map does not work with crop (stack size mismatch)
         - re-order cal checks: pattern focus, then phase step
         - re-order utilities: Stack FFT, Format Converter
