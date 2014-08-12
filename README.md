@@ -109,7 +109,7 @@ TODO
 ====
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
-      - !! Make a 0.95 release ASAP with rec Fourier & other bugs fixed !!
+      - !! Make a 0.9.5 release ASAP with rec Fourier & other bugs fixed !!
         - renaming / dialog / output updates:-
           - tweak main dialog text
           - angles & phases sig figs
