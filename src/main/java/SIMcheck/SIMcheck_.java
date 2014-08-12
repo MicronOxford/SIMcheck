@@ -81,7 +81,7 @@ public class SIMcheck_ implements PlugIn {
             IJ.noImage();
             return;
         }
-        GenericDialog gd = new GenericDialog("SIMcheck (v0.9.4)");
+        GenericDialog gd = new GenericDialog("SIMcheck (v0.9.5-SNAPSHOT)");
         gd.addMessage(
                 "--------------- INSTRUCTIONS ---------------");
         gd.addMessage(
