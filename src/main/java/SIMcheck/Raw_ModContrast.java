@@ -88,7 +88,7 @@ public class Raw_ModContrast implements PlugIn, Executable {
         gd.addNumericField("Angles", angles, 0);
         gd.addNumericField("Phases", phases, 0);
         gd.addNumericField("Z window half-width", zw, 0);
-        gd.addCheckbox("Raw Fourier (central Z)", false);
+        gd.addCheckbox("Fourier Transform Phases (central Z)", false);
         gd.showDialog();
         if (gd.wasCanceled()) {
             return;

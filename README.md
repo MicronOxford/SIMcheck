@@ -123,7 +123,6 @@ TODO
         - utilties should autoscale (stack FFT, threshold & 16-bit)
         - SI pattern focus: reslice with interp, autoscale, flicker corr?
         - log text update & auto-format to 55 char line length
-        - raw Fourier central Z: explain /annotate output
 
       - documentation: 
         - finish/improve docs, illustrate usage with pictures, examples
