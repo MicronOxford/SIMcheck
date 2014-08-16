@@ -306,7 +306,7 @@ public final class I1l {
         for (int i = 0; i < ntok; i++) {
             nuTitle += titleTokens[i];
         }
-        nuTitle = nuTitle + "_" + suffix + "." + ext;
+        nuTitle = nuTitle + "_" + suffix;
         return WindowManager.makeUniqueName(nuTitle);
     }
 

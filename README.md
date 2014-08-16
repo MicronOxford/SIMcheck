@@ -114,7 +114,6 @@ TODO
           - tweak main dialog text
           - angles & phases sig figs
           - check / util renaming
-          - remove dv extensions for check outputs
           - calibration bar on MCNR & modcontrast map
           - rename Illumination Pattern Focus -> SI Pattern Focus
             (& SI Phase Steps)
@@ -127,7 +126,6 @@ TODO
         - "Fourier Plots": reslice then blur then apply LUT
         - crop function:
           - improve lay-out in main dialog, add "Zlast" or similar
-          - move to separate utility
         - utilties should autoscale (stack FFT, threshold & 16-bit)
         - SI pattern focus: reslice with interp, autoscale, flicker corr?
         - log text update & auto-format to 55 char line length
@@ -144,6 +142,7 @@ TODO
         - Wiener filter parameter estimate - calibrate, document
         - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
         - recon FT radial profile scale / units
+        - get rid of IJ.run calls & show/hide of intermediate results 
         - angle labels etc. should be overlaid, not drawn
         - remove unused intermediate results from Windows list
       - features:
@@ -165,6 +164,7 @@ TODO
         - cal check: intensity fluctuations
       - tests, structure:
         - final empirical tests, param calibration, tolerances etc.
+        - move crop function code to separate utility
         - tidy up tests:
           - .main() for interactive test, .test() to test private methods?
           - more tests to test/debug non-interactive code, preconditions / inputs
