@@ -43,8 +43,8 @@ public class Raw_FourierProjections implements PlugIn, Executable {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);                   
         gd.addMessage("Requires SI raw data in OMX (CPZAT) order.");        
-        gd.addNumericField("angles", angles, 1 );                               
-        gd.addNumericField("phases", phases, 1 );                               
+        gd.addNumericField("angles", angles, 0);                               
+        gd.addNumericField("phases", phases, 0);                               
         gd.showDialog();                                                        
         if (gd.wasCanceled()) return;
         if( gd.wasOKed() ){                                                     

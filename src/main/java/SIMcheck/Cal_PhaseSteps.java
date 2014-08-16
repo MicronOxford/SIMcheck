@@ -73,10 +73,10 @@ public class Cal_PhaseSteps implements PlugIn {
         }
         GenericDialog gd = new GenericDialog("Caibrate Phases");
         gd.addMessage("Requires SI raw data in OMX (CPZAT) order.");
-        gd.addNumericField("Angles", angles, 1);
-        gd.addNumericField("Phases", phases, 1);
-        gd.addNumericField("first Z slice to analyze", zFirst, 1);
-        gd.addNumericField("last Z slice to analyze", zLast, 1);
+        gd.addNumericField("Angles", angles, 0);
+        gd.addNumericField("Phases", phases, 0);
+        gd.addNumericField("first Z slice to analyze", zFirst, 0);
+        gd.addNumericField("last Z slice to analyze", zLast, 0);
         gd.showDialog();
         if (gd.wasCanceled()) return;
         if (gd.wasOKed()) {
@@ -686,8 +686,7 @@ public class Cal_PhaseSteps implements PlugIn {
         Cal_PhaseSteps plugin = new Cal_PhaseSteps();
         System.out.println("private methods test OK? " + plugin.test(true));
         new ImageJ();
-        ImagePlus lawn = IJ.openImage("src/test/resources/BeadLawn.tif");
-        lawn.show();
+        TestData.lawn.show();
         IJ.runPlugIn(Cal_PhaseSteps.class.getName(), "");
     }
     

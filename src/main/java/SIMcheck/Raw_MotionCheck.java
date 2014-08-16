@@ -44,8 +44,8 @@ public class Raw_MotionCheck implements PlugIn, Executable {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);
         gd.addMessage("Requires SI raw data in OMX (CPZAT) order.");
-        gd.addNumericField("Angles", angles, 1);
-        gd.addNumericField("Phases", phases, 1);
+        gd.addNumericField("Angles", angles, 0);
+        gd.addNumericField("Phases", phases, 0);
         gd.showDialog();
         if (gd.wasCanceled()) return;
         if (gd.wasOKed()) {

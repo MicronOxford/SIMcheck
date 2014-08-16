@@ -39,8 +39,8 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         // TODO: option for padding to reconstructed result size for comparison
         GenericDialog gd = new GenericDialog("Raw SI data to Pseudo-Widefield");                   
         gd.addMessage("Requires SI raw data in OMX (CPZAT) order.");        
-        gd.addNumericField("Angles", angles, 1);                               
-        gd.addNumericField("Phases", phases, 1);
+        gd.addNumericField("Angles", angles, 0);                               
+        gd.addNumericField("Phases", phases, 0);
         gd.showDialog();                                                        
         if (gd.wasCanceled()) return;                                           
         if(gd.wasOKed()){                                                     
@@ -145,5 +145,12 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         }
         oip = new FloatProcessor(width, height, avpixels, null);
         return oip;
+    }
+    
+    /** Interactive test method. */
+    public static void main(String[] args) {
+        new ImageJ();
+        TestData.raw.show();
+        IJ.runPlugIn(Util_SItoPseudoWidefield.class.getName(), "");
     }
 }

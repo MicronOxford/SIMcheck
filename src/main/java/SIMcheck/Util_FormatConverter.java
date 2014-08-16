@@ -46,8 +46,8 @@ public class Util_FormatConverter implements PlugIn {
         GenericDialog gd = new GenericDialog("SIM Formats");
         gd.addMessage("Conversion to OMX (CPZAT) order.");        
         int formatChoice = 0;  // default choice (=ELYRA)
-        gd.addNumericField("Angles", angles, 1);
-        gd.addNumericField("Phases", phases, 1);
+        gd.addNumericField("Angles", angles, 0);
+        gd.addNumericField("Phases", phases, 0);
         gd.addChoice("Data format:", formats, formats[formatChoice]);
         gd.showDialog();
         if (gd.wasCanceled()) return;

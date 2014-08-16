@@ -85,9 +85,9 @@ public class Raw_ModContrast implements PlugIn, Executable {
         ImagePlus imp; 
         imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);
-        gd.addNumericField("Angles", angles, 1);
-        gd.addNumericField("Phases", phases, 1);
-        gd.addNumericField("Z window half-width", zw, 1);
+        gd.addNumericField("Angles", angles, 0);
+        gd.addNumericField("Phases", phases, 0);
+        gd.addNumericField("Z window half-width", zw, 0);
         gd.addCheckbox("Raw Fourier (central Z)", false);
         gd.showDialog();
         if (gd.wasCanceled()) {

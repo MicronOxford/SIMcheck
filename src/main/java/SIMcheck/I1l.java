@@ -298,10 +298,8 @@ public final class I1l {
         String[] titleTokens = imp.getTitle().split("\\.");
         int ntok = titleTokens.length;
         String nuTitle = "";
-        String ext = "";
         if (ntok > 1) {
-            ext += titleTokens[ntok - 1];
-            ntok -= 1;
+            ntok -= 1;  // discard token for input file extension
         }
         for (int i = 0; i < ntok; i++) {
             nuTitle += titleTokens[i];
