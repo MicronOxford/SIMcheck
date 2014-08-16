@@ -38,7 +38,7 @@ import ij.gui.*;
  **/
 public class Cal_PhaseSteps implements PlugIn {
 
-    String name = "Phase Steps";
+    String name = "SI Phase Steps";
     ResultSet results = new ResultSet(name);
 	
     // parameter / option fields

@@ -114,8 +114,6 @@ TODO
           - tweak main dialog text
           - check / util renaming
           - calibration bar on MCNR & modcontrast map
-          - rename Illumination Pattern Focus -> SI Pattern Focus
-            (& SI Phase Steps)
           - plot titles & axis labels, distinguish plot / image
         - notification when all checks done, and tile windows
         - "Fourier Plots": option for non-mode zero-point (no BG)

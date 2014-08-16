@@ -34,7 +34,7 @@ import ij.plugin.StackCombiner;
  **/
 public class Cal_PatternFocus implements PlugIn, Executable {
 
-    String name = "Illumination Pattern Focus";
+    String name = "SI Pattern Focus";
     ResultSet results = new ResultSet(name);
 	
 	private int width;
