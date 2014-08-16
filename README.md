@@ -119,9 +119,6 @@ TODO
             (& SI Phase Steps)
           - plot titles & axis labels, distinguish plot / image
         - notification when all checks done, and tile windows
-        - bug: mod contrast map does not work with crop (stack size mismatch)
-        - re-order cal checks: pattern focus, then phase step
-        - re-order utilities: Stack FFT, Format Converter
         - "Fourier Plots": option for non-mode zero-point (no BG)
         - "Fourier Plots": reslice then blur then apply LUT
         - crop function:
