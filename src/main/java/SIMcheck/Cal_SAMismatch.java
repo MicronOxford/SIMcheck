@@ -30,7 +30,7 @@ import ij.process.*;
  * the sample and PSF.
  * @author Graeme Ball <graemeball@gmail.com>
  */
-public class Rec_SAMismatch implements PlugIn, Executable {
+public class Cal_SAMismatch implements PlugIn, Executable {
     
     public static final String name = "Sperical Aberration Mismatch";
     public static final String TLA = "SAM";
@@ -136,6 +136,6 @@ public class Rec_SAMismatch implements PlugIn, Executable {
     public static void main(String[] args) {
         new ImageJ();
         TestData.recon.show();
-        IJ.runPlugIn(Rec_SAMismatch.class.getName(), "");
+        IJ.runPlugIn(Cal_SAMismatch.class.getName(), "");
     }
 }

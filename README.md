@@ -114,7 +114,6 @@ TODO
           - tweak main dialog text
           - angles & phases sig figs
           - check / util renaming
-          - move spher aberr to calibration tools
           - remove dv extensions for check outputs
           - calibration bar on MCNR & modcontrast map
           - rename Illumination Pattern Focus -> SI Pattern Focus
