@@ -111,7 +111,6 @@ TODO
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - !! Make a 0.9.5 release ASAP with rec Fourier & other bugs fixed !!
         - renaming / dialog / output updates:-
-          - calibration bar on MCNR & modcontrast map
           - plot titles & axis labels, distinguish plot / image
         - notification when all checks done, and tile windows
         - "Fourier Plots": option for non-mode zero-point (no BG)
@@ -144,6 +143,7 @@ TODO
           - axial FFT: project over central slice range, not just 1
           - axial FFT: profile plot?
           - option to not discard negatives before FFT?
+        - calibration bar on modcontrast map
         - better name for motion check
         - window positioning: dialog to top left, ...
         - Intensity Histogram: different zero-points for images w/o BG

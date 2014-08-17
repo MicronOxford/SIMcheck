@@ -247,6 +247,12 @@ public class Raw_ModContrast implements PlugIn, Executable {
         if (!doRawFourier) {
             impResult = (ImagePlus)(new CompositeImage(impResult));
             I1l.applyLUT(impResult, mcnrLUT, displayRange);
+            // overlay a LUT "calibration bar" if the image is big enough 
+            if (impResult.getWidth() > 128) {
+                IJ.run(impResult, "Calibration Bar...", 
+                        "location=[Lower Right] fill=None label=White " +
+                        "number=5 decimal=0 font=12 zoom=1 bold overlay");
+            }
             results.addImp("modulation contrast-to-noise ratio image", 
                     impResult);
             results.addInfo("How to interpret",
