@@ -117,7 +117,6 @@ TODO
         - "Fourier Plots": reslice then blur then apply LUT
         - crop function:
           - improve lay-out in main dialog, add "Zlast" or similar
-        - utilties should autoscale (stack FFT, threshold & 16-bit)
         - log text update & auto-format to 55 char line length
 
       - documentation: 

@@ -27,6 +27,9 @@ import ij.gui.GenericDialog;
  **/ 
 public class Util_SItoPseudoWidefield implements PlugIn {
     
+    public static final String name = "Raw SI to Pseudo-Widefield";
+    public static final String TLA = "PWF";
+    
     // parameter fields
     public int phases = 5;                                                         
     public int angles = 3;                                                         
@@ -37,7 +40,7 @@ public class Util_SItoPseudoWidefield implements PlugIn {
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
         // TODO: option for padding to reconstructed result size for comparison
-        GenericDialog gd = new GenericDialog("Raw SI data to Pseudo-Widefield");                   
+        GenericDialog gd = new GenericDialog(name);                   
         gd.addMessage("Requires SI raw data in OMX (CPZAT) order.");        
         gd.addNumericField("Angles", angles, 0);                               
         gd.addNumericField("Phases", phases, 0);
@@ -53,6 +56,7 @@ public class Util_SItoPseudoWidefield implements PlugIn {
             return;                                                             
         }
         projImg = exec(imp, phases, angles);  
+        IJ.run("Brightness/Contrast...");
         projImg.show();
     }
 
@@ -73,7 +77,7 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         new StackConverter(impCopy).convertToGray32();  
         averagePandA(impCopy, channels, Zplanes, frames);
         I1l.copyCal(imp, projImg);
-        projImg.setTitle(I1l.makeTitle(imp, "PWF"));  
+        projImg.setTitle(I1l.makeTitle(imp, TLA));  
         return projImg;
     }
 
