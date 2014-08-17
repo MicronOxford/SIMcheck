@@ -82,7 +82,7 @@ public class SIMcheck_ implements PlugIn {
         }
         GenericDialog gd = new GenericDialog("SIMcheck (v0.9.5-SNAPSHOT)");
         gd.addMessage(
-                "--------------- INSTRUCTIONS ---------------");
+                "--------------- Instructions ---------------");
         gd.addMessage(
                 "  1. Choose a raw and/or reconstructed SIM data stacks.");
         gd.addMessage(
@@ -92,25 +92,27 @@ public class SIMcheck_ implements PlugIn {
         gd.addMessage(helpMessage);
         
         // present options
-        gd.addMessage("---------------- Raw data -----------------");
+        gd.addMessage("---------------- Raw Data -----------------");
         gd.addChoice("Raw_Data:", titles, titles[1]);
         gd.addChoice("Data format:", formats, omx);
-        gd.addNumericField("angles", angles, 0);
-        gd.addNumericField("phases", phases, 0);
+        gd.addNumericField("Angles", angles, 0);
+        gd.addNumericField("Phases", phases, 0);
         gd.addCheckbox(Raw_IntensityProfiles.name, doIntensityProfiles);
         gd.addCheckbox(Raw_FourierProjections.name, doFourierProjections);
         gd.addCheckbox(Raw_MotionCheck.name, doMotionCheck);
         gd.addCheckbox(Raw_ModContrast.name, doModContrast);
         gd.addNumericField("    Camera Bit Depth", camBitDepth, 0);
-        gd.addMessage("------------ Reconstructed data ------------");
+        gd.addMessage("------------ Reconstructed Data ------------");
         gd.addChoice("Reconstructed_Data:", titles, titles[0]);
         gd.addCheckbox(Rec_IntensityHistogram.name, doHistograms);
         gd.addCheckbox(Rec_FourierPlots.name, doFourierPlots);
         gd.addCheckbox(Rec_ModContrastMap.name +
                 " (requires Raw Mod Contrast)", doModContrastMap);
-        gd.addCheckbox("Use reconstructed data ROI to crop images?", doCrop);
-        gd.addNumericField("* first Z (crop)", crop.zFirst, 0);
-        gd.addNumericField("* last Z (crop)", crop.zLast, 0);
+        gd.addMessage("---------- Select Subregion (XYZ) ----------");
+        gd.addCheckbox("Crop data? (use reconstructed data ROI for XY)", doCrop);
+        gd.addMessage("To crop in Z, enter slice numbers, 'first' or 'last'");
+        gd.addNumericField("* Z crop first", crop.zFirst, 0);
+        gd.addNumericField("* Z crop last", crop.zLast, 0);
         gd.addHelp(
                 "http://www.micron.ox.ac.uk/microngroup/software/SIMcheck.html");
         gd.showDialog();

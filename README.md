@@ -111,8 +111,6 @@ TODO
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - !! Make a 0.9.5 release ASAP with rec Fourier & other bugs fixed !!
         - renaming / dialog / output updates:-
-          - tweak main dialog text
-          - check / util renaming
           - calibration bar on MCNR & modcontrast map
           - plot titles & axis labels, distinguish plot / image
         - notification when all checks done, and tile windows
