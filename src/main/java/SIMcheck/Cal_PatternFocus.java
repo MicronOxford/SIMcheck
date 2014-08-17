@@ -55,12 +55,12 @@ public class Cal_PatternFocus implements PlugIn, Executable {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog("Caibrate Pattern Focus");
         gd.addMessage("Requires SI raw data in OMX (CPZAT) order.");
-        gd.addNumericField("Angles", angles, 1);
-        gd.addNumericField("Phases", phases, 1);
+        gd.addNumericField("Angles", angles, 0);
+        gd.addNumericField("Phases", phases, 0);
         // NB. in IJ, East is 0, in worx North is 0 (CCW is +ve in both cases)
         angle1 = ij.Prefs.get("SIMcheck.angle1", angle1);
         gd.addNumericField("Angle 1 (deg, IJ)", angle1, 1);
-        gd.addNumericField("Angle 1 (rad, OMX)", ij2omx(angle1), 2);
+        gd.addNumericField("Angle 1 (rad, OMX)", ij2omx(angle1), 3);
         gd.addRadioButtonGroup("Method to specify angle", angleMethods,
                 1, angleMethods.length, angleMethods[0]);
         gd.addCheckbox("Show rotated illumination patterns?", showRotated);
@@ -117,6 +117,7 @@ public class Cal_PatternFocus implements PlugIn, Executable {
                         " degrees CCW from E)", phase1imps[a]);
             }
             phase1imps[a] = resliceAndProject(phase1imps[a].duplicate());
+            IJ.run(phase1imps[a], "Enhance Contrast", "saturated=0.35");
             String label = "A" + (a + 1);
             String title = I1l.makeTitle(imp, "APF" + (a + 1));
             phase1imps[a].setTitle(title);
@@ -182,7 +183,7 @@ public class Cal_PatternFocus implements PlugIn, Executable {
         int ymax = (int)(height * 0.75);
         imp2.setRoi(0, ymin, width, ymax - ymin);
         IJ.run(imp2, "Reslice [/]...", "output=" + 
-                imp2.getCalibration().pixelDepth + " start=Top avoid");
+                imp2.getCalibration().pixelDepth + " start=Top");
         ImagePlus impResliced = IJ.getImage();
         IJ.run(impResliced, "Z Project...", "projection=[Max Intensity]");
         ImagePlus impProjected = IJ.getImage();

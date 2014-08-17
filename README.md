@@ -118,7 +118,6 @@ TODO
         - crop function:
           - improve lay-out in main dialog, add "Zlast" or similar
         - utilties should autoscale (stack FFT, threshold & 16-bit)
-        - SI pattern focus: reslice with interp, autoscale, flicker corr?
         - log text update & auto-format to 55 char line length
 
       - documentation: 
@@ -135,6 +134,7 @@ TODO
         - get rid of IJ.run calls & show/hide of intermediate results 
         - angle labels etc. should be overlaid, not drawn
         - remove unused intermediate results from Windows list
+        - SI pattern focus flicker corr?
       - features:
         - summary table of stats & results (pass/uncertain/fail)
         - raw data angle difference (floaty): RMS error? (at least some stat)
