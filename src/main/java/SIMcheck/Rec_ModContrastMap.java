@@ -98,7 +98,7 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
         ImagePlus impRec = imps[1];
         ImagePlus impMCNR = imps[2];
         if (impRaw == null) {
-            IJ.showMessage("Error", "Specify raw data image");
+            IJ.showMessage("Error", "Mod contrast map requires raw data image");
             return results;
         } else if (impRec == null) {
             IJ.showMessage("Error", "Specify reconstructed image");

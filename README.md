@@ -115,8 +115,6 @@ TODO
         - notification when all checks done, and tile windows
         - "Fourier Plots": option for non-mode zero-point (no BG)
         - "Fourier Plots": reslice then blur then apply LUT
-        - crop function:
-          - improve lay-out in main dialog, add "Zlast" or similar
         - log text update & auto-format to 55 char line length
 
       - documentation: 
