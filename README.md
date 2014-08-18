@@ -112,7 +112,6 @@ TODO
       - !! Make a 0.9.5 release ASAP with rec Fourier & other bugs fixed !!
         - renaming / dialog / output updates:-
           - plot titles & axis labels, distinguish plot / image
-        - notification when all checks done, and tile windows
         - "Fourier Plots": option for non-mode zero-point (no BG)
         - "Fourier Plots": reslice then blur then apply LUT
         - log text update & auto-format to 55 char line length

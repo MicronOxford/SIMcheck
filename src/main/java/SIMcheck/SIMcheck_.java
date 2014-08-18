@@ -285,7 +285,8 @@ public class SIMcheck_ implements PlugIn {
                 results.report();
             }
         }
-        IJ.log("\n\n\n");
+        IJ.log("\n ==== All Checks Finished! ====\n\n \n");
+        IJ.run("Tile", "");
     }
 
     /** Split hyperstack, returning new ImagePlus for angle requested.
