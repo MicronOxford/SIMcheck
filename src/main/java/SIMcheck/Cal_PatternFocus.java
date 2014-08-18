@@ -53,7 +53,7 @@ public class Cal_PatternFocus implements PlugIn, Executable {
     @Override
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
-        GenericDialog gd = new GenericDialog("Caibrate Pattern Focus");
+        GenericDialog gd = new GenericDialog("Calibrate Pattern Focus");
         gd.addMessage("Requires SI raw data in OMX (CPZAT) order.");
         gd.addNumericField("Angles", angles, 0);
         gd.addNumericField("Phases", phases, 0);
@@ -64,7 +64,8 @@ public class Cal_PatternFocus implements PlugIn, Executable {
         gd.addRadioButtonGroup("Method to specify angle", angleMethods,
                 1, angleMethods.length, angleMethods[0]);
         gd.addCheckbox("Show rotated illumination patterns?", showRotated);
-        gd.addMessage("** for 1st angle, draw line from bottom to top (0-180)");
+        gd.addMessage("** Select focal plane in angle 1 & draw line from" +
+                      " bottom to top end of an arbitrary stripe.");
         gd.showDialog();
         if (gd.wasCanceled()) return;
         if (gd.wasOKed()) {
