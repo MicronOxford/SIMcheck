@@ -112,8 +112,6 @@ TODO
       - !! Make a 0.9.5 release ASAP with rec Fourier & other bugs fixed !!
         - renaming / dialog / output updates:-
           - plot titles & axis labels, distinguish plot / image
-        - "Fourier Plots": option for non-mode zero-point (no BG)
-        - "Fourier Plots": reslice then blur then apply LUT
         - log text update & auto-format to 55 char line length
 
       - documentation: 
@@ -123,10 +121,10 @@ TODO
         - Fourier proj: document power-of-2 and that cropping causes problems
         - see google hit for "maven attach source and javadoc artifacts"
       - fixes:
+        - recon FT radial profile scale / units
         - test / finish spherical aberration mismatch check
         - Wiener filter parameter estimate - calibrate, document
         - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
-        - recon FT radial profile scale / units
         - get rid of IJ.run calls & show/hide of intermediate results 
         - angle labels etc. should be overlaid, not drawn
         - remove unused intermediate results from Windows list
@@ -139,6 +137,7 @@ TODO
           - axial FFT: project over central slice range, not just 1
           - axial FFT: profile plot?
           - option to not discard negatives before FFT?
+        - "Fourier Plots": option for non-mode zero-point (no BG)
         - calibration bar on modcontrast map
         - better name for motion check
         - window positioning: dialog to top left, ...

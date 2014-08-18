@@ -19,6 +19,7 @@ package SIMcheck;
 import ij.*;
 import ij.plugin.LutLoader;
 import ij.plugin.ChannelSplitter;
+import ij.plugin.filter.GaussianBlur;
 import ij.process.*;
 import ij.measure.Calibration;
 
@@ -245,6 +246,21 @@ public final class I1l {
         return maskedIp.getStatistics();
     }
     
+    /** Apply 2D gaussian blur to each slice in a stack. */
+    public static ImagePlus gaussBlur2D(ImagePlus imp, double blurRad) {
+        int ns = imp.getStackSize();
+        ImagePlus imp2 = imp.duplicate();
+        GaussianBlur gblur = new GaussianBlur();
+        gblur.showProgress(false);
+        for (int s = 1; s <= ns; s++) {
+            imp2.setSlice(s);
+            ImageProcessor ip = imp2.getProcessor();
+            gblur.blurGaussian(ip, blurRad, blurRad, 0.002);
+            imp2.setProcessor(ip);
+        }
+        return imp2;
+    }
+
     /** Get ImageStatistics for a single channel of an ImagePlus. */
     public static ImageStatistics getStatsForChannel(
             ImagePlus imp, int channel) {
@@ -570,6 +586,27 @@ public final class I1l {
         }
     }
 
+    /** Make a (sub)HyperStack comprising just the central Z slice */
+    public static ImagePlus takeCentralZ(ImagePlus imp) {
+        String title = imp.getTitle();
+        int[] dims = imp.getDimensions();
+        ImageStack stack = new ImageStack(dims[0], dims[1]);
+        imp.setZ(dims[3] / 2);
+        for (int t = 1; t <= dims[4]; t++) {
+            for (int c = 1; c <= dims[2]; c++) {
+                imp.setC(c);
+                imp.setT(t);
+                ImageProcessor ip = imp.getProcessor();
+                stack.addSlice(ip);
+            }
+        }
+        ImagePlus imp2 = new ImagePlus(title, stack);
+        imp2.setDimensions(dims[2], dims[3], dims[4]);
+        imp2.setCalibration(imp.getCalibration());
+        imp2.setOpenAsHyperStack(true);
+        return imp2;
+    }
+
     /** Interactive test method. */
     public static void main(String[] args) {
         System.out.println("Testing I1l.java");
@@ -587,7 +624,6 @@ public final class I1l {
         I1l.subtractPerSliceMode(impSub);
         impSub.show();
     }
-
 }
 
 ///// useful code snippets commented out below /////
