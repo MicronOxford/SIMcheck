@@ -83,10 +83,11 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
                         + Integer.toString(c), 
                         "unable to calculate +ve/-ve intensity ratio");
             }
-            String newTitle = "Intensity Histogram Channel " + c;
-            EhistWindow histW = new EhistWindow(newTitle, imp2, stats);
+            String plotTitle = "Intensity Histogram, Channel " + c;
+            EhistWindow histW = new EhistWindow(plotTitle, imp2, stats);
             histW.setVisible(false);
             plots[c - 1] = histW.getImagePlus();
+            I1l.drawPlotTitle(plots[c - 1], plotTitle);
         }
         String title = I1l.makeTitle(imps[0], TLA);
         ImagePlus impAllPlots = I1l.mergeChannels(title, plots);

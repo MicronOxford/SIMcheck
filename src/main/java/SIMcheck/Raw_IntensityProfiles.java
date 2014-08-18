@@ -34,8 +34,8 @@ import java.awt.Color;
  */
 public class Raw_IntensityProfiles implements PlugIn, Executable {
 
-    public static final String name = "Intensity Profiles";
-    public static final String TLA = "IPL";
+    public static final String name = "Channel Intensity Profiles";
+    public static final String TLA = "CIP";
     private ResultSet results = new ResultSet(name);
 
     // parameter fields
@@ -88,8 +88,8 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
         float[] avIntensities = new float[totalPlanes / nc];
         float[] pzat_no = new float[totalPlanes / nc];
         Plot plot = new Plot(I1l.makeTitle(imp, TLA), 
-        		"Slices in order: Phase, Z, Angle, Time (C1=blu,C2=grn,C3=red)",
-        		"Average Intensity per. Plane", pzat_no, avIntensities);
+        		"Slices in order: Phase, Z, Angle, Time (C1=red,C2=grn,C3=blu)",
+        		"Slice Mean Intensity", pzat_no, avIntensities);
 
         double sliceMeanMin = 0;
         double sliceMeanMax = 0;  // max of means for each slice
@@ -122,13 +122,13 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
                 avIntensities[pzat-1] = planeMean;
             }
             if (channel == 1) {
-                Color color = Color.BLUE;
+                Color color = Color.RED;
                 plot.setColor(color);
             } else if (channel == 2) {
                 Color color = Color.GREEN;
                 plot.setColor(color);
             } else if (channel == 3) {
-                Color color = Color.RED;
+                Color color = Color.BLUE;
                 plot.setColor(color);
             } else {
                 Color color = Color.BLACK;  // channels beyond 3rd BLACK 
@@ -175,6 +175,8 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
                     + " max intensity difference between angles (%)",
                     (double)Math.round(largestDiff));
         }
+        ImagePlus impResult = plot.getImagePlus();
+        I1l.drawPlotTitle(impResult, "Per Channel Intensity Profiles");
         results.addImp("per. channel intensity profiles", plot.getImagePlus());
         results.addInfo("How to interpret",
                 "large intensity differences of several 10's"

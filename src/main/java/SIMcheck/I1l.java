@@ -226,11 +226,22 @@ public final class I1l {
     
     /** Draw size 12 white text at the top left of the image. */
     public static void drawLabel(ImagePlus imp, String text) {
-        IJ.setForegroundColor(255, 255, 255);
+        IJ.setForegroundColor(255, 255, 255);  // TODO, remove
         ImageProcessor ip = imp.getProcessor();
         ip.setFont(new Font("SansSerif", Font.PLAIN, 12));
         ip.setColor(Color.WHITE);
         ip.drawString(text, 5, 17);
+        imp.setProcessor(ip);
+    }
+
+    /** Add a title to the ImagePlus for Plot or Histogram window. */
+    public static void drawPlotTitle(ImagePlus imp, String plotTitle) {
+        int xOffset = imp.getWidth() / 2 - plotTitle.length() * 3;
+        int yOffset = 13;
+        ImageProcessor ip = imp.getProcessor();
+        ip.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        ip.setColor(Color.BLACK);
+        ip.drawString(plotTitle, xOffset, yOffset);
         imp.setProcessor(ip);
     }
     

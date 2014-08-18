@@ -110,8 +110,6 @@ TODO
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - !! Make a 0.9.5 release ASAP with rec Fourier & other bugs fixed !!
-        - renaming / dialog / output updates:-
-          - plot titles & axis labels, distinguish plot / image
         - log text update & auto-format to 55 char line length
 
       - documentation: 
