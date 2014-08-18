@@ -40,6 +40,8 @@ import ij.ImageJ;
  */
 public class SIMcheck_ implements PlugIn {
     
+    private static final String VERSION = "0.9.5-SNAPSHOT";
+    
     private static final String none = "[None]";  // no image
     private static final String omx = "OMX (CPZAT)";
 
@@ -80,7 +82,7 @@ public class SIMcheck_ implements PlugIn {
             IJ.noImage();
             return;
         }
-        GenericDialog gd = new GenericDialog("SIMcheck (v0.9.5-SNAPSHOT)");
+        GenericDialog gd = new GenericDialog("SIMcheck (v" + VERSION + ")");
         gd.addMessage(
                 "--------------- Instructions ---------------");
         gd.addMessage(
@@ -144,8 +146,9 @@ public class SIMcheck_ implements PlugIn {
             crop.zFirst = encodeSliceNumber(gd.getNextString());
             crop.zLast = encodeSliceNumber(gd.getNextString());
             IJ.log(   "\n   =====================      "
-                    + "\n                      SIMcheck        "
+                    + "\n           SIMcheck (v" + VERSION + ")"
                     + "\n   =====================      ");
+            IJ.log("   " + JM.timestamp());
         } else {
             return;  // bail out upon cancel
         }

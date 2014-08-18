@@ -17,7 +17,10 @@
 
 package SIMcheck;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 
 /** 
  * JM is a class containing static utility methods for simple Java Math.
@@ -230,6 +233,12 @@ public class JM {
             f[i] = f[i] - val;
         }
         return f;
+    }
+    
+    /** Return a timestamp String. */
+    public static String timestamp() {
+        Date date = Calendar.getInstance().getTime();
+        return new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(date);
     }
 
     /** Calculate the variance of a double array.  */
