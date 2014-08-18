@@ -99,7 +99,7 @@ public class Cal_SAMismatch implements PlugIn, Executable {
             plots[c - 1] = plot.getImagePlus();
             double nstdev = Math.sqrt(JM.variance(sliceMinima)) / 
                     JM.mean(sliceMeans);
-            results.addStat("Channel " + c + " normalized stdDev", nstdev);
+            results.addStat("Channel " + c + " normalized StdDev", nstdev);
             
         }
         String title = I1l.makeTitle(imps[0], TLA);
@@ -111,7 +111,7 @@ public class Cal_SAMismatch implements PlugIn, Executable {
         results.addInfo("How to interpret", 
                 "high standard deviation of slice minimum intensity" +
                 " with respect to slice average feature intensity" +
-                " indicates sample / PSF \nSpherical Aberration mismatch.");
+                " indicates sample / PSF Spherical Aberration mismatch.");
         return results;
     }
 

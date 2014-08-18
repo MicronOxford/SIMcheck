@@ -288,7 +288,7 @@ public class SIMcheck_ implements PlugIn {
                 results.report();
             }
         }
-        IJ.log("\n ==== All Checks Finished! ====\n\n \n");
+        IJ.log("\n ==== All Checks Finished! ====\n");
         IJ.run("Tile", "");
     }
 

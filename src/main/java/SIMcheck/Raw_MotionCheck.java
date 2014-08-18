@@ -90,10 +90,11 @@ public class Raw_MotionCheck implements PlugIn, Executable {
             ImagePlus colorImp = colorAngles(imp, projImp, nc, nz, normFactors);
             results.addImp("false-colored angle data (C, M, Y)", colorImp);
             results.addInfo("How to interpret",
-                    "phases averaged, angles normalized, colored Cyan,"
-                    + " Magenta, Yellow for angles 1, 2 & 3"
-                    + " - non-white indicates differences between angles due"
-                    + " to drift, floating particles or uneven illumination.");
+                    "phases are averaged, angles normalized, and colored" +
+                    " Cyan, Magenta, Yellow for angles 1, 2 & 3." +
+                    " Non-white areas indicate differences between angles" +
+                    " due to drift, floating particles or" +
+                    " uneven illumination.");
         }
         return results;
     }

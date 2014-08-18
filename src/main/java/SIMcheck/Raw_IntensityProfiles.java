@@ -177,11 +177,12 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
         }
         ImagePlus impResult = plot.getImagePlus();
         I1l.drawPlotTitle(impResult, "Per Channel Intensity Profiles");
-        results.addImp("per. channel intensity profiles", plot.getImagePlus());
+        results.addImp(name, plot.getImagePlus());
         results.addInfo("How to interpret",
-                "large intensity differences of several 10's"
-                + " of % between Angles or over Z window (" + zwin
-                + " sections) used to reconstruct a slice produce artifacts.");
+                "intensity differences of > ~30% between angles and/or" +
+                " over 9-Z-window used to reconstruct each Z secition" +
+                " may cause artifacts (exact level depends on the" +
+                " signal-to-noise level).");
         return results;
     }
     

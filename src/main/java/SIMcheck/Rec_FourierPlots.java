@@ -101,7 +101,8 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         impF = overlayResRings(impF, cal);
         I1l.copyStackDims(imps[0], impF);
         impF.setTitle(I1l.makeTitle(imps[0], TLA1));
-        results.addImp("Fourier Transform Lateral (XY)", impF);
+        results.addImp("Fourier Transform Lateral (XY), showing resolution" +
+                " rings (in Microns)", impF);
         // radial profile of lateral FFT
         ImagePlus radialProfiles = makeRadialProfiles(impF);
         radialProfiles.setTitle(I1l.makeTitle(imps[0], TLA2));
@@ -136,7 +137,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             "How to interpret", 
             " Fourier plots show spatial frequency (i.e. size / resolution),"
             + " highlighting reconstruction artifacts and average resolution:"
-            + "  - spots in XY Fourier spectrum indicate periodic XY patterns"
+            + "  - spots in XY Fourier spectrum indicate periodic patterns"
             + "  - flat Fourier spectrum (plateau in radial profile) indicates"
             + " lack of high frequency signal and poor resolution"
             + "  - asymmetric FFT indicates decreased resolution due to:"

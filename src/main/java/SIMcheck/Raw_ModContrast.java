@@ -256,17 +256,20 @@ public class Raw_ModContrast implements PlugIn, Executable {
             results.addImp("modulation contrast-to-noise ratio image", 
                     impResult);
             results.addInfo("How to interpret",
-                    "color LUT display shows MCNR value:"
-                    + "  - purple is inadequate (3 or less)"
-                    + "  - red is an acceptable value of 6+"
-                    + "  - orange is good"
-                    + "  - yellow-white is very good-excellent");
+                    "color LUT display shows modulation contrast value:" +
+                    "  - purple is inadequate (3 or less)" +
+                    "  - red is an acceptable value of 6+" +
+                    "  - orange is good" +
+                    "  - yellow-white is very good-excellent." +
+                    "For estimated MCNR of image features, features are" +
+                    " selected by OTSU auto-thresholding. The Wiener filter" +
+                    " parameter estimate is for OMX data reconstruction only.");
             for (int c = 1; c <= nc; c++) {
                 ImagePlus impC = I1l.copyChannel(impResult, c);
                 double featMCNR = I1l.stackFeatMean(impC);
-                results.addStat("Channel " + c + " estimated feature MCNR = ", 
+                results.addStat("Channel " + c + " estimated feature MCNR", 
                         featMCNR);
-                results.addStat("Channel " + c + " estimated Wiener optimum = ", 
+                results.addStat("Channel " + c + " estimated Wiener optimum", 
                         estimWiener(featMCNR));
             }
         } else {
@@ -274,9 +277,9 @@ public class Raw_ModContrast implements PlugIn, Executable {
             results.addImp("Raw Fourier transforms of phases for central Z", 
                     impResult);
             results.addInfo("How to interpret",
-                    "Z dimension now corresponds to frequency / order,\n"
-                    + "  from 0 order (low freq) to highest freq,"
-                    + " back to low freq; for each angle in turn.");
+                    "Z dimension now corresponds to frequency / order," +
+                    " from 0 order (low freq) to highest freq," +
+                    " back to low freq; for each angle in turn.");
         }
         return results;
     }

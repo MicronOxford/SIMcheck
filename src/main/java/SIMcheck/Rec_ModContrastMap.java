@@ -180,13 +180,16 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
         int Tmid = nt / 2;
         outImp.setPosition(Cmid, Zmid, Tmid);
         I1l.copyCal(impRec2, outImp);
-        results.addImp("reconstructed intensities, mod contrast color LUT",
+        results.addImp("Reconstructed data color-coded by the underlying" +
+                " modulation contrast (MCNR) in the raw data",
                 outImp);
         results.addInfo("How to interpret", "Mod contrast color LUT" +
-                " indicates superresolution signal strength in raw data: " + 
-                " 0-3 purple (inadequate), to 6 red (acceptable)," +
-                " to 12 orange (good), to 18 yellow (very good)," +
-                " to 24 white (excellent).");
+                " indicates local variations in reconstruction quality," +
+                " e.g. due to blurring, dense features, or uneven SI" + 
+                " illumination.");
+        results.addInfo("MCNR values", " 0-3 purple (inadequate)," +
+                " to 6 red (acceptable), to 12 orange (good)," +
+                " to 18 yellow (very good), to 24 white (excellent).");
         return results;
     }
 
