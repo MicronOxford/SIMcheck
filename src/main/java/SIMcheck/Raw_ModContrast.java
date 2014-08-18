@@ -256,10 +256,10 @@ public class Raw_ModContrast implements PlugIn, Executable {
             results.addImp("modulation contrast-to-noise ratio image", 
                     impResult);
             results.addInfo("How to interpret",
-                    "color LUT display shows MCNR value...\n"
-                    + "  - purple is inadequate (3 or less)\n"
-                    + "  - red is an acceptable value of 6+\n"
-                    + "  - orange is good\n"
+                    "color LUT display shows MCNR value:"
+                    + "  - purple is inadequate (3 or less)"
+                    + "  - red is an acceptable value of 6+"
+                    + "  - orange is good"
                     + "  - yellow-white is very good-excellent");
             for (int c = 1; c <= nc; c++) {
                 ImagePlus impC = I1l.copyChannel(impResult, c);

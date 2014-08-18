@@ -134,15 +134,15 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         impF.setPosition(1, impF.getNSlices() / 2, 1);
         results.addInfo(
             "How to interpret", 
-            " Fourier plots show spatial frequency (i.e. size / resolution),\n"
-            + " highlighting reconstruction artifacts and average resolution:\n"
-            + "  - spots in XY Fourier spectrum indicate periodic XY patterns\n"
-            + "  - flat Fourier spectrum (plateau in radial profile) indicates\n"
-            + "    lack of high frequency signal and poor resolution\n"
-            + "  - asymmetric FFT indicates decreased resolution due to:\n"
-            + "    - angle to angle intensity variations\n"
-            + "    - angle-specific illumination pattern ('k0') fit error\n"
-            + "    - angle-specific z-modulation issues\n");
+            " Fourier plots show spatial frequency (i.e. size / resolution),"
+            + " highlighting reconstruction artifacts and average resolution:"
+            + "  - spots in XY Fourier spectrum indicate periodic XY patterns"
+            + "  - flat Fourier spectrum (plateau in radial profile) indicates"
+            + " lack of high frequency signal and poor resolution"
+            + "  - asymmetric FFT indicates decreased resolution due to:"
+            + "    - angle to angle intensity variations"
+            + "    - angle-specific illumination pattern ('k0') fit error"
+            + "    - angle-specific z-modulation issues");
         return results;
     }
     

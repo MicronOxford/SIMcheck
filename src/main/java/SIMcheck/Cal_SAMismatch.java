@@ -109,7 +109,7 @@ public class Cal_SAMismatch implements PlugIn, Executable {
         results.addImp("slice feature means (gray) & minima (black)",
                 impAllPlots);
         results.addInfo("How to interpret", 
-                "high standard deviation of slice minimum intensity\n" +
+                "high standard deviation of slice minimum intensity" +
                 " with respect to slice average feature intensity" +
                 " indicates sample / PSF \nSpherical Aberration mismatch.");
         return results;

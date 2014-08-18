@@ -183,10 +183,10 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
         results.addImp("reconstructed intensities, mod contrast color LUT",
                 outImp);
         results.addInfo("How to interpret", "Mod contrast color LUT" +
-                " indicates superresolution signal\n strength in raw data: " + 
-                " 0-3 purple (inadequate), to 6 red (acceptable),\n"
-                + "    to 12 orange (good), to 18 yellow (very good), " 
-                + "to 24 white (excellent).");
+                " indicates superresolution signal strength in raw data: " + 
+                " 0-3 purple (inadequate), to 6 red (acceptable)," +
+                " to 12 orange (good), to 18 yellow (very good)," +
+                " to 24 white (excellent).");
         return results;
     }
 
@@ -225,9 +225,9 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
         if ((newWidth / oldWidth == 0) || (newWidth % oldWidth != 0)
                 || ((newWidth / oldWidth) != (newHeight / oldHeight))) {
             throw new IllegalArgumentException(
-                    "same aspect, integer scaling only: arguments asked for"
-                    + " width " + oldWidth + "->" + newWidth 
-                    + ", height" + oldHeight + "->" + newHeight);
+                    "same aspect, integer scaling only: arguments asked for" +
+                    " width " + oldWidth + "->" + newWidth +
+                    ", height" + oldHeight + "->" + newHeight);
         } else {
             int scaleF = 1;
             scaleF = newWidth / oldWidth;

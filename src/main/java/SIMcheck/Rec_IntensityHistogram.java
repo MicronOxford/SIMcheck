@@ -75,7 +75,7 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
                         + " intensities for Channel " + c;
                 results.addStat(statDescription, 
                         (double)((int)(posNegRatio * 10)) / 10);
-                results.addInfo("  Number of max / min pixels (Ch " + c + ")",
+                results.addInfo("Number of max / min pixels (Ch " + c + ")",
                         nNegPixels + "/" + nPosPixels);
                 
             } else {
@@ -101,8 +101,8 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
         results.addImp("intensity counts in black, log-scaled counts in gray",
                 impAllPlots);
         results.addInfo("How to interpret",
-                "Intensity ratio of pixels at histogram max / min,\n" +
-                "  <3 inadequate, 3-6 low, 6-12 good, >12 excellent");
+                "Intensity ratio of pixels at histogram max / min," +
+                " <3 inadequate, 3-6 low, 6-12 good, >12 excellent");
         return results;
     }
 

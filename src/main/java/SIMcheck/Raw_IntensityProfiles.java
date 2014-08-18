@@ -180,7 +180,7 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
         results.addImp("per. channel intensity profiles", plot.getImagePlus());
         results.addInfo("How to interpret",
                 "large intensity differences of several 10's"
-                + " of % between Angles\n   or over Z window (" + zwin
+                + " of % between Angles or over Z window (" + zwin
                 + " sections) used to reconstruct a slice produce artifacts.");
         return results;
     }
