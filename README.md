@@ -111,7 +111,6 @@ TODO
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - !! Make a 0.9.5 release ASAP with rec Fourier & other bugs fixed !!
         - log text auto-format to 55 char line length
-        - make some dialogs non-modal?
 
       - documentation: 
         - finish/improve docs, illustrate usage with pictures, examples

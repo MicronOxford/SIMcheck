@@ -20,7 +20,7 @@ package SIMcheck;
 import ij.*;
 import ij.plugin.*;
 import ij.process.*;
-import ij.gui.GenericDialog;
+import ij.gui.NonBlockingGenericDialog;
 import ij.IJ;
 import ij.gui.*;
 
@@ -53,7 +53,7 @@ public class Cal_PatternFocus implements PlugIn, Executable {
     @Override
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
-        GenericDialog gd = new GenericDialog("Calibrate Pattern Focus");
+        NonBlockingGenericDialog gd = new NonBlockingGenericDialog(name);
         gd.addMessage("Requires SI raw data in OMX (CPZAT) order.");
         gd.addNumericField("Angles", angles, 0);
         gd.addNumericField("Phases", phases, 0);

@@ -21,7 +21,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.WindowManager;
-import ij.gui.GenericDialog;
+import ij.gui.NonBlockingGenericDialog;
 import ij.gui.Roi;
 import ij.plugin.PlugIn;
 import ij.plugin.Duplicator;
@@ -82,7 +82,8 @@ public class SIMcheck_ implements PlugIn {
             IJ.noImage();
             return;
         }
-        GenericDialog gd = new GenericDialog("SIMcheck (v" + VERSION + ")");
+        NonBlockingGenericDialog gd = new NonBlockingGenericDialog(
+                "SIMcheck (v" + VERSION + ")");
         gd.addMessage(
                 "--------------- Instructions ---------------");
         gd.addMessage(
