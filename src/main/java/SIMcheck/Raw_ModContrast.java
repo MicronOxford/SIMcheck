@@ -260,10 +260,11 @@ public class Raw_ModContrast implements PlugIn, Executable {
                     "  - purple is inadequate (3 or less)" +
                     "  - red is an acceptable value of 6+" +
                     "  - orange is good" +
-                    "  - yellow-white is very good-excellent." +
-                    "For estimated MCNR of image features, features are" +
-                    " selected by OTSU auto-thresholding. The Wiener filter" +
-                    " parameter estimate is for OMX data reconstruction only.");
+                    "  - yellow-white is very good-excellent.");
+            results.addInfo("Estimated feature MCNR",
+                    "features selected by Otsu auto-thresholding.");
+            results.addInfo("Estimated Wiener filter parameter",
+                    "for OMX data reconstruction only.");
             for (int c = 1; c <= nc; c++) {
                 ImagePlus impC = I1l.copyChannel(impResult, c);
                 double featMCNR = I1l.stackFeatMean(impC);

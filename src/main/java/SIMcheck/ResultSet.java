@@ -29,6 +29,10 @@ import java.math.MathContext;
  */
 public class ResultSet {
 
+    // for automatic formatting of result log / output
+    private static final int TEXTWIDTH = 55;
+    private static final int INDENT = 2;
+    
     private String resultSetName = "";
     private LinkedHashMap<String, ImagePlus> imps = 
             new LinkedHashMap<String, ImagePlus>();
@@ -86,7 +90,7 @@ public class ResultSet {
         for (Map.Entry<String, ImagePlus> entry : imps.entrySet()) {
             String description = entry.getKey();
             ImagePlus imp = (ImagePlus)entry.getValue();
-            IJ.log("  Displaying " + description);
+            IJ.log("  Displaying " + autoFormat(description, TEXTWIDTH, 16));
             imp.show();
         }
         for (Map.Entry<String, Double> entry : stats.entrySet()) {
@@ -100,9 +104,53 @@ public class ResultSet {
         for (Map.Entry<String, String> entry : infos.entrySet()) {
             String infoTitle = entry.getKey();
             String info = entry.getValue();
-            IJ.log("  " + infoTitle + ": " + info);
+            IJ.log("  " + infoTitle + ": " + autoFormat(info, TEXTWIDTH,
+                    infoTitle.length() + 2));
         }
         IJ.log("---");
+    }
+    
+    /**
+     * Automatically add line-breaks, returning text String of fixed width.
+     * The first line may be shortened by firstLineSubtraction characters.
+     * '  -' starts a new indented list item; TODO: '--' ends the list.
+     */
+    private static String autoFormat(String text, int width,
+            int firstLineSubtraction) {
+        StringBuilder sb = new StringBuilder((int)(text.length() * 1.1));
+        int thisSpace = 0;
+        int lastSpace = 0;
+        int lineStart = 0;
+        int maxIter = 100;
+        int iter = 0;
+        // TODO: break the first line early according to length of item name
+        while (thisSpace != -1 && iter < maxIter) {
+            lastSpace = thisSpace;
+            thisSpace = text.indexOf(" ", lastSpace + 1);
+            if (thisSpace == -1) {
+                sb.append(text.substring(lineStart, text.length()));
+            } else if (thisSpace + 4 < text.length() - 1 &&
+                    text.substring(thisSpace, thisSpace + 4).equals("  - ")) {
+                sb.append(text.substring(lineStart, thisSpace) + "\n");
+                sb.append(spaces(INDENT * 3) + "- ");
+                lineStart = thisSpace + 4;
+                thisSpace += 4;
+            } else {
+                if (thisSpace - lineStart > width) {
+                    // backtrack to lastSpace
+                    sb.append(text.substring(lineStart, lastSpace) + "\n" +
+                            spaces(INDENT * 2));
+                    lineStart = lastSpace + 1;
+                }
+            }
+            iter++;
+        }
+        return sb.toString();
+    }
+    
+    /** Return a string containing n spaces. */
+    private static String spaces(int n) {
+        return new String(new char[n]).replace("\0", " ");
     }
     
     /** Return an Object[] representation of the results. */

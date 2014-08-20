@@ -104,8 +104,8 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
                 " 3-6 low, 6-12 good, >12 excellent. For valid results," +
                 " the data set must contain sufficient background areas and" +
                 " should be constrained to Z slices containing features.");
-        results.addInfo("Max / min intensity ratio description",
-                "this is the ratio of the averaged " + percentile + "%" +
+        results.addInfo("Max / min intensity ratio",
+                "the ratio of the averaged " + percentile + "%" +
                 " highest and lowest intensity pixels in a 32-bit stack," +
                 " centered at the stack mode (assumed to be the center of" +
                 " the noise distribution). i.e.: Max - Mode / Abs(Min - Mode)");
