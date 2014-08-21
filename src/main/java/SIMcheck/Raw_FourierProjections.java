@@ -30,7 +30,7 @@ import ij.IJ;
  */ 
 public class Raw_FourierProjections implements PlugIn, Executable {
 
-    public static final String name = "Fourier Projections";
+    public static final String name = "Raw Data Fourier Projections";
     public static final String TLA = "FPJ";
     private ResultSet results = new ResultSet(name);
 
@@ -43,8 +43,8 @@ public class Raw_FourierProjections implements PlugIn, Executable {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);                   
         gd.addMessage("Requires SI raw data in OMX (CPZAT) order.");        
-        gd.addNumericField("angles", angles, 1 );                               
-        gd.addNumericField("phases", phases, 1 );                               
+        gd.addNumericField("angles", angles, 0);                               
+        gd.addNumericField("phases", phases, 0);                               
         gd.showDialog();                                                        
         if (gd.wasCanceled()) return;
         if( gd.wasOKed() ){                                                     
@@ -108,8 +108,9 @@ public class Raw_FourierProjections implements PlugIn, Executable {
         montage.setTitle(I1l.makeTitle(imps[0], TLA));
       	results.addImp("2D FFT max projection montage for angles 1-" + angles,
       	        montage);
-        results.addInfo("How to interpret", 
-                "look for clean 1st & 2nd order spots, similar across angles.");
+        results.addInfo("How to interpret", "look for clean 1st & 2nd" +
+      	        " order spots, similar across angles. NB. spot intensity" +
+                " depends on image content.");
         return results;
     }
     

@@ -44,8 +44,8 @@ public class Raw_MotionCheck implements PlugIn, Executable {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);
         gd.addMessage("Requires SI raw data in OMX (CPZAT) order.");
-        gd.addNumericField("Angles", angles, 1);
-        gd.addNumericField("Phases", phases, 1);
+        gd.addNumericField("Angles", angles, 0);
+        gd.addNumericField("Phases", phases, 0);
         gd.showDialog();
         if (gd.wasCanceled()) return;
         if (gd.wasOKed()) {
@@ -90,10 +90,11 @@ public class Raw_MotionCheck implements PlugIn, Executable {
             ImagePlus colorImp = colorAngles(imp, projImp, nc, nz, normFactors);
             results.addImp("false-colored angle data (C, M, Y)", colorImp);
             results.addInfo("How to interpret",
-                    "phases averaged, angles normalized, colored Cyan,"
-                    + " Magenta, Yellow for angles 1, 2 & 3 \n"
-                    + "  - non-white indicates differences between angles due"
-                    + " to drift, floating particles or uneven illumination");
+                    "phases are averaged, angles normalized, and colored" +
+                    " Cyan, Magenta, Yellow for angles 1, 2 & 3." +
+                    " Non-white areas indicate differences between angles" +
+                    " due to drift, floating particles or" +
+                    " uneven illumination.");
         }
         return results;
     }

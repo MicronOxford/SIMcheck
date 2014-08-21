@@ -109,31 +109,7 @@ TODO
 ====
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
-      - !! Make a 0.9.5 release ASAP with rec Fourier & other bugs fixed !!
-        - renaming / dialog / output updates:-
-          - tweak main dialog text
-          - angles & phases sig figs
-          - check / util renaming
-          - move spher aberr to calibration tools
-          - remove dv extensions for check outputs
-          - calibration bar on MCNR & modcontrast map
-          - rename Illumination Pattern Focus -> SI Pattern Focus
-            (& SI Phase Steps)
-          - plot titles & axis labels, distinguish plot / image
-        - notification when all checks done, and tile windows
-        - bug: mod contrast map does not work with crop (stack size mismatch)
-        - re-order cal checks: pattern focus, then phase step
-        - re-order utilities: Stack FFT, Format Converter
-        - "Fourier Plots": option for non-mode zero-point (no BG)
-        - "Fourier Plots": reslice then blur then apply LUT
-        - crop function:
-          - improve lay-out in main dialog, add "Zlast" or similar
-          - move to separate utility
-        - utilties should autoscale (stack FFT, threshold & 16-bit)
-        - SI pattern focus: reslice with interp, autoscale, flicker corr?
-        - log text update & auto-format to 55 char line length
-        - raw Fourier central Z: explain /annotate output
-
+      - release "0.9.5"
       - documentation: 
         - finish/improve docs, illustrate usage with pictures, examples
         - for ELYRA reconstructed .czi, discard WF and decon-WF
@@ -141,12 +117,14 @@ TODO
         - Fourier proj: document power-of-2 and that cropping causes problems
         - see google hit for "maven attach source and javadoc artifacts"
       - fixes:
+        - recon FT radial profile scale / units
         - test / finish spherical aberration mismatch check
         - Wiener filter parameter estimate - calibrate, document
         - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
-        - recon FT radial profile scale / units
+        - get rid of IJ.run calls & show/hide of intermediate results 
         - angle labels etc. should be overlaid, not drawn
         - remove unused intermediate results from Windows list
+        - SI pattern focus flicker corr?
       - features:
         - summary table of stats & results (pass/uncertain/fail)
         - raw data angle difference (floaty): RMS error? (at least some stat)
@@ -155,6 +133,8 @@ TODO
           - axial FFT: project over central slice range, not just 1
           - axial FFT: profile plot?
           - option to not discard negatives before FFT?
+        - "Fourier Plots": option for non-mode zero-point (no BG)
+        - calibration bar on modcontrast map
         - better name for motion check
         - window positioning: dialog to top left, ...
         - Intensity Histogram: different zero-points for images w/o BG
@@ -166,6 +146,7 @@ TODO
         - cal check: intensity fluctuations
       - tests, structure:
         - final empirical tests, param calibration, tolerances etc.
+        - move crop function code to separate utility
         - tidy up tests:
           - .main() for interactive test, .test() to test private methods?
           - more tests to test/debug non-interactive code, preconditions / inputs

@@ -98,7 +98,7 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
         ImagePlus impRec = imps[1];
         ImagePlus impMCNR = imps[2];
         if (impRaw == null) {
-            IJ.showMessage("Error", "Specify raw data image");
+            IJ.showMessage("Error", "Mod contrast map requires raw data image");
             return results;
         } else if (impRec == null) {
             IJ.showMessage("Error", "Specify reconstructed image");
@@ -180,13 +180,16 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
         int Tmid = nt / 2;
         outImp.setPosition(Cmid, Zmid, Tmid);
         I1l.copyCal(impRec2, outImp);
-        results.addImp("reconstructed intensities, mod contrast color LUT",
+        results.addImp("Reconstructed data color-coded by the underlying" +
+                " modulation contrast (MCNR) in the raw data",
                 outImp);
         results.addInfo("How to interpret", "Mod contrast color LUT" +
-                " indicates superresolution signal\n strength in raw data: " + 
-                " 0-3 purple (inadequate), to 6 red (acceptable),\n"
-                + "    to 12 orange (good), to 18 yellow (very good), " 
-                + "to 24 white (excellent).");
+                " indicates local variations in reconstruction quality," +
+                " e.g. due to blurring, dense features, or uneven SI" + 
+                " illumination.");
+        results.addInfo("MCNR values", " 0-3 purple (inadequate)," +
+                " to 6 red (acceptable), to 12 orange (good)," +
+                " to 18 yellow (very good), to 24 white (excellent).");
         return results;
     }
 
@@ -225,9 +228,9 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
         if ((newWidth / oldWidth == 0) || (newWidth % oldWidth != 0)
                 || ((newWidth / oldWidth) != (newHeight / oldHeight))) {
             throw new IllegalArgumentException(
-                    "same aspect, integer scaling only: arguments asked for"
-                    + " width " + oldWidth + "->" + newWidth 
-                    + ", height" + oldHeight + "->" + newHeight);
+                    "same aspect, integer scaling only: arguments asked for" +
+                    " width " + oldWidth + "->" + newWidth +
+                    ", height" + oldHeight + "->" + newHeight);
         } else {
             int scaleF = 1;
             scaleF = newWidth / oldWidth;

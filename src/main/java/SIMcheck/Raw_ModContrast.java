@@ -85,10 +85,10 @@ public class Raw_ModContrast implements PlugIn, Executable {
         ImagePlus imp; 
         imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);
-        gd.addNumericField("Angles", angles, 1);
-        gd.addNumericField("Phases", phases, 1);
-        gd.addNumericField("Z window half-width", zw, 1);
-        gd.addCheckbox("Raw Fourier (central Z)", false);
+        gd.addNumericField("Angles", angles, 0);
+        gd.addNumericField("Phases", phases, 0);
+        gd.addNumericField("Z window half-width", zw, 0);
+        gd.addCheckbox("Fourier Transform Phases (central Z)", false);
         gd.showDialog();
         if (gd.wasCanceled()) {
             return;
@@ -247,20 +247,30 @@ public class Raw_ModContrast implements PlugIn, Executable {
         if (!doRawFourier) {
             impResult = (ImagePlus)(new CompositeImage(impResult));
             I1l.applyLUT(impResult, mcnrLUT, displayRange);
+            // overlay a LUT "calibration bar" if the image is big enough 
+            if (impResult.getWidth() > 128) {
+                IJ.run(impResult, "Calibration Bar...", 
+                        "location=[Lower Right] fill=None label=White " +
+                        "number=5 decimal=0 font=12 zoom=1 bold overlay");
+            }
             results.addImp("modulation contrast-to-noise ratio image", 
                     impResult);
             results.addInfo("How to interpret",
-                    "color LUT display shows MCNR value...\n"
-                    + "  - purple is inadequate (3 or less)\n"
-                    + "  - red is an acceptable value of 6+\n"
-                    + "  - orange is good\n"
-                    + "  - yellow-white is very good-excellent");
+                    "color LUT display shows modulation contrast value:" +
+                    "  - purple is inadequate (3 or less)" +
+                    "  - red is an acceptable value of 6+" +
+                    "  - orange is good" +
+                    "  - yellow-white is very good-excellent.");
+            results.addInfo("Estimated feature MCNR",
+                    "features selected by Otsu auto-thresholding.");
+            results.addInfo("Estimated Wiener filter parameter",
+                    "for OMX data reconstruction only.");
             for (int c = 1; c <= nc; c++) {
                 ImagePlus impC = I1l.copyChannel(impResult, c);
                 double featMCNR = I1l.stackFeatMean(impC);
-                results.addStat("Channel " + c + " estimated feature MCNR = ", 
+                results.addStat("Channel " + c + " estimated feature MCNR", 
                         featMCNR);
-                results.addStat("Channel " + c + " estimated Wiener optimum = ", 
+                results.addStat("Channel " + c + " estimated Wiener optimum", 
                         estimWiener(featMCNR));
             }
         } else {
@@ -268,9 +278,9 @@ public class Raw_ModContrast implements PlugIn, Executable {
             results.addImp("Raw Fourier transforms of phases for central Z", 
                     impResult);
             results.addInfo("How to interpret",
-                    "Z dimension now corresponds to frequency / order,\n"
-                    + "  from 0 order (low freq) to highest freq,"
-                    + " back to low freq; for each angle in turn.");
+                    "Z dimension now corresponds to frequency / order," +
+                    " from 0 order (low freq) to highest freq," +
+                    " back to low freq; for each angle in turn.");
         }
         return results;
     }

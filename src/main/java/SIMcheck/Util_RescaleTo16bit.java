@@ -28,10 +28,14 @@ import ij.plugin.PlugIn;
  */
 public class Util_RescaleTo16bit implements PlugIn {
 
+    public static final String name = "Threshold and 16-bit conversion";
+    public static final String TLA = "THR";
+    
     @Override
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
         ImagePlus imp2 = exec(imp);
+        IJ.run("Brightness/Contrast...");
         imp2.show();
     }
 
@@ -42,7 +46,7 @@ public class Util_RescaleTo16bit implements PlugIn {
      * @return ImagePlus (16-bit) after discarding below channel mode
      */
     public static ImagePlus exec(ImagePlus imp) {
-        String title = I1l.makeTitle(imp, "POS");
+        String title = I1l.makeTitle(imp, TLA);
         ImagePlus imp2 = imp.duplicate();
         I1l.subtractPerSliceMode(imp2);
         // TODO: get conversion opts, rescale only if necess, reset conv opts

@@ -30,7 +30,7 @@ import ij.process.*;
  * the sample and PSF.
  * @author Graeme Ball <graemeball@gmail.com>
  */
-public class Rec_SAMismatch implements PlugIn, Executable {
+public class Cal_SAMismatch implements PlugIn, Executable {
     
     public static final String name = "Sperical Aberration Mismatch";
     public static final String TLA = "SAM";
@@ -99,7 +99,7 @@ public class Rec_SAMismatch implements PlugIn, Executable {
             plots[c - 1] = plot.getImagePlus();
             double nstdev = Math.sqrt(JM.variance(sliceMinima)) / 
                     JM.mean(sliceMeans);
-            results.addStat("Channel " + c + " normalized stdDev", nstdev);
+            results.addStat("Channel " + c + " normalized StdDev", nstdev);
             
         }
         String title = I1l.makeTitle(imps[0], TLA);
@@ -109,9 +109,9 @@ public class Rec_SAMismatch implements PlugIn, Executable {
         results.addImp("slice feature means (gray) & minima (black)",
                 impAllPlots);
         results.addInfo("How to interpret", 
-                "high standard deviation of slice minimum intensity\n" +
+                "high standard deviation of slice minimum intensity" +
                 " with respect to slice average feature intensity" +
-                " indicates sample / PSF \nSpherical Aberration mismatch.");
+                " indicates sample / PSF Spherical Aberration mismatch.");
         return results;
     }
 
@@ -136,6 +136,6 @@ public class Rec_SAMismatch implements PlugIn, Executable {
     public static void main(String[] args) {
         new ImageJ();
         TestData.recon.show();
-        IJ.runPlugIn(Rec_SAMismatch.class.getName(), "");
+        IJ.runPlugIn(Cal_SAMismatch.class.getName(), "");
     }
 }

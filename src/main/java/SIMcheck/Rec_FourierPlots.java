@@ -20,7 +20,6 @@ package SIMcheck;
 
 import ij.*;
 import ij.plugin.*;
-import ij.plugin.filter.GaussianBlur;
 import ij.process.*;
 import ij.measure.*;
 import ij.gui.*;
@@ -61,9 +60,9 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         GenericDialog gd = new GenericDialog(name);
         imp.getWidth();
         gd.addCheckbox("Show axial FFT", showAxial);
-        gd.addCheckbox("Window Function**", applyWinFunc);
-        gd.addCheckbox("Auto-scale (mode-max)", autoScale);
-        gd.addCheckbox("Blur & False-color LUT", blurAndLUT);
+        gd.addCheckbox("Window function**", applyWinFunc);
+        gd.addCheckbox("Auto-scale input slices mode-max)", autoScale);
+        gd.addCheckbox("Blur & false-color LUT", blurAndLUT);
         gd.addMessage("** suppress edge artifacts");
         gd.showDialog();
         if (gd.wasOKed()) {
@@ -92,16 +91,18 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         ImagePlus impF = FFT2D.fftImp(imp2, winFraction);
         blurRadius *= (double)impF.getWidth() / 512.0d;
         IJ.showStatus("Blurring & rescaling slices (lateral view)");
-        impF = displaySettings(impF);  
+        autoscaleSlices(impF);
+        impF = gaussBlur(impF);
         if (imps[0].isComposite()) {
             impF = new CompositeImage(impF);
         }
-        rescale(impF);
+        rescaleToStackMax(impF);
         setLUT(impF);
         impF = overlayResRings(impF, cal);
         I1l.copyStackDims(imps[0], impF);
         impF.setTitle(I1l.makeTitle(imps[0], TLA1));
-        results.addImp("Fourier Transform Lateral (XY)", impF);
+        results.addImp("Fourier Transform Lateral (XY), showing resolution" +
+                " rings (in Microns)", impF);
         // radial profile of lateral FFT
         ImagePlus radialProfiles = makeRadialProfiles(impF);
         radialProfiles.setTitle(I1l.makeTitle(imps[0], TLA2));
@@ -113,15 +114,16 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             OrthoReslicer orthoReslicer = new OrthoReslicer();
             ImagePlus impOrtho = imp2.duplicate();
             impOrtho = orthoReslicer.exec(impOrtho, false);
-            impOrtho = takeCentralZ(impOrtho);
+            impOrtho = I1l.takeCentralZ(impOrtho);
             Calibration calOrtho = impOrtho.getCalibration();
             IJ.showStatus("Fourier transforming slices (orthogonal view)");
             ImagePlus impOrthoF = FFT2D.fftImp(impOrtho, winFraction);
             IJ.showStatus("Blurring & rescaling slices (orthogonal view)");
-            impOrthoF = displaySettings(impOrthoF);
+            autoscaleSlices(impOrthoF);
             impOrthoF = resizeAndPad(impOrthoF, cal);
+            impOrthoF = gaussBlur(impOrthoF);
             // TODO, for multi-frame images, ensure impOrthoF is composite
-            rescale(impOrthoF);
+            rescaleToStackMax(impOrthoF);
             setLUT(impOrthoF);
             calOrtho.pixelHeight = calOrtho.pixelWidth;  // after resizeAndPad
             impOrthoF = overlayResRings(impOrthoF, calOrtho);
@@ -133,20 +135,46 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         impF.setPosition(1, impF.getNSlices() / 2, 1);
         results.addInfo(
             "How to interpret", 
-            " Fourier plots show spatial frequency (i.e. size / resolution),\n"
-            + " highlighting reconstruction artifacts and average resolution:\n"
-            + "  - spots in XY Fourier spectrum indicate periodic XY patterns\n"
-            + "  - flat Fourier spectrum (plateau in radial profile) indicates\n"
-            + "    lack of high frequency signal and poor resolution\n"
-            + "  - asymmetric FFT indicates decreased resolution due to:\n"
-            + "    - angle to angle intensity variations\n"
-            + "    - angle-specific illumination pattern ('k0') fit error\n"
-            + "    - angle-specific z-modulation issues\n");
+            " Fourier plots show spatial frequency (i.e. size / resolution),"
+            + " highlighting reconstruction artifacts and average resolution:"
+            + "  - spots in XY Fourier spectrum indicate periodic patterns"
+            + "  - flat Fourier spectrum (plateau in radial profile) indicates"
+            + " lack of high frequency signal and poor resolution"
+            + "  - asymmetric FFT indicates decreased resolution due to:"
+            + "    - angle to angle intensity variations"
+            + "    - angle-specific illumination pattern ('k0') fit error"
+            + "    - angle-specific z-modulation issues");
         return results;
     }
     
+    /** Gaussian-blur result, or not, based on blurAndLUT option field. */
+    private ImagePlus gaussBlur(ImagePlus imp) {
+        if (blurAndLUT) {
+            imp = I1l.gaussBlur2D(imp, blurRadius);
+        }
+        return imp;
+    }
+    
+    /** Autoscale 8-bit imp 0-255 for input min or mode (autoscale) to max. */
+    private void autoscaleSlices(ImagePlus imp) {
+        int ns = imp.getStackSize();
+        for (int s = 1; s <= ns; s++) {
+            imp.setSlice(s);
+            ImageProcessor ip = imp.getProcessor();
+            ImageStatistics stats = imp.getProcessor().getStatistics();
+            int min = (int)stats.min;
+            if (autoScale) {
+                min = (int)stats.mode;
+            }
+            int max = (int)stats.max;
+            ByteProcessor bp = (ByteProcessor)imp.getProcessor();
+            ip = (ImageProcessor)I1l.setBPminMax(bp, min, max, 255);
+            imp.setProcessor(ip);
+        }
+    }
+    
     /** Rescale 8-bit image to fill up to max 255. */
-    private void rescale(ImagePlus imp) {
+    private void rescaleToStackMax(ImagePlus imp) {
         int nc = imp.getNChannels();
         ImagePlus[] imps = new ImagePlus[nc];
         for (int c = 0; c < nc; c++) {
@@ -163,24 +191,54 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         imp.setStack(I1l.mergeChannels("impsMerged", imps).getStack());
     }
     
-    /** Make a (sub)HyperStack comprising just the central Z slice */
-    private ImagePlus takeCentralZ(ImagePlus imp) {
-        String title = imp.getTitle();
-        int[] dims = imp.getDimensions();
-        ImageStack stack = new ImageStack(dims[0], dims[1]);
-        imp.setZ(dims[3] / 2);
-        for (int t = 1; t <= dims[4]; t++) {
-            for (int c = 1; c <= dims[2]; c++) {
-                imp.setC(c);
-                imp.setT(t);
-                ImageProcessor ip = imp.getProcessor();
-                stack.addSlice(ip);
+    /** Use color LUT, or not, according to blurAndLUT option field. */
+    private void setLUT(ImagePlus imp) {
+        if (blurAndLUT) {
+            double[] displayRange = {0.0d, 255.0d};  // show all
+            I1l.applyLUT(imp, fourierLUT, displayRange);
+        } else {
+            if (imp.isComposite()) {
+                CompositeImage ci = (CompositeImage)imp;
+                ci.setMode(IJ.GRAYSCALE);
             }
         }
-        ImagePlus imp2 = new ImagePlus(title, stack);
-        imp2.setDimensions(dims[2], dims[3], dims[4]);
-        imp2.setCalibration(imp.getCalibration());
-        imp2.setOpenAsHyperStack(true);
+    }
+
+    /** Resize imp for same y pixel size as in cal & pad square with 0s. */
+    private ImagePlus resizeAndPad(ImagePlus imp, Calibration cal) {
+        int width = imp.getHeight();
+        int height = imp.getHeight();
+        int depth = imp.getNSlices();
+        double rescaleFactor = cal.pixelHeight / cal.pixelDepth;
+        int rescaledHeight = (int)((double)height * rescaleFactor);
+        IJ.run(imp, "Scale...", 
+                "x=1.0 y=" + rescaleFactor 
+                + " z=1.0 width=" + width 
+                + " height=" + rescaledHeight
+                + " depth=" + depth + " interpolation=Bilinear"
+                + " average process create title=impOrthoResized");
+        ImagePlus imp2 = IJ.getImage();  // TODO: refactor
+        imp2.hide();
+        int slices = imp2.getStackSize();
+        ImageStack stack = imp2.getStack();
+        ImageStack padStack = new ImageStack(width, height, 
+                imp.getStackSize());
+        for (int s = 1; s <= slices; s++) {
+            ImageProcessor ip = stack.getProcessor(s);
+            int insertStart = width * (((height - rescaledHeight) / 2) - 1);
+            int insertEnd = insertStart + width * rescaledHeight;
+            ImageProcessor pip = new ByteProcessor(width, height);  // to pad
+            byte[] pix = (byte[])((ByteProcessor)ip).getPixels();
+            byte[] padpix = new byte[width * height];
+            for (int i = insertStart; i < insertEnd; i++) {
+                padpix[i] = pix[i - insertStart];
+            }
+            pip.setPixels(padpix);
+            padStack.setProcessor(pip, s);
+        }
+        imp2.setStack(padStack);
+        I1l.copyCal(imp, imp2);
+        imp2.setProperty("FHT", imp.getProperty("FHT"));
         return imp2;
     }
     
@@ -201,83 +259,6 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         ImagePlus impProfiles = I1l.mergeChannels(
                 "radial profiles", profiles);
         return impProfiles;
-    }
-    
-    /** Resize impOrthoF for same y pixel size as impF & pad square with 0s */
-    private ImagePlus resizeAndPad(ImagePlus impOrthoF, Calibration cal) {
-        int width = impOrthoF.getHeight();
-        int height = impOrthoF.getHeight();
-        int depth = impOrthoF.getNSlices();
-        double rescaleFactor = cal.pixelHeight / cal.pixelDepth;
-        int rescaledHeight = (int)((double)height * rescaleFactor);
-        IJ.run(impOrthoF, "Scale...", 
-                "x=1.0 y=" + rescaleFactor 
-                + " z=1.0 width=" + width 
-                + " height=" + rescaledHeight
-                + " depth=" + depth + " interpolation=Bilinear"
-                + " average process create title=impOrthoResized");
-        ImagePlus impOrthoFrsz = IJ.getImage();
-        impOrthoFrsz.hide();
-        int slices = impOrthoFrsz.getStackSize();
-        ImageStack stack = impOrthoFrsz.getStack();
-        ImageStack padStack = new ImageStack(width, height, 
-        		impOrthoF.getStackSize());
-        for (int s = 1; s <= slices; s++) {
-            ImageProcessor ip = stack.getProcessor(s);
-            int insertStart = width * (((height - rescaledHeight) / 2) - 1);
-            int insertEnd = insertStart + width * rescaledHeight;
-            ImageProcessor pip = new ByteProcessor(width, height);  // to pad
-            byte[] pix = (byte[])((ByteProcessor)ip).getPixels();
-            byte[] padpix = new byte[width * height];
-            for (int i = insertStart; i < insertEnd; i++) {
-                padpix[i] = pix[i - insertStart];
-            }
-            pip.setPixels(padpix);
-            padStack.setProcessor(pip, s);
-        }
-        impOrthoFrsz.setStack(padStack);
-        I1l.copyCal(impOrthoF, impOrthoFrsz);
-        impOrthoFrsz.setProperty("FHT", impOrthoF.getProperty("FHT"));
-        return impOrthoFrsz;
-    }
-    
-
-    /** Optional gaussian blur, and select lower end of intensity range. */
-    private void setLUT(ImagePlus imp) {
-        if (blurAndLUT) {
-            double[] displayRange = {0.0d, 255.0d};  // show all
-            I1l.applyLUT(imp, fourierLUT, displayRange);
-        } else {
-            if (imp.isComposite()) {
-                CompositeImage ci = (CompositeImage)imp;
-                ci.setMode(IJ.GRAYSCALE);
-            }
-        }
-    }
-    
-    /** Optional gaussian blur, and select lower end of intensity range. */
-    private ImagePlus displaySettings(ImagePlus imp) {
-        int ns = imp.getStackSize();
-        GaussianBlur gblur = new GaussianBlur();
-        gblur.showProgress(false);
-        for (int s = 1; s <= ns; s++) {
-            imp.setSlice(s);
-            ImageProcessor ip = imp.getProcessor();
-            ImageStatistics stats = imp.getProcessor().getStatistics();
-            int min = (int)stats.min;
-            if (autoScale) {
-                min = (int)stats.mode;
-            }
-            int max = (int)stats.max;
-            ByteProcessor bp = (ByteProcessor)imp.getProcessor();
-            ip = (ImageProcessor)I1l.setBPminMax(bp, min, max, 255);
-            if (blurAndLUT) {
-                gblur.blurGaussian(ip, blurRadius, blurRadius, 0.002);
-            }
-            imp.setProcessor(ip);
-            IJ.showProgress(s, ns);
-        }
-        return imp;
     }
     
     /** 

@@ -21,7 +21,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.WindowManager;
-import ij.gui.GenericDialog;
+import ij.gui.NonBlockingGenericDialog;
 import ij.gui.Roi;
 import ij.plugin.PlugIn;
 import ij.plugin.Duplicator;
@@ -40,6 +40,8 @@ import ij.ImageJ;
  */
 public class SIMcheck_ implements PlugIn {
     
+    private static final String VERSION = "0.9.5-SNAPSHOT";
+    
     private static final String none = "[None]";  // no image
     private static final String omx = "OMX (CPZAT)";
 
@@ -56,7 +58,6 @@ public class SIMcheck_ implements PlugIn {
     private ImagePlus impMCNR = null;
     private ImagePlus impRecon = null;
     private boolean doHistograms = true;
-    private boolean doSAMismatch = true;
     private boolean doFourierPlots = true;
     private boolean doModContrastMap = true;
     private Crop crop = new Crop();
@@ -68,8 +69,8 @@ public class SIMcheck_ implements PlugIn {
         int y = 0;
         int w = 0;  // width
         int h = 0;  // height
-        int zFirst = 1;
-        int zLast = 1;
+        int zFirst = 0;  // 1-based slice number; 'first' Z encoded as slice 0
+        int zLast = -1;  // 1-based slice number; 'last' Z encoded as slice -1
     }
     
     @Override
@@ -81,9 +82,10 @@ public class SIMcheck_ implements PlugIn {
             IJ.noImage();
             return;
         }
-        GenericDialog gd = new GenericDialog("SIMcheck (v0.9.5-SNAPSHOT)");
+        NonBlockingGenericDialog gd = new NonBlockingGenericDialog(
+                "SIMcheck (v" + VERSION + ")");
         gd.addMessage(
-                "--------------- INSTRUCTIONS ---------------");
+                "--------------- Instructions ---------------");
         gd.addMessage(
                 "  1. Choose a raw and/or reconstructed SIM data stacks.");
         gd.addMessage(
@@ -93,26 +95,27 @@ public class SIMcheck_ implements PlugIn {
         gd.addMessage(helpMessage);
         
         // present options
-        gd.addMessage("---------------- Raw data -----------------");
+        gd.addMessage("---------------- Raw Data -----------------");
         gd.addChoice("Raw_Data:", titles, titles[1]);
         gd.addChoice("Data format:", formats, omx);
-        gd.addNumericField("angles", angles, 0);
-        gd.addNumericField("phases", phases, 0);
+        gd.addNumericField("Angles", angles, 0);
+        gd.addNumericField("Phases", phases, 0);
         gd.addCheckbox(Raw_IntensityProfiles.name, doIntensityProfiles);
         gd.addCheckbox(Raw_FourierProjections.name, doFourierProjections);
         gd.addCheckbox(Raw_MotionCheck.name, doMotionCheck);
         gd.addCheckbox(Raw_ModContrast.name, doModContrast);
         gd.addNumericField("    Camera Bit Depth", camBitDepth, 0);
-        gd.addMessage("------------ Reconstructed data ------------");
+        gd.addMessage("------------ Reconstructed Data ------------");
         gd.addChoice("Reconstructed_Data:", titles, titles[0]);
         gd.addCheckbox(Rec_IntensityHistogram.name, doHistograms);
-        gd.addCheckbox(Rec_SAMismatch.name, doSAMismatch);
         gd.addCheckbox(Rec_FourierPlots.name, doFourierPlots);
         gd.addCheckbox(Rec_ModContrastMap.name +
                 " (requires Raw Mod Contrast)", doModContrastMap);
-        gd.addCheckbox("Use reconstructed data ROI to crop images?", doCrop);
-        gd.addNumericField("* first Z (crop)", crop.zFirst, 0);
-        gd.addNumericField("* last Z (crop)", crop.zLast, 0);
+        gd.addMessage("---------- Select Subregion (XYZ) ----------");
+        gd.addCheckbox("Crop data? (use reconstructed data ROI for XY)", doCrop);
+        gd.addMessage("To crop in Z, enter slice numbers, 'first' or 'last'");
+        gd.addStringField("* Z crop first", "first");
+        gd.addStringField("* Z crop last", "last");
         gd.addHelp(
                 "http://www.micron.ox.ac.uk/microngroup/software/SIMcheck.html");
         gd.showDialog();
@@ -137,15 +140,16 @@ public class SIMcheck_ implements PlugIn {
                 impRecon = WindowManager.getImage(reconTitle);
             }
             doHistograms = gd.getNextBoolean();
-            doSAMismatch = gd.getNextBoolean();
             doFourierPlots = gd.getNextBoolean();
             doModContrastMap = gd.getNextBoolean();
             doCrop = gd.getNextBoolean();
-            crop.zFirst = (int)gd.getNextNumber();
-            crop.zLast = (int)gd.getNextNumber();
+            
+            crop.zFirst = encodeSliceNumber(gd.getNextString());
+            crop.zLast = encodeSliceNumber(gd.getNextString());
             IJ.log(   "\n   =====================      "
-                    + "\n                      SIMcheck        "
+                    + "\n           SIMcheck (v" + VERSION + ")"
                     + "\n   =====================      ");
+            IJ.log("   " + JM.timestamp());
         } else {
             return;  // bail out upon cancel
         }
@@ -179,11 +183,14 @@ public class SIMcheck_ implements PlugIn {
             IJ.log("\n      Cropping to Reconstructed image ROI:");
             IJ.log("        x, y, width, height = " + crop.x + ", " + crop.y +
                     ", " + crop.w + ", " + crop.h);
-            IJ.log("        slices Z = " + crop.zFirst + "-" + crop.zLast);
+            IJ.log("        slices Z = " +
+                    decodeSliceNumber(crop.zFirst, impRecon) +
+                    "-" + decodeSliceNumber(crop.zLast, impRecon));
             int[] d = impRecon.getDimensions();
             String impReconTitle = I1l.makeTitle(impRecon, "CRP");
-            ImagePlus impRecon2 = new Duplicator().run(impRecon, 
-                    1, d[2], crop.zFirst, crop.zLast, 1, d[4]);
+            ImagePlus impRecon2 = new Duplicator().run(impRecon, 1, d[2], 
+                    decodeSliceNumber(crop.zFirst, impRecon), 
+                    decodeSliceNumber(crop.zLast, impRecon), 1, d[4]);
             impRecon2.setTitle(impReconTitle);
             impRecon.close();
             impRecon = impRecon2;
@@ -195,16 +202,21 @@ public class SIMcheck_ implements PlugIn {
                 ImagePlus imp2 = null;
                 for (int a = 1; a <= angles; a++) {
                     imp2 = getImpForAngle(impRaw, a, phases, angles);
-                    int zFirst = 1 + (crop.zFirst - 1) * phases;
+                    int zFirst = 1 +
+                            (decodeSliceNumber(crop.zFirst, impRecon) - 1) *
+                            phases;
                     imp2 = new Duplicator().run(imp2, 1, d[2], zFirst,
-                            crop.zLast * phases, 1, d[4]);
+                            decodeSliceNumber(crop.zLast, impRecon) *
+                            phases, 1, d[4]);
                     if (a == 1) {
                         cropStack = imp2.getStack();
                     } else {
                         cropStack = I1l.cat(cropStack, imp2.getStack());
                     }
                 }
-                int nz = (crop.zLast - crop.zFirst + 1) * phases * angles;
+                int nz = (decodeSliceNumber(crop.zLast, impRecon) -
+                        decodeSliceNumber(crop.zFirst, impRecon) +
+                        1) * phases * angles;
                 impRaw.setStack(cropStack);
                 impRaw.setDimensions(d[2], nz , d[4]);
                 impRaw.setOpenAsHyperStack(true);
@@ -263,11 +275,6 @@ public class SIMcheck_ implements PlugIn {
                 ResultSet results = rih.exec(impRecon);
                 results.report();
             }
-            if (doSAMismatch) {
-                Rec_SAMismatch sam = new Rec_SAMismatch();
-                ResultSet results = sam.exec(impRecon);
-                results.report();
-            }
             if (doFourierPlots) {
                 Rec_FourierPlots ftx = new Rec_FourierPlots();
                 ResultSet results = ftx.exec(impRecon);
@@ -282,7 +289,8 @@ public class SIMcheck_ implements PlugIn {
                 results.report();
             }
         }
-        IJ.log("\n\n\n");
+        IJ.log("\n ==== All Checks Finished! ====\n");
+        IJ.run("Tile", "");
     }
 
     /** Split hyperstack, returning new ImagePlus for angle requested.
@@ -324,6 +332,31 @@ public class SIMcheck_ implements PlugIn {
         impOut.setPosition(1, centralZ, 1);
         impOut.setOpenAsHyperStack(true);
         return impOut;
+    }
+    
+    /** Take a string containing slice number, 'first' or 'last' and return
+     * its integer equivalent ('first' encoded as 0, 'last' as -1).
+     */
+    private static int encodeSliceNumber(String sliceString) {
+        if (sliceString.equals("first")) {
+            return 0;
+        } else if (sliceString.equals("last")) {
+            return -1;
+        } else {
+            return Integer.parseInt(sliceString);
+        }
+    }
+    
+    /** Take an encoded slice number ('first' encoded as 0, 'last' as -1) and
+     * the ImagePlus it refers to, and return actual slice number.
+     */
+    private static int decodeSliceNumber(
+            int encodedSliceNumber, ImagePlus imp) {
+        switch (encodedSliceNumber) {
+        case 0: return 1;
+        case -1: return imp.getNSlices();
+        default: return encodedSliceNumber;
+        }
     }
     
     /** Interactive test. */

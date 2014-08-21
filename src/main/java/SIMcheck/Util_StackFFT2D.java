@@ -27,7 +27,10 @@ import ij.plugin.PlugIn;
  * @author Graeme Ball <graemeball@gmail.com>
  */ 
 public class Util_StackFFT2D implements PlugIn {
-
+    
+    public static final String name = "Stack FFT (2D)";
+    public static final String TLA = "FFT";
+    
     @Override 
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
@@ -42,6 +45,7 @@ public class Util_StackFFT2D implements PlugIn {
      */ 
     public ImagePlus exec(ImagePlus imp) {
         ImagePlus impF = FFT2D.fftImp(imp, 0.01d);
+        impF.setTitle(I1l.makeTitle(imp, TLA));
         return impF;
     }
     

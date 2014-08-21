@@ -70,23 +70,23 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
                 // caluclate +ve / -ve ratio if histogram has negatives
                 double posNegRatio = calcPosNegRatio(
                 		stats, (double)percentile / 100);
-                String statDescription = "Ratio of "
-                        + Double.toString(percentile) + "% max / min"
-                        + " intensities for Channel " + c;
+                String statDescription = "Channel " + c +
+                        " max / min intensity ratio";
                 results.addStat(statDescription, 
                         (double)((int)(posNegRatio * 10)) / 10);
-                results.addInfo("  Number of max / min pixels (Ch " + c + ")",
-                        nNegPixels + "/" + nPosPixels);
+                results.addInfo("Channel " + c + " number of max / min" +
+                        " pixels", nNegPixels + "/" + nPosPixels);
                 
             } else {
                 results.addInfo("  ! histogram minimum above mode for channel "
                         + Integer.toString(c), 
                         "unable to calculate +ve/-ve intensity ratio");
             }
-            String newTitle = "Intensity Histogram Channel " + c;
-            EhistWindow histW = new EhistWindow(newTitle, imp2, stats);
+            String plotTitle = "Intensity Histogram, Channel " + c;
+            EhistWindow histW = new EhistWindow(plotTitle, imp2, stats);
             histW.setVisible(false);
             plots[c - 1] = histW.getImagePlus();
+            I1l.drawPlotTitle(plots[c - 1], plotTitle);
         }
         String title = I1l.makeTitle(imps[0], TLA);
         ImagePlus impAllPlots = I1l.mergeChannels(title, plots);
@@ -99,9 +99,16 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
         impAllPlots.setOpenAsHyperStack(true);
         results.addImp("intensity counts in black, log-scaled counts in gray",
                 impAllPlots);
-        results.addInfo("How to interpret",
-                "Intensity ratio of pixels at histogram max / min,\n" +
-                "  <3 inadequate, 3-6 low, 6-12 good, >12 excellent");
+        results.addInfo("How to interpret", "For the intensity ratio of" +
+                " pixels at the histogram max / min, <3 is inadequate," +
+                " 3-6 low, 6-12 good, >12 excellent. For valid results," +
+                " the data set must contain sufficient background areas and" +
+                " should be constrained to Z slices containing features.");
+        results.addInfo("Max / min intensity ratio",
+                "the ratio of the averaged " + percentile + "%" +
+                " highest and lowest intensity pixels in a 32-bit stack," +
+                " centered at the stack mode (assumed to be the center of" +
+                " the noise distribution). i.e.: Max - Mode / Abs(Min - Mode)");
         return results;
     }
 
