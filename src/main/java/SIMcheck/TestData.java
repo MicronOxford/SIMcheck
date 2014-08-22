@@ -21,10 +21,13 @@ import ij.IJ;
 import ij.ImagePlus;
 
 /**
- * Simple interface to access test data in main() interactive test methods.
+ * Access test data: for use in main() interactive test methods.
  * @author Graeme Ball <graemeball@gmail.com>
  */
-public interface TestData {
+class TestData {
+    
+    /** Utility class should not be instantiated. */
+    private TestData() {}
     
     public static final ImagePlus raw = 
             IJ.openImage("src/test/resources/TestRaw.tif");
