@@ -87,6 +87,11 @@ public class JM {
         System.arraycopy(arr2, 0, result, arr1.length, arr2.length);
         return result;
     }
+    
+    /** Return closest even integer to input n (round down). */
+    public static int closestEven(int n) {
+        return n % 2 == 0 ? n : n - 1;
+    }
 
     /** Convert double array to float array. */
     public static float[] d2f(double[] d) {
@@ -187,7 +192,7 @@ public class JM {
         return mean;
     }
 
-    /** Find median of an array of ints */
+    /** Find median of an array of ints. */
     public static int median(int[] m) {                                             
         Arrays.sort(m);                                                         
         int middle = m.length / 2;                                              
@@ -266,6 +271,4 @@ public class JM {
         }
         return variance;
     }
-
-    
 }

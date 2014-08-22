@@ -98,9 +98,8 @@ class Radial_Profile implements PlugIn {
 
     /** main() method for testing. */
     public static void main(String[] args) {
-        System.out.println("Testing OrthoReslicer.java");
-        ImagePlus impTest = IJ.openImage(
-                    "/Users/graemeb/Documents/InTray/SIMcheck/Test/V3_good_DAPI_SIR_Z24.tif");
+        System.out.println("Testing Radial_Profile.java");
+        ImagePlus impTest = TestData.recon;
         impTest = FFT2D.fftImp(impTest);
         impTest.show();
         Radial_Profile radialProfiler = new Radial_Profile();

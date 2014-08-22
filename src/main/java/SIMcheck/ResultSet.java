@@ -112,18 +112,17 @@ public class ResultSet {
     
     /**
      * Automatically add line-breaks, returning text String of fixed width.
-     * The first line may be shortened by firstLineSubtraction characters.
-     * '  -' starts a new indented list item; TODO: '--' ends the list.
+     * titleLen shortens the first line, adjusting for length of item title.
+     * '  -' starts a new indented list item ; TODO: '--' should end list.
      */
-    private static String autoFormat(String text, int width,
-            int firstLineSubtraction) {
+    private static String autoFormat(String text, int width, int titleLen) {
         StringBuilder sb = new StringBuilder((int)(text.length() * 1.1));
         int thisSpace = 0;
         int lastSpace = 0;
         int lineStart = 0;
-        int maxIter = 100;
+        int maxIter = 100;  // prevent infinite while; implies < 100 words
         int iter = 0;
-        // TODO: break the first line early according to length of item name
+        boolean firstLine = true;
         while (thisSpace != -1 && iter < maxIter) {
             lastSpace = thisSpace;
             thisSpace = text.indexOf(" ", lastSpace + 1);
@@ -131,16 +130,26 @@ public class ResultSet {
                 sb.append(text.substring(lineStart, text.length()));
             } else if (thisSpace + 4 < text.length() - 1 &&
                     text.substring(thisSpace, thisSpace + 4).equals("  - ")) {
+                // handle indentation of list items starting '  -'
                 sb.append(text.substring(lineStart, thisSpace) + "\n");
                 sb.append(spaces(INDENT * 3) + "- ");
                 lineStart = thisSpace + 4;
                 thisSpace += 4;
+                // TODO: indentation of multi-line items & end lists upon '--' 
             } else {
-                if (thisSpace - lineStart > width) {
+                int adjustedLineStart = lineStart;
+                if (firstLine) {
+                    // first line, with title, would be too long w/o adjustment
+                    adjustedLineStart -= titleLen;
+                }
+                if (thisSpace - adjustedLineStart > width) {
                     // backtrack to lastSpace
                     sb.append(text.substring(lineStart, lastSpace) + "\n" +
                             spaces(INDENT * 2));
                     lineStart = lastSpace + 1;
+                    if (firstLine) {
+                        firstLine = false;
+                    }
                 }
             }
             iter++;
@@ -172,16 +181,13 @@ public class ResultSet {
         
         ResultSet results = new ResultSet("ResultSet Test");
         new ImageJ();
-        ImagePlus limp = IJ.openImage(
-                "/Users/graemeb/Documents/testData/Lena.tif");
-        results.addImp("a picture of Lena", limp);
-        results.addStat("stat1, imWidth", (double)limp.getWidth());
-        results.addStat("stat2, imHeight", (double)limp.getHeight());
+        ImagePlus blimp = TestData.lawn;
+        results.addImp("a bead lawn", blimp);
+        results.addStat("stat1, imWidth", (double)blimp.getWidth());
+        results.addStat("stat2, imHeight", (double)blimp.getHeight());
         results.addStat("stat3, imBytesPerPix", 
-                (double)limp.getBytesPerPixel());
-        results.addInfo("about", "this is a picture of Lena");
-        
-            
+                (double)blimp.getBytesPerPixel());
+        results.addInfo("about", "this is raw SIM data for a bead lawn");
 
         IJ.log("report()  - should show all images and log"
                 + " all stats, info. Check stats appear in order.");

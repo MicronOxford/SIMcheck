@@ -304,6 +304,7 @@ public class FFT2D extends FHT {
     /** Test method. */
     public static void main(String[] args) {
         System.out.println("Testing FFT2D.java");
+        new ImageJ();
         // create x-gradient test image
         int nx = 300;
         int ny = 200;
@@ -329,9 +330,9 @@ public class FFT2D extends FHT {
         fp3 = (FloatProcessor)FFT2D.pad(fp2.duplicate(), FFT2D.calcPadSize(impWinFunc));
         ImagePlus impPadWin = new ImagePlus("gradient_win_pad", fp3);
         impPadWin.show();
-        ImagePlus wfTest = IJ.openImage("/Users/graemeb/Documents/InTray/SIMcheck/CURRENT_EXAMPLE_FILES/V3_Blaze_medium_DAPI_mismatch_w5_SIR_C3-WF_TEST.tif");
+        ImagePlus wfTest = TestData.recon;
         FloatProcessor fpWFtest = (FloatProcessor)wfTest.getProcessor();
-        fpWFtest = (FloatProcessor)FFT2D.gaussWindow(fpWFtest.duplicate(), 0.125d);
+        fpWFtest = (FloatProcessor)FFT2D.gaussWindow(fpWFtest.duplicate(), 0.04d);
         ImagePlus impWFtestResult = new ImagePlus("WindowFunctionTest", fpWFtest);
         impWFtestResult.copyScale(wfTest);
         impWFtestResult.show();

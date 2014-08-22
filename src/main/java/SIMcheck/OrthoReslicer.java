@@ -235,8 +235,7 @@ class OrthoReslicer implements PlugIn {
     /** main() method for testing. */
     public static void main(String[] args) {
         System.out.println("Testing OrthoReslicer.java");
-        ImagePlus impTest = IJ
-                .openImage("/Users/graemeb/Workspace/SIMcheck/test_images/Test/V3_DAPI_good_3Dsmall.tif");
+        ImagePlus impTest = TestData.recon;
         impTest.show();
         OrthoReslicer orthoReslicer = new OrthoReslicer();
         ImagePlus impOrthoI = orthoReslicer.exec(impTest, true);
