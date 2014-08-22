@@ -117,7 +117,6 @@ TODO
         - Fourier proj: document power-of-2 and that cropping causes problems
         - see google hit for "maven attach source and javadoc artifacts"
       - fixes:
-        - bug in mod contrast map with cropping (from main dialog)
         - recon FT radial profile scale / units
         - test / finish spherical aberration mismatch check
         - Wiener filter parameter estimate - calibrate, document

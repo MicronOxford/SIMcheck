@@ -174,10 +174,10 @@ public class SIMcheck_ implements PlugIn {
                 crop.w = impRecon.getWidth();
                 crop.h = impRecon.getHeight();
             } else {
-                crop.x = roi.getBounds().x;
-                crop.y = roi.getBounds().y;
-                crop.w = roi.getBounds().width;
-                crop.h = roi.getBounds().height;
+                crop.x = JM.closestEven(roi.getBounds().x);
+                crop.y = JM.closestEven(roi.getBounds().y);
+                crop.w = JM.closestEven(roi.getBounds().width);
+                crop.h = JM.closestEven(roi.getBounds().height);
             }
             // Do recon image crop
             IJ.log("\n      Cropping to Reconstructed image ROI:");
