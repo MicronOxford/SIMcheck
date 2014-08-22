@@ -113,17 +113,16 @@ public class ResultSet {
     /**
      * Automatically add line-breaks, returning text String of fixed width.
      * The first line may be shortened by firstLineSubtraction characters.
-     * '  -' starts a new indented list item; TODO: '--' ends the list.
+     * '  -' starts a new indented list item; TODO: '--' should end list.
      */
-    private static String autoFormat(String text, int width,
-            int firstLineSubtraction) {
+    private static String autoFormat(String text, int width, int titleLen) {
         StringBuilder sb = new StringBuilder((int)(text.length() * 1.1));
         int thisSpace = 0;
         int lastSpace = 0;
         int lineStart = 0;
-        int maxIter = 100;
+        int maxIter = 100;  // prevent infinite while; implies < 100 words
         int iter = 0;
-        // TODO: break the first line early according to length of item name
+        boolean firstLine = true;
         while (thisSpace != -1 && iter < maxIter) {
             lastSpace = thisSpace;
             thisSpace = text.indexOf(" ", lastSpace + 1);
@@ -131,16 +130,26 @@ public class ResultSet {
                 sb.append(text.substring(lineStart, text.length()));
             } else if (thisSpace + 4 < text.length() - 1 &&
                     text.substring(thisSpace, thisSpace + 4).equals("  - ")) {
+                // handle indentation of list items starting '  -'
                 sb.append(text.substring(lineStart, thisSpace) + "\n");
                 sb.append(spaces(INDENT * 3) + "- ");
                 lineStart = thisSpace + 4;
                 thisSpace += 4;
+                // TODO: end lists upon '--'; indentation of multi-line items
             } else {
-                if (thisSpace - lineStart > width) {
+                int adjustedLineStart = lineStart;
+                if (firstLine) {
+                    // first line, with title, would be too long w/o adjustment
+                    adjustedLineStart -= titleLen;
+                }
+                if (thisSpace - adjustedLineStart > width) {
                     // backtrack to lastSpace
                     sb.append(text.substring(lineStart, lastSpace) + "\n" +
                             spaces(INDENT * 2));
                     lineStart = lastSpace + 1;
+                    if (firstLine) {
+                        firstLine = false;
+                    }
                 }
             }
             iter++;
