@@ -117,6 +117,10 @@ TODO
         - Fourier proj: document power-of-2 and that cropping causes problems
         - see google hit for "maven attach source and javadoc artifacts"
       - fixes:
+        - LUT overlay in raw mod cotrast only appears for 1st channel
+          (& font -> non-bold)
+        - HELP button should go to new page
+        - re-do log using Lothar's suggestions
         - recon FT radial profile scale / units
         - test / finish spherical aberration mismatch check
         - Wiener filter parameter estimate - calibrate, document
@@ -126,6 +130,7 @@ TODO
         - remove unused intermediate results from Windows list
         - SI pattern focus flicker corr?
       - features:
+        - option to specify manual offset & different modes for threshold / 16-bit
         - summary table of stats & results (pass/uncertain/fail)
         - raw data angle difference (floaty): RMS error? (at least some stat)
         - rec Fourier:-
