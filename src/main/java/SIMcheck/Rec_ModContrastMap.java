@@ -21,6 +21,7 @@ import ij.*;
 import ij.process.*;
 import ij.plugin.*;
 import ij.gui.GenericDialog;
+import ij.gui.Overlay;
 
 import java.lang.Math;
 
@@ -179,6 +180,12 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
         int Zmid = nz / 2;
         int Tmid = nt / 2;
         outImp.setPosition(Cmid, Zmid, Tmid);
+        Overlay legend = impMCNR.getOverlay();
+        outImp.setOverlay(legend);
+        if (outImp.getOverlay() !=null) {
+            // MCNR / raw data overlay is 1/2 size and defaults to center
+            outImp.getOverlay().translate(height / 2, width / 2);
+        }
         I1l.copyCal(impRec2, outImp);
         results.addImp("Reconstructed data color-coded by the underlying" +
                 " modulation contrast (MCNR) in the raw data",

@@ -117,8 +117,6 @@ TODO
         - Fourier proj: document power-of-2 and that cropping causes problems
         - see google hit for "maven attach source and javadoc artifacts"
       - fixes:
-        - LUT overlay in raw mod cotrast only appears for 1st channel
-          (& font -> non-bold)
         - HELP button should go to new page
         - re-do log using Lothar's suggestions
         - recon FT radial profile scale / units
@@ -140,7 +138,6 @@ TODO
           - axial FFT: project over central slice range, not just 1
           - axial FFT: profile plot?
           - option to not discard negatives before FFT?
-        - calibration bar on modcontrast map
         - report per. angle modulation contrast and/or minimum of these?
         - Fourier proj stat(s)? spots over angles, 1st vs second, stability?
         - raw -> WF same size as rec by interpolation (& preserve type??)
