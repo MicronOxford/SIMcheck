@@ -122,15 +122,17 @@ TODO
         - HELP button should go to new page
         - re-do log using Lothar's suggestions
         - recon FT radial profile scale / units
-        - test / finish spherical aberration mismatch check
         - Wiener filter parameter estimate - calibrate, document
+        - test / finish spherical aberration mismatch check
         - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
         - get rid of IJ.run calls & show/hide of intermediate results 
         - angle labels etc. should be overlaid, not drawn
         - remove unused intermediate results from Windows list
-        - SI pattern focus flicker corr?
       - features:
         - option to specify manual offset & different modes for threshold / 16-bit
+          - "Fourier Plots": option for non-mode zero-point (no BG)
+          - Intensity Histogram: different zero-points for images w/o BG
+        - better name for motion check
         - summary table of stats & results (pass/uncertain/fail)
         - raw data angle difference (floaty): RMS error? (at least some stat)
         - rec Fourier:-
@@ -138,38 +140,35 @@ TODO
           - axial FFT: project over central slice range, not just 1
           - axial FFT: profile plot?
           - option to not discard negatives before FFT?
-        - "Fourier Plots": option for non-mode zero-point (no BG)
         - calibration bar on modcontrast map
-        - better name for motion check
-        - window positioning: dialog to top left, ...
-        - Intensity Histogram: different zero-points for images w/o BG
-        - cropping selection after / during main dialog
-        - spherical aberration mismatch check: axis always symmetrical about 0?
         - report per. angle modulation contrast and/or minimum of these?
         - Fourier proj stat(s)? spots over angles, 1st vs second, stability?
         - raw -> WF same size as rec by interpolation (& preserve type??)
-        - cal check: intensity fluctuations
+        - spherical aberration mismatch check: axis always symmetrical about 0?
+        - SI pattern focus flicker corr?
+        - window positioning: dialog to top left, ...
       - tests, structure:
         - final empirical tests, param calibration, tolerances etc.
         - move crop function code to separate utility
         - tidy up tests:
-          - .main() for interactive test, .test() to test private methods?
-          - more tests to test/debug non-interactive code, preconditions / inputs
+          - .main() for interactive test, .test() to unit-test private methods
           - unit tests to run without test data (download should build easily)
-          - nice, compact test data suite for distribution
-        - work out strategy for test data distribution
+          - more tests to test/debug non-interactive code, preconditions (inputs)
+        - test data:
+          - compact test / example data suite for distribution
+          - work out strategy for test data distribution
         - add ResultTable support to ResultSet class
 
 * 1.1: future features
-      - convert dialog & logging to non-blocking swing GUI
+      - convert dialog & logging to swing GUI
+      - rec: FFT automatic resolution estimation??
+      - 3D FFT
+      - raw: estimate angles & line-spacing for FFT, pattern focus?
+      - cal: PSF symmetry within tolerance?
+      - cal: OTF extent, shape & order separation?
       - util: merge/shuffle:-
         - tool for merging SIM & widefield data (Julio)
         - re-order channels
-      - pre: estimate angles & line-spacing for FFT, pattern focus
-      - 3D FFT
-      - post: rec FFT automatic resolution estimation??
-      - cal: PSF symmetry within tolerance?
-      - cal: OTF extent, shape & order separation?
       - pre: plot channel color from channel metadata
 
 
