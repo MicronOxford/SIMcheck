@@ -20,10 +20,13 @@ package SIMcheck;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
+import ij.gui.GenericDialog;
+import ij.plugin.ChannelSplitter;
 import ij.plugin.PlugIn;
+import ij.process.StackStatistics;
 
 /**
- * This plugin discards values below channel mode and converts to 16-bit.
+ * This plugin discards values below zero-point and converts to 16-bit.
  * @author Graeme Ball <graemeball@gmail.com>
  */
 public class Util_RescaleTo16bit implements PlugIn {
@@ -34,12 +37,40 @@ public class Util_RescaleTo16bit implements PlugIn {
     @Override
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
-        ImagePlus imp2 = exec(imp);
+        ImagePlus imp2 = null;
+        double[] channelMinima = new double[imp.getNChannels()];
+        GenericDialog gd = new GenericDialog(name);
+        gd.addCheckbox("Auto-scale input slices mode-max", true);
+        gd.showDialog();
+        if (gd.wasOKed()) {
+            if (gd.getNextBoolean()) {
+                imp2 = exec(imp);
+            } else {
+                specifyChannelMinima(channelMinima);
+                imp2 = exec(imp, channelMinima);
+            }
+        }
         IJ.run("Brightness/Contrast...");
         imp2.show();
     }
+    
+    /** Prompt user to specify channel minima and set channelMinima array. */
+    static void specifyChannelMinima(double[] channelMinima) {
+        int nc = channelMinima.length;
+        GenericDialog gd2 = new GenericDialog("Channel Minima");
+        gd2.addMessage("Discard intensities below:");
+        for (int c = 1; c <= nc; c++) {
+            gd2.addNumericField("Channel " + c, 0.0d, 0);
+        }
+        gd2.showDialog();
+        if (gd2.wasOKed()) {
+            for (int c = 1; c <= nc; c++) {
+                channelMinima[c - 1] = gd2.getNextNumber();
+            }
+        }
+    }
 
-    /** Execute plugin functionality: discard -ve and convert to 16-bit.
+    /** Execute plugin functionality: discard <mode and convert to 16-bit.
      * For each channel, old mode is new zero, and values are rescaled to
      * fit 0-65535 if channel max exceeds 65535.
      * @param imp input ImagePlus, i.e. 32-bit reconstructed SIM data
@@ -49,13 +80,40 @@ public class Util_RescaleTo16bit implements PlugIn {
         String title = I1l.makeTitle(imp, TLA);
         ImagePlus imp2 = imp.duplicate();
         I1l.subtractPerSliceMode(imp2);
-        // TODO: get conversion opts, rescale only if necess, reset conv opts
-        // TODO: option to "discard negatives" where not much background
+        IJ.log(name + ", using per slice mode.");
         IJ.run("Conversions...", " ");
-//        IJ.run("Conversions...", "scale");
         IJ.run(imp2, "16-bit", "");
         imp2.setTitle(title);
         return imp2;
+    }
+
+    /** Alternative exec(): discard below specified channel minima, to 16-bit.
+     * @param imp input ImagePlus, i.e. 32-bit reconstructed SIM data
+     * @param array channel minima
+     * @return ImagePlus (16-bit) after discarding below channel minimum
+     */
+    public static ImagePlus exec(ImagePlus imp, double[] channelMinima) {
+        String title = I1l.makeTitle(imp, TLA);
+        ImagePlus imp2 = imp.duplicate();
+        IJ.log(name + ", using specified minima:");
+        for (int c = 1; c <= channelMinima.length; c++) {
+            IJ.log("  Channel " + c + " minimum = " + channelMinima[c - 1]);
+        }
+        subtractChannelMinima(imp2, channelMinima);
+        IJ.run("Conversions...", " ");
+        IJ.run(imp2, "16-bit", "");
+        imp2.setTitle(title);
+        return imp2;
+    }
+    
+    /** Subtract specified minimum from each channel. */
+    static void subtractChannelMinima(ImagePlus imp, double[] minima) {
+        ImagePlus[] imps = ChannelSplitter.split(imp);
+        for (int c = 0; c < imps.length; c++) {
+            double minimum = minima[c];
+            IJ.run(imps[c], "Subtract...", "value=" + minimum + " stack");
+        }
+        imp.setStack(I1l.mergeChannels(imp.getTitle(), imps).getStack());
     }
     
     /** Interactive test method. */

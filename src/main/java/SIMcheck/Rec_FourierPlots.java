@@ -54,6 +54,8 @@ public class Rec_FourierPlots implements PlugIn, Executable {
     public boolean autoScale = true;  // re-scale to mode->max?
     public boolean blurAndLUT = false;  // blur & apply false color LUT?
     
+    private double[] channelMinima = null;
+    
     @Override
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
@@ -61,7 +63,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         imp.getWidth();
         gd.addCheckbox("Show axial FFT", showAxial);
         gd.addCheckbox("Window function**", applyWinFunc);
-        gd.addCheckbox("Auto-scale input slices mode-max)", autoScale);
+        gd.addCheckbox("Auto-scale input slices mode-max", autoScale);
         gd.addCheckbox("Blur & false-color LUT", blurAndLUT);
         gd.addMessage("** suppress edge artifacts");
         gd.showDialog();
@@ -72,6 +74,10 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             this.blurAndLUT = gd.getNextBoolean();
             if (!applyWinFunc) {
                 winFraction = 0.0d;
+            }
+            if (!autoScale) {
+                channelMinima = new double[imp.getNChannels()];
+                Util_RescaleTo16bit.specifyChannelMinima(channelMinima);
             }
 	        results = exec(imp);
 	        results.report();
@@ -86,7 +92,12 @@ public class Rec_FourierPlots implements PlugIn, Executable {
      */
     public ResultSet exec(ImagePlus... imps) {
         Calibration cal = imps[0].getCalibration();
-        ImagePlus imp2 = Util_RescaleTo16bit.exec(imps[0].duplicate());
+        ImagePlus imp2 = null;
+        if (autoScale) {
+            imp2 = Util_RescaleTo16bit.exec(imps[0].duplicate());
+        } else {
+            imp2 = Util_RescaleTo16bit.exec(imps[0].duplicate(), channelMinima);
+        }
         IJ.showStatus("Fourier transforming slices (lateral view)");
         ImagePlus impF = FFT2D.fftImp(imp2, winFraction);
         blurRadius *= (double)impF.getWidth() / 512.0d;

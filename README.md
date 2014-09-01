@@ -117,7 +117,6 @@ TODO
         - Fourier proj: document power-of-2 and that cropping causes problems
         - see google hit for "maven attach source and javadoc artifacts"
       - fixes:
-        - HELP button should go to new page
         - re-do log using Lothar's suggestions
         - recon FT radial profile scale / units
         - Wiener filter parameter estimate - calibrate, document
@@ -128,7 +127,6 @@ TODO
         - remove unused intermediate results from Windows list
       - features:
         - option to specify manual offset & different modes for threshold / 16-bit
-          - "Fourier Plots": option for non-mode zero-point (no BG)
           - Intensity Histogram: different zero-points for images w/o BG
         - better name for motion check
         - summary table of stats & results (pass/uncertain/fail)

@@ -38,10 +38,10 @@ import ij.ImageJ;
  * </ul>
  * @author Graeme Ball <graemeball@gmail.com>
  */
-public class SIMcheck_ implements PlugIn {
+public final class SIMcheck_ implements PlugIn {
     
+    // constants
     private static final String VERSION = "0.9.5-SNAPSHOT";
-    
     private static final String none = "[None]";  // no image
     private static final String omx = "OMX (CPZAT)";
 
@@ -61,6 +61,8 @@ public class SIMcheck_ implements PlugIn {
     private boolean doFourierPlots = true;
     private boolean doModContrastMap = true;
     private Crop crop = new Crop();
+    
+    // stored preferences with default values
     private int camBitDepth = 16;
 
     /** Crop ROI */
@@ -292,7 +294,7 @@ public class SIMcheck_ implements PlugIn {
         IJ.log("\n ==== All Checks Finished! ====\n");
         IJ.run("Tile", "");
     }
-
+    
     /** Split hyperstack, returning new ImagePlus for angle requested.
      * Assumes V2 OMX CPZAT channel order.
      */
