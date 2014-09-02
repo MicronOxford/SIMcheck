@@ -223,7 +223,7 @@ public class Cal_PhaseSteps implements PlugIn {
                 double[] positionStdevs = peakPositionStdevs(peakSets[c - 1]);
                 double[] phaseStats = plotPhases(
                         phaseSets[c - 1], positionStdevs, stackPlots);
-                double avPosStdev = JM.mean(positionStdevs);
+                double avPosStdev = J.mean(positionStdevs);
                 results.addStat("a" + a + " c" + c + " peak postion stdev", 
                         avPosStdev);
 
@@ -233,8 +233,8 @@ public class Cal_PhaseSteps implements PlugIn {
                         phaseStats[0]);
                 results.addStat("a" + a + " c" + c + " phase offset stdev", 
                         phaseStats[1]);
-                IJ.log("  line spacing = " + JM.mean(lineSpacings[c - 1]));
-                IJ.log("  k angle = " + JM.mean(kAngles[c - 1]));
+                IJ.log("  line spacing = " + J.mean(lineSpacings[c - 1]));
+                IJ.log("  k angle = " + J.mean(kAngles[c - 1]));
             }
             title = I1l.makeTitle(imp, "A" + a + "_PPL");
             plotImps[a - 1] = new ImagePlus(title, stackPlots);
@@ -317,8 +317,8 @@ public class Cal_PhaseSteps implements PlugIn {
             ispeakPair = false;
         }
         // peaks equal distance from center?
-        double dist0 = JM.dist(x[0], y[0], x[1], y[1]);
-        double dist1 = JM.dist(x[2], y[2], x[1], y[1]);
+        double dist0 = J.dist(x[0], y[0], x[1], y[1]);
+        double dist1 = J.dist(x[2], y[2], x[1], y[1]);
         if (Math.abs(dist1 - dist0) > tol) {
             ispeakPair = false;
         }
@@ -398,7 +398,7 @@ public class Cal_PhaseSteps implements PlugIn {
             }
             stdevs[cyc] = stdev2D(peakSet) + 0.0001f;
             Polygon setMedCoord = medianCoords(peakSet);
-            if (JM.dist(medCoord.xpoints[0], medCoord.ypoints[0], 
+            if (J.dist(medCoord.xpoints[0], medCoord.ypoints[0], 
                     setMedCoord.xpoints[0], setMedCoord.ypoints[0]) 
                     > (double)peakPosTolerance) {
                 stdevs[cyc] = -stdevs[cyc];  // FIXME, -ve indicates outside tolerance
@@ -419,8 +419,8 @@ public class Cal_PhaseSteps implements PlugIn {
             x[i] = coordSet[i].xpoints[0];
             y[i] = coordSet[i].ypoints[0];
         }
-        int[] xm = {JM.median(x)};
-        int[] ym = {JM.median(y)};
+        int[] xm = {J.median(x)};
+        int[] ym = {J.median(y)};
         return new Polygon(xm, ym, 1);
     }
     
@@ -495,8 +495,8 @@ public class Cal_PhaseSteps implements PlugIn {
     private double[] plotPhases(float[] phaseSet, double[] positionStdevs,
             ImageStack stackPlots) {
         phaseSet = unwrapPhaseCycles(phaseSet);
-        float plotMin = JM.min(phaseSet);
-        float plotMax = JM.max(phaseSet);
+        float plotMin = J.min(phaseSet);
+        float plotMax = J.max(phaseSet);
         double[] phaseStats = analyzePhases(phaseSet);
         Plot plot = new Plot("Phase plot", "Z,P", "phase (radians)");
         plot.setLineWidth(1);
@@ -600,7 +600,7 @@ public class Cal_PhaseSteps implements PlugIn {
                     }
                 }
             }
-            phaseStats[0] = Math.sqrt(JM.variance(steps));
+            phaseStats[0] = Math.sqrt(J.variance(steps));
             // 3. TODO, offset stdev
         } else {
             phaseStats[0] = phaseStats[1] = Double.NaN;
@@ -649,9 +649,9 @@ public class Cal_PhaseSteps implements PlugIn {
             peakIntens[pk] = 
                     fp.getPixelValue(peaks.xpoints[pk], peaks.ypoints[pk]);
         }
-        int indexMax1 = JM.maxIndex(peakIntens);
+        int indexMax1 = J.maxIndex(peakIntens);
         peakIntens[indexMax1] = 0;  // so we don't find 1st max again...
-        int indexMax2 = JM.maxIndex(peakIntens);
+        int indexMax2 = J.maxIndex(peakIntens);
         int[] filtPkX = {peaks.xpoints[indexMax1], peaks.xpoints[indexMax2]};
         int[] filtPkY = {peaks.ypoints[indexMax1], peaks.ypoints[indexMax2]};
         Polygon filteredPeaks = new Polygon(filtPkX, filtPkY, 2);
@@ -673,7 +673,7 @@ public class Cal_PhaseSteps implements PlugIn {
         double r1Expect = 0.40d;
         double r2 = I1l.calcFourierR(95, 231, 256, 256, cal);
         double r2Expect = 0.19d;
-        pass = JM.approxEq(r1, r1Expect) && JM.approxEq(r2, r2Expect);
+        pass = J.approxEq(r1, r1Expect) && J.approxEq(r2, r2Expect);
         if (verbose) {
             System.out.println("expect r = " + r1Expect + ", r1 = " + r1);
             System.out.println("expect r = " + r2Expect + ", r2 = " + r2);

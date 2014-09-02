@@ -47,7 +47,7 @@ public class ResultSet {
 
     /** Add ImagePlus result & description: title+description MUST be unique. */
     public void addImp(String description, ImagePlus imp) {
-        description = imp.getTitle() + ": " + description;  // more unique
+        description = imp.getTitle() + ":\n" + description;  // more unique
         if (imps.containsKey(description)) {
             throw new IllegalArgumentException(description + " already exists");
         }
@@ -86,11 +86,11 @@ public class ResultSet {
     public void report() {
         IJ.log("");
         IJ.log(resultSetName);
-        IJ.log(new String(new char[resultSetName.length()]).replace("\0", "-"));
+        IJ.log(J.nChars(TEXTWIDTH, "-"));
         for (Map.Entry<String, ImagePlus> entry : imps.entrySet()) {
             String description = entry.getKey();
             ImagePlus imp = (ImagePlus)entry.getValue();
-            IJ.log("  Displaying " + autoFormat(description, TEXTWIDTH, 16));
+            IJ.log("Displaying " + autoFormat(description, TEXTWIDTH, 16));
             imp.show();
         }
         for (Map.Entry<String, Double> entry : stats.entrySet()) {
@@ -99,12 +99,12 @@ public class ResultSet {
             BigDecimal bd = new BigDecimal(stat);  
             bd = bd.round(new MathContext(2));  // OOMG
             double stat2sigFig = bd.doubleValue();  
-            IJ.log("  " + statName + " = " + stat2sigFig);
+            IJ.log(statName + " = " + stat2sigFig);
         }
         for (Map.Entry<String, String> entry : infos.entrySet()) {
             String infoTitle = entry.getKey();
             String info = entry.getValue();
-            IJ.log("  " + infoTitle + ": " + autoFormat(info, TEXTWIDTH,
+            IJ.log(infoTitle + ": " + autoFormat(info, TEXTWIDTH,
                     infoTitle.length() + 2));
         }
         IJ.log("---");
@@ -132,7 +132,7 @@ public class ResultSet {
                     text.substring(thisSpace, thisSpace + 4).equals("  - ")) {
                 // handle indentation of list items starting '  -'
                 sb.append(text.substring(lineStart, thisSpace) + "\n");
-                sb.append(spaces(INDENT * 3) + "- ");
+                sb.append(J.nChars(INDENT * 3, " ") + "- ");
                 lineStart = thisSpace + 4;
                 thisSpace += 4;
                 // TODO: indentation of multi-line items & end lists upon '--' 
@@ -145,7 +145,7 @@ public class ResultSet {
                 if (thisSpace - adjustedLineStart > width) {
                     // backtrack to lastSpace
                     sb.append(text.substring(lineStart, lastSpace) + "\n" +
-                            spaces(INDENT * 2));
+                            J.nChars(INDENT * 2, " "));
                     lineStart = lastSpace + 1;
                     if (firstLine) {
                         firstLine = false;
@@ -155,11 +155,6 @@ public class ResultSet {
             iter++;
         }
         return sb.toString();
-    }
-    
-    /** Return a string containing n spaces. */
-    private static String spaces(int n) {
-        return new String(new char[n]).replace("\0", " ");
     }
     
     /** Return an Object[] representation of the results. */

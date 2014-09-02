@@ -45,6 +45,7 @@ public final class SIMcheck_ implements PlugIn {
     private static final String VERSION = "0.9.5-SNAPSHOT";
     private static final String none = "[None]";  // no image
     private static final String omx = "OMX (CPZAT)";
+    private static final int TEXTWIDTH = 55;
 
     // options with default values
     private boolean doCrop = false;
@@ -78,8 +79,8 @@ public final class SIMcheck_ implements PlugIn {
     
     @Override
     public void run(String arg) {
-        String[] titles = JM.cat(new String[] {none}, I1l.collectTitles());
-        String[] formats = JM.cat(new String[] {omx}, Util_FormatConverter.formats);
+        String[] titles = J.cat(new String[] {none}, I1l.collectTitles());
+        String[] formats = J.cat(new String[] {omx}, Util_FormatConverter.formats);
         camBitDepth = (int)ij.Prefs.get("SIMcheck.camBitDepth", camBitDepth);
         if (titles.length < 2) {
             IJ.noImage();
@@ -149,10 +150,10 @@ public final class SIMcheck_ implements PlugIn {
             
             crop.zFirst = encodeSliceNumber(gd.getNextString());
             crop.zLast = encodeSliceNumber(gd.getNextString());
-            IJ.log(   "\n   =====================      "
-                    + "\n           SIMcheck (v" + VERSION + ")"
-                    + "\n   =====================      ");
-            IJ.log("   " + JM.timestamp());
+            IJ.log(J.nChars(TEXTWIDTH,"=") + "\n" +
+                   "           SIMcheck (v" + VERSION + ")\n" +
+                   J.nChars(TEXTWIDTH,"=") + "\n");
+            IJ.log("   " + J.timestamp());
         } else {
             return;  // bail out upon cancel
         }
@@ -177,16 +178,16 @@ public final class SIMcheck_ implements PlugIn {
                 crop.w = impRecon.getWidth();
                 crop.h = impRecon.getHeight();
             } else {
-                crop.x = JM.closestEven(roi.getBounds().x);
-                crop.y = JM.closestEven(roi.getBounds().y);
-                crop.w = JM.closestEven(roi.getBounds().width);
-                crop.h = JM.closestEven(roi.getBounds().height);
+                crop.x = J.closestEven(roi.getBounds().x);
+                crop.y = J.closestEven(roi.getBounds().y);
+                crop.w = J.closestEven(roi.getBounds().width);
+                crop.h = J.closestEven(roi.getBounds().height);
             }
             // Do recon image crop
-            IJ.log("\n      Cropping to Reconstructed image ROI:");
-            IJ.log("        x, y, width, height = " + crop.x + ", " + crop.y +
+            IJ.log("\nCropping to Reconstructed image ROI:");
+            IJ.log("x, y, width, height = " + crop.x + ", " + crop.y +
                     ", " + crop.w + ", " + crop.h);
-            IJ.log("        slices Z = " +
+            IJ.log("z-slices = " +
                     decodeSliceNumber(crop.zFirst, impRecon) +
                     "-" + decodeSliceNumber(crop.zLast, impRecon));
             int[] d = impRecon.getDimensions();
@@ -230,15 +231,15 @@ public final class SIMcheck_ implements PlugIn {
                 IJ.run(impRaw, "Crop", "");
             }
         } else if (doCrop && impRecon != null) {
-            IJ.log("      ! cannot crop: reconstructed image requires ROI");
+            IJ.log("! cannot crop: require reconstructed image ROI");
         }
         IJ.run("Brightness/Contrast...");
         IJ.run("Channels Tool... ", "");
         
         // run checks, report results
         if (impRaw != null) {
-            IJ.log("\n ==== Raw Data Checks ====");
-            IJ.log("  Using SI stack: " + impRaw.getTitle());
+            IJ.log("\n==== Raw Data Checks ====");
+            IJ.log("Using SI stack: " + impRaw.getTitle());
             // do checks on raw SI data
             if (doIntensityProfiles) {
                 Raw_IntensityProfiles ipf = new Raw_IntensityProfiles();
@@ -271,8 +272,8 @@ public final class SIMcheck_ implements PlugIn {
             }
         }
         if (impRecon != null) {
-            IJ.log("\n ==== Reconstructed Data Checks ====");
-            IJ.log("  using reconstructed stack: " + impRecon.getTitle());
+            IJ.log("\n==== Reconstructed Data Checks ====");
+            IJ.log("Using reconstructed stack: " + impRecon.getTitle());
             if (doHistograms) {
                 Rec_IntensityHistogram rih = new Rec_IntensityHistogram();
                 ResultSet results = rih.exec(impRecon);
@@ -292,7 +293,7 @@ public final class SIMcheck_ implements PlugIn {
                 results.report();
             }
         }
-        IJ.log("\n ==== All Checks Finished! ====\n");
+        IJ.log("\n==== All Checks Finished! ====\n");
         IJ.run("Tile", "");
     }
     

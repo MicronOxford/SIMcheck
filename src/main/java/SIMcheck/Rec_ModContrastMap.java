@@ -109,7 +109,11 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
             return results;
         }
         if (!rawAndRecImpMatch(impMCNR, impRec)) {
-            IJ.log("  ! Rec_ModContrastMap: input stack size mismatch");
+            IJ.log("! Rec_ModContrastMap: input stack size mismatch");
+            IJ.log("  - impRaw nx,ny,nz = " + impRaw.getWidth() + "," +
+                    impRaw.getHeight() + "," + impRaw.getNSlices() + "\n");
+            IJ.log("  - impRec nx,ny,nz = " + impRec.getWidth() + "," +
+                    impRec.getHeight() + "," + impRec.getNSlices() + "\n");
             return results;
         }
         // convert raw data imp into pseudo-widefield

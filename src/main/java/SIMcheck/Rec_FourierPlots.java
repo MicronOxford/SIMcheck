@@ -49,7 +49,8 @@ public class Rec_FourierPlots implements PlugIn, Executable {
     public double winFraction = 0.01d;  // window function size, 0-1
     
     // options
-    public boolean showAxial = false;  // show axial FFT? 
+    public boolean showAxial = false;  // show axial FFT?
+    public boolean autoCutoff = true;  // auto noise cut-off?
     public boolean applyWinFunc = true;  // apply window function?
     public boolean autoScale = true;  // re-scale to mode->max?
     public boolean blurAndLUT = false;  // blur & apply false color LUT?
@@ -62,13 +63,15 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         GenericDialog gd = new GenericDialog(name);
         imp.getWidth();
         gd.addCheckbox("Show axial FFT", showAxial);
+        gd.addCheckbox("Auto noise cut-off (slice mode)", autoCutoff);
         gd.addCheckbox("Window function**", applyWinFunc);
-        gd.addCheckbox("Auto-scale input slices mode-max", autoScale);
+        gd.addCheckbox("Auto-scale FFT (mode-max)", autoScale);
         gd.addCheckbox("Blur & false-color LUT", blurAndLUT);
         gd.addMessage("** suppress edge artifacts");
         gd.showDialog();
         if (gd.wasOKed()) {
             this.showAxial = gd.getNextBoolean();
+            this.autoCutoff = gd.getNextBoolean();
             this.applyWinFunc = gd.getNextBoolean();
             this.autoScale = gd.getNextBoolean();
             this.blurAndLUT = gd.getNextBoolean();
@@ -78,7 +81,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             if (!autoScale) {
                 channelMinima = new double[imp.getNChannels()];
                 SIMcheck_.specifyBackgrounds(
-                        channelMinima, "Discard intensities up to:");
+                        channelMinima, "Set noise cut-off:");
             }
 	        results = exec(imp);
 	        results.report();
@@ -94,7 +97,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
     public ResultSet exec(ImagePlus... imps) {
         Calibration cal = imps[0].getCalibration();
         ImagePlus imp2 = null;
-        if (autoScale) {
+        if (autoCutoff) {
             imp2 = Util_RescaleTo16bit.exec(imps[0].duplicate());
         } else {
             imp2 = Util_RescaleTo16bit.exec(imps[0].duplicate(), channelMinima);
@@ -167,7 +170,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         return imp;
     }
     
-    /** Autoscale 8-bit imp 0-255 for input min or mode (autoscale) to max. */
+    /** Rescale 8-bit imp 0-255 for input min or mode (autoscale) to max. */
     private void autoscaleSlices(ImagePlus imp) {
         int ns = imp.getStackSize();
         for (int s = 1; s <= ns; s++) {

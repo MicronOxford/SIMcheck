@@ -97,8 +97,8 @@ public class Cal_SAMismatch implements PlugIn, Executable {
             plot.addPoints(zPlanes, sliceMeans, Plot.LINE);
             plot.setLineWidth(1);
             plots[c - 1] = plot.getImagePlus();
-            double nstdev = Math.sqrt(JM.variance(sliceMinima)) / 
-                    JM.mean(sliceMeans);
+            double nstdev = Math.sqrt(J.variance(sliceMinima)) / 
+                    J.mean(sliceMeans);
             results.addStat("Channel " + c + " normalized StdDev", nstdev);
             
         }

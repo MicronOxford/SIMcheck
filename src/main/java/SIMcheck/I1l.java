@@ -220,7 +220,7 @@ public final class I1l {
         FloatProcessor result = (FloatProcessor)fpN.duplicate();
         float[] pixN = (float[])fpN.getPixels();
         float[] pixD = (float[])fpD.getPixels();
-        result.setPixels((Object)JM.div(pixN, pixD));
+        result.setPixels((Object)J.div(pixN, pixD));
         return result;
     }
     
@@ -362,11 +362,11 @@ public final class I1l {
         float[][] abOut = new float[alen][blen];
         float bav = 0.0f;
         for (int a = 0; a < alen; a++) {
-            bav += JM.mean(ab[a]);
+            bav += J.mean(ab[a]);
         }
         bav /= alen;
         for (int a = 0; a < alen; a++) {
-            float scaleFactor = bav / JM.mean(ab[a]);
+            float scaleFactor = bav / J.mean(ab[a]);
             for (int b = 0; b < blen; b++) {
                 abOut[a][b] = (float)(ab[a][b] * scaleFactor);
             }
@@ -463,7 +463,7 @@ public final class I1l {
                     dimPositions[dimPosIndex++] = args[a + 1];        
                     dimPositions[dimPosIndex++] = args[a];        
                 }
-                result = JM.cat(result, new int[] {stackSliceNo(dimPositions)});
+                result = J.cat(result, new int[] {stackSliceNo(dimPositions)});
             }
         } else {
             // start from highest dim: evaluate 1st non-closed dim encountered
@@ -472,7 +472,7 @@ public final class I1l {
                     do {
                         int temp = args[a + 2];
                         args[a + 2] = args[a + 1];
-                        result = JM.cat(result, sliceList(args));  // RECURSE
+                        result = J.cat(result, sliceList(args));  // RECURSE
                         args[a + 2] = temp;
                         args[a + 1]++;
                     } while (args[a + 1] <= args[a + 2]);

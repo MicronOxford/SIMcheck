@@ -117,15 +117,24 @@ TODO
         - Fourier proj: document power-of-2 and that cropping causes problems
         - see google hit for "maven attach source and javadoc artifacts"
       - fixes:
+        - Autoscale check 27th Aug version
+            1. noise cutoff: discard below stack or slice mode (default),
+                or to selected values (16bit util)
+            2. auto-scale FFT - separate from noise cutoff!
         - re-do log using Lothar's suggestions
+        - mod contrast map size mismatch after crop :-(
+        - CIP / intensity decay: max of 3 angles' bleach rates over central 9Z
         - recon FT radial profile scale / units
         - Wiener filter parameter estimate - calibrate, document
+        - channel order: RGB vs. BGR
         - test / finish spherical aberration mismatch check
         - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
         - get rid of IJ.run calls & show/hide of intermediate results 
         - angle labels etc. should be overlaid, not drawn
         - remove unused intermediate results from Windows list
       - features:
+        - report frame-to-frame flicker
+        - SI pattern focus flicker corr?
         - summary table of stats & results (pass/uncertain/fail)
         - raw data angle difference (floaty): RMS error? (at least some stat)
         - rec Fourier:-
@@ -137,7 +146,6 @@ TODO
         - Fourier proj stat(s)? spots over angles, 1st vs second, stability?
         - raw -> WF same size as rec by interpolation (& preserve type??)
         - spherical aberration mismatch check: axis always symmetrical about 0?
-        - SI pattern focus flicker corr?
         - window positioning: dialog to top left, ...
       - tests, structure:
         - final empirical tests, param calibration, tolerances etc.

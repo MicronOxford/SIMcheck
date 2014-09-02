@@ -215,7 +215,7 @@ public class Cal_PatternFocus implements PlugIn, Executable {
         double[] ijAngles = {42.0d, 162.0d, 102.0d};
         if (verbose) { IJ.log("* testing ij2omx() and omx2ij() conversions:"); }
         for (int i = 0; i < ijAngles.length; i++) {
-            boolean pass = JM.approxEq(ijAngles[i], omx2ij(omxAngles[i]));
+            boolean pass = J.approxEq(ijAngles[i], omx2ij(omxAngles[i]));
             // ij2omx is complicated to test: may not give angle with same sign
             if (verbose) {
                 IJ.log(ijAngles[i] + " -> ij2omx -> " + ij2omx(ijAngles[i]));
