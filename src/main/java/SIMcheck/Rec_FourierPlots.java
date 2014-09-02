@@ -78,8 +78,8 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             if (!applyWinFunc) {
                 winFraction = 0.0d;
             }
-            if (!autoScale) {
-                channelMinima = new double[imp.getNChannels()];
+            if (!autoCutoff) {
+                this.channelMinima = new double[imp.getNChannels()];
                 SIMcheck_.specifyBackgrounds(
                         channelMinima, "Set noise cut-off:");
             }
