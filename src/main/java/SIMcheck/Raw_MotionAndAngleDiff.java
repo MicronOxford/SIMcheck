@@ -29,10 +29,10 @@ import ij.gui.GenericDialog;
  * differences, images ought to appear white/gray!
  * @author Graeme Ball <graemeball@gmail.com>
  */
-public class Raw_MotionCheck implements PlugIn, Executable {
+public class Raw_MotionAndAngleDiff implements PlugIn, Executable {
 
-    public static final String name = "Motion Check";
-    public static final String TLA = "MOT";
+    public static final String name = "Motion & Angle Difference";
+    public static final String TLA = "MAD";
     private ResultSet results = new ResultSet(name);
 
     // parameter fields
@@ -314,6 +314,6 @@ public class Raw_MotionCheck implements PlugIn, Executable {
     public static void main(String[] args) {
         new ImageJ();
         TestData.raw.show();
-        IJ.runPlugIn(Raw_MotionCheck.class.getName(), "");
+        IJ.runPlugIn(Raw_MotionAndAngleDiff.class.getName(), "");
     }
 }

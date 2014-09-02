@@ -126,7 +126,6 @@ TODO
         - angle labels etc. should be overlaid, not drawn
         - remove unused intermediate results from Windows list
       - features:
-        - better name for motion check
         - summary table of stats & results (pass/uncertain/fail)
         - raw data angle difference (floaty): RMS error? (at least some stat)
         - rec Fourier:-
