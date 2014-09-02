@@ -21,6 +21,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.WindowManager;
+import ij.gui.GenericDialog;
 import ij.gui.NonBlockingGenericDialog;
 import ij.gui.Roi;
 import ij.plugin.PlugIn;
@@ -295,6 +296,22 @@ public final class SIMcheck_ implements PlugIn {
         IJ.run("Tile", "");
     }
     
+    /** Prompt user to specify and set per-channel background levels. */
+    static void specifyBackgrounds(double[] backgrounds, String message) {
+        int nc = backgrounds.length;
+        GenericDialog gd2 = new GenericDialog("Background Level");
+        gd2.addMessage(message);
+        for (int c = 1; c <= nc; c++) {
+            gd2.addNumericField("Channel " + c, 0.0d, 0);
+        }
+        gd2.showDialog();
+        if (gd2.wasOKed()) {
+            for (int c = 1; c <= nc; c++) {
+                backgrounds[c - 1] = gd2.getNextNumber();
+            }
+        }
+    }
+
     /** Split hyperstack, returning new ImagePlus for angle requested.
      * Assumes V2 OMX CPZAT channel order.
      */

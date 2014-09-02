@@ -21,6 +21,7 @@ import java.util.Arrays;
 
 import ij.*;
 import ij.plugin.PlugIn;
+import ij.gui.GenericDialog;
 import ij.gui.HistogramWindow;
 import ij.process.*;
 
@@ -39,14 +40,29 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
     public double percentile = 0.01;  // use 0-100% of histogram extrema
     public double modeTol = 0.25;  // mode should be within modeTol*stdev of 0
     
+    // noise cut-off
+    private boolean autoCutoff = true;
+    private double[] backgrounds;  // for manual
+    
     private int nNegPixels = 0;
     private int nPosPixels = 0;
 
     @Override
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
-        results = exec(imp);
-        results.report();
+        GenericDialog gd = new GenericDialog(name);
+        gd.addCheckbox("Use mode for noise cut-off?", autoCutoff);
+        gd.showDialog();
+        if (gd.wasOKed()) {
+            this.autoCutoff = gd.getNextBoolean();
+            if (!autoCutoff) {
+                this.backgrounds = new double[imp.getNChannels()];
+                SIMcheck_.specifyBackgrounds(
+                        backgrounds, "Background / noise mid-points:");
+            }
+            results = exec(imp);
+            results.report();
+        }
     }
 
     /** Execute plugin functionality: plot histogram and calculate +ve/-ve
@@ -61,15 +77,19 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
         for (int c = 1; c <= nc; c++){
             ImagePlus imp2 = I1l.copyChannel(imps[0], c);
             StackStatistics stats = new StackStatistics(imp2);
-            if (Math.abs(stats.dmode) > (stats.stdDev*modeTol)) {
+            double background = stats.dmode;
+            if (!autoCutoff) {
+                background = backgrounds[c - 1];
+            }
+            if (Math.abs(background) > (stats.stdDev*modeTol)) {
                 IJ.log("  ! warning, ch" + c + " histogram mode=" 
-                        + Math.round(stats.dmode) 
+                        + Math.round(background) 
                         + " not within " + modeTol + " stdev of 0\n");
             }
-            if (stats.histMin < stats.dmode) {
+            if (stats.histMin < background) {
                 // caluclate +ve / -ve ratio if histogram has negatives
                 double posNegRatio = calcPosNegRatio(
-                		stats, (double)percentile / 100);
+                		stats, (double)percentile / 100, background);
                 String statDescription = "Channel " + c +
                         " max / min intensity ratio";
                 results.addStat(statDescription, 
@@ -78,8 +98,8 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
                         " pixels", nNegPixels + "/" + nPosPixels);
                 
             } else {
-                results.addInfo("  ! histogram minimum above mode for channel "
-                        + Integer.toString(c), 
+                results.addInfo("  ! histogram minimum above background for"
+                        + " for channel " + Integer.toString(c), 
                         "unable to calculate +ve/-ve intensity ratio");
             }
             String plotTitle = "Intensity Histogram, Channel " + c;
@@ -116,9 +136,10 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
      * image histogram. 
      * @param stats for the ImagePlus
      * @param pc (0-1) fraction of histogram to use at lower AND upper ends
+     * @param bg background / noise mid-point of histogram
      * @return (Imax - Imode) / (Imode - Imin), i.e. positive / negative ratio 
      */
-    double calcPosNegRatio(ImageStatistics stats, double pc) {
+    double calcPosNegRatio(ImageStatistics stats, double pc, double bg) {
         int[] hist = stats.histogram;
         // find hist step (bin size), and number of pixels in image 
         double histStep = (stats.histMax - stats.histMin)
@@ -132,9 +153,9 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
         double negTotal = 0;
         int bin = 0;
         double binValue = stats.histMin;
-        while (negPc < pc && binValue < stats.dmode && bin < hist.length) {
+        while (negPc < pc && binValue < bg && bin < hist.length) {
             negPc += (double)hist[bin] / nPixels;
-            negTotal += (binValue - stats.dmode) * hist[bin];  // make mode 0
+            negTotal += (binValue - bg) * hist[bin];  // make mode 0
             bin += 1;
             binValue += histStep;
         }
@@ -146,7 +167,7 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
         binValue = stats.histMax;
         while ((posPc < pc) && (bin >= 0)) {
             posPc += (double)hist[bin] / nPixels;
-            posTotal += (binValue - stats.dmode) * hist[bin];  // make mode 0
+            posTotal += (binValue - bg) * hist[bin];  // make mode 0
             bin -= 1;
             binValue -= histStep;
         }
@@ -174,10 +195,10 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
         IJ.run(imp, "Select All", "");
         ImageStatistics stats = new StackStatistics(imp);
         Rec_IntensityHistogram plugin = new Rec_IntensityHistogram();
-        double pnRatio = plugin.calcPosNegRatio(stats, 0.005);
+        double pnRatio = plugin.calcPosNegRatio(stats, 0.005, stats.dmode);
         if (verbose) {
             System.out.println("hist: " + Arrays.toString(stats.histogram));
-            System.out.println("min; mode; max = " +
+            System.out.println("min; background (mode); max = " +
                     stats.histMin + "; " + stats.dmode + "; " + stats.histMax);
             System.out.println("pnRatio = " + pnRatio);
             System.out.println("nNegPixels = " + plugin.nNegPixels);

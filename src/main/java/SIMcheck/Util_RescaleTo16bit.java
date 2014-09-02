@@ -23,7 +23,6 @@ import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.plugin.ChannelSplitter;
 import ij.plugin.PlugIn;
-import ij.process.StackStatistics;
 
 /**
  * This plugin discards values below zero-point and converts to 16-bit.
@@ -46,30 +45,15 @@ public class Util_RescaleTo16bit implements PlugIn {
             if (gd.getNextBoolean()) {
                 imp2 = exec(imp);
             } else {
-                specifyChannelMinima(channelMinima);
+                SIMcheck_.specifyBackgrounds(
+                        channelMinima, "Discard intensities up to:");
                 imp2 = exec(imp, channelMinima);
             }
+            IJ.run("Brightness/Contrast...");
+            imp2.show();
         }
-        IJ.run("Brightness/Contrast...");
-        imp2.show();
     }
     
-    /** Prompt user to specify channel minima and set channelMinima array. */
-    static void specifyChannelMinima(double[] channelMinima) {
-        int nc = channelMinima.length;
-        GenericDialog gd2 = new GenericDialog("Channel Minima");
-        gd2.addMessage("Discard intensities below:");
-        for (int c = 1; c <= nc; c++) {
-            gd2.addNumericField("Channel " + c, 0.0d, 0);
-        }
-        gd2.showDialog();
-        if (gd2.wasOKed()) {
-            for (int c = 1; c <= nc; c++) {
-                channelMinima[c - 1] = gd2.getNextNumber();
-            }
-        }
-    }
-
     /** Execute plugin functionality: discard <mode and convert to 16-bit.
      * For each channel, old mode is new zero, and values are rescaled to
      * fit 0-65535 if channel max exceeds 65535.

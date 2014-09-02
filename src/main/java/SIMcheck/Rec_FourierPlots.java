@@ -77,7 +77,8 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             }
             if (!autoScale) {
                 channelMinima = new double[imp.getNChannels()];
-                Util_RescaleTo16bit.specifyChannelMinima(channelMinima);
+                SIMcheck_.specifyBackgrounds(
+                        channelMinima, "Discard intensities up to:");
             }
 	        results = exec(imp);
 	        results.report();

@@ -126,8 +126,6 @@ TODO
         - angle labels etc. should be overlaid, not drawn
         - remove unused intermediate results from Windows list
       - features:
-        - option to specify manual offset & different modes for threshold / 16-bit
-          - Intensity Histogram: different zero-points for images w/o BG
         - better name for motion check
         - summary table of stats & results (pass/uncertain/fail)
         - raw data angle difference (floaty): RMS error? (at least some stat)
