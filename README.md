@@ -118,7 +118,6 @@ TODO
         - see google hit for "maven attach source and javadoc artifacts"
       - fixes:
         - re-do log using Lothar's suggestions
-        - mod contrast map size mismatch after crop :-(
         - CIP / intensity decay: max of 3 angles' bleach rates over central 9Z
         - recon FT radial profile scale / units
         - Wiener filter parameter estimate - calibrate, document

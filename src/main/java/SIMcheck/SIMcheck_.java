@@ -182,6 +182,7 @@ public final class SIMcheck_ implements PlugIn {
                 crop.y = J.closestEven(roi.getBounds().y);
                 crop.w = J.closestEven(roi.getBounds().width);
                 crop.h = J.closestEven(roi.getBounds().height);
+                impRecon.setRoi(new Roi(crop.x, crop.y, crop.w, crop.h));
             }
             // Do recon image crop
             IJ.log("\nCropping to Reconstructed image ROI:");
