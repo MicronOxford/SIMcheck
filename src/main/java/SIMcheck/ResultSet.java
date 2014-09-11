@@ -47,7 +47,8 @@ public class ResultSet {
 
     /** Add ImagePlus result & description: title+description MUST be unique. */
     public void addImp(String description, ImagePlus imp) {
-        description = imp.getTitle() + ":\n" + description;  // more unique
+        // key composed of image title + description -- separated again later
+        description = imp.getTitle() + ":\n" + description;
         if (imps.containsKey(description)) {
             throw new IllegalArgumentException(description + " already exists");
         }
@@ -90,8 +91,11 @@ public class ResultSet {
         for (Map.Entry<String, ImagePlus> entry : imps.entrySet()) {
             String description = entry.getKey();
             ImagePlus imp = (ImagePlus)entry.getValue();
-            // FIXME, log title & pass only real description to autoFormat
-            IJ.log("Displaying " + autoFormat(description, TEXTWIDTH, 0));
+            IJ.log("Displaying " + imp.getTitle() + ":\n");
+            int nTitleChars = imp.getTitle().length() + 2;
+            description = description.substring(
+                    nTitleChars, description.length());
+            IJ.log(autoFormat(description, TEXTWIDTH, 0));
             IJ.log("\n");
             imp.show();
         }

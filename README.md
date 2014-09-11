@@ -117,7 +117,6 @@ TODO
         - Fourier proj: document power-of-2 and that cropping causes problems
         - see google hit for "maven attach source and javadoc artifacts"
       - fixes:
-        - re-do log using Lothar's suggestions
         - CIP / intensity decay: max of 3 angles' bleach rates over central 9Z
         - recon FT radial profile scale / units
         - Wiener filter parameter estimate - calibrate, document
