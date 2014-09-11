@@ -117,7 +117,13 @@ TODO
         - Fourier proj: document power-of-2 and that cropping causes problems
         - see google hit for "maven attach source and javadoc artifacts"
       - fixes:
+        - tick for prompt to enter manual background (i.e. reverse checkbox)
+        - turn on axial FFT by default as standalone, and have as 2nd last option (before LUT)
+        - axial FFT: check if off by one / check centering
+        - Rec MCM: saturated if any of 15 input pixels are saturated
+        - check rounding & reporting to 2 sig fig (e.g. CPI rounded, remove?)
         - CIP / intensity decay: max of 3 angles' bleach rates over central 9Z
+        - add check-box for tile after running
         - recon FT radial profile scale / units
         - Wiener filter parameter estimate - calibrate, document
         - channel order: RGB vs. BGR
