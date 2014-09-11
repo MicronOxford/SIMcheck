@@ -191,16 +191,17 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
             outImp.getOverlay().translate(height / 2, width / 2);
         }
         I1l.copyCal(impRec2, outImp);
-        results.addImp("Reconstructed data color-coded by the underlying" +
-                " modulation contrast (MCNR) in the raw data",
+        results.addImp("Reconstructed data color-coded according to the"
+                + " underlying Modulation Contrast-to-Noise Ratio (MCNR)"
+                + " in the raw data",
                 outImp);
-        results.addInfo("How to interpret", "Mod contrast color LUT" +
-                " indicates local variations in reconstruction quality," +
-                " e.g. due to blurring, dense features, or uneven SI" + 
-                " illumination.");
-        results.addInfo("MCNR values", " 0-3 purple (inadequate)," +
-                " to 6 red (acceptable), to 12 orange (good)," +
-                " to 18 yellow (very good), to 24 white (excellent).");
+        results.addInfo("How to interpret", "The MCNR map indicates local"
+                + " variations in reconstruction quality, e.g. due to"
+                + " variations in out-of-focus blur contribution due to"
+                + " feature density, or due to uneven SI illumination.");
+        results.addInfo("MCNR values", " 0-3 purple (inadequate),"
+                + " to 6 red (acceptable), to 12 orange (good),"
+                + " to 18 yellow (very good), to 24 white (excellent).");
         return results;
     }
 
@@ -221,8 +222,8 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
             if (stackMatch && widthMatch && heightMatch) { 
                 match = true;
             }
-        }else{
-            IJ.log("  ! warning: raw or reconstructed stack was null");
+        } else {
+            IJ.log("! warning: raw or reconstructed stack was null");
         }
         return match;
     }

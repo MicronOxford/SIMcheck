@@ -88,11 +88,11 @@ public class Raw_MotionAndAngleDiff implements PlugIn, Executable {
             recordRmsErr(imp, projImp);
             calcNormalizationFactors(imp, nc, angles, totalIntens, normFactors);
             ImagePlus colorImp = colorAngles(imp, projImp, nc, nz, normFactors);
-            results.addImp("false-colored angle data (C, M, Y)", colorImp);
+            results.addImp("Each angle phase-averaged, normalized," +
+                    " and false-colored (A1 cyan, A2 magenta, A3 yellow)",
+                    colorImp);
             results.addInfo("How to interpret",
-                    "phases are averaged, angles normalized, and colored" +
-                    " Cyan, Magenta, Yellow for angles 1, 2 & 3." +
-                    " Non-white areas indicate differences between angles" +
+                    " non-white areas indicate differences between angles" +
                     " due to drift, floating particles or" +
                     " uneven illumination.");
         }

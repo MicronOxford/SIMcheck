@@ -147,8 +147,8 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
             double channelDecay = (double)100 * (1 - Math.exp(fitResults[1]
             		* pzat_no.length * (zwin / nz)));
             results.addStat(
-                    "Channel " + Integer.toString(channel) + " intensity decay"
-                        + " per " + (int)zwin + " Z (%)",
+                    "C" + Integer.toString(channel) + " intensity decay"
+                        + " per " + (int)zwin + " z-slices (%)",
                     (double)Math.round(channelDecay));
             
             /// (2) "Angle differences"
@@ -171,7 +171,7 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
             // normalize largest av intensity diff using max intensity angle
             float maxAngleIntensity = J.max(angleMeans);
             largestDiff = (double)100 * largestDiff / (double)maxAngleIntensity;
-            results.addStat("Channel " + Integer.toString(channel) 
+            results.addStat("C" + Integer.toString(channel) 
                     + " max intensity difference between angles (%)",
                     (double)Math.round(largestDiff));
         }
@@ -179,9 +179,9 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
         I1l.drawPlotTitle(impResult, "Per Channel Intensity Profiles");
         results.addImp(name, plot.getImagePlus());
         results.addInfo("How to interpret",
-                "intensity differences of > ~30% between angles and/or" +
-                " over 9-Z-window used to reconstruct each Z secition" +
-                " may cause artifacts (exact level depends on the" +
+                "intensity differences > ~30% between angles and/or" +
+                " over 9-z-window used to reconstruct each z-section" +
+                " may cause artifacts (threshold depends on" +
                 " signal-to-noise level).");
         return results;
     }

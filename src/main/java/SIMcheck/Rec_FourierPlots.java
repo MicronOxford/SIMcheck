@@ -35,7 +35,7 @@ import java.awt.image.IndexColorModel;
  */
 public class Rec_FourierPlots implements PlugIn, Executable {
 
-    public static final String name = "Fourier Plots";
+    public static final String name = "Reconstructed Data Fourier Plots";
     public static final String TLA1 = "FTL";  // Fourier Transform Lateral
     public static final String TLA2 = "FTR";  // FT Radial profile
     public static final String TLA3 = "FTO";  // FT Orthogonal (XZ)
@@ -148,17 +148,24 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             results.addImp("Fourier Transform Orthogonal (XZ)", impOrthoF);
         }
         impF.setPosition(1, impF.getNSlices() / 2, 1);
-        results.addInfo(
-            "How to interpret", 
-            " Fourier plots show spatial frequency (i.e. size / resolution),"
-            + " highlighting reconstruction artifacts and average resolution:"
-            + "  - spots in XY Fourier spectrum indicate periodic patterns"
+        results.addInfo("How to interpret", 
+            " Fourier plots highlight potential artifacts and indicate"
+            + "effective resolution:"
+            + "  - spots in Fourier spectrum indicate periodic patterns"
             + "  - flat Fourier spectrum (plateau in radial profile) indicates"
-            + " lack of high frequency signal and poor resolution"
-            + "  - asymmetric FFT indicates decreased resolution due to:"
-            + "    - angle to angle intensity variations"
-            + "    - angle-specific illumination pattern ('k0') fit error"
-            + "    - angle-specific z-modulation issues");
+            + " lack of real high frequency signal and poor resolution"
+            + "  - asymmetric FFT indicates angle-specific decrease in"
+            + " resolution due to: angle-to-angle intensity variations,"
+            + " angle-specific illumination pattern ('k0') fit error, or"
+            + " angle-specific z-modulation issues");
+        results.addInfo("About the Fourier plots",
+                "By default reconstructed data cropped to mode; "
+                + " window function applied to reduce edge artifacts prior"
+                + "to FFT; FFT slices are normalized (mode-max); and target"
+                + "rings (overlay) are added to translate frequency to"
+                + " spatial resolution. Optionally results may be blurred"
+                + " and a color Look-Up Table applied to highlight slope /"
+                + " flatness of Fourier spectrum.");
         return results;
     }
     

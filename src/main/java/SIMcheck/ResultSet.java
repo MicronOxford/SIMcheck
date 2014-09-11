@@ -31,7 +31,7 @@ public class ResultSet {
 
     // for automatic formatting of result log / output
     private static final int TEXTWIDTH = 55;
-    private static final int INDENT = 2;
+    private static final int INDENT = 0;
     
     private String resultSetName = "";
     private LinkedHashMap<String, ImagePlus> imps = 
@@ -90,7 +90,9 @@ public class ResultSet {
         for (Map.Entry<String, ImagePlus> entry : imps.entrySet()) {
             String description = entry.getKey();
             ImagePlus imp = (ImagePlus)entry.getValue();
-            IJ.log("Displaying " + autoFormat(description, TEXTWIDTH, 16));
+            // FIXME, log title & pass only real description to autoFormat
+            IJ.log("Displaying " + autoFormat(description, TEXTWIDTH, 0));
+            IJ.log("\n");
             imp.show();
         }
         for (Map.Entry<String, Double> entry : stats.entrySet()) {
@@ -104,10 +106,17 @@ public class ResultSet {
         for (Map.Entry<String, String> entry : infos.entrySet()) {
             String infoTitle = entry.getKey();
             String info = entry.getValue();
+            IJ.log("\n");
             IJ.log(infoTitle + ": " + autoFormat(info, TEXTWIDTH,
                     infoTitle.length() + 2));
         }
         IJ.log("---");
+    }
+    
+    /** Produce summary table of numerical stats and interpretation. */
+    public String summary() {
+        // TODO
+        return "==== Summary ====";
     }
     
     /**

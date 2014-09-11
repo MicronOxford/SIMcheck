@@ -252,24 +252,24 @@ public class Raw_ModContrast implements PlugIn, Executable {
                         "location=[Lower Right] fill=None label=White " +
                         "number=5 decimal=0 font=12 zoom=1 overlay");
             }
-            results.addImp("modulation contrast-to-noise ratio image", 
+            results.addImp("Modulation contrast-to-noise ratio (MCNR) image", 
                     impResult);
             results.addInfo("How to interpret",
-                    "color LUT display shows modulation contrast value:" +
+                    "color Look-Up Table shows MCNR value:" +
                     "  - purple is inadequate (3 or less)" +
                     "  - red is an acceptable value of 6+" +
                     "  - orange is good" +
-                    "  - yellow-white is very good-excellent.");
+                    "  - yellow-white is very good-excellent");
             results.addInfo("Estimated feature MCNR",
                     "features selected by Otsu auto-thresholding.");
             results.addInfo("Estimated Wiener filter parameter",
-                    "for OMX data reconstruction only.");
+                    "for OMX data reconstruction (SoftWoRx) only.");
             for (int c = 1; c <= nc; c++) {
                 ImagePlus impC = I1l.copyChannel(impResult, c);
                 double featMCNR = I1l.stackFeatMean(impC);
-                results.addStat("Channel " + c + " estimated feature MCNR", 
+                results.addStat("C" + c + " estimated feature MCNR", 
                         featMCNR);
-                results.addStat("Channel " + c + " estimated Wiener optimum", 
+                results.addStat("C" + c + " estimated Wiener filter optimum", 
                         estimWiener(featMCNR));
             }
         } else {

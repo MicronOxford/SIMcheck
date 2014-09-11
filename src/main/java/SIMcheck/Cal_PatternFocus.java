@@ -98,7 +98,6 @@ public class Cal_PatternFocus implements PlugIn, Executable {
      * @return ResultSet containing 3 projections
      */
     public ResultSet exec(ImagePlus... imps) {
-        IJ.log("exec got angle1=" + angle1);
         ImagePlus imp = imps[0];
         width = imp.getWidth();
         height = imp.getHeight();
@@ -113,9 +112,9 @@ public class Cal_PatternFocus implements PlugIn, Executable {
         for (int a = 0; a < angles; a++) {
             rotateStripes(phase1imps[a], angleDegrees);
             if (showRotated) {
-                results.addImp("Angle " + (a + 1) + " rotated SI image (" +
-                        String.format("%.1f", angleDegrees) +
-                        " degrees CCW from E)", phase1imps[a]);
+                results.addImp("Angle " + (a + 1) + " (phase 1) SI image"
+                        + " rotated " + String.format("%.1f", angleDegrees) +
+                        "º CCW from East", phase1imps[a]);
             }
             phase1imps[a] = resliceAndProject(phase1imps[a].duplicate());
             IJ.run(phase1imps[a], "Enhance Contrast", "saturated=0.35");
@@ -136,7 +135,18 @@ public class Cal_PatternFocus implements PlugIn, Executable {
             phase1imps[a].close();
         }
         montage.setTitle(I1l.makeTitle(imp, "APF"));
-        results.addImp("Angles 1-" + angles + " pattern focus", montage);
+        String description = "Projected side view along the illumination"
+                + " stripes (phase 1 only) for each angle to illustrate"
+                + " alignment of the z-modulation with the focal plane.";
+        results.addImp(description, montage);
+        results.addInfo("\nHow to interpret",
+                "100 nm bead layer in the focal plane should display distinct"
+                + " intensity modulation (side view of first order stripes."
+                + " Intensity dips above and below the intensity peaks should"
+                + " be balanced. A \"zipper-like\" appearance (i.e. two"
+                + " staggered layers of modulated intensities) indicate"
+                + " defocussing of the z-modulation against the focal plane."
+                + " All angles should have the same characteristics.");
         return results;
     }
     
@@ -156,7 +166,7 @@ public class Cal_PatternFocus implements PlugIn, Executable {
                     }
                 }
             }
-            phase1Imps[a] = new ImagePlus("Rotated SI Pattern P1, A" + (a + 1),
+            phase1Imps[a] = new ImagePlus("Angle " + (a + 1) + " (Phase 1)",
                     stack);
             I1l.copyCal(imp, phase1Imps[a]);
         }
@@ -166,7 +176,7 @@ public class Cal_PatternFocus implements PlugIn, Executable {
     /** Rotate stripes for each angle to vertical. */
     private void rotateStripes(ImagePlus imp2, double angleDeg) {
         angleDeg = -angleDeg;
-        IJ.log("rotating " + imp2.getTitle() + " by " + angleDeg + " degrees");
+        results.addInfo(imp2.getTitle(), "rotated " + angleDeg + "° CCW");
         IJ.run(imp2, "Rotate... ", "angle=" + angleDeg +
                 " grid=1 interpolation=Bilinear stack");
         // draw central vertical line to visually check angle after rotation 

@@ -82,23 +82,23 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
                 background = backgrounds[c - 1];
             }
             if (Math.abs(background) > (stats.stdDev*modeTol)) {
-                IJ.log("  ! warning, ch" + c + " histogram mode=" 
+                IJ.log("! warning, C" + c + " histogram mode=" 
                         + Math.round(background) 
-                        + " not within " + modeTol + " stdev of 0\n");
+                        + " not within " + modeTol + " stdDev of 0\n");
             }
             if (stats.histMin < background) {
                 // caluclate +ve / -ve ratio if histogram has negatives
                 double posNegRatio = calcPosNegRatio(
                 		stats, (double)percentile / 100, background);
-                String statDescription = "Channel " + c +
+                String statDescription = "C" + c +
                         " max / min intensity ratio";
                 results.addStat(statDescription, 
                         (double)((int)(posNegRatio * 10)) / 10);
-                results.addInfo("Channel " + c + " number of max / min" +
+                results.addInfo("C" + c + " number of max / min" +
                         " pixels", nNegPixels + "/" + nPosPixels);
                 
             } else {
-                results.addInfo("  ! histogram minimum above background for"
+                results.addInfo("! histogram minimum above background for"
                         + " for channel " + Integer.toString(c), 
                         "unable to calculate +ve/-ve intensity ratio");
             }
@@ -117,18 +117,19 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
         }
         impAllPlots.setDimensions(nc, 1, 1);
         impAllPlots.setOpenAsHyperStack(true);
-        results.addImp("intensity counts in black, log-scaled counts in gray",
+        results.addImp("Intensity counts in black (linear) & gray (log-scale).",
                 impAllPlots);
-        results.addInfo("How to interpret", "For the intensity ratio of" +
-                " pixels at the histogram max / min, <3 is inadequate," +
-                " 3-6 low, 6-12 good, >12 excellent. For valid results," +
-                " the data set must contain sufficient background areas and" +
-                " should be constrained to Z slices containing features.");
-        results.addInfo("Max / min intensity ratio",
+        results.addInfo("How to interpret", "Max / Min intensity ratio " +
+                " <3 is inadequate, 3-6 is low, 6-12 is good, >12 excellent." +
+                " For valid results, the data set must contain sufficient" +
+                " background areas (so that the mode reflects background)" +
+                " and should be constrained to z-slices containing features.");
+        results.addInfo("About the Max / min intensity ratio",
                 "the ratio of the averaged " + percentile + "%" +
-                " highest and lowest intensity pixels in a 32-bit stack," +
-                " centered at the stack mode (assumed to be the center of" +
-                " the noise distribution). i.e.: Max - Mode / Abs(Min - Mode)");
+                " highest (Max*) and lowest (Min*) intensity pixels in a" +
+                " 32-bit stack, centered at the stack mode (assumed to be" +
+                " the center of the noise distribution)." +
+                " i.e.: Max* - Mode / |Min* - Mode|");
         return results;
     }
 
