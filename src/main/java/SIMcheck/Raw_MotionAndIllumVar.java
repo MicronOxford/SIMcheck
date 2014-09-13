@@ -29,10 +29,10 @@ import ij.gui.GenericDialog;
  * differences, images ought to appear white/gray!
  * @author Graeme Ball <graemeball@gmail.com>
  */
-public class Raw_MotionAndAngleDiff implements PlugIn, Executable {
+public class Raw_MotionAndIllumVar implements PlugIn, Executable {
 
-    public static final String name = "Motion & Angle Difference";
-    public static final String TLA = "MAD";
+    public static final String name = "Motion & Illumination Variation";
+    public static final String TLA = "MIV";
     private ResultSet results = new ResultSet(name);
 
     // parameter fields
@@ -94,7 +94,7 @@ public class Raw_MotionAndAngleDiff implements PlugIn, Executable {
             results.addInfo("How to interpret",
                     " non-white areas indicate differences between angles" +
                     " due to drift, floating particles or" +
-                    " uneven illumination.");
+                    " illumination variations.");
         }
         return results;
     }
@@ -314,6 +314,6 @@ public class Raw_MotionAndAngleDiff implements PlugIn, Executable {
     public static void main(String[] args) {
         new ImageJ();
         TestData.raw.show();
-        IJ.runPlugIn(Raw_MotionAndAngleDiff.class.getName(), "");
+        IJ.runPlugIn(Raw_MotionAndIllumVar.class.getName(), "");
     }
 }

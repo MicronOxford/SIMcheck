@@ -106,7 +106,7 @@ public final class SIMcheck_ implements PlugIn {
         gd.addNumericField("Phases", phases, 0);
         gd.addCheckbox(Raw_IntensityProfiles.name, doIntensityProfiles);
         gd.addCheckbox(Raw_FourierProjections.name, doFourierProjections);
-        gd.addCheckbox(Raw_MotionAndAngleDiff.name, doMotionCheck);
+        gd.addCheckbox(Raw_MotionAndIllumVar.name, doMotionCheck);
         gd.addCheckbox(Raw_ModContrast.name, doModContrast);
         gd.addNumericField("    Camera Bit Depth", camBitDepth, 0);
         gd.addMessage("------------ Reconstructed Data ------------");
@@ -257,7 +257,7 @@ public final class SIMcheck_ implements PlugIn {
                 results.report();
             }
             if (doMotionCheck) {
-                Raw_MotionAndAngleDiff mot = new Raw_MotionAndAngleDiff();
+                Raw_MotionAndIllumVar mot = new Raw_MotionAndIllumVar();
                 mot.phases = phases;
                 mot.angles = angles;
                 ResultSet results = mot.exec(impRaw);
