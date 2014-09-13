@@ -34,7 +34,8 @@ import ij.plugin.StackCombiner;
  **/
 public class Cal_PatternFocus implements PlugIn, Executable {
 
-    String name = "SI Pattern Focus";
+    public static final String name = "Illumination Pattern Focus";
+    public static final String TLA = "IPF";
     ResultSet results = new ResultSet(name);
 	
 	private int width;
@@ -134,7 +135,7 @@ public class Cal_PatternFocus implements PlugIn, Executable {
         for (int a = 0; a < angles; a++) {
             phase1imps[a].close();
         }
-        montage.setTitle(I1l.makeTitle(imp, "APF"));
+        montage.setTitle(I1l.makeTitle(imp, TLA));
         String description = "Projected side view along the illumination"
                 + " stripes (phase 1 only) for each angle to illustrate"
                 + " alignment of the z-modulation with the focal plane.";
