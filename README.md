@@ -46,36 +46,44 @@ Features
 - results: images will appear and key statistics will be logged
 - help button: link to instructions, help, documentation
 
----------------------
-1: Calibration Checks
----------------------
-
-    Check          |        Statistic(s)            |       Comments
------------------- | ------------------------------ | -----------------------
- Cal phases        | phase step & range stable?     | +k0 angles, linespacing
- Cal pattern focus | clean PSF, no "zipper" pattern | 
-
 ----------------------------------
-2: Pre-processing, Raw Data Checks
+1: Pre-processing, Raw Data Checks
 ----------------------------------
 
-    Check          |        Statistic(s)             |      Comments
------------------- | ------------------------------- | ---------------------
- Angle Diff    |  no colored differences?        |    threshold/stat?
- Intensity Prf |  bleaching and angle intensity  |
- Fourier plots |  SI pattern correct & regular?  |    TODO? k0 & linspc
- Mod Contrast  |  feature MCNR acceptable?       |    Wiener par
+    Check            |        Statistic(s)                 |      Comments   
+-------------------- | ----------------------------------- | ------------------
+ Intensity Profiles  | bleaching, flicker, angle intensity | TODO: flicker     
+ Motion / Illum Var  | angle difference (motion, illum.)   | TODO: correlation 
+ Fourier Projections | None: check pattern / spots OK      | TODO? k0 & linspc 
+ Mod Contrast        | feature MCNR acceptable?            | Wiener estimate   
 
 -----------------------------
-3: Post-reconstruction Checks
+2: Post-reconstruction Checks
 -----------------------------
 
-    Check          |        Statistic(s)              |     Comments
------------------- | -------------------------------- | --------------------
- Histogram     |  +ve/-ve ratio acceptable?       | top/bottom 0.01%
- Z variation   |  stdev of miniumum vs. mean      | shows OTF mismatch
- Fourier Plot  |  symmetry+profile OK? +res/angle | +radial profile
- MCNR Map      |  None - for visual inspection    | MCNR + intensity
+    Check            |        Statistic(s)                 |      Comments
+-------------------- | ----------------------------------- | ------------------
+ Intensity Histogram | +ve/-ve ratio acceptable?           | top/bottom 0.01%  
+ Fourier Plots       | None: symmetry+profile OK?          | TODO: resolution  
+ Mod Contrast Map    | None: inspect MCNR of features      | MCNR & intensity  
+
+---------------------
+3: Calibration Checks
+---------------------
+
+    Check            |        Statistic(s)                 |      Comments
+-------------------- | ----------------------------------- | ------------------
+ Illum. Phase Steps  | phase step & range stable?          | +k0, linespacing  
+ Pattern focus       | None: check no "zipper" pattern     |                   
+ SA Mismatch         | stdDev of miniumum vs. mean         | shows OTF mismatch
+
+4: Utilities
+------------
+
+- Format Converter for SIM data
+- Raw SI Data to Pseudo-Widefield conversion
+- Threshold and 16-bit conversion (i.e. "discard neagtives")
+- Stack FFT (2D)
 
 
 PROJECT STRUCTURE
