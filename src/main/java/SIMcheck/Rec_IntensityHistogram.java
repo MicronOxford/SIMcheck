@@ -41,7 +41,7 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
     public double modeTol = 0.25;  // mode should be within modeTol*stdev of 0
     
     // noise cut-off
-    private boolean autoCutoff = true;
+    private boolean manualCutoff = false;
     private double[] backgrounds;  // for manual
     
     private int nNegPixels = 0;
@@ -51,11 +51,11 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);
-        gd.addCheckbox("Use mode for noise cut-off?", autoCutoff);
+        gd.addCheckbox("Specify manual noise cut-off?", manualCutoff);
         gd.showDialog();
         if (gd.wasOKed()) {
-            this.autoCutoff = gd.getNextBoolean();
-            if (!autoCutoff) {
+            this.manualCutoff = gd.getNextBoolean();
+            if (manualCutoff) {
                 this.backgrounds = new double[imp.getNChannels()];
                 SIMcheck_.specifyBackgrounds(
                         backgrounds, "Background / noise mid-points:");
@@ -78,7 +78,7 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
             ImagePlus imp2 = I1l.copyChannel(imps[0], c);
             StackStatistics stats = new StackStatistics(imp2);
             double background = stats.dmode;
-            if (!autoCutoff) {
+            if (manualCutoff) {
                 background = backgrounds[c - 1];
             }
             if (Math.abs(background) > (stats.stdDev*modeTol)) {

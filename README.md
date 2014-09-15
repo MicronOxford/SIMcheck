@@ -117,11 +117,9 @@ TODO
         - Fourier proj: document power-of-2 and that cropping causes problems
         - see google hit for "maven attach source and javadoc artifacts"
       - fixes:
-        - tick for prompt to enter manual background (i.e. reverse checkbox)
-        - turn on axial FFT by default as standalone, and have as 2nd last option (before LUT)
         - axial FFT: check if off by one / check centering
-        - Rec MCM: saturated if any of 15 input pixels are saturated
         - check rounding & reporting to 2 sig fig (e.g. CPI rounded, remove?)
+        - Rec MCM: saturated if *any* of 15 input pixels are saturated
         - CIP / intensity decay: max of 3 angles' bleach rates over central 9Z
         - add check-box for tile after running
         - recon FT radial profile scale / units
@@ -134,7 +132,6 @@ TODO
         - remove unused intermediate results from Windows list
       - features:
         - report frame-to-frame flicker
-        - SI pattern focus flicker corr?
         - summary table of stats & results (pass/uncertain/fail)
         - raw data angle difference (floaty): RMS error? (at least some stat)
         - rec Fourier:-
@@ -143,6 +140,7 @@ TODO
           - axial FFT: profile plot?
           - option to not discard negatives before FFT?
         - report per. angle modulation contrast and/or minimum of these?
+        - SI pattern focus flicker corr?
         - Fourier proj stat(s)? spots over angles, 1st vs second, stability?
         - raw -> WF same size as rec by interpolation (& preserve type??)
         - spherical aberration mismatch check: axis always symmetrical about 0?

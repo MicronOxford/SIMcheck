@@ -49,10 +49,10 @@ public class Rec_FourierPlots implements PlugIn, Executable {
     public double winFraction = 0.01d;  // window function size, 0-1
     
     // options
-    public boolean showAxial = false;  // show axial FFT?
-    public boolean autoCutoff = true;  // auto noise cut-off?
+    public boolean manualCutoff = false;  // manual noise cut-off?
     public boolean applyWinFunc = true;  // apply window function?
-    public boolean autoScale = true;  // re-scale to mode->max?
+    public boolean autoScale = true;  // re-scale FFT to mode->max?
+    public boolean showAxial = true;  // show axial FFT?
     public boolean blurAndLUT = false;  // blur & apply false color LUT?
     
     private double[] channelMinima = null;
@@ -62,23 +62,23 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);
         imp.getWidth();
-        gd.addCheckbox("Show axial FFT", showAxial);
-        gd.addCheckbox("Auto noise cut-off (slice mode)", autoCutoff);
+        gd.addCheckbox("Manual noise cut-off?", manualCutoff);
         gd.addCheckbox("Window function**", applyWinFunc);
         gd.addCheckbox("Auto-scale FFT (mode-max)", autoScale);
+        gd.addCheckbox("Show axial FFT", showAxial);
         gd.addCheckbox("Blur & false-color LUT", blurAndLUT);
         gd.addMessage("** suppress edge artifacts");
         gd.showDialog();
         if (gd.wasOKed()) {
-            this.showAxial = gd.getNextBoolean();
-            this.autoCutoff = gd.getNextBoolean();
+            this.manualCutoff = gd.getNextBoolean();
             this.applyWinFunc = gd.getNextBoolean();
             this.autoScale = gd.getNextBoolean();
+            this.showAxial = gd.getNextBoolean();
             this.blurAndLUT = gd.getNextBoolean();
             if (!applyWinFunc) {
                 winFraction = 0.0d;
             }
-            if (!autoCutoff) {
+            if (manualCutoff) {
                 this.channelMinima = new double[imp.getNChannels()];
                 SIMcheck_.specifyBackgrounds(
                         channelMinima, "Set noise cut-off:");
@@ -97,10 +97,10 @@ public class Rec_FourierPlots implements PlugIn, Executable {
     public ResultSet exec(ImagePlus... imps) {
         Calibration cal = imps[0].getCalibration();
         ImagePlus imp2 = null;
-        if (autoCutoff) {
-            imp2 = Util_RescaleTo16bit.exec(imps[0].duplicate());
-        } else {
+        if (manualCutoff) {
             imp2 = Util_RescaleTo16bit.exec(imps[0].duplicate(), channelMinima);
+        } else {
+            imp2 = Util_RescaleTo16bit.exec(imps[0].duplicate());
         }
         IJ.showStatus("Fourier transforming slices (lateral view)");
         ImagePlus impF = FFT2D.fftImp(imp2, winFraction);
