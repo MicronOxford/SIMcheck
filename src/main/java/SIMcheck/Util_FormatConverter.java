@@ -99,13 +99,13 @@ public class Util_FormatConverter implements PlugIn {
     
     /** Convert ELYRA data (CZTAP order) to OMX order (CPZAT) */
     private void convertELYRA() {
-        // ELYRA data, angles and phases encoded in time dimension
+        // ELYRA data: angles encoded in Z, phases in time dimension
         if (nt % phases != 0 || nz % angles != 0) {
             String issue = "For raw ELYRA data expect angles in Z, phases in T";
             IJ.log(issue);
             throw new IllegalArgumentException(issue);
         }
-        // remove phases & angles for true number of frames
+        // remove phases & angles for true number of frames & Z
         nt /= phases;
         nz /= angles;
         this.outStack = new ImageStack(width, height);
@@ -127,7 +127,7 @@ public class Util_FormatConverter implements PlugIn {
         }
     }
 
-    /** Convert NSIM data (P & A tiled, multiple C,Z,T) to OMX order (CPZAT). */
+    /** Convert NSIM data (P, A tiled in X, Y) to OMX order (CPZAT). */
     private void convertNSIM() {
         // Nikon N-SIM: phases tiled in X, angles tiled in Y
         // (assuming NISM data are CZT dimension order)
