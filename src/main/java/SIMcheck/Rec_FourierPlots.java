@@ -247,7 +247,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
                 imp.getStackSize());
         for (int s = 1; s <= slices; s++) {
             ImageProcessor ip = stack.getProcessor(s);
-            int insertStart = width * (((height - rescaledHeight) / 2) - 1);
+            int insertStart = width * (((height - rescaledHeight) / 2) + 1);
             int insertEnd = insertStart + width * rescaledHeight;
             ImageProcessor pip = new ByteProcessor(width, height);  // to pad
             byte[] pix = (byte[])((ByteProcessor)ip).getPixels();

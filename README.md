@@ -117,8 +117,6 @@ TODO
         - Fourier proj: document power-of-2 and that cropping causes problems
         - see google hit for "maven attach source and javadoc artifacts"
       - fixes:
-        - axial FFT: check if off by one / check centering
-        - --
         - Rec MCM: saturated if *any* of 15 input pixels are saturated
         - CIP / intensity decay: max of 3 angles' bleach rates over central 9Z
         - recon FT radial profile scale / units
