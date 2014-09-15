@@ -48,11 +48,11 @@ public final class SIMcheck_ implements PlugIn {
     private static final int TEXTWIDTH = 55;
 
     // options with default values
-    private boolean doCrop = false;
     private ImagePlus impRaw = null;
     private int formatChoice = 0;
     private int phases = 5;
     private int angles = 3;
+    private boolean doTileAfterRun = true;
     private boolean doIntensityProfiles = true;
     private boolean doFourierProjections = true;
     private boolean doMotionCheck = true;
@@ -62,6 +62,7 @@ public final class SIMcheck_ implements PlugIn {
     private boolean doHistograms = true;
     private boolean doFourierPlots = true;
     private boolean doModContrastMap = true;
+    private boolean doCrop = false;
     private Crop crop = new Crop();
     
     // stored preferences with default values
@@ -99,6 +100,7 @@ public final class SIMcheck_ implements PlugIn {
         gd.addMessage(helpMessage);
         
         // present options
+        gd.addCheckbox("Tile result windows after running?", doTileAfterRun);
         gd.addMessage("---------------- Raw Data -----------------");
         gd.addChoice("Raw_Data:", titles, titles[1]);
         gd.addChoice("Data format:", formats, omx);
@@ -126,6 +128,7 @@ public final class SIMcheck_ implements PlugIn {
 
         // collect options
         if (gd.wasOKed()) {
+            doTileAfterRun = gd.getNextBoolean();
             String rawTitle = titles[gd.getNextChoiceIndex()];
             if (!rawTitle.equals(none)) {
                 impRaw = WindowManager.getImage(rawTitle);
@@ -295,7 +298,9 @@ public final class SIMcheck_ implements PlugIn {
             }
         }
         IJ.log("\n==== All Checks Finished! ====\n");
-        IJ.run("Tile", "");
+        if (doTileAfterRun) {
+            IJ.run("Tile", "");
+        }
     }
     
     /** Prompt user to specify and set per-channel background levels. */

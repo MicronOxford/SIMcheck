@@ -119,9 +119,9 @@ TODO
       - fixes:
         - axial FFT: check if off by one / check centering
         - check rounding & reporting to 2 sig fig (e.g. CPI rounded, remove?)
+        - --
         - Rec MCM: saturated if *any* of 15 input pixels are saturated
         - CIP / intensity decay: max of 3 angles' bleach rates over central 9Z
-        - add check-box for tile after running
         - recon FT radial profile scale / units
         - Wiener filter parameter estimate - calibrate, document
         - channel order: RGB vs. BGR
@@ -131,14 +131,13 @@ TODO
         - angle labels etc. should be overlaid, not drawn
         - remove unused intermediate results from Windows list
       - features:
+        - raw data angle difference (floaty): RMS error? (at least some stat)
         - report frame-to-frame flicker
         - summary table of stats & results (pass/uncertain/fail)
-        - raw data angle difference (floaty): RMS error? (at least some stat)
         - rec Fourier:-
           - lat: pattern angles (use "SIMcheck.angle1" pref), 3 color profiles
           - axial FFT: project over central slice range, not just 1
           - axial FFT: profile plot?
-          - option to not discard negatives before FFT?
         - report per. angle modulation contrast and/or minimum of these?
         - SI pattern focus flicker corr?
         - Fourier proj stat(s)? spots over angles, 1st vs second, stability?
