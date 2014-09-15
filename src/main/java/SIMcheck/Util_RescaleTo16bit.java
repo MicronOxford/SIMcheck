@@ -73,7 +73,7 @@ public class Util_RescaleTo16bit implements PlugIn {
 
     /** Alternative exec(): discard below specified channel minima, to 16-bit.
      * @param imp input ImagePlus, i.e. 32-bit reconstructed SIM data
-     * @param array channel minima
+     * @param channelMinima array of minimum cut-offs for each channel
      * @return ImagePlus (16-bit) after discarding below channel minimum
      */
     public static ImagePlus exec(ImagePlus imp, double[] channelMinima) {
