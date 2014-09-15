@@ -153,9 +153,9 @@ public final class SIMcheck_ implements PlugIn {
             
             crop.zFirst = encodeSliceNumber(gd.getNextString());
             crop.zLast = encodeSliceNumber(gd.getNextString());
-            IJ.log(J.nChars(TEXTWIDTH,"=") + "\n" +
-                   "           SIMcheck (v" + VERSION + ")\n" +
-                   J.nChars(TEXTWIDTH,"=") + "\n");
+            IJ.log(titleString("", "="));
+            IJ.log(titleString("SIMcheck (v" + VERSION + ")", " "));
+            IJ.log(titleString("", "="));
             IJ.log("   " + J.timestamp());
         } else {
             return;  // bail out upon cancel
@@ -242,7 +242,7 @@ public final class SIMcheck_ implements PlugIn {
         
         // run checks, report results
         if (impRaw != null) {
-            IJ.log("\n==== Raw Data Checks ====");
+            IJ.log("\n" + titleString("Raw Data Checks", "="));
             IJ.log("Using SI stack: " + impRaw.getTitle());
             // do checks on raw SI data
             if (doIntensityProfiles) {
@@ -276,7 +276,7 @@ public final class SIMcheck_ implements PlugIn {
             }
         }
         if (impRecon != null) {
-            IJ.log("\n==== Reconstructed Data Checks ====");
+            IJ.log("\n" + titleString("Reconstructed Data Checks", "="));
             IJ.log("Using reconstructed stack: " + impRecon.getTitle());
             if (doHistograms) {
                 Rec_IntensityHistogram rih = new Rec_IntensityHistogram();
@@ -297,7 +297,7 @@ public final class SIMcheck_ implements PlugIn {
                 results.report();
             }
         }
-        IJ.log("\n==== All Checks Finished! ====\n");
+        IJ.log("\n" + titleString("All Checks Finished!", "=") + "\n");
         if (doTileAfterRun) {
             IJ.run("Tile", "");
         }
@@ -358,6 +358,20 @@ public final class SIMcheck_ implements PlugIn {
         impOut.setPosition(1, centralZ, 1);
         impOut.setOpenAsHyperStack(true);
         return impOut;
+    }
+    
+    /** Return a String containing 'title' centered in a line of charX. */
+    private static String titleString(String title, String charX) {
+        if (!title.equals("")) {
+            title = " " + title + " ";
+        }
+        int nPadChars = (int)(0.5 * (TEXTWIDTH - title.length()));
+        if (charX.equals("=")) {
+            nPadChars = (int)(0.75 * nPadChars);  // correct for wider '='
+        } else if (charX.equals(" ")) {
+            nPadChars = (int)(1.67 * nPadChars);  // correct for narrow ' '
+        }
+        return J.nChars(nPadChars, charX) + title + J.nChars(nPadChars, charX);
     }
     
     /** Take a string containing slice number, 'first' or 'last' and return
