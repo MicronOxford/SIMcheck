@@ -118,7 +118,6 @@ TODO
         - see google hit for "maven attach source and javadoc artifacts"
       - fixes:
         - axial FFT: check if off by one / check centering
-        - check rounding & reporting to 2 sig fig (e.g. CPI rounded, remove?)
         - --
         - Rec MCM: saturated if *any* of 15 input pixels are saturated
         - CIP / intensity decay: max of 3 angles' bleach rates over central 9Z

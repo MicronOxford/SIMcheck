@@ -32,6 +32,7 @@ public class ResultSet {
     // for automatic formatting of result log / output
     private static final int TEXTWIDTH = 55;
     private static final int INDENT = 0;
+    private static final int STAT_SIG_FIGS = 2;
     
     private String resultSetName = "";
     private LinkedHashMap<String, ImagePlus> imps = 
@@ -103,9 +104,9 @@ public class ResultSet {
             String statName = entry.getKey();
             Double stat = entry.getValue();
             BigDecimal bd = new BigDecimal(stat);  
-            bd = bd.round(new MathContext(2));  // OOMG
-            double stat2sigFig = bd.doubleValue();  
-            IJ.log(statName + " = " + stat2sigFig);
+            bd = bd.round(new MathContext(STAT_SIG_FIGS));
+            double statToSpecifiedSigFigs = bd.doubleValue();  
+            IJ.log(statName + " = " + statToSpecifiedSigFigs);
         }
         for (Map.Entry<String, String> entry : infos.entrySet()) {
             String infoTitle = entry.getKey();
