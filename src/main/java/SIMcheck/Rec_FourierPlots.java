@@ -35,7 +35,7 @@ import java.awt.image.IndexColorModel;
  */
 public class Rec_FourierPlots implements PlugIn, Executable {
 
-    public static final String name = "Fourier Plots";
+    public static final String name = "Reconstructed Data Fourier Plots";
     public static final String TLA1 = "FTL";  // Fourier Transform Lateral
     public static final String TLA2 = "FTR";  // FT Radial profile
     public static final String TLA3 = "FTO";  // FT Orthogonal (XZ)
@@ -49,29 +49,39 @@ public class Rec_FourierPlots implements PlugIn, Executable {
     public double winFraction = 0.01d;  // window function size, 0-1
     
     // options
-    public boolean showAxial = false;  // show axial FFT? 
+    public boolean manualCutoff = false;  // manual noise cut-off?
     public boolean applyWinFunc = true;  // apply window function?
-    public boolean autoScale = true;  // re-scale to mode->max?
+    public boolean autoScale = true;  // re-scale FFT to mode->max?
+    public boolean showAxial = true;  // show axial FFT?
     public boolean blurAndLUT = false;  // blur & apply false color LUT?
+    
+    private double[] channelMinima = null;
     
     @Override
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);
         imp.getWidth();
-        gd.addCheckbox("Show axial FFT", showAxial);
+        gd.addCheckbox("Manual noise cut-off?", manualCutoff);
         gd.addCheckbox("Window function**", applyWinFunc);
-        gd.addCheckbox("Auto-scale input slices mode-max)", autoScale);
+        gd.addCheckbox("Auto-scale FFT (mode-max)", autoScale);
+        gd.addCheckbox("Show axial FFT", showAxial);
         gd.addCheckbox("Blur & false-color LUT", blurAndLUT);
         gd.addMessage("** suppress edge artifacts");
         gd.showDialog();
         if (gd.wasOKed()) {
-            this.showAxial = gd.getNextBoolean();
+            this.manualCutoff = gd.getNextBoolean();
             this.applyWinFunc = gd.getNextBoolean();
             this.autoScale = gd.getNextBoolean();
+            this.showAxial = gd.getNextBoolean();
             this.blurAndLUT = gd.getNextBoolean();
             if (!applyWinFunc) {
                 winFraction = 0.0d;
+            }
+            if (manualCutoff) {
+                this.channelMinima = new double[imp.getNChannels()];
+                SIMcheck_.specifyBackgrounds(
+                        channelMinima, "Set noise cut-off:");
             }
 	        results = exec(imp);
 	        results.report();
@@ -86,7 +96,12 @@ public class Rec_FourierPlots implements PlugIn, Executable {
      */
     public ResultSet exec(ImagePlus... imps) {
         Calibration cal = imps[0].getCalibration();
-        ImagePlus imp2 = Util_RescaleTo16bit.exec(imps[0].duplicate());
+        ImagePlus imp2 = null;
+        if (manualCutoff) {
+            imp2 = Util_RescaleTo16bit.exec(imps[0].duplicate(), channelMinima);
+        } else {
+            imp2 = Util_RescaleTo16bit.exec(imps[0].duplicate());
+        }
         IJ.showStatus("Fourier transforming slices (lateral view)");
         ImagePlus impF = FFT2D.fftImp(imp2, winFraction);
         blurRadius *= (double)impF.getWidth() / 512.0d;
@@ -133,17 +148,24 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             results.addImp("Fourier Transform Orthogonal (XZ)", impOrthoF);
         }
         impF.setPosition(1, impF.getNSlices() / 2, 1);
-        results.addInfo(
-            "How to interpret", 
-            " Fourier plots show spatial frequency (i.e. size / resolution),"
-            + " highlighting reconstruction artifacts and average resolution:"
-            + "  - spots in XY Fourier spectrum indicate periodic patterns"
+        results.addInfo("How to interpret", 
+            " Fourier plots highlight potential artifacts and indicate"
+            + "effective resolution:"
+            + "  - spots in Fourier spectrum indicate periodic patterns"
             + "  - flat Fourier spectrum (plateau in radial profile) indicates"
-            + " lack of high frequency signal and poor resolution"
-            + "  - asymmetric FFT indicates decreased resolution due to:"
-            + "    - angle to angle intensity variations"
-            + "    - angle-specific illumination pattern ('k0') fit error"
-            + "    - angle-specific z-modulation issues");
+            + " lack of real high frequency signal and poor resolution"
+            + "  - asymmetric FFT indicates angle-specific decrease in"
+            + " resolution due to: angle-to-angle intensity variations,"
+            + " angle-specific illumination pattern ('k0') fit error, or"
+            + " angle-specific z-modulation issues");
+        results.addInfo("About the Fourier plots",
+                "By default reconstructed data cropped to mode; "
+                + " window function applied to reduce edge artifacts prior"
+                + "to FFT; FFT slices are normalized (mode-max); and target"
+                + "rings (overlay) are added to translate frequency to"
+                + " spatial resolution. Optionally results may be blurred"
+                + " and a color Look-Up Table applied to highlight slope /"
+                + " flatness of Fourier spectrum.");
         return results;
     }
     
@@ -155,7 +177,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         return imp;
     }
     
-    /** Autoscale 8-bit imp 0-255 for input min or mode (autoscale) to max. */
+    /** Rescale 8-bit imp 0-255 for input min or mode (autoscale) to max. */
     private void autoscaleSlices(ImagePlus imp) {
         int ns = imp.getStackSize();
         for (int s = 1; s <= ns; s++) {
@@ -225,7 +247,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
                 imp.getStackSize());
         for (int s = 1; s <= slices; s++) {
             ImageProcessor ip = stack.getProcessor(s);
-            int insertStart = width * (((height - rescaledHeight) / 2) - 1);
+            int insertStart = width * (((height - rescaledHeight) / 2) + 1);
             int insertEnd = insertStart + width * rescaledHeight;
             ImageProcessor pip = new ByteProcessor(width, height);  // to pad
             byte[] pix = (byte[])((ByteProcessor)ip).getPixels();

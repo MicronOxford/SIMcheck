@@ -137,8 +137,8 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
             plot.addPoints(pzat_no, avIntensities, 1);
 
             /// (1) "Channel decay"
-            double[] xSlice = JM.f2d(pzat_no);
-            double[] yIntens = JM.f2d(avIntensities);
+            double[] xSlice = J.f2d(pzat_no);
+            double[] yIntens = J.f2d(avIntensities);
             //  fitting with y=a*exp(bx)  ; fitter returns a, b, R^2
             //   e.g. x=ln((2/3)/b) for 2/3 original intensity (<33% decay)
             CurveFitter expFitter = new CurveFitter(xSlice, yIntens);
@@ -147,8 +147,8 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
             double channelDecay = (double)100 * (1 - Math.exp(fitResults[1]
             		* pzat_no.length * (zwin / nz)));
             results.addStat(
-                    "Channel " + Integer.toString(channel) + " intensity decay"
-                        + " per " + (int)zwin + " Z (%)",
+                    "C" + Integer.toString(channel) + " intensity decay"
+                        + " per " + (int)zwin + " z-slices (%)",
                     (double)Math.round(channelDecay));
             
             /// (2) "Angle differences"
@@ -157,7 +157,7 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
                 float[] yIntens3 = new float[np*nz];
                 System.arraycopy(avIntensities, (angle - 1) * np * nz, 
                 		yIntens3, 0, np * nz);
-                angleMeans[angle-1] = JM.mean(yIntens3);
+                angleMeans[angle-1] = J.mean(yIntens3);
             }
             double largestDiff = 0;
             for (int angle=1; angle<=na; angle++) {
@@ -169,9 +169,9 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
                 }
             }
             // normalize largest av intensity diff using max intensity angle
-            float maxAngleIntensity = JM.max(angleMeans);
+            float maxAngleIntensity = J.max(angleMeans);
             largestDiff = (double)100 * largestDiff / (double)maxAngleIntensity;
-            results.addStat("Channel " + Integer.toString(channel) 
+            results.addStat("C" + Integer.toString(channel) 
                     + " max intensity difference between angles (%)",
                     (double)Math.round(largestDiff));
         }
@@ -179,9 +179,9 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
         I1l.drawPlotTitle(impResult, "Per Channel Intensity Profiles");
         results.addImp(name, plot.getImagePlus());
         results.addInfo("How to interpret",
-                "intensity differences of > ~30% between angles and/or" +
-                " over 9-Z-window used to reconstruct each Z secition" +
-                " may cause artifacts (exact level depends on the" +
+                "intensity differences > ~30% between angles and/or" +
+                " over 9-z-window used to reconstruct each z-section" +
+                " may cause artifacts (threshold depends on" +
                 " signal-to-noise level).");
         return results;
     }

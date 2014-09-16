@@ -106,10 +106,10 @@ public class Raw_FourierProjections implements PlugIn, Executable {
         }
         IJ.run(montage, "Grays", "");
         montage.setTitle(I1l.makeTitle(imps[0], TLA));
-      	results.addImp("2D FFT max projection montage for angles 1-" + angles,
+      	results.addImp("2D FFT montage for each angle (max projection)",
       	        montage);
         results.addInfo("How to interpret", "look for clean 1st & 2nd" +
-      	        " order spots, similar across angles. NB. spot intensity" +
+      	        " order spots, similar across angles. N.B. Spot intensity" +
                 " depends on image content.");
         return results;
     }

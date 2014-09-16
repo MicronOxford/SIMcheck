@@ -46,36 +46,44 @@ Features
 - results: images will appear and key statistics will be logged
 - help button: link to instructions, help, documentation
 
----------------------
-1: Calibration Checks
----------------------
-
-    Check          |        Statistic(s)            |       Comments
------------------- | ------------------------------ | -----------------------
- Cal phases        | phase step & range stable?     | +k0 angles, linespacing
- Cal pattern focus | clean PSF, no "zipper" pattern | 
-
 ----------------------------------
-2: Pre-processing, Raw Data Checks
+1: Pre-processing, Raw Data Checks
 ----------------------------------
 
-    Check          |        Statistic(s)             |      Comments
------------------- | ------------------------------- | ---------------------
- Angle Diff    |  no colored differences?        |    threshold/stat?
- Intensity Prf |  bleaching and angle intensity  |
- Fourier plots |  SI pattern correct & regular?  |    TODO? k0 & linspc
- Mod Contrast  |  feature MCNR acceptable?       |    Wiener par
+    Check            |        Statistic(s)                 |      Comments   
+-------------------- | ----------------------------------- | ------------------
+ Intensity Profiles  | bleaching, flicker, angle intensity | TODO: flicker     
+ Motion / Illum Var  | angle difference (motion, illum.)   | TODO: correlation 
+ Fourier Projections | None: check pattern / spots OK      | TODO? k0 & linspc 
+ Mod Contrast        | feature MCNR acceptable?            | Wiener estimate   
 
 -----------------------------
-3: Post-reconstruction Checks
+2: Post-reconstruction Checks
 -----------------------------
 
-    Check          |        Statistic(s)              |     Comments
------------------- | -------------------------------- | --------------------
- Histogram     |  +ve/-ve ratio acceptable?       | top/bottom 0.01%
- Z variation   |  stdev of miniumum vs. mean      | shows OTF mismatch
- Fourier Plot  |  symmetry+profile OK? +res/angle | +radial profile
- MCNR Map      |  None - for visual inspection    | MCNR + intensity
+    Check            |        Statistic(s)                 |      Comments
+-------------------- | ----------------------------------- | ------------------
+ Intensity Histogram | +ve/-ve ratio acceptable?           | top/bottom 0.01%  
+ Fourier Plots       | None: symmetry+profile OK?          | TODO: resolution  
+ Mod Contrast Map    | None: inspect MCNR of features      | MCNR & intensity  
+
+---------------------
+3: Calibration Checks
+---------------------
+
+    Check            |        Statistic(s)                 |      Comments
+-------------------- | ----------------------------------- | ------------------
+ Illum. Phase Steps  | phase step & range stable?          | +k0, linespacing  
+ Pattern focus       | None: check no "zipper" pattern     |                   
+ SA Mismatch         | stdDev of miniumum vs. mean         | shows OTF mismatch
+
+4: Utilities
+------------
+
+- Format Converter for SIM data
+- Raw SI Data to Pseudo-Widefield conversion
+- Threshold and 16-bit conversion (i.e. "discard neagtives")
+- Stack FFT (2D)
 
 
 PROJECT STRUCTURE
@@ -109,7 +117,6 @@ TODO
 ====
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
-      - release "0.9.5"
       - documentation: 
         - finish/improve docs, illustrate usage with pictures, examples
         - for ELYRA reconstructed .czi, discard WF and decon-WF
@@ -117,54 +124,53 @@ TODO
         - Fourier proj: document power-of-2 and that cropping causes problems
         - see google hit for "maven attach source and javadoc artifacts"
       - fixes:
+        - Rec MCM: saturated if *any* of 15 input pixels are saturated
+        - CIP / intensity decay: max of 3 angles' bleach rates over central 9Z
         - recon FT radial profile scale / units
-        - test / finish spherical aberration mismatch check
         - Wiener filter parameter estimate - calibrate, document
+        - channel order: RGB vs. BGR
+        - test / finish spherical aberration mismatch check
         - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
         - get rid of IJ.run calls & show/hide of intermediate results 
         - angle labels etc. should be overlaid, not drawn
         - remove unused intermediate results from Windows list
-        - SI pattern focus flicker corr?
       - features:
-        - summary table of stats & results (pass/uncertain/fail)
         - raw data angle difference (floaty): RMS error? (at least some stat)
+        - report frame-to-frame flicker
+        - summary table of stats & results (pass/uncertain/fail)
         - rec Fourier:-
           - lat: pattern angles (use "SIMcheck.angle1" pref), 3 color profiles
           - axial FFT: project over central slice range, not just 1
           - axial FFT: profile plot?
-          - option to not discard negatives before FFT?
-        - "Fourier Plots": option for non-mode zero-point (no BG)
-        - calibration bar on modcontrast map
-        - better name for motion check
-        - window positioning: dialog to top left, ...
-        - Intensity Histogram: different zero-points for images w/o BG
-        - cropping selection after / during main dialog
-        - spherical aberration mismatch check: axis always symmetrical about 0?
         - report per. angle modulation contrast and/or minimum of these?
+        - display / warn about saturated pixels in raw data MCN check
+        - SI pattern focus flicker corr?
         - Fourier proj stat(s)? spots over angles, 1st vs second, stability?
         - raw -> WF same size as rec by interpolation (& preserve type??)
-        - cal check: intensity fluctuations
+        - spherical aberration mismatch check: axis always symmetrical about 0?
+        - window positioning: dialog to top left, ...
       - tests, structure:
         - final empirical tests, param calibration, tolerances etc.
         - move crop function code to separate utility
         - tidy up tests:
-          - .main() for interactive test, .test() to test private methods?
-          - more tests to test/debug non-interactive code, preconditions / inputs
+          - .main() for interactive test, .test() to unit-test private methods
           - unit tests to run without test data (download should build easily)
-          - nice, compact test data suite for distribution
-        - work out strategy for test data distribution
+          - more tests to test/debug non-interactive code, preconditions (inputs)
+        - test data:
+          - compact test / example data suite for distribution
+          - work out strategy for test data distribution
         - add ResultTable support to ResultSet class
 
 * 1.1: future features
-      - convert dialog & logging to non-blocking swing GUI
+      - convert dialog & logging to swing GUI
+      - rec: FFT automatic resolution estimation??
+      - 3D FFT
+      - raw: estimate angles & line-spacing for FFT, pattern focus?
+      - cal: PSF symmetry within tolerance?
+      - cal: OTF extent, shape & order separation?
       - util: merge/shuffle:-
         - tool for merging SIM & widefield data (Julio)
         - re-order channels
-      - pre: estimate angles & line-spacing for FFT, pattern focus
-      - 3D FFT
-      - post: rec FFT automatic resolution estimation??
-      - cal: PSF symmetry within tolerance?
-      - cal: OTF extent, shape & order separation?
       - pre: plot channel color from channel metadata
 
 

@@ -245,32 +245,31 @@ public class Raw_ModContrast implements PlugIn, Executable {
         impResult.setT(1);
         impResult.setOpenAsHyperStack(true);
         if (!doRawFourier) {
-            impResult = (ImagePlus)(new CompositeImage(impResult));
             I1l.applyLUT(impResult, mcnrLUT, displayRange);
             // overlay a LUT "calibration bar" if the image is big enough 
-            if (impResult.getWidth() > 128) {
+            if (impResult.getWidth() >= 160) {
                 IJ.run(impResult, "Calibration Bar...", 
                         "location=[Lower Right] fill=None label=White " +
-                        "number=5 decimal=0 font=12 zoom=1 bold overlay");
+                        "number=5 decimal=0 font=12 zoom=1 overlay");
             }
-            results.addImp("modulation contrast-to-noise ratio image", 
+            results.addImp("Modulation contrast-to-noise ratio (MCNR) image", 
                     impResult);
             results.addInfo("How to interpret",
-                    "color LUT display shows modulation contrast value:" +
+                    "color Look-Up Table shows MCNR value:" +
                     "  - purple is inadequate (3 or less)" +
                     "  - red is an acceptable value of 6+" +
                     "  - orange is good" +
-                    "  - yellow-white is very good-excellent.");
+                    "  - yellow-white is very good-excellent");
             results.addInfo("Estimated feature MCNR",
                     "features selected by Otsu auto-thresholding.");
             results.addInfo("Estimated Wiener filter parameter",
-                    "for OMX data reconstruction only.");
+                    "for OMX data reconstruction (SoftWoRx) only.");
             for (int c = 1; c <= nc; c++) {
                 ImagePlus impC = I1l.copyChannel(impResult, c);
                 double featMCNR = I1l.stackFeatMean(impC);
-                results.addStat("Channel " + c + " estimated feature MCNR", 
+                results.addStat("C" + c + " estimated feature MCNR", 
                         featMCNR);
-                results.addStat("Channel " + c + " estimated Wiener optimum", 
+                results.addStat("C" + c + " estimated Wiener filter optimum", 
                         estimWiener(featMCNR));
             }
         } else {
@@ -302,7 +301,7 @@ public class Raw_ModContrast implements PlugIn, Executable {
         int[] sliceList = I1l.sliceList(nc, c, c, phases, phStart, phEnd, 
                 nz, zStart, zEnd, angles, a, a, nt, t, t);
         float[][] vp = I1l.stack2arr(stack, sliceList);
-        vp = JM.anscombe(vp);
+        vp = J.anscombe(vp);
         vp = I1l.normalizeInner(vp);
         vp = DFT1D.dftOuter(vp);
         return vp;
@@ -339,10 +338,10 @@ public class Raw_ModContrast implements PlugIn, Executable {
         float[] order2pix = new float[npix]; 
         System.arraycopy(freqPix[order1pos], 0, order1pix, 0, npix);
         System.arraycopy(freqPix[order2pos], 0, order2pix, 0, npix);
-        float noiseStdev = (float)Math.sqrt(JM.variance(freqPix[noiseSlice]));
-        float[] modContrast = JM.add(JM.sq(order1pix), JM.sq(order2pix));
-        modContrast = JM.sqrt(modContrast);
-        modContrast = JM.div(modContrast, noiseStdev);
+        float noiseStdev = (float)Math.sqrt(J.variance(freqPix[noiseSlice]));
+        float[] modContrast = J.add(J.sq(order1pix), J.sq(order2pix));
+        modContrast = J.sqrt(modContrast);
+        modContrast = J.div(modContrast, noiseStdev);
         fp.setPixels(modContrast); 
         return fp;
     }
@@ -359,9 +358,9 @@ public class Raw_ModContrast implements PlugIn, Executable {
                 int slice = z + (nz * (a - 1));
                 FloatProcessor fp = (FloatProcessor)stackAZ.getProcessor(slice);
                 float[] fpixels = (float[]) fp.getPixels();
-                newpixels = JM.add(newpixels, fpixels);
+                newpixels = J.add(newpixels, fpixels);
             }
-            newpixels = JM.div(newpixels, angles);
+            newpixels = J.div(newpixels, angles);
             avFp.setPixels(newpixels);
             avStack.addSlice(avFp);
         }

@@ -29,10 +29,10 @@ import ij.gui.GenericDialog;
  * differences, images ought to appear white/gray!
  * @author Graeme Ball <graemeball@gmail.com>
  */
-public class Raw_MotionCheck implements PlugIn, Executable {
+public class Raw_MotionAndIllumVar implements PlugIn, Executable {
 
-    public static final String name = "Motion Check";
-    public static final String TLA = "MOT";
+    public static final String name = "Motion & Illumination Variation";
+    public static final String TLA = "MIV";
     private ResultSet results = new ResultSet(name);
 
     // parameter fields
@@ -88,13 +88,13 @@ public class Raw_MotionCheck implements PlugIn, Executable {
             recordRmsErr(imp, projImp);
             calcNormalizationFactors(imp, nc, angles, totalIntens, normFactors);
             ImagePlus colorImp = colorAngles(imp, projImp, nc, nz, normFactors);
-            results.addImp("false-colored angle data (C, M, Y)", colorImp);
+            results.addImp("Each angle phase-averaged, normalized," +
+                    " and false-colored (A1 cyan, A2 magenta, A3 yellow)",
+                    colorImp);
             results.addInfo("How to interpret",
-                    "phases are averaged, angles normalized, and colored" +
-                    " Cyan, Magenta, Yellow for angles 1, 2 & 3." +
-                    " Non-white areas indicate differences between angles" +
+                    " non-white areas indicate differences between angles" +
                     " due to drift, floating particles or" +
-                    " uneven illumination.");
+                    " illumination variations.");
         }
         return results;
     }
@@ -314,6 +314,6 @@ public class Raw_MotionCheck implements PlugIn, Executable {
     public static void main(String[] args) {
         new ImageJ();
         TestData.raw.show();
-        IJ.runPlugIn(Raw_MotionCheck.class.getName(), "");
+        IJ.runPlugIn(Raw_MotionAndIllumVar.class.getName(), "");
     }
 }

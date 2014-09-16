@@ -97,21 +97,24 @@ public class Cal_SAMismatch implements PlugIn, Executable {
             plot.addPoints(zPlanes, sliceMeans, Plot.LINE);
             plot.setLineWidth(1);
             plots[c - 1] = plot.getImagePlus();
-            double nstdev = Math.sqrt(JM.variance(sliceMinima)) / 
-                    JM.mean(sliceMeans);
-            results.addStat("Channel " + c + " normalized StdDev", nstdev);
+            double nstdev = Math.sqrt(J.variance(sliceMinima)) / 
+                    J.mean(sliceMeans);
+            results.addStat("C" + c + " normalized StdDev", nstdev);
             
         }
         String title = I1l.makeTitle(imps[0], TLA);
         ImagePlus impAllPlots = I1l.mergeChannels(title, plots);
         impAllPlots.setDimensions(nc, 1, 1);
         impAllPlots.setOpenAsHyperStack(true);
-        results.addImp("slice feature means (gray) & minima (black)",
+        results.addImp("z-slice minimum (black) and feature mean (gray)",
                 impAllPlots);
         results.addInfo("How to interpret", 
-                "high standard deviation of slice minimum intensity" +
-                " with respect to slice average feature intensity" +
-                " indicates sample / PSF Spherical Aberration mismatch.");
+                "high normalized standard deviation of z-slice minimum"
+                + " intensity with respect to slice average feature"
+                + " intensity indicates sample / PSF Spherical Aberration"
+                + " mismatch. Typically this is seen as a peak / dip in"
+                + " normalized minimum StdDev at the sample boundary, but"
+                + " the absolute value depends on image content.");
         return results;
     }
 

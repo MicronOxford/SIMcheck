@@ -23,15 +23,15 @@ import java.util.Calendar;
 import java.util.Date;
 
 /** 
- * JM is a class containing static utility methods for simple Java Math.
+ * A class containing static utility methods for Java.
  * @author Graeme Ball <graemeball@gmail.com>
  */
-public class JM {
+public class J {
     
     private static final double APPROX_EQ_TOL = 0.05d;  // i.e. 5% tolerance
     
     /** Utility class should not be instantiated. */
-    private JM() {}
+    private J() {}
 
     /** 
      * Add two 1D float arrays of the same length, element by element.
@@ -210,6 +210,11 @@ public class JM {
             if (f[i] < min) min = f[i];
         }
         return min;
+    }
+    
+    /** Return a string containing n repeats of charString. */
+    public static String nChars(int n, String charString) {
+        return new String(new char[n]).replace("\0", charString);
     }
 
     /** Square each element of a float array. */                                
