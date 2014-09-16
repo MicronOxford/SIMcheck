@@ -5,19 +5,35 @@ SIMcheck
 SIMcheck is a package of ImageJ tools for assessing the quality and
 reliability of Structured Illumination Microscopy (SIM) data.
 
-To install the built result, copy ./build/dist/SIMcheck_.jar to your ImageJ
-plugins/ directory and restart ImageJ. Note that the lib/ directory here must
-contain a soft link to the ij.jar you are using for the build process to work.
+* More information can be found on the 
+[Micron Oxford Website](http://www.micron.ox.ac.uk/software/SIMCheck.shtml)
+* **The latest .jar can be downloaded from
+[here](http://www.micron.ox.ac.uk/microngroup/software/SIMcheck_.jar)**
+* Further help is available
+[here](http://www.micron.ox.ac.uk/microngroup/software/SIMcheck.html)
+
+The project was recently converted to the maven build and dependency
+management tool (the previous ant build setup is described in the 
+next paragraph below). A solution for local deployment of the latest
+maven build is still being worked on, and there is no Fiji update site
+yet. To build, run the following (.jar file appears in ./target/):-
+
+    mvn package
+
+
+The code has always been arranged in a conventional Maven-like structure,
+and previously came with an ant build script that copied the resulting
+SIMcheck_.jar to a local plugin folder. It was necessary, before building
+the project, to create a ./lib/ directory containing a soft link to the
+ij.jar from the desired ImageJ version, as well as a soft link to junit.jar.
+The built result was then copied to ./plugins/ so this needed to be
+soft-linked to your ImageJ plugins folder. Typing "ant" to build the
+default (all) target and restarting ImageJ or Help->Refresh Menus gave
+access to the newly built plugin package.
 
 Copyright Graeme Ball and Micron Oxford, Department of Biochemistry, 
 University of Oxford. License GPL unless stated otherwise in a given file.
 
-Code is arranged in a conventional Maven-like structure and includes an
-ant build script that can copy the resulting SIMcheck_.jar to a local
-plugin folder.
-
-**The latest .jar can be downloaded from the 
-[Micron Oxford Website](http://www.micron.ox.ac.uk/microngroup/software/SIMcheck_.jar)**
 
 Features
 ========
@@ -30,115 +46,132 @@ Features
 - results: images will appear and key statistics will be logged
 - help button: link to instructions, help, documentation
 
----------------------
-1: Calibration Checks
----------------------
-
-    Check          |        Statistic(s)            |       Comments
------------------- | ------------------------------ | -----------------------
- Cal phases        | phase step & range stable?     | +k0 angles, linespacing
- Cal grating, TODO | grating clean?                 |  grating image
- Cal PSF, TODO     | SNR, symmetry, posn&focus OK?  | 
-
 ----------------------------------
-2: Pre-processing, Raw Data Checks
+1: Pre-processing, Raw Data Checks
 ----------------------------------
 
-    Check          |        Statistic(s)             |      Comments
------------------- | ------------------------------- | ---------------------
- Raw Z profile     |  bleaching and angle diffs OK?  |    
- Raw Fourier plots |  SI pattern correct & regular?  |    TODO? k0 & linspc
- Raw floaties      |  no floaties or drift detected? |    threshold/stat?
- Raw Mod Contrast  |  feature MCNR acceptable?       |    Wiener par
-
-- TODO? camera correction? correlation coefficient & linearity
+    Check            |        Statistic(s)                 |      Comments   
+-------------------- | ----------------------------------- | ------------------
+ Intensity Profiles  | bleaching, flicker, angle intensity | TODO: flicker     
+ Motion / Illum Var  | angle difference (motion, illum.)   | TODO: correlation 
+ Fourier Projections | None: check pattern / spots OK      | TODO? k0 & linspc 
+ Mod Contrast        | feature MCNR acceptable?            | Wiener estimate   
 
 -----------------------------
-3: Post-reconstruction Checks
+2: Post-reconstruction Checks
 -----------------------------
 
-    Check          |        Statistic(s)              |     Comments
------------------- | -------------------------------- | --------------------
- SIR Histogram     |  +ve/-ve ratio acceptable?       | top/bottom 0.5%
- SIR Z variation   |  stdev of miniumum vs. mean      | shows mismatch
- SIR Fourier Plot  |  symmetry+profile OK? +res/angle | +radial profile
- SIR MCNR Map      |  None - for visual inspection    | MCNR + intensity
+    Check            |        Statistic(s)                 |      Comments
+-------------------- | ----------------------------------- | ------------------
+ Intensity Histogram | +ve/-ve ratio acceptable?           | top/bottom 0.01%  
+ Fourier Plots       | None: symmetry+profile OK?          | TODO: resolution  
+ Mod Contrast Map    | None: inspect MCNR of features      | MCNR & intensity  
+
+---------------------
+3: Calibration Checks
+---------------------
+
+    Check            |        Statistic(s)                 |      Comments
+-------------------- | ----------------------------------- | ------------------
+ Illum. Phase Steps  | phase step & range stable?          | +k0, linespacing  
+ Pattern focus       | None: check no "zipper" pattern     |                   
+ SA Mismatch         | stdDev of miniumum vs. mean         | shows OTF mismatch
+
+4: Utilities
+------------
+
+- Format Converter for SIM data
+- Raw SI Data to Pseudo-Widefield conversion
+- Threshold and 16-bit conversion (i.e. "discard neagtives")
+- Stack FFT (2D)
 
 
 PROJECT STRUCTURE
 =================
 
-- README.txt - this file
-- NOTICE.txt  - Notices and attributions required by libraries depended on
+- README.md - This file
 - LICENSE.txt - Project's license
-- build.xml - ant buildfile
-- lib/ - contains soft links to necessary libraries (i.e. ij.jar)
+- CHANGES.txt  - History of versions and changes
+- pom.xml - maven Project Object Model describing dependencies, build etc.
 - src/main/java/ - Application sources (in SIMcheck/ package)
 - src/main/resources/ - Application resources (IJ menu config, html help text)
 - src/test/java/ - Test sources
 - src/test/resources/ - Test resources
 - target/ - output SIMcheck_.jar file
-- target/classes/ - for build output .class files
+- target/classes/ - build output .class files
 - target/test-classes/ - classes produced by tests
-- docs/ - documentation (output from javadoc)
-
-Eclipse project created using File->New->Project->from Ant build file
-
 
 
 Style Notes
 ===========
+
 * simple, modular structure - each check is a standalone plugin
-* exec methods take input images and return results with no GUI calls
+* plugin exec methods take input images and return ResultSet
+  (no GUI calls within exec when easily avoidable)
+* no dependencies other than ImageJ1, apart from JUnit for testing
 * ImageJ1-like preference for pre- java 5 features (i.e. not many generics)
   and reliance on float primitive type for most calculations
-* no dependencies other than ImageJ1
-* unconventional choices which some people may consider bad pratice -
-  * significant use of a utility class with static methods to provide 
-    functionality missing from java arrays, math, & IJ API
-  * final not used to mark immutability (not worth increase in visual noise)
-  * most methods package-private rather than private - less verbose & makes
-    unit testing easier (I never call non-public methods between classes)
 
 
 TODO
 ====
 
-problems / ideas -
-* Recon data histogram +ve/-ve ratio wrong
-* bleaching calculation: combine per-9Z and inter-angle decay
-* display / warn saturated pixels (try green)
-
 * 1.0: integration/GUI, tests, documentation & write-up up for release
-      - swing GUI runner & report
-      - raw -> WF same size as SIR by interpolation (& preserve type??)
-      - SIR_Fourier:
-        - one orthogonal slice, not whole stack?
-        - finalize scaling: separate for lat & ortho?
-      - ImagePlus.isHyperstack() = true
-      - SIR_hist with multiple frames
-      - SIR_FFT, update window function to Rainer Heintzmann's
-      - make sure tests and debug not deployed
-      - convert dialog & logging to non-blocking swing GUI
-      - final empirical tests, param calibration, tolerances etc.
-      - public web page with EXAMPLES
-      - improve log output: should be simple, concise & self-documenting
-      - check preconditions & robustness w.r.t. input data (multi-d, type etc.)
-      - junit test suite to test/debug non-interactive code
-      - mavenize & make Fiji update site
-      - try to install LUTs into IJ menu?
-      - add ResultTable support to ResultSet class
-      - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
+      - documentation: 
+        - finish/improve docs, illustrate usage with pictures, examples
+        - for ELYRA reconstructed .czi, discard WF and decon-WF
+          (processed data have 3 channels: recon, decon pseudoWF, WF)
+        - Fourier proj: document power-of-2 and that cropping causes problems
+        - see google hit for "maven attach source and javadoc artifacts"
+      - fixes:
+        - Rec MCM: saturated if *any* of 15 input pixels are saturated
+        - CIP / intensity decay: max of 3 angles' bleach rates over central 9Z
+        - recon FT radial profile scale / units
+        - Wiener filter parameter estimate - calibrate, document
+        - channel order: RGB vs. BGR
+        - test / finish spherical aberration mismatch check
+        - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
+        - get rid of IJ.run calls & show/hide of intermediate results 
+        - angle labels etc. should be overlaid, not drawn
+        - remove unused intermediate results from Windows list
+      - features:
+        - raw data angle difference (floaty): RMS error? (at least some stat)
+        - report frame-to-frame flicker
+        - summary table of stats & results (pass/uncertain/fail)
+        - rec Fourier:-
+          - lat: pattern angles (use "SIMcheck.angle1" pref), 3 color profiles
+          - axial FFT: project over central slice range, not just 1
+          - axial FFT: profile plot?
+        - report per. angle modulation contrast and/or minimum of these?
+        - display / warn about saturated pixels in raw data MCN check
+        - SI pattern focus flicker corr?
+        - Fourier proj stat(s)? spots over angles, 1st vs second, stability?
+        - raw -> WF same size as rec by interpolation (& preserve type??)
+        - spherical aberration mismatch check: axis always symmetrical about 0?
+        - window positioning: dialog to top left, ...
+      - tests, structure:
+        - final empirical tests, param calibration, tolerances etc.
+        - move crop function code to separate utility
+        - tidy up tests:
+          - .main() for interactive test, .test() to unit-test private methods
+          - unit tests to run without test data (download should build easily)
+          - more tests to test/debug non-interactive code, preconditions (inputs)
+        - test data:
+          - compact test / example data suite for distribution
+          - work out strategy for test data distribution
+        - add ResultTable support to ResultSet class
 
 * 1.1: future features
-      - bead puddle SI illumination image
-        split angles, de-interleave 5 phases, rotate to orthogonal
-      - pre: add statistic for floaty detection
-      - post: k0 angle lines (manual entry?), resolution symmetrical /angle?
-      - post: SIR FFT automatic resolution estimation??
-      - pre: FFT check to estimate angles & line-spacing
-      - cali: PSF symmetry within tolerance?
-      - cali: OTF extent, shape & order separation?
+      - convert dialog & logging to swing GUI
+      - rec: FFT automatic resolution estimation??
+      - 3D FFT
+      - raw: estimate angles & line-spacing for FFT, pattern focus?
+      - cal: PSF symmetry within tolerance?
+      - cal: OTF extent, shape & order separation?
+      - util: merge/shuffle:-
+        - tool for merging SIM & widefield data (Julio)
+        - re-order channels
+      - pre: plot channel color from channel metadata
 
 
 SIM Reconstruction Problems & Remedies 

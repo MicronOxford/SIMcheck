@@ -22,7 +22,7 @@ import ij.ImagePlus;
 /** 
  * Executable interface for a pre-configured image processor.
  */
-public interface EProcessor {
+public interface Executable {
    
     /**
      * Execution method containing processor functionality.

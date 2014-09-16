@@ -29,6 +29,9 @@ import ij.plugin.filter.GaussianBlur;
  * @author Graeme Ball <graemeball@gmail.com>
  */
 public class FFT2D extends FHT {
+    
+    // tolerance to check if a double precision float is approx. equal to 0
+    private static final double ZERO_TOL = 0.000001d;
 
     public FFT2D(ImageProcessor ip){
         super(ip);
@@ -154,6 +157,13 @@ public class FFT2D extends FHT {
      * @return new ImagePlus after 2D FFT
      **/
     public static ImagePlus fftImp(ImagePlus impIn) {
+        return fftImp(impIn, 0.02d);
+    }
+    
+    /**
+     * 2D FFT hyperstack, specify window function size as input size fraction.
+     */
+    public static ImagePlus fftImp(ImagePlus impIn, double winFraction) {
         ImagePlus imp = impIn.duplicate();
         Calibration cal = impIn.getCalibration();
         int width = imp.getWidth();
@@ -182,7 +192,9 @@ public class FFT2D extends FHT {
             // See: ij/plugin/FFT.java & ij/ImagePlus.java (search FHT & FFT)
             //      ij/process/FHT.java
             ImageProcessor ip = stack.getProcessor(slice);
-            ip = FFT2D.gaussWindow(ip, 0.125d); 
+            if (Math.abs(winFraction) > ZERO_TOL) {
+                ip = FFT2D.gaussWindow(ip, winFraction);
+            }
             ip = FFT2D.pad(ip, paddedSize);  
             fht = FFT2D.fftSlice(ip, imp);
             ImageProcessor ps = fht.getPowerSpectrum();
@@ -199,6 +211,8 @@ public class FFT2D extends FHT {
         impF.setOpenAsHyperStack(true);
         return impF;
     }
+    
+    
 
     /** 
      * Calculate the padded width and height for an ImagePlus to be
@@ -271,7 +285,7 @@ public class FFT2D extends FHT {
     }
 
     /** Calculate phase using real + imaginary components. **/
-    static float calcPhase(float re, float im) {
+    private static float calcPhase(float re, float im) {
         if (re > 0) {
             return (float)Math.atan((double)im/re);
         }else if ((re < 0) && (im >= 0)) {
@@ -290,6 +304,7 @@ public class FFT2D extends FHT {
     /** Test method. */
     public static void main(String[] args) {
         System.out.println("Testing FFT2D.java");
+        new ImageJ();
         // create x-gradient test image
         int nx = 300;
         int ny = 200;
@@ -315,9 +330,9 @@ public class FFT2D extends FHT {
         fp3 = (FloatProcessor)FFT2D.pad(fp2.duplicate(), FFT2D.calcPadSize(impWinFunc));
         ImagePlus impPadWin = new ImagePlus("gradient_win_pad", fp3);
         impPadWin.show();
-        ImagePlus wfTest = IJ.openImage("/Users/graemeb/Documents/InTray/SIMcheck/CURRENT_EXAMPLE_FILES/V3_Blaze_medium_DAPI_mismatch_w5_SIR_C3-WF_TEST.tif");
+        ImagePlus wfTest = TestData.recon;
         FloatProcessor fpWFtest = (FloatProcessor)wfTest.getProcessor();
-        fpWFtest = (FloatProcessor)FFT2D.gaussWindow(fpWFtest.duplicate(), 0.125d);
+        fpWFtest = (FloatProcessor)FFT2D.gaussWindow(fpWFtest.duplicate(), 0.04d);
         ImagePlus impWFtestResult = new ImagePlus("WindowFunctionTest", fpWFtest);
         impWFtestResult.copyScale(wfTest);
         impWFtestResult.show();

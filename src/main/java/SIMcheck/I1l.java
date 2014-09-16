@@ -17,16 +17,22 @@
 
 package SIMcheck;
 import ij.*;
+import ij.plugin.LutLoader;
+import ij.plugin.ChannelSplitter;
+import ij.plugin.filter.GaussianBlur;
 import ij.process.*;
 import ij.measure.Calibration;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.Polygon;
 import java.awt.image.*;
-import java.util.Arrays;
+import java.io.IOException;
+import java.io.InputStream;
 
 /** 
  * I1l (<b>I</b>mageJ <b>1</b> <b>l</b>ibrary) is a class containing static
- * utility methods for ImageJ1 and java array / math. How good is your font?
+ * utility methods for ImageJ1. How good is your font?
  * @author Graeme Ball <graemeball@gmail.com>
  */
 public final class I1l {
@@ -34,40 +40,6 @@ public final class I1l {
     /** Utility class should not be instantiated. */
     private I1l() {}
     
-    /** 
-     * Add two 1D float arrays of the same length, element by element.
-     * @param f1 first input array
-     * @param f2 second input array
-     * @return float[] array of same length as first input
-     */
-    public static float[] add(float[] f1, float[] f2) {
-        int len = f1.length;
-        float[] result = new float[len];
-        for (int i = 0; i < len; i++) {
-            result[i] = f1[i] + f2[i];
-        }
-        return result;
-    }
-
-    /** 
-     * Apply an Anscombe variance stabilizing transform to a 2D float array:
-     * <pre>x-&gt;[2*sqrt(x)]+3/8</pre>
-     * @param ab 2D array of floats 
-     * @return Anscome-transformed 2D array same shape as input
-     */
-    public static float[][] anscombe(float[][] ab) {
-        int nb = ab[0].length;
-        int na = ab.length;
-        float[][] abAns = new float[na][nb];
-        for (int a = 0; a < na; a++) {
-            for (int b = 0; b < nb; b++){
-                abAns[a][b] = (float)( 
-                        (2 * Math.sqrt((double)ab[a][b])) + (3 / 8));
-            }
-        }
-        return abAns;
-    }
-
     /** 
      * Apply a LUT to an ImagePlus and set its display range for meaningful
      * interpretation.
@@ -77,28 +49,28 @@ public final class I1l {
      */
     public static void applyLUT(ImagePlus imp, 
             IndexColorModel cm, double[] displayRange ) {
-        if (imp.isComposite() && 
-                ((CompositeImage)imp).getMode() == CompositeImage.GRAYSCALE) {
+        if (imp.isComposite()) {
             CompositeImage cimp = (CompositeImage)imp;
             cimp.setMode(CompositeImage.COLOR);
             int saveC = cimp.getChannel();
             for (int c = 1; c <= cimp.getNChannels(); c++) {
                 cimp.setC(c);
                 cimp.setChannelColorModel(cm);
+                cimp.setDisplayRange(displayRange[0], displayRange[1]);
             }
             imp.setC(saveC);
         } else {
-            ImageProcessor ip = imp.getChannelProcessor();
-            if (imp.isComposite()) {
-                ((CompositeImage)imp).setChannelColorModel(cm);
+            if (imp.getStackSize() > 1) {
+                ImageStack stack = imp.getStack();
+                stack.setColorModel(cm);
+                imp.setStack(stack);
             } else {
+                ImageProcessor ip = imp.getProcessor();
                 ip.setColorModel(cm);
+                imp.setProcessor(ip);
             }
-            if (imp.getStackSize()>1) {
-                imp.getStack().setColorModel(cm);
-            }
+            imp.setDisplayRange(displayRange[0], displayRange[1]);
         }
-        imp.setDisplayRange(displayRange[0], displayRange[1]);
     }
 
     /** 
@@ -138,7 +110,7 @@ public final class I1l {
         return tempImp.getStack().getProcessor(1);                                  
     }
 
-    /** Calculate angle in radians using given x, y coords */
+    /** Calculate angle in radians CCW from E using given x, y coords. */
     public static double calcAngle(double x, double y) {
         if (x > 0) {
             return Math.atan(y / x);
@@ -184,26 +156,17 @@ public final class I1l {
         return result;
     }                                                                           
                                                                                 
-    /** Concatenate arr2 to the end of arr1. */
-    public static int[] cat(int[] arr1, int[] arr2) {
-        int[] result = new int[arr1.length + arr2.length];
-        System.arraycopy(arr1, 0, result, 0, arr1.length);
-        System.arraycopy(arr2, 0, result, arr1.length, arr2.length);
-        return result;
-    }
-        
     /** Collect and return an array of title Strings from all windows. */
-    static String[] collectTitles() {
-        int[] wList = WindowManager.getIDList();
-        if (wList==null) {
-            IJ.noImage();
-            return null;
-        }else{
+    public static String[] collectTitles() {
+        if (WindowManager.getWindowCount() > 0) {
+            int[] wList = WindowManager.getIDList();
             String[] titles = new String[wList.length];
             for (int i = 0; i < wList.length; i++) {
                 titles[i] = WindowManager.getImage(wList[i]).getTitle();
             }
             return titles;
+        } else {
+            return new String[0]; // no windows!
         }
     }
 
@@ -252,64 +215,34 @@ public final class I1l {
         }
     }
     
-    /** Convert double array to float array. */
-    public static float[] d2f(double[] d) {
-        if (d == null) {
-            return null; // Or throw an exception?
-        }
-        float[] output = new float[d.length];
-        for (int i = 0; i < d.length; i++) {
-            output[i] = (float)d[i];
-        }
-        return output;
-    }
-    
-    /** Euclidean distance */
-    public static double dist(double x1, double y1, double x2, double y2) {
-        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2) / 2);
-    }
-    
-    /** Divide each element of a float array by a float. */
-    public static float[] div(float[] f, float div) {
-        int len = f.length;
-        float[] result = new float[len];
-        for (int i = 0; i < f.length; i++) {
-            result[i] = (float)f[i] / div;
-        }
-        return result;
-    }
-
-    /** Divide two float arrays of identical dimensions, fN / fD. */
-    public static float[] div(float[] fN, float[] fD) {
-        int nPix = fN.length;
-        float[] result = new float[nPix];
-        for (int p = 0; p < nPix; p++) {
-            result[p] = fN[p] / fD[p];
-        }
-        return result;
-    }
-
     /** Divide two FloatProcessors of identical dimensions, fpN / fpD. */
     public static FloatProcessor div(FloatProcessor fpN, FloatProcessor fpD) {
         FloatProcessor result = (FloatProcessor)fpN.duplicate();
         float[] pixN = (float[])fpN.getPixels();
         float[] pixD = (float[])fpD.getPixels();
-        result.setPixels((Object)div(pixN, pixD));
+        result.setPixels((Object)J.div(pixN, pixD));
         return result;
     }
     
-    /** Convert primitive Float array to primitive Double array. */
-    public static double[] f2d(float[] f) {
-        if (f == null)
-        {
-            return null; // Or throw an exception?
-        }
-        double[] output = new double[f.length];
-        for (int i = 0; i < f.length; i++)
-        {
-            output[i] = f[i];
-        }
-        return output;
+    /** Draw size 12 white text at the top left of the image. */
+    public static void drawLabel(ImagePlus imp, String text) {
+        IJ.setForegroundColor(255, 255, 255);  // TODO, remove
+        ImageProcessor ip = imp.getProcessor();
+        ip.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        ip.setColor(Color.WHITE);
+        ip.drawString(text, 5, 17);
+        imp.setProcessor(ip);
+    }
+
+    /** Add a title to the ImagePlus for Plot or Histogram window. */
+    public static void drawPlotTitle(ImagePlus imp, String plotTitle) {
+        int xOffset = imp.getWidth() / 2 - plotTitle.length() * 3;
+        int yOffset = 13;
+        ImageProcessor ip = imp.getProcessor();
+        ip.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        ip.setColor(Color.BLACK);
+        ip.drawString(plotTitle, xOffset, yOffset);
+        imp.setProcessor(ip);
     }
     
     /** Return ImageStatistics for auto-thresholded features in this ip. */
@@ -322,6 +255,28 @@ public final class I1l {
         ImageProcessor maskedIp = ip.duplicate();
         maskedIp.setMask(maskIp);
         return maskedIp.getStatistics();
+    }
+    
+    /** Apply 2D gaussian blur to each slice in a stack. */
+    public static ImagePlus gaussBlur2D(ImagePlus imp, double blurRad) {
+        int ns = imp.getStackSize();
+        ImagePlus imp2 = imp.duplicate();
+        GaussianBlur gblur = new GaussianBlur();
+        gblur.showProgress(false);
+        for (int s = 1; s <= ns; s++) {
+            imp2.setSlice(s);
+            ImageProcessor ip = imp2.getProcessor();
+            gblur.blurGaussian(ip, blurRad, blurRad, 0.002);
+            imp2.setProcessor(ip);
+        }
+        return imp2;
+    }
+
+    /** Get ImageStatistics for a single channel of an ImagePlus. */
+    public static ImageStatistics getStatsForChannel(
+            ImagePlus imp, int channel) {
+        ImagePlus impC = I1l.copyChannel(imp, channel);
+        return impC.getStatistics();
     }
     
     /** Filter peaks based on Fourier radial position (freq) rMin to rMax */
@@ -339,6 +294,26 @@ public final class I1l {
         return filteredPeaks;
     }
     
+    /** Load a LUT from a file. (NB. getClass is non-static) */
+    public static IndexColorModel loadLut(String LUTfile) {
+        IndexColorModel cm = null;
+        InputStream is = I1l.class.getClassLoader().getResourceAsStream(LUTfile);
+        if (is == null) {
+            IJ.log("! InputStream null for " + LUTfile);
+        } else {
+            try {
+                cm = LutLoader.open(is);
+            } catch (IOException e) {
+                IJ.log("! error opening InputStream while loading LUT");
+                IJ.error("" + e);
+            }
+            if (cm == null) {
+                IJ.log("! error loading LUT - IndexColorModel is null");
+            }
+        }
+        return cm;
+    }
+    
     /** 
      * Make a new title using old (short) title of the ImagePlus
      * with a specified suffix.
@@ -350,75 +325,14 @@ public final class I1l {
         String[] titleTokens = imp.getTitle().split("\\.");
         int ntok = titleTokens.length;
         String nuTitle = "";
-        String ext = "";
         if (ntok > 1) {
-            ext += titleTokens[ntok - 1];
-            ntok -= 1;
+            ntok -= 1;  // discard token for input file extension
         }
         for (int i = 0; i < ntok; i++) {
             nuTitle += titleTokens[i];
         }
-        nuTitle = nuTitle + "_" + suffix + "." + ext;
+        nuTitle = nuTitle + "_" + suffix;
         return WindowManager.makeUniqueName(nuTitle);
-    }
-
-    /** Calculate the maximum of float array. */
-    public static float max(float[] f) {
-        float max = 0;
-        for (int i = 0; i < f.length; i++) {
-            if (f[i] > max) max = f[i];
-        }
-        return max;
-    }
-
-    /** Find index of maximum in float array. */
-    public static int maxIndex(float[] f) {
-        float max = f[0];
-        int maxIndex = 0;
-        int flen = f.length;
-        for (int i = 0; i < flen; i++) {
-            if (f[i] > max) {
-                max = f[i];
-                maxIndex = i;
-            }
-        }
-        return maxIndex;
-    }
-
-    /** Average an array of doubles, ignoring NaN entries */
-    public static double mean(double[] d) {
-        int len = d.length;
-        double total = 0.0d;
-        int nNonNan = 0;  // :-)
-        for (int i = 0; i < len; i++) {
-            if (!Double.isNaN(d[i])) {
-                total += d[i];
-                nNonNan++;
-            }
-        }
-        return total / nNonNan;
-    }
-
-    /** Calculate the mean of a float array. */
-    public static float mean(float[] f) {
-        float mean = 0;
-        int len = f.length;
-        float flen = (float)len;
-        for (int i = 0; i < len; i++) {
-            mean += f[i] / flen;
-        }
-        return mean;
-    }
-
-    /** Find median of an array of ints */
-    public static int median(int[] m) {                                             
-        Arrays.sort(m);                                                         
-        int middle = m.length / 2;                                              
-        if (m.length % 2 == 1) {                                                
-            return m[middle];                                                   
-        } else {                                                                
-            return (m[middle - 1] + m[middle]) / 2;                          
-        }                                                                       
     }
 
     /** Merge identically-dimensioned single-channel images, channel fastest. */ 
@@ -441,15 +355,6 @@ public final class I1l {
         return imp2;
     }
     
-    /** Calculate the minimum of float array. */
-    public static float min(float[] f) {
-        float min = f[0];
-        for (int i = 0; i < f.length; i++) {
-            if (f[i] < min) min = f[i];
-        }
-        return min;
-    }
-    
     /** Normalize fluctuations in inner 'b' dim average intensity. */
     public static float[][] normalizeInner(float[][] ab) {
         int blen = ab[0].length;
@@ -457,11 +362,11 @@ public final class I1l {
         float[][] abOut = new float[alen][blen];
         float bav = 0.0f;
         for (int a = 0; a < alen; a++) {
-            bav += mean(ab[a]);
+            bav += J.mean(ab[a]);
         }
         bav /= alen;
         for (int a = 0; a < alen; a++) {
-            float scaleFactor = bav / mean(ab[a]);
+            float scaleFactor = bav / J.mean(ab[a]);
             for (int b = 0; b < blen; b++) {
                 abOut[a][b] = (float)(ab[a][b] * scaleFactor);
             }
@@ -469,32 +374,41 @@ public final class I1l {
         return abOut;
     }
     
-    /** Convert array to string for printing. */
-    public static String prn(double[] arr) {
-        String arrString = "";
-        for (int i = 0; i < arr.length; i++) {
-            arrString += " " + arr[i];
+    /** Rescale an 8-bit stack to range 0-255 for input range min to max. */
+    public static void rescale8bitToMinMax(
+            ImagePlus imp, double min, double max) {
+        int nSlices = imp.getStackSize();
+        for (int s = 1; s <= nSlices; s++) {
+            imp.setSlice(s);
+            ByteProcessor bp = (ByteProcessor)imp.getProcessor();
+            ImageProcessor ip = 
+                    (ImageProcessor)setBPminMax(bp, (int)min, (int)max, 255);
+            imp.setProcessor(ip);
         }
-        return arrString;
     }
     
-    /** Convert array to string for printing. */
-    public static String prn(float[] arr) {
-        String arrString = "";
-        for (int i = 0; i < arr.length; i++) {
-            arrString += " " + arr[i];
+    /** Set ByteProcessor range min to inMax to output range 0 to outMax. */
+    public static ByteProcessor setBPminMax(ByteProcessor bp, 
+            int min, int inMax, int outMax) {
+        if (min < 0 || inMax > 255 || outMax > 255) {
+            throw new IllegalArgumentException("invalid min or max for 8-bit");
         }
-        return arrString;
-    }
-    
-    
-    /** Convert array to string for printing. */
-    public static String prn(int[] arr) {
-        String arrString = "";
-        for (int i = 0; i < arr.length; i++) {
-            arrString += " " + arr[i];
+        byte[] bpix = (byte[])bp.getPixels();
+        int range = inMax - min; 
+        for (int i = 0; i < bpix.length; i++) {
+            int scaledPix = (int)bpix[i] & 0xff;
+            if (scaledPix > inMax) {
+                scaledPix = inMax;
+            }
+            scaledPix -= min;
+            if (scaledPix < 0) {
+                scaledPix = 0;
+            }
+            scaledPix = (int)(outMax * ((double)scaledPix / range));
+            bpix[i] = (byte)scaledPix;
         }
-        return arrString;
+        bp.setPixels(bpix);
+        return bp;
     }
     
     /**
@@ -549,7 +463,7 @@ public final class I1l {
                     dimPositions[dimPosIndex++] = args[a + 1];        
                     dimPositions[dimPosIndex++] = args[a];        
                 }
-                result = cat(result, new int[] {stackSliceNo(dimPositions)});
+                result = J.cat(result, new int[] {stackSliceNo(dimPositions)});
             }
         } else {
             // start from highest dim: evaluate 1st non-closed dim encountered
@@ -558,7 +472,7 @@ public final class I1l {
                     do {
                         int temp = args[a + 2];
                         args[a + 2] = args[a + 1];
-                        result = cat(result, sliceList(args));  // RECURSE
+                        result = J.cat(result, sliceList(args));  // RECURSE
                         args[a + 2] = temp;
                         args[a + 1]++;
                     } while (args[a + 1] <= args[a + 2]);
@@ -569,26 +483,6 @@ public final class I1l {
         return result;   
     }
     
-    /** Square each element of a float array. */                                
-    public static float[] sq(float[] f) {                                       
-        int len = f.length;                                                     
-        float[] sq = new float[len];                                           
-        for (int i = 0; i < len; i++) {                                         
-            sq[i] = f[i] * f[i];                                               
-        }                                                                       
-        return sq;                                                             
-    }
-    
-    /** Take the square root of each element of a float array. */               
-    public static float[] sqrt(float[] f) {                                     
-        int len = f.length;                                                     
-        float[] sqrt = new float[len];                                         
-        for (int i = 0; i < len; i++) {                                         
-            sqrt[i] = (float)Math.sqrt(f[i]);                                  
-        }                                                                       
-        return sqrt;                                                           
-    }
-
     /** 
      * Return a 2D float array with outer dim representing slice numbers,
      * inner dim pixels from a linearized 2D XY slice (32-bit float only).
@@ -682,51 +576,64 @@ public final class I1l {
         }
     }
 
-    /** Subtract value from each element of a float array. */
-    public static float[] sub(float[] f, float val) {
-        for (int i = 0; i < f.length; i++) {
-            f[i] = f[i] - val;
+    /** Subtract per-channel mode value from all slices in a hyperstack. */
+    public static void subtractMode(ImagePlus imp) {
+        ImagePlus[] imps = ChannelSplitter.split(imp);
+        for (int c = 0; c < imps.length; c++) {
+            double dmode = new StackStatistics(imps[c]).dmode;
+            IJ.run(imps[c], "Subtract...", "value=" + dmode + " stack");
         }
-        return f;
+        imp.setStack(mergeChannels(imp.getTitle(), imps).getStack());
+    }
+    
+    /** Subtract per-slice mode from all slices in a hyperstack. */
+    public static void subtractPerSliceMode(ImagePlus imp) {
+        for (int s = 1; s <= imp.getStackSize(); s++) {
+            ImageProcessor ip = imp.getStack().getProcessor(s);
+            ImageStatistics stats = ip.getStatistics();
+            double dmode = stats.dmode;
+            imp.setSliceWithoutUpdate(s);
+            IJ.run(imp, "Subtract...", "value=" + dmode + " slice");
+        }
     }
 
-    /** Calculate the variance of a double array.  */
-    public static double variance(double[] d) {
-        double variance = 0;
-        double mean = 0;
-        for (int i = 0; i < d.length; i++) {
-            mean += (double)d[i] / (double)d.length;
+    /** Make a (sub)HyperStack comprising just the central Z slice */
+    public static ImagePlus takeCentralZ(ImagePlus imp) {
+        String title = imp.getTitle();
+        int[] dims = imp.getDimensions();
+        ImageStack stack = new ImageStack(dims[0], dims[1]);
+        imp.setZ(dims[3] / 2);
+        for (int t = 1; t <= dims[4]; t++) {
+            for (int c = 1; c <= dims[2]; c++) {
+                imp.setC(c);
+                imp.setT(t);
+                ImageProcessor ip = imp.getProcessor();
+                stack.addSlice(ip);
+            }
         }
-        for (int i = 0; i < d.length; i++) {
-            variance += ((d[i] - mean) * (d[i] - mean)) / (double)d.length;
-        }
-        return variance;
+        ImagePlus imp2 = new ImagePlus(title, stack);
+        imp2.setDimensions(dims[2], dims[3], dims[4]);
+        imp2.setCalibration(imp.getCalibration());
+        imp2.setOpenAsHyperStack(true);
+        return imp2;
     }
-    
-    /** Calculate the variance of a float array.  */
-    public static float variance(float[] f) {
-        float variance = 0;
-        float mean = 0;
-        for (int i = 0; i < f.length; i++) {
-            mean += (float)f[i] / (float)f.length;
-        }
-        for (int i = 0; i < f.length; i++) {
-            variance += ((f[i] - mean) * (f[i] - mean)) / (float)f.length;
-        }
-        return variance;
-    }
-    
-    /** Test method. */
+
+    /** Interactive test method. */
     public static void main(String[] args) {
         System.out.println("Testing I1l.java");
-        ImagePlus wfTest = IJ.openImage("/Users/graemeb/Documents/InTray/SIMcheck/CURRENT_EXAMPLE_FILES/V3_Blaze_medium_DAPI_mismatch_w5_SIR_C3-WF_TEST.tif");
+        ImagePlus impRecon = IJ.openImage("src/test/resources/TestRecon.tif");
+        impRecon.show();
         // test feature roi stats
-        ImageStatistics rawStats = wfTest.getStatistics();
+        ImageStatistics rawStats = impRecon.getStatistics();
         IJ.log("raw min, mean, max = " + rawStats.min + ", " + rawStats.mean
                 + ", " + rawStats.max);
-        ImageStatistics roiStats = featStats(wfTest.getProcessor());
+        ImageStatistics roiStats = featStats(impRecon.getProcessor());
         IJ.log("roi min, mean, max = " + roiStats.min + ", " + roiStats.mean
                 + ", " + roiStats.max);
+        // test subtractPerSliceMode
+        ImagePlus impSub = impRecon.duplicate();
+        I1l.subtractPerSliceMode(impSub);
+        impSub.show();
     }
 }
 

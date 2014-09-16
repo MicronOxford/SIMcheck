@@ -21,10 +21,9 @@ package SIMcheck;
 import ij.*;
 import ij.process.*;
 import ij.plugin.*;
-import java.io.*;
-import java.awt.image.IndexColorModel;
-import ij.plugin.HyperStackConverter;
 import ij.gui.GenericDialog;
+
+import java.awt.image.IndexColorModel;
 
 /** This plugin displays a modulation contrast map for raw SI data. 
  * For each channel, displaying the result with a LUT which is also shown. 
@@ -66,11 +65,13 @@ import ij.gui.GenericDialog;
  *    where noise amplitude approximated to be equal to highest freq component.
  * </pre>
  */
-public class Raw_ModContrast implements PlugIn, EProcessor {
+public class Raw_ModContrast implements PlugIn, Executable {
 
-    String name = "Raw Data Modulation Contrast (MCN)";
-    ResultSet results = new ResultSet(name);
-    String contrastLUTfile = "MCNR.lut";
+    public static final String name = "Modulation Contrast";
+    public static final String TLA = "MCN";
+    private ResultSet results = new ResultSet(name);
+    private static final IndexColorModel mcnrLUT = 
+            I1l.loadLut("SIMcheck/MCNR.lut");
     
     // parameter fields
     public int phases = 5;
@@ -83,11 +84,11 @@ public class Raw_ModContrast implements PlugIn, EProcessor {
     public void run(String arg) {
         ImagePlus imp; 
         imp = IJ.getImage();
-        GenericDialog gd = new GenericDialog("Raw Data Modulation Contrast");
-        gd.addNumericField("Angles", angles, 1);
-        gd.addNumericField("Phases", phases, 1);
-        gd.addNumericField("Z window half-width", zw, 1);
-        gd.addCheckbox("Raw Fourier (central Z)", false);
+        GenericDialog gd = new GenericDialog(name);
+        gd.addNumericField("Angles", angles, 0);
+        gd.addNumericField("Phases", phases, 0);
+        gd.addNumericField("Z window half-width", zw, 0);
+        gd.addCheckbox("Fourier Transform Phases (central Z)", false);
         gd.showDialog();
         if (gd.wasCanceled()) {
             return;
@@ -96,8 +97,12 @@ public class Raw_ModContrast implements PlugIn, EProcessor {
             phases = (int)gd.getNextNumber();
             zw = (int)gd.getNextNumber();
             doRawFourier = gd.getNextBoolean();
-            results = exec(imp);
-            results.report();
+            if (imp.getNSlices() < (angles * phases * 2 * zw + 1)) {
+                IJ.error("Not enough Z: pick a smaller Z window half-width");
+            } else {
+                results = exec(imp);
+                results.report();
+            }
         }
     }
 
@@ -123,6 +128,9 @@ public class Raw_ModContrast implements PlugIn, EProcessor {
             return null;
         } else {
             nz /= phases * angles; // take phases & angles out of nz
+        }
+        if (nz < 3) {
+            this.zw = 0;  // do not use Z window when nz is too small
         }
         int width = imp.getWidth();
         int height = imp.getHeight();
@@ -216,7 +224,7 @@ public class Raw_ModContrast implements PlugIn, EProcessor {
         if (doRawFourier) {
             newTitle = I1l.makeTitle(imps[0], "PFT");  
         } else {
-            newTitle = I1l.makeTitle(imps[0], "MCN");  
+            newTitle = I1l.makeTitle(imps[0], TLA);  
         }
         if (doRawFourier) {
             int fourierLen = phases * ((2 * zw) + 1);
@@ -237,79 +245,73 @@ public class Raw_ModContrast implements PlugIn, EProcessor {
         impResult.setT(1);
         impResult.setOpenAsHyperStack(true);
         if (!doRawFourier) {
-            IndexColorModel LUT = loadLut(contrastLUTfile);
-            I1l.applyLUT(impResult, LUT, displayRange);
-            results.addImp("modulation contrast-to-noise ratio image", 
+            I1l.applyLUT(impResult, mcnrLUT, displayRange);
+            // overlay a LUT "calibration bar" if the image is big enough 
+            if (impResult.getWidth() >= 160) {
+                IJ.run(impResult, "Calibration Bar...", 
+                        "location=[Lower Right] fill=None label=White " +
+                        "number=5 decimal=0 font=12 zoom=1 overlay");
+            }
+            results.addImp("Modulation contrast-to-noise ratio (MCNR) image", 
                     impResult);
-            results.addInfo("Modulation contrast-to-noise ratio (MCNR)",
-                    "color LUT display shows MCNR value,\n"
-                    + "   purple is inadequate (3 or less), red is an"
-                    + " acceptable value of 6+, orange is good,\n"
-                    + "   yellow-white is very good-excellent).");
+            results.addInfo("How to interpret",
+                    "color Look-Up Table shows MCNR value:" +
+                    "  - purple is inadequate (3 or less)" +
+                    "  - red is an acceptable value of 6+" +
+                    "  - orange is good" +
+                    "  - yellow-white is very good-excellent");
+            results.addInfo("Estimated feature MCNR",
+                    "features selected by Otsu auto-thresholding.");
+            results.addInfo("Estimated Wiener filter parameter",
+                    "for OMX data reconstruction (SoftWoRx) only.");
             for (int c = 1; c <= nc; c++) {
                 ImagePlus impC = I1l.copyChannel(impResult, c);
                 double featMCNR = I1l.stackFeatMean(impC);
-                results.addStat("C" + c + " estimated feature MCNR = ", 
+                results.addStat("C" + c + " estimated feature MCNR", 
                         featMCNR);
-                results.addStat("C" + c + " estimated Wiener optimum = ", 
+                results.addStat("C" + c + " estimated Wiener filter optimum", 
                         estimWiener(featMCNR));
             }
         } else {
             IJ.run(impResult, "Enhance Contrast", "saturated=0.35");
-            results.addImp("raw Fourier transforms of phases", 
+            results.addImp("Raw Fourier transforms of phases for central Z", 
                     impResult);
-            results.addInfo("Raw Fourier transforms of phases for central Z",
-                    "Z dimension now corresponds to frequency / order,\n"
-                    + "  from 0 order (low freq) to highest freq,"
-                    + " back to low freq; for each angle in turn.");
+            results.addInfo("How to interpret",
+                    "Z dimension now corresponds to frequency / order," +
+                    " from 0 order (low freq) to highest freq," +
+                    " back to low freq; for each angle in turn.");
         }
         return results;
     }
     
     /** Estimate optimum Wiener filter setting for reconstruction using MCNR. */
-    double estimWiener(double mcnr) {
+    private double estimWiener(double mcnr) {
         /* Wiener filter parameter inversely proportional to noise variance
          * using dataset where MCNR = 4.6 sigma^2 has optimal Wiener = 0.04
          *   x / 4.6^2  = 0.004, => x = 0.085 and Wiener = 0.085 / (MCNR^2)
          */
-        return 0.085d / (mcnr * mcnr);
+        return 0.170d / (mcnr * mcnr);  // 0.0085 doubled based on Wiener series
     }
     
     /** Calculate DFT for window orthogonal to an XY slice. */
-    float[][] dftSliceWindow(int vlen, int nc, int c, int phStart, int phEnd, 
-            int nz, int zStart, int zEnd, int a, int nt, int t, ImageStack stack) {
+    private float[][] dftSliceWindow(
+            int vlen, int nc, int c, int phStart, int phEnd,
+            int nz, int zStart, int zEnd,
+            int a, int nt, int t, ImageStack stack) {
         int[] sliceList = I1l.sliceList(nc, c, c, phases, phStart, phEnd, 
                 nz, zStart, zEnd, angles, a, a, nt, t, t);
         float[][] vp = I1l.stack2arr(stack, sliceList);
-        vp = I1l.anscombe(vp);
+        vp = J.anscombe(vp);
         vp = I1l.normalizeInner(vp);
         vp = DFT1D.dftOuter(vp);
         return vp;
-    }
-
-    /** Load a LUT from a file (NB. getClass() is non-static) */
-    IndexColorModel loadLut(String LUTfile) {
-        InputStream is = getClass().getResourceAsStream(LUTfile);
-        IndexColorModel cm = null;
-        if (is != null) {
-            try {
-                cm = LutLoader.open(is);
-            } catch (IOException e) {
-                IJ.log("  ! error loading LUT");
-                IJ.error("" + e);
-            }
-        }
-        if (cm == null) {
-            IJ.log("  ! warning: cm is null");
-        }
-        return cm;
     }
 
     /** Calculate position of different orders/bands in frequency space.
      * vlen is nphases * (2*zw + 1), covering 2pi radians per nphases.
      * @return array index of order, first occurrence, counting from 0
      */
-    int calcOrderPos(int order, int vlen) {
+    private int calcOrderPos(int order, int vlen) {
         return vlen * order / phases;
     }
 
@@ -317,7 +319,8 @@ public class Raw_ModContrast implements PlugIn, EProcessor {
      * where freq is SI illumination frequency from Fourier transform of
      * phases, and pixels are from a linearized 2D XY array.
      */
-    FloatProcessor calcModContrast(float[][] freqPix, FloatProcessor fp) {
+    private FloatProcessor calcModContrast(
+            float[][] freqPix, FloatProcessor fp) {
         /* SI illumination 1st order Contrast-to-Noise Ratio (CNR1):- 
          * CNR12 = (k1/k0) / (N0/k0) = k1/N0 
          * where k1 is the amplitude of the 1st order modulation 
@@ -335,16 +338,17 @@ public class Raw_ModContrast implements PlugIn, EProcessor {
         float[] order2pix = new float[npix]; 
         System.arraycopy(freqPix[order1pos], 0, order1pix, 0, npix);
         System.arraycopy(freqPix[order2pos], 0, order2pix, 0, npix);
-        float noiseStdev = (float)Math.sqrt(I1l.variance(freqPix[noiseSlice]));
-        float[] modContrast = I1l.add(I1l.sq(order1pix), I1l.sq(order2pix));
-        modContrast = I1l.sqrt(modContrast);
-        modContrast = I1l.div(modContrast, noiseStdev);
+        float noiseStdev = (float)Math.sqrt(J.variance(freqPix[noiseSlice]));
+        float[] modContrast = J.add(J.sq(order1pix), J.sq(order2pix));
+        modContrast = J.sqrt(modContrast);
+        modContrast = J.div(modContrast, noiseStdev);
         fp.setPixels(modContrast); 
         return fp;
     }
 
     /** Average mod contrast for different angles. */
-    ImageStack averageAngles(ImageStack stackAZ, int nz, ImageStack avStack) {
+    private ImageStack averageAngles(
+            ImageStack stackAZ, int nz, ImageStack avStack) {
         int width = stackAZ.getWidth();
         int height = stackAZ.getHeight();
         for (int z = 1; z <= nz; z++) {
@@ -354,27 +358,39 @@ public class Raw_ModContrast implements PlugIn, EProcessor {
                 int slice = z + (nz * (a - 1));
                 FloatProcessor fp = (FloatProcessor)stackAZ.getProcessor(slice);
                 float[] fpixels = (float[]) fp.getPixels();
-                newpixels = I1l.add(newpixels, fpixels);
+                newpixels = J.add(newpixels, fpixels);
             }
-            newpixels = I1l.div(newpixels, angles);
+            newpixels = J.div(newpixels, angles);
             avFp.setPixels(newpixels);
             avStack.addSlice(avFp);
         }
         return avStack;
     }
+    
+    /** Test private methods. */
+    static boolean test(boolean verbose) {
+        boolean allPass = true;
+        Raw_ModContrast plugin = new Raw_ModContrast();
+        // calcOrderPos
+        int[][] orderVlenPos = new int[][] {  // tests assume phases = 5
+                {0, 15, 0}, {1, 15, 3}, {1, 10, 2}, {2, 15, 6}, {2, 10, 4}};
+        for (int[] OVP : orderVlenPos) {
+            int position = plugin.calcOrderPos(OVP[0], OVP[1]);
+            boolean pass = position == OVP[2];
+            if (verbose) {
+                System.out.printf("  calcOrderPos(%d, %d) -> %d? %s\n",
+                        OVP[0], OVP[1], OVP[2], pass ? "true" : "false");
+            }
+            allPass = allPass && pass;
+        }
+        return allPass;
+    }
 
+    /** Interactive test method. */
     public static void main (String[] args) {
-        Raw_ModContrast raw_mcnr = new Raw_ModContrast();
-        System.out.println("Testing calcOrderPos()");
-        System.out.println("  calcOrderPos(0, 15) -> 0? " 
-                + raw_mcnr.calcOrderPos(0, 15));
-        System.out.println("  calcOrderPos(1, 15) -> 3? " 
-                + raw_mcnr.calcOrderPos(1, 15));
-        System.out.println("  calcOrderPos(1, 10) -> 2? " 
-                + raw_mcnr.calcOrderPos(1, 10));
-        System.out.println("  calcOrderPos(2, 15) -> 6? " 
-                + raw_mcnr.calcOrderPos(2, 15));
-        System.out.println("  calcOrderPos(2, 10) -> 4? " 
-                + raw_mcnr.calcOrderPos(2, 10));
+        IJ.log("All private methods test OK? " + test(true));
+        new ImageJ();
+        TestData.raw.show();
+        IJ.runPlugIn(Raw_ModContrast.class.getName(), "");
     }
 }

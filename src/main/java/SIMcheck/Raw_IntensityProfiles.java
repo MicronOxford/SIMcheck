@@ -24,17 +24,19 @@ import ij.process.*;
 import ij.measure.*;
 import ij.gui.*;
 import ij.IJ;
+
 import java.awt.Color;
 
-/** This plugin plots a Z-axis profile for each channel of raw SI data to
- * evaluate bleaching as phase, Z, angle and time are incremented.
+/** This plugin plots slice average intensity for each channel of raw SI data
+ * to evaluate bleaching as phase, Z, angle and time are incremented.
  * Each channel is plotted in a different (arbitrary) color.
  * @author Graeme Ball <graemeball@gmail.com>
  */
-public class Raw_intensity implements PlugIn, EProcessor {
+public class Raw_IntensityProfiles implements PlugIn, Executable {
 
-    String name = "Raw Data Intensity profiles";
-    ResultSet results = new ResultSet(name);
+    public static final String name = "Channel Intensity Profiles";
+    public static final String TLA = "CIP";
+    private ResultSet results = new ResultSet(name);
 
     // parameter fields
     public int phases = 5;
@@ -45,9 +47,9 @@ public class Raw_intensity implements PlugIn, EProcessor {
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);
-        gd.addMessage("Requires raw SI data in API OMX (CPZAT) order.");
-        gd.addNumericField("Angles", angles, 1);
-        gd.addNumericField("Phases", phases, 1);
+        gd.addMessage("Requires raw SI data in OMX (CPZAT) order.");
+        gd.addNumericField("Angles", angles, 0);
+        gd.addNumericField("Phases", phases, 0);
         gd.showDialog();
         if (gd.wasCanceled()) return;
         if (gd.wasOKed()) {
@@ -55,7 +57,7 @@ public class Raw_intensity implements PlugIn, EProcessor {
             phases = (int)gd.getNextNumber();
         }
         if (!I1l.stackDivisibleBy(imp, phases * angles)) {
-            IJ.showMessage("Raw Data Intensity Profiles", 
+            IJ.showMessage(name, 
             		"Error: stack size not consistent with phases/angles.");
             return;
         }
@@ -64,7 +66,7 @@ public class Raw_intensity implements PlugIn, EProcessor {
     }
 
     /** Execute plugin functionality: create a plot of intensity profile per 
-     * channel. Assumes API OMX CPZAT dimension order.
+     * channel. Assumes OMX CPZAT dimension order.
      * @param imps input raw SI data ImagePlus should be first imp
      * @return ResultSet containing intensity profile plots
      */
@@ -85,9 +87,9 @@ public class Raw_intensity implements PlugIn, EProcessor {
 
         float[] avIntensities = new float[totalPlanes / nc];
         float[] pzat_no = new float[totalPlanes / nc];
-        Plot plot = new Plot("Raw Data Intensity Profiles", 
-        		"Slices in order: Phase, Z, Angle, Time (C1=blu,C2=grn,C3=red)",
-        		"Average Intensity per. Plane", pzat_no, avIntensities);
+        Plot plot = new Plot(I1l.makeTitle(imp, TLA), 
+        		"Slices in order: Phase, Z, Angle, Time (C1=red,C2=grn,C3=blu)",
+        		"Slice Mean Intensity", pzat_no, avIntensities);
 
         double sliceMeanMin = 0;
         double sliceMeanMax = 0;  // max of means for each slice
@@ -120,13 +122,13 @@ public class Raw_intensity implements PlugIn, EProcessor {
                 avIntensities[pzat-1] = planeMean;
             }
             if (channel == 1) {
-                Color color = Color.BLUE;
+                Color color = Color.RED;
                 plot.setColor(color);
             } else if (channel == 2) {
                 Color color = Color.GREEN;
                 plot.setColor(color);
             } else if (channel == 3) {
-                Color color = Color.RED;
+                Color color = Color.BLUE;
                 plot.setColor(color);
             } else {
                 Color color = Color.BLACK;  // channels beyond 3rd BLACK 
@@ -135,8 +137,8 @@ public class Raw_intensity implements PlugIn, EProcessor {
             plot.addPoints(pzat_no, avIntensities, 1);
 
             /// (1) "Channel decay"
-            double[] xSlice = I1l.f2d(pzat_no);
-            double[] yIntens = I1l.f2d(avIntensities);
+            double[] xSlice = J.f2d(pzat_no);
+            double[] yIntens = J.f2d(avIntensities);
             //  fitting with y=a*exp(bx)  ; fitter returns a, b, R^2
             //   e.g. x=ln((2/3)/b) for 2/3 original intensity (<33% decay)
             CurveFitter expFitter = new CurveFitter(xSlice, yIntens);
@@ -145,8 +147,8 @@ public class Raw_intensity implements PlugIn, EProcessor {
             double channelDecay = (double)100 * (1 - Math.exp(fitResults[1]
             		* pzat_no.length * (zwin / nz)));
             results.addStat(
-                    "Channel " + Integer.toString(channel) + " intensity decay"
-                        + " per " + (int)zwin + " Z (%)",
+                    "C" + Integer.toString(channel) + " intensity decay"
+                        + " per " + (int)zwin + " z-slices (%)",
                     (double)Math.round(channelDecay));
             
             /// (2) "Angle differences"
@@ -155,7 +157,7 @@ public class Raw_intensity implements PlugIn, EProcessor {
                 float[] yIntens3 = new float[np*nz];
                 System.arraycopy(avIntensities, (angle - 1) * np * nz, 
                 		yIntens3, 0, np * nz);
-                angleMeans[angle-1] = I1l.mean(yIntens3);
+                angleMeans[angle-1] = J.mean(yIntens3);
             }
             double largestDiff = 0;
             for (int angle=1; angle<=na; angle++) {
@@ -167,18 +169,27 @@ public class Raw_intensity implements PlugIn, EProcessor {
                 }
             }
             // normalize largest av intensity diff using max intensity angle
-            float maxAngleIntensity = I1l.max(angleMeans);
+            float maxAngleIntensity = J.max(angleMeans);
             largestDiff = (double)100 * largestDiff / (double)maxAngleIntensity;
-            results.addStat("Channel " + Integer.toString(channel) 
+            results.addStat("C" + Integer.toString(channel) 
                     + " max intensity difference between angles (%)",
                     (double)Math.round(largestDiff));
         }
-        results.addImp("per. channel intensity profiles", plot.getImagePlus());
-        results.addInfo("Intensity statistics", 
-                "large intensity differences of several 10's"
-                + " of % between Angles\n   or over Z window (" + zwin
-                + " sections) used to reconstruct a slice produce artifacts.");
+        ImagePlus impResult = plot.getImagePlus();
+        I1l.drawPlotTitle(impResult, "Per Channel Intensity Profiles");
+        results.addImp(name, plot.getImagePlus());
+        results.addInfo("How to interpret",
+                "intensity differences > ~30% between angles and/or" +
+                " over 9-z-window used to reconstruct each z-section" +
+                " may cause artifacts (threshold depends on" +
+                " signal-to-noise level).");
         return results;
     }
     
+    /** Interactive test method */
+    public static void main(String[] args) {
+        new ImageJ();
+        TestData.raw.show();
+        IJ.runPlugIn(Raw_IntensityProfiles.class.getName(), "");
+    }
 }

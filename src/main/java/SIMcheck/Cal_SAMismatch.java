@@ -24,15 +24,17 @@ import ij.plugin.PlugIn;
 import ij.gui.Plot;
 import ij.process.*;
 
-/** This plugin takes SIR reconstructed data and produces produces
- * plots of slice minima and summarizes their standard deviation, which 
- * diagnoses refractive index mismatch.
+/** This plugin takes reconstructed data and produces produces plots of
+ * slice minimum and average feature intensity, as well as summarising standard
+ * deviation of the minimum to diagnose refractive index mismatch between
+ * the sample and PSF.
  * @author Graeme Ball <graemeball@gmail.com>
  */
-public class SIR_Z_variation implements PlugIn, EProcessor {
+public class Cal_SAMismatch implements PlugIn, Executable {
     
-    String name = "Reconstructed data Z minimum variance";
-    ResultSet results = new ResultSet(name);
+    public static final String name = "Sperical Aberration Mismatch";
+    public static final String TLA = "SAM";
+    private ResultSet results = new ResultSet(name);
     
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
@@ -41,12 +43,12 @@ public class SIR_Z_variation implements PlugIn, EProcessor {
     }
 
     /** Execute plugin functionality: plot slice minimum and feature mean
-     * scaled to stack mode as zero point, and report variance of minima. 
-     * @param imps reconstructed SIR data ImagePlus should be first imp
+     * scaled to stack mode as zero point, and report stdDev of minima. 
+     * @param imps reconstructed data ImagePlus should be first imp
      * @return ResultSet containing plots of mnimum and mean variation 
      */
      public ResultSet exec(ImagePlus... imps) {  
-        IJ.showStatus("Reconstructed data minimum plot...");
+        IJ.showStatus(name + "...");
         int nc = imps[0].getNChannels();
         ImagePlus[] plots = new ImagePlus[nc];
         for (int c = 1; c <= nc; c++) {
@@ -82,7 +84,7 @@ public class SIR_Z_variation implements PlugIn, EProcessor {
                 }
             }
             Plot plot = new Plot(
-                    "SIR normalized min variation, C" + c,
+                    "Reconstructed normalized min variation, C" + c,
                     "Z plane", "slice feature means (gray) & minima (black)");
             // display 20% beyond min and max
             plotMin -= 0.2 * Math.abs(plotMin);
@@ -95,24 +97,29 @@ public class SIR_Z_variation implements PlugIn, EProcessor {
             plot.addPoints(zPlanes, sliceMeans, Plot.LINE);
             plot.setLineWidth(1);
             plots[c - 1] = plot.getImagePlus();
-            double nstdev = Math.sqrt(I1l.variance(sliceMinima)) / 
-                    I1l.mean(sliceMeans);
-            results.addStat("  channel " + c + " normalized stdev", nstdev);
+            double nstdev = Math.sqrt(J.variance(sliceMinima)) / 
+                    J.mean(sliceMeans);
+            results.addStat("C" + c + " normalized StdDev", nstdev);
             
         }
-        String title = "slice feature means (gray) & minima (black)";
+        String title = I1l.makeTitle(imps[0], TLA);
         ImagePlus impAllPlots = I1l.mergeChannels(title, plots);
         impAllPlots.setDimensions(nc, 1, 1);
         impAllPlots.setOpenAsHyperStack(true);
-        results.addImp(title, impAllPlots);
-        results.addInfo("Standard deviation of minimum", "high value with"
-                + " respect to mean feature intensity indicates\n"
-                + "    sample / PSF Refractive Index mismatch.");
+        results.addImp("z-slice minimum (black) and feature mean (gray)",
+                impAllPlots);
+        results.addInfo("How to interpret", 
+                "high normalized standard deviation of z-slice minimum"
+                + " intensity with respect to slice average feature"
+                + " intensity indicates sample / PSF Spherical Aberration"
+                + " mismatch. Typically this is seen as a peak / dip in"
+                + " normalized minimum StdDev at the sample boundary, but"
+                + " the absolute value depends on image content.");
         return results;
     }
 
     /**  Return a new ImagePlus containing a single channel of the input. */
-    ImagePlus singleChannel(ImagePlus imp, int channel) {
+    private ImagePlus singleChannel(ImagePlus imp, int channel) {
         int stackSize = imp.getStackSize();
         int channels = imp.getNChannels();
         ImageStack nuStack = new ImageStack(imp.getWidth(),imp.getHeight());
@@ -126,5 +133,12 @@ public class SIR_Z_variation implements PlugIn, EProcessor {
         ImagePlus imp2 = new ImagePlus(nuTitle, nuStack);
         imp2.setDimensions(1, imp.getNSlices(), imp.getNFrames());  // 1 channel
         return imp2;
+    }
+    
+    /** Interactive test method */
+    public static void main(String[] args) {
+        new ImageJ();
+        TestData.recon.show();
+        IJ.runPlugIn(Cal_SAMismatch.class.getName(), "");
     }
 }
