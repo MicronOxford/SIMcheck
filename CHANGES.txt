@@ -23,3 +23,22 @@ Version 0.9
 ** estimates line spacing and k angle from the peaks
 ** produces result table for phase step analysis
 * new N-SIM format converter
+
+Version 0.9.5
+-------------
+* new SIMcheck Manual (using the Sphinx documentation tool)
+* fixes to Phase Step calibration check (Ian Dobbie)
+* switched to Apache Maven for build & dependency management
+* reconstructed Fourier Plots streamlined and improved
+* many of the checks have been renamed
+* fixed bug in Reconstructed Intensity Histogram statistic
+* code tidied and more tests added, several minor bugs fixed
+* Modulation Contrast Map shows saturation in raw data (green)
+* new Illumination Pattern Focus calibration check
+* new Threshold and 16-bit Conversion utility
+* raw data Fourier plugin now displays montage of projections
+* fixes to ELYRA and N-SIM data format conversion
+* implemented image-cropping utility in main SIMcheck dialog
+* added option to specify camera bit depth (to identify saturation)
+* Look-Up Tables displayed as overlay on results when appropriate
+* the log output / report generation has been tidied up
