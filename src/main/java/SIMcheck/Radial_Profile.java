@@ -14,12 +14,14 @@ import java.util.Properties;
 
 class Radial_Profile implements PlugIn {
 
-    ImagePlus imp;
-    double X0;
-    double Y0;
-    double mR;
-    int nBins=100;
-    static boolean useCalibration = true;
+    // parameter fields
+    public int nBins=100;
+
+    private ImagePlus imp;
+    private double X0;
+    private double Y0;
+    private double mR;
+    private boolean useCalibration = true;
 
     public void run(String arg) {
         ImagePlus plotImp = exec(IJ.getImage());
@@ -35,7 +37,7 @@ class Radial_Profile implements PlugIn {
         return result;
     }
     
-    void setXYcenter() {
+    private void setXYcenter() {
         int width = imp.getWidth();
         int height = imp.getHeight();
         X0 = width / 2;
@@ -43,7 +45,7 @@ class Radial_Profile implements PlugIn {
         mR = (width + height) / 4.0;
     }
 
-    ImagePlus doRadialDistribution(ImageProcessor ip) {
+    private ImagePlus doRadialDistribution(ImageProcessor ip) {
         nBins = (int) (3*mR/4);
         int thisBin;
         float[][] Accumulator = new float[2][nBins];
@@ -57,7 +59,8 @@ class Radial_Profile implements PlugIn {
                 thisBin=thisBin-1;
                 if (thisBin>nBins-1) thisBin=nBins-1;
                 Accumulator[0][thisBin]=Accumulator[0][thisBin]+1;
-                Accumulator[1][thisBin]=Accumulator[1][thisBin]+ip.getPixelValue((int)i,(int)j);
+                Accumulator[1][thisBin]=
+                        Accumulator[1][thisBin]+ip.getPixelValue((int)i,(int)j);
             }
         }
         Calibration cal = imp.getCalibration();
@@ -71,30 +74,32 @@ class Radial_Profile implements PlugIn {
         if (useCalibration) {
             for (int i = 0; i < nBins; i++) {
                 Accumulator[1][i] =  Accumulator[1][i] / Accumulator[0][i];
-                Accumulator[0][i] = (float)(cal.pixelWidth*mR*((double)(i+1)/nBins));
+                Accumulator[0][i] =
+                        (float)(cal.pixelWidth*mR*((double)(i+1)/nBins));
             }
             String units = cal.getUnits();
             if (isFourier) {
                 units = "1/x " + units;
             }
             plot = new Plot("Radial Profile Plot", "Radius ["+ units +"]", 
-                    "Normalized Integrated Intensity",  Accumulator[0], Accumulator[1]);
+                    "Normalized Integrated Intensity",
+                    Accumulator[0], Accumulator[1]);
         } else {
             for (int i = 0; i < nBins; i++) {
                 Accumulator[1][i] = Accumulator[1][i] / Accumulator[0][i];
                 Accumulator[0][i] = (float)(mR*((double)(i+1)/nBins));
             }
             plot = new Plot("Radial Profile Plot", "Radius [pixels]", 
-                    "Normalized Integrated Intensity",  Accumulator[0], Accumulator[1]);
+                    "Normalized Integrated Intensity",
+                    Accumulator[0], Accumulator[1]);
         }
         return plot.getImagePlus();
     }
 
     /** main() method for testing. */
     public static void main(String[] args) {
-        System.out.println("Testing OrthoReslicer.java");
-        ImagePlus impTest = IJ.openImage(
-                    "/Users/graemeb/Documents/InTray/SIMcheck/Test/V3_good_DAPI_SIR_Z24.tif");
+        System.out.println("Testing Radial_Profile.java");
+        ImagePlus impTest = TestData.recon;
         impTest = FFT2D.fftImp(impTest);
         impTest.show();
         Radial_Profile radialProfiler = new Radial_Profile();

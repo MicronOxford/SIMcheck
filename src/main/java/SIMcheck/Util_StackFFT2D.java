@@ -18,6 +18,7 @@
 package SIMcheck;
 
 import ij.IJ;
+import ij.ImageJ;
 import ij.ImagePlus;
 import ij.plugin.PlugIn;
 
@@ -25,8 +26,11 @@ import ij.plugin.PlugIn;
  * This plugin carries out ImageJ's 2D FFT on each slice of a stack. 
  * @author Graeme Ball <graemeball@gmail.com>
  */ 
-public class Util_FFTstack implements PlugIn {
-
+public class Util_StackFFT2D implements PlugIn {
+    
+    public static final String name = "Stack FFT (2D)";
+    public static final String TLA = "FFT";
+    
     @Override 
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
@@ -40,7 +44,15 @@ public class Util_FFTstack implements PlugIn {
      * @return ImagePlus after 2D FFT of each slice
      */ 
     public ImagePlus exec(ImagePlus imp) {
-        ImagePlus impF = FFT2D.fftImp(imp);
+        ImagePlus impF = FFT2D.fftImp(imp, 0.01d);
+        impF.setTitle(I1l.makeTitle(imp, TLA));
         return impF;
+    }
+    
+    /** Interactive test method. */
+    public static void main(String[] args) {
+        new ImageJ();
+        TestData.raw.show();
+        IJ.runPlugIn(Util_StackFFT2D.class.getName(), "");
     }
 }

@@ -21,91 +21,140 @@ import ij.*;
 import ij.process.*;
 import ij.plugin.*;
 import ij.gui.GenericDialog;
+import ij.gui.Overlay;
+
 import java.lang.Math;
 
 /** This plugin summarizes reconstructed data intensity and modulation 
  * contrast in the same image. The two metrics are displayed using color 
  * values of a 3-byte RBG: 1. Modulation Contrast-to-Noise Ratio (MCNR), 
  * according to the LUT used for the Raw_ModContrast plugin output
- * (purple=poor to white=excellent). 2. SIR reconstructed image intensity 
+ * (purple=poor to white=excellent). 2. reconstructed image intensity 
  * scales pixel brightness. The plugin requires an ImagePlus containing MCNR 
- * values, so "Raw_Modulation_Contrast" output for matching raw data is 
+ * values, so "Raw_ModulationContrast" output for matching raw data is 
  * required.
  * @author Graeme Ball <graemeball@gmail.com>
  */
-public class SIR_ModContrastMap implements PlugIn, EProcessor {
+public class Rec_ModContrastMap implements PlugIn, Executable {
     
-    String name = "Reconstructed Data Mod Contrast Map (MCM)";
-    ResultSet results = new ResultSet(name);
-    float mcnrMax = 24.0f;
+    public static final String name = "Modulation Contrast Map";
+    public static final String TLA = "MCM";
+    private ResultSet results = new ResultSet(name);
+    
+    // parameter fields
+    public int phases = 5;
+    public int angles = 3;
+    public int camBitDepth = 16;
+    public float mcnrMax = 24.0f;
 
     @Override
     public void run(String arg) {
-        GenericDialog gd = new GenericDialog("SIR_Mod_Contrast_Map");
+        GenericDialog gd = new GenericDialog(name);
         String[] titles = I1l.collectTitles();
+        if (titles.length < 2) {
+            IJ.showMessage("Error", "Did not find at least 2 images" +
+                    " (raw and recon)");
+            return;
+        }
+        camBitDepth = (int)ij.Prefs.get("SIMcheck.camBitDepth", camBitDepth);
+        gd.addMessage(" --- Raw data stack --- ");
+        gd.addChoice("Raw data stack:", titles, titles[0]);
+        gd.addNumericField("       Camera Bit Depth", camBitDepth, 0);
         gd.addMessage(" --- Modulation-Contrast-to-Noise Ratio stack --- ");
-        gd.addChoice("MCNR stack:", titles, titles[0]);
+        gd.addCheckbox("Calculate MCNR stack from raw data?", true);
+        gd.addChoice("OR, specify MCNR stack:", titles, titles[0]);
         gd.addMessage(" ------------- Reconstructed SI stack ----------- ");
-        gd.addChoice("SIR stack:", titles, titles[0]);
-        // TODO - offer the option of running MCNR calc from here?
-        // ImagePlus MCNRimp = ModContrast_Map.exec(1, imp, phases, angles);
+        gd.addChoice("Reconstructed data stack:", titles, titles[0]);
+        
         gd.showDialog();
         if (gd.wasOKed()) {
-            String MCNRstackChoice = gd.getNextChoice();
-            String SIRstackChoice = gd.getNextChoice();
-            ImagePlus MCNRimp = ij.WindowManager.getImage(MCNRstackChoice);
-            ImagePlus SIRimp = ij.WindowManager.getImage(SIRstackChoice);
-                results = exec(SIRimp, MCNRimp);
-                results.report();
+            String rawStackChoice = gd.getNextChoice();
+            camBitDepth = (int)gd.getNextNumber();
+            ij.Prefs.set("SIMcheck.camBitDepth", camBitDepth);
+            String mcnrStackChoice = gd.getNextChoice();
+            String recStackChoice = gd.getNextChoice();
+            ImagePlus rawImp = ij.WindowManager.getImage(rawStackChoice);
+            ImagePlus impMCNR = null;
+            if (gd.getNextBoolean()) {
+                Raw_ModContrast plugin = new Raw_ModContrast();
+                plugin.phases = phases;
+                plugin.angles = angles;
+                impMCNR = plugin.exec(rawImp).getImp(0);
+            } else {
+                impMCNR = ij.WindowManager.getImage(mcnrStackChoice);
+            }
+            ImagePlus impRec = ij.WindowManager.getImage(recStackChoice);
+            results = exec(rawImp, impRec, impMCNR);
+            results.report();
         }
     }
 
     /** Execute plugin functionality: create a modulation contrast color map.
-     * @param imps ImagePluses should be SIRimp reconstructed data
-     *        and MCNRimp MCNR result for raw data used to produce SIRimp
-     * @return ResultSet containing map of SIR intesnsity colored by MCNR
+     * @param imps ImagePluses should be impRec reconstructed data
+     *        and impMCNR MCNR result for raw data used to produce impRec
+     * @return ResultSet with map of reconstructed intensity colored by MCNR
      */
     public ResultSet exec(ImagePlus... imps) {
-        ImagePlus SIRimp = imps[0];
-        ImagePlus MCNRimp = imps[1];
-        if (SIandSIRimpMatch(MCNRimp, SIRimp)) {
-        } else {
-            IJ.log("  ! SIR_ModContrastMap: MCNR and SIR stack size mismatch");
+        ImagePlus impRaw = imps[0];  
+        ImagePlus impRec = imps[1];
+        ImagePlus impMCNR = imps[2];
+        if (impRaw == null) {
+            IJ.showMessage("Error", "Mod contrast map requires raw data image");
+            return results;
+        } else if (impRec == null) {
+            IJ.showMessage("Error", "Specify reconstructed image");
+            return results;
+        } else if (impMCNR == null) {
+            IJ.showMessage("Error", "Specify modulation contrast image");
             return results;
         }
-        IJ.showStatus("Reconstructed data Mod Contrast Map...");
-        ImagePlus SIRimp2 = (ImagePlus) SIRimp.duplicate();
-        IJ.run(SIRimp2, "32-bit", "");
-        ImagePlus MCNRimp2 = (ImagePlus)MCNRimp.duplicate();
-        IJ.run(SIRimp2, "Enhance Contrast", "saturated=0.35 process_all use");
-        IJ.run(MCNRimp2, "Gaussian Blur 3D...", "x=1 y=1 z=1"); 
-        int width = SIRimp2.getWidth();
-        int height = SIRimp2.getHeight();
-        int nc = SIRimp2.getNChannels();
-        int nz = SIRimp2.getNSlices();
-        int nt = SIRimp2.getNFrames();
+        if (!rawAndRecImpMatch(impMCNR, impRec)) {
+            IJ.log("! Rec_ModContrastMap: input stack size mismatch");
+            IJ.log("  - impRaw nx,ny,nz = " + impRaw.getWidth() + "," +
+                    impRaw.getHeight() + "," + impRaw.getNSlices() + "\n");
+            IJ.log("  - impRec nx,ny,nz = " + impRec.getWidth() + "," +
+                    impRec.getHeight() + "," + impRec.getNSlices() + "\n");
+            return results;
+        }
+        // convert raw data imp into pseudo-widefield
+        Util_SItoPseudoWidefield si2wf = new Util_SItoPseudoWidefield();
+        ImagePlus wfImp = si2wf.exec(impRaw, phases, angles);
+        IJ.showStatus(name + "...");
+        ImagePlus impRec2 = (ImagePlus)impRec.duplicate();
+        IJ.run(impRec2, "32-bit", "");
+        ImagePlus impMCNR2 = (ImagePlus)impMCNR.duplicate();
+        IJ.run(impRec2, "Enhance Contrast", "saturated=0.35 process_all use");
+        IJ.run(impMCNR2, "Gaussian Blur 3D...", "x=1 y=1 z=1"); 
+        int width = impRec2.getWidth();
+        int height = impRec2.getHeight();
+        int nc = impRec2.getNChannels();
+        int nz = impRec2.getNSlices();
+        int nt = impRec2.getNFrames();
         ImagePlus[] MCMimpsC = new ImagePlus[nc];
         // each channel must be scaled separately: merge 1-channel images later
         for (int c = 1; c <= nc; c++) {
-            ImagePlus SIRimpC = I1l.copyChannel(SIRimp2, c); 
-            ImagePlus MCNimpC = I1l.copyChannel(MCNRimp2, c); 
-            StackStatistics stats = new ij.process.StackStatistics(SIRimpC);
-            float maxPositive = (float)stats.max; 
-            int slices = SIRimpC.getStack().getSize();
+            ImagePlus impRecC = I1l.copyChannel(impRec2, c); 
+            ImagePlus MCNimpC = I1l.copyChannel(impMCNR2, c); 
+            ImagePlus wfImpC = I1l.copyChannel(wfImp, c); 
+            StackStatistics stats = new ij.process.StackStatistics(impRecC);
+            float chMax = (float)stats.max; 
+            int slices = impRecC.getStack().getSize();
             ImageStack MCMstackC = new ImageStack(width, height);
             for (int slice = 1; slice <= slices; slice++) {
                 // 1. new processors for values to be converted to 8-bit color
-                FloatProcessor SIRfp = 
-                        (FloatProcessor)SIRimpC.getStack().getProcessor(slice);
-                FloatProcessor MCNfp = 
+                FloatProcessor fpRec = 
+                        (FloatProcessor)impRecC.getStack().getProcessor(slice);
+                FloatProcessor fpMCN = 
                         (FloatProcessor)MCNimpC.getStack().getProcessor(slice);
-                FloatProcessor MCNRfpRsz = fpResize(MCNfp, width, height);
+                FloatProcessor MCNRfpRsz = fpResize(fpMCN, width, height);
                 FloatProcessor fpRed = new FloatProcessor(width, height);
                 FloatProcessor fpGrn = new FloatProcessor(width, height);
                 FloatProcessor fpBlu = new FloatProcessor(width, height);
                 ImageStack RGBset = new ImageStack(width, height);  // 1 set
                 // 2. copy scaled values from input Processors to new Processors
-                scaledRGBintensities(SIRfp, maxPositive, MCNRfpRsz, 
+                FloatProcessor wfFp = 
+                        (FloatProcessor)wfImpC.getStack().getProcessor(slice);
+                scaledRGBintensities(fpRec, MCNRfpRsz, wfFp, chMax,
                         fpRed, fpGrn, fpBlu);
                 // 3. assemble 1 RGBset (3 slices)
                 ByteProcessor bpRed = (ByteProcessor)fpRed.convertToByte(false);
@@ -127,7 +176,7 @@ public class SIR_ModContrastMap implements PlugIn, EProcessor {
                     "saturated=0.08 process_all use");
         }
         // try to set result ImagePlus with reasonable display settings
-        ImagePlus outImp = I1l.mergeChannels(I1l.makeTitle(SIRimp, "MCM"), 
+        ImagePlus outImp = I1l.mergeChannels(I1l.makeTitle(impRec, "MCM"), 
                 MCMimpsC);
         outImp.setDimensions(nc, nz, nt);
         outImp.setOpenAsHyperStack(true);
@@ -135,35 +184,46 @@ public class SIR_ModContrastMap implements PlugIn, EProcessor {
         int Zmid = nz / 2;
         int Tmid = nt / 2;
         outImp.setPosition(Cmid, Zmid, Tmid);
-        I1l.copyCal(SIRimp2, outImp);
-        results.addImp("raw data mod contrast with reconstructed intensities", 
+        Overlay legend = impMCNR.getOverlay();
+        outImp.setOverlay(legend);
+        if (outImp.getOverlay() !=null) {
+            // MCNR / raw data overlay is 1/2 size and defaults to center
+            outImp.getOverlay().translate(height / 2, width / 2);
+        }
+        I1l.copyCal(impRec2, outImp);
+        results.addImp("Reconstructed data color-coded according to the"
+                + " underlying Modulation Contrast-to-Noise Ratio (MCNR)"
+                + " in the raw data",
                 outImp);
-        results.addInfo("Modulation contrast", 
-                "0-3 purple (inadequate), to 6 red (acceptable),\n"
-                + "    to 12 orange (good), to 18 yellow (very good), " 
-                + "to 24 white (excellent).");
+        results.addInfo("How to interpret", "The MCNR map indicates local"
+                + " variations in reconstruction quality, e.g. due to"
+                + " variations in out-of-focus blur contribution due to"
+                + " feature density, or due to uneven SI illumination.");
+        results.addInfo("MCNR values", " 0-3 purple (inadequate),"
+                + " to 6 red (acceptable), to 12 orange (good),"
+                + " to 18 yellow (very good), to 24 white (excellent).");
         return results;
     }
 
-    /** Check SIR imp width and height are 2x raw SI data width and height. */
-    private static boolean SIandSIRimpMatch(
-            ImagePlus rawImp, ImagePlus sirImp) {
+    /** Check rec imp width and height are 2x raw data width and height. */
+    private static boolean rawAndRecImpMatch(
+            ImagePlus impRaw, ImagePlus impRec) {
         boolean match = false;
-        int slicesMCNR = rawImp.getStackSize();
-        int widthMCNR = rawImp.getStack().getWidth();
-        int heightMCNR = rawImp.getStack().getHeight();
-        int slicesSIR = sirImp.getStackSize();
-        int widthSIR = sirImp.getStack().getWidth();
-        int heightSIR = sirImp.getStack().getHeight();
-        if ((sirImp != null) && (rawImp != null)){
-            boolean stackMatch = slicesMCNR == slicesSIR;
-            boolean widthMatch = (int)(widthMCNR * 2) == widthSIR;
-            boolean heightMatch = (int)(heightMCNR * 2) == heightSIR;
+        int slicesMCNR = impRaw.getStackSize();
+        int widthMCNR = impRaw.getStack().getWidth();
+        int heightMCNR = impRaw.getStack().getHeight();
+        int slicesRec = impRec.getStackSize();
+        int widthRec = impRec.getStack().getWidth();
+        int heightRec = impRec.getStack().getHeight();
+        if ((impRec != null) && (impRaw != null)){
+            boolean stackMatch = slicesMCNR == slicesRec;
+            boolean widthMatch = (int)(widthMCNR * 2) == widthRec;
+            boolean heightMatch = (int)(heightMCNR * 2) == heightRec;
             if (stackMatch && widthMatch && heightMatch) { 
                 match = true;
             }
-        }else{
-            IJ.log("  ! warning: raw or SIR stack was null");
+        } else {
+            IJ.log("! warning: raw or reconstructed stack was null");
         }
         return match;
     }
@@ -171,7 +231,8 @@ public class SIR_ModContrastMap implements PlugIn, EProcessor {
     /** Method to resize a FloatProcessor - IJ's doesn't work or doesn't update
      * size info :-(
      */
-    FloatProcessor fpResize(FloatProcessor fpIn, int newWidth, int newHeight) {
+    private FloatProcessor fpResize(
+            FloatProcessor fpIn, int newWidth, int newHeight) {
         int oldWidth = fpIn.getWidth();
         int oldHeight = fpIn.getHeight();
         float[] oldPixels = (float[]) fpIn.getPixels();
@@ -179,9 +240,9 @@ public class SIR_ModContrastMap implements PlugIn, EProcessor {
         if ((newWidth / oldWidth == 0) || (newWidth % oldWidth != 0)
                 || ((newWidth / oldWidth) != (newHeight / oldHeight))) {
             throw new IllegalArgumentException(
-                    "same aspect, integer scaling only: arguments asked for"
-                    + " width " + oldWidth + "->" + newWidth 
-                    + ", height" + oldHeight + "->" + newHeight);
+                    "same aspect, integer scaling only: arguments asked for" +
+                    " width " + oldWidth + "->" + newWidth +
+                    ", height" + oldHeight + "->" + newHeight);
         } else {
             int scaleF = 1;
             scaleF = newWidth / oldWidth;
@@ -203,17 +264,20 @@ public class SIR_ModContrastMap implements PlugIn, EProcessor {
         }
     }
 
-    /** Use input SIR and MCNR values to make output RGB color-coded processors.
-     * SIR image intensity combined with MCNR encoded in LUT color map.
+    /** Combine reconstructed image intensity with mod contrast encoded in
+     * LUT color map. Also color saturated pixels in raw data green.
      */
-    void scaledRGBintensities(FloatProcessor SIRfp, float maxPositive,
-            FloatProcessor MCNRfp2, FloatProcessor fpRed, FloatProcessor fpGrn,
-            FloatProcessor fpBlu) {
-        float[] fpixSIR = (float[])SIRfp.getPixels();
+    private void scaledRGBintensities(
+            FloatProcessor fpRec, FloatProcessor MCNRfp2,
+            FloatProcessor wfFp, float chMax,
+            FloatProcessor fpRed, FloatProcessor fpGrn, FloatProcessor fpBlu) {
+        float[] wfPix = (float[])wfFp.getPixels();
+        float[] fpixRec = (float[])fpRec.getPixels();
         float[] fpixMCNR = (float[])MCNRfp2.getPixels();
         float[] fpixRed = (float[])fpRed.getPixels();
         float[] fpixGrn = (float[])fpGrn.getPixels();
         float[] fpixBlu = (float[])fpBlu.getPixels();
+        int widthRec = fpRec.getWidth();
         final float[] redLUT = 
                 { 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
                 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80,
@@ -273,14 +337,30 @@ public class SIR_ModContrastMap implements PlugIn, EProcessor {
                 111, 115, 119, 123, 127, 131, 135, 139, 143, 147, 151, 155,
                 159, 163, 167, 171, 175, 179, 183, 187, 191, 195, 199, 203,
                 207, 211, 215, 219, 223, 227, 231, 235, 239, 243, 247, 251 };
-        for (int i = 1; i < fpixSIR.length; i++) {
-            float intensScale = (float) Math.max(
-                    Math.min((fpixSIR[i] / maxPositive), 1.0f), 0.0f);
-            int lutIndex = (int) (255.0f * Math
-                    .min((fpixMCNR[i] / mcnrMax), 1.0f));
-            fpixRed[i] = intensScale * redLUT[lutIndex];
-            fpixGrn[i] = intensScale * grnLUT[lutIndex];
-            fpixBlu[i] = intensScale * bluLUT[lutIndex];
+        for (int i = 1; i < fpixRec.length; i++) {
+            int j = i / widthRec;
+            int rawI = (i / 2) % (widthRec / 2) + ((j / 2) * widthRec / 2);
+            if (wfPix[rawI] > Math.pow(2, camBitDepth) - 2) {
+                fpixRed[i] = 0.0f;
+                fpixGrn[i] = 255.0f;
+                fpixBlu[i] = 0.0f;
+            } else {
+                float intensScale = (float) Math.max(
+                        Math.min((fpixRec[i] / chMax), 1.0f), 0.0f);
+                int lutIndex = (int) (255.0f * Math.min(
+                                (fpixMCNR[i] / mcnrMax), 1.0f));
+                fpixRed[i] = intensScale * redLUT[lutIndex];
+                fpixGrn[i] = intensScale * grnLUT[lutIndex];
+                fpixBlu[i] = intensScale * bluLUT[lutIndex];
+            }
         }
+    }
+    
+    /** Interactive test method */
+    public static void main(String[] args) {
+        new ImageJ();
+        TestData.raw.show();
+        TestData.recon.show();
+        IJ.runPlugIn(Rec_ModContrastMap.class.getName(), "");
     }
 }

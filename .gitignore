@@ -1,1 +1,11 @@
 *.class
+.DS_Store
+.classpath
+.project
+.settings/
+public/
+target/
+src/test/resources/
+plugins
+z
+up

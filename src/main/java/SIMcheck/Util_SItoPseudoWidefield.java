@@ -22,23 +22,28 @@ import ij.process.*;
 import ij.gui.GenericDialog; 
 
 /** This plugin converts a SIM image to a pseudo-wide-field image by averaging
- * phases and angles. Assumes API OMX V2 CPZAT input channel order.
+ * phases and angles. Assumes OMX V2 CPZAT input channel order.
  * @author Graeme Ball <graemeball@gmail.com>
  **/ 
-public class Util_SI2WF implements PlugIn {
+public class Util_SItoPseudoWidefield implements PlugIn {
     
-    int phases = 5;                                                         
-    int angles = 3;                                                         
+    public static final String name = "Raw SI to Pseudo-Widefield";
+    public static final String TLA = "PWF";
+    
+    // parameter fields
+    public int phases = 5;                                                         
+    public int angles = 3;                                                         
+    
     private static ImagePlus projImg = null;  // intermediate & final results
 
     @Override 
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
-        // TODO: option for padding to SIR result size for comparison
-        GenericDialog gd = new GenericDialog("Raw SI data to Pseudo-Wide-Field");                   
-        gd.addMessage("Requires SI raw data in API OMX (CPZAT) order.");        
-        gd.addNumericField("Angles", angles, 1);                               
-        gd.addNumericField("Phases", phases, 1);
+        // TODO: option for padding to reconstructed result size for comparison
+        GenericDialog gd = new GenericDialog(name);                   
+        gd.addMessage("Requires SI raw data in OMX (CPZAT) order.");        
+        gd.addNumericField("Angles", angles, 0);                               
+        gd.addNumericField("Phases", phases, 0);
         gd.showDialog();                                                        
         if (gd.wasCanceled()) return;                                           
         if(gd.wasOKed()){                                                     
@@ -51,6 +56,7 @@ public class Util_SI2WF implements PlugIn {
             return;                                                             
         }
         projImg = exec(imp, phases, angles);  
+        IJ.run("Brightness/Contrast...");
         projImg.show();
     }
 
@@ -71,12 +77,12 @@ public class Util_SI2WF implements PlugIn {
         new StackConverter(impCopy).convertToGray32();  
         averagePandA(impCopy, channels, Zplanes, frames);
         I1l.copyCal(imp, projImg);
-        projImg.setTitle(I1l.makeTitle(imp, "PWF"));  
+        projImg.setTitle(I1l.makeTitle(imp, TLA));  
         return projImg;
     }
 
     /** Average projections of 5 phases, 3 angles for each CZT **/
-    ImagePlus averagePandA(ImagePlus imp, int nc, int nz, int nt) {
+    private ImagePlus averagePandA(ImagePlus imp, int nc, int nz, int nt) {
         ImageStack stack = imp.getStack(); 
         ImageStack PAset = new ImageStack(imp.getWidth(), imp.getHeight());
         ImageStack avStack = new ImageStack(imp.getWidth(), imp.getHeight());
@@ -123,7 +129,8 @@ public class Util_SI2WF implements PlugIn {
     }
 
     /** Average slices (32-bit floats). */
-    ImageProcessor avSlices(ImagePlus imp, ImageStack stack, int slices) {
+    private ImageProcessor avSlices(
+            ImagePlus imp, ImageStack stack, int slices) {
         int width = imp.getWidth();                                             
         int height = imp.getHeight();
         int len = width * height;
@@ -142,5 +149,12 @@ public class Util_SI2WF implements PlugIn {
         }
         oip = new FloatProcessor(width, height, avpixels, null);
         return oip;
+    }
+    
+    /** Interactive test method. */
+    public static void main(String[] args) {
+        new ImageJ();
+        TestData.raw.show();
+        IJ.runPlugIn(Util_SItoPseudoWidefield.class.getName(), "");
     }
 }

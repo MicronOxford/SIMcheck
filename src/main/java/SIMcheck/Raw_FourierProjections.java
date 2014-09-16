@@ -17,9 +17,10 @@
  */ 
 
 package SIMcheck;
+
 import ij.*;
 import ij.plugin.*;
-import ij.process.*;
+import ij.process.ImageStatistics;
 import ij.gui.GenericDialog; 
 import ij.IJ;
 
@@ -27,10 +28,11 @@ import ij.IJ;
  * to which a 2D FFT is applied to each slice.
  * @author Graeme Ball <graemeball@gmail.com>
  */ 
-public class Raw_Fourier implements PlugIn, EProcessor {
+public class Raw_FourierProjections implements PlugIn, Executable {
 
-    String name = "Raw Data Fourier plots";
-    ResultSet results = new ResultSet(name);
+    public static final String name = "Raw Data Fourier Projections";
+    public static final String TLA = "FPJ";
+    private ResultSet results = new ResultSet(name);
 
     // parameter fields
     public int phases = 5;                                                         
@@ -40,9 +42,9 @@ public class Raw_Fourier implements PlugIn, EProcessor {
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);                   
-        gd.addMessage("Requires SI raw data in API OMX (CPZAT) order.");        
-        gd.addNumericField("angles", angles, 1 );                               
-        gd.addNumericField("phases", phases, 1 );                               
+        gd.addMessage("Requires SI raw data in OMX (CPZAT) order.");        
+        gd.addNumericField("angles", angles, 0);                               
+        gd.addNumericField("phases", phases, 0);                               
         gd.showDialog();                                                        
         if (gd.wasCanceled()) return;
         if( gd.wasOKed() ){                                                     
@@ -50,7 +52,7 @@ public class Raw_Fourier implements PlugIn, EProcessor {
             phases = (int)gd.getNextNumber();                                   
         }                                                                       
         if (!I1l.stackDivisibleBy(imp, phases * angles)) {    
-            IJ.showMessage("Raw Data Fourier Plots",
+            IJ.showMessage(name,
             		"Error: stack size not consistent with phases/angles.");
             return;                                                             
         }
@@ -58,68 +60,65 @@ public class Raw_Fourier implements PlugIn, EProcessor {
         results.report();
     }
 
-    /** Execute plugin functionality: split angles into separate stacks and
-     * perform 2D FFT on each slice. Assumes V2 OMX CPZAT dimension order.
+    /** Execute plugin functionality (old version): split angles into separate
+     * stacks and perform 2D FFT on each slice for V2 OMX CPZAT dimension order.
      * @param imps first imp should be input raw SI data ImagePlus
      * @return ResultSet containing FFTs for each angle
      */
     public ResultSet exec(ImagePlus... imps) {
         ImagePlus imp = imps[0];
+        ImagePlus montage = null;
+        StackCombiner comb = new StackCombiner();
         for (int a = 1; a <= angles; a++) {
-          	ImagePlus impCurrentA = getImpForAngle(imp, a);
+          	ImagePlus impCurrentA = SIMcheck_.getImpForAngle(
+          	        imp, a, phases, angles);
           	String statusString = "Performing FFT for angle " 
           			+ Integer.toString(a);
           	IJ.showStatus(statusString);
           	impCurrentA = FFT2D.fftImp(impCurrentA);
           	String title = I1l.makeTitle(imp, "FT" + a);
           	impCurrentA.setTitle(title);
-          	results.addImp("2D FFT for angle " + a, impCurrentA);
+          	IJ.run(impCurrentA, "Z Project...", "projection=[Max Intensity]");
+          	impCurrentA = ij.WindowManager.getCurrentImage();
+          	int nChannels = impCurrentA.getNChannels();
+          	ImagePlus[] impChannels = new ImagePlus[nChannels];
+          	for (int c = 1; c <= nChannels; c++) {
+          	    ImagePlus impC = I1l.copyChannel(impCurrentA, c);
+          	    ImageStatistics stats = impC.getStatistics();
+          	    double newMin = stats.dmode - stats.stdDev;
+          	    I1l.rescale8bitToMinMax(impC, newMin, stats.max);
+          	    I1l.drawLabel(impC, "A" + a);
+          	    impChannels[c - 1] = impC;
+          	}
+          	impCurrentA.getWindow().close();
+          	impCurrentA = I1l.mergeChannels("FFT_A" + a, impChannels);
+          	impCurrentA.setC(1);
+          	if (a == 1) {
+          	    montage = impCurrentA.duplicate();
+          	} else {
+          	    ImageStack montageStack = comb.combineHorizontally(
+          	            montage.getStack(), impCurrentA.getStack());
+          	    montage.setStack(montageStack);
+          	}
+          	// TODO: clear MAX_<originalTitle>_FT2.tif and "FT3.tif
+          	//       from Window list after the plugin exits ()
+          	impCurrentA.close();  // only seems to fully close "FT1.tif
         }
-        results.addInfo("Fourier-transformed raw data", 
-                "check for clean 1st & 2nd order spots");
+        IJ.run(montage, "Grays", "");
+        montage.setTitle(I1l.makeTitle(imps[0], TLA));
+      	results.addImp("2D FFT montage for each angle (max projection)",
+      	        montage);
+        results.addInfo("How to interpret", "look for clean 1st & 2nd" +
+      	        " order spots, similar across angles. N.B. Spot intensity" +
+                " depends on image content.");
         return results;
     }
     
-    /** Split hyperstack, returning new ImagePlus for angle requested.
-     * Assumes API V2 OMX CPZAT channel order. 
-     */
-    ImagePlus getImpForAngle(ImagePlus impAll, int a) {
-    	int nc = impAll.getNChannels();
-      	int nz = impAll.getNSlices();
-      	int nt = impAll.getNFrames();
-      	nz = nz / (phases * angles);  // take phase & angle out of Z
-      	int sliceIn = 0;
-      	int sliceOut = 0;
-      	int width = impAll.getWidth();
-        int height = impAll.getHeight();
-      	ImageStack stackAll = impAll.getStack();
-      	ImageStack stackOut = new ImageStack(width, height);
-    	for (int t = 1; t <= nt; t++) {
-            for (int z = 1; z <= nz; z++) {
-                for (int p = 1; p <= phases; p++) {
-                    for (int c = 1; c <= nc; c++) {
-                        sliceIn = (t - 1) * (nc * phases * nz * angles);
-                        sliceIn += (a - 1) * (nc * phases * nz);
-                        sliceIn += (z - 1) * (nc * phases);
-                        sliceIn += (p - 1) * nc;
-                        sliceIn += c;
-                        sliceOut++;  
-                        ImageProcessor ip = stackAll.getProcessor(sliceIn);
-                        stackOut.addSlice(String.valueOf(sliceOut), ip);
-                    }
-                }
-            }
-        }
-    	String title = I1l.makeTitle(impAll, "A" + a);
-        ImagePlus impOut = new ImagePlus(title, stackOut);
-        impOut.setDimensions(nc, nz * phases, nt);
-        I1l.copyCal(impAll, impOut);
-        int centralZ = ((nz / 2) * phases) - phases + 1;  // 1st phase
-        impOut.setZ(centralZ);                                       
-        impOut.setC(1);                                              
-        impOut.setT(1);                                              
-        impOut.setOpenAsHyperStack(true);
-        return impOut;
+    /** Interactive test method */
+    public static void main(String[] args) {
+        new ImageJ();
+        TestData.raw.show();
+        IJ.runPlugIn(Raw_FourierProjections.class.getName(), "");
     }
 }
 

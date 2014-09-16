@@ -29,6 +29,11 @@ import java.math.MathContext;
  */
 public class ResultSet {
 
+    // for automatic formatting of result log / output
+    private static final int TEXTWIDTH = 55;
+    private static final int INDENT = 0;
+    private static final int STAT_SIG_FIGS = 2;
+    
     private String resultSetName = "";
     private LinkedHashMap<String, ImagePlus> imps = 
             new LinkedHashMap<String, ImagePlus>();
@@ -43,7 +48,8 @@ public class ResultSet {
 
     /** Add ImagePlus result & description: title+description MUST be unique. */
     public void addImp(String description, ImagePlus imp) {
-        description = imp.getTitle() + ": " + description;  // more unique
+        // key composed of image title + description -- separated again later
+        description = imp.getTitle() + ":\n" + description;
         if (imps.containsKey(description)) {
             throw new IllegalArgumentException(description + " already exists");
         }
@@ -82,27 +88,87 @@ public class ResultSet {
     public void report() {
         IJ.log("");
         IJ.log(resultSetName);
-        IJ.log(new String(new char[resultSetName.length()]).replace("\0", "-"));
+        IJ.log(J.nChars(TEXTWIDTH, "-"));
         for (Map.Entry<String, ImagePlus> entry : imps.entrySet()) {
             String description = entry.getKey();
             ImagePlus imp = (ImagePlus)entry.getValue();
-            IJ.log("  Displaying " + description);
+            IJ.log("Displaying " + imp.getTitle() + ":\n");
+            int nTitleChars = imp.getTitle().length() + 2;
+            description = description.substring(
+                    nTitleChars, description.length());
+            IJ.log(autoFormat(description, TEXTWIDTH, 0));
+            IJ.log("\n");
             imp.show();
         }
         for (Map.Entry<String, Double> entry : stats.entrySet()) {
             String statName = entry.getKey();
             Double stat = entry.getValue();
             BigDecimal bd = new BigDecimal(stat);  
-            bd = bd.round(new MathContext(2));  // OOMG
-            double stat2sigFig = bd.doubleValue();  
-            IJ.log("  " + statName + " = " + stat2sigFig);
+            bd = bd.round(new MathContext(STAT_SIG_FIGS));
+            double statToSpecifiedSigFigs = bd.doubleValue();  
+            IJ.log(statName + " = " + statToSpecifiedSigFigs);
         }
         for (Map.Entry<String, String> entry : infos.entrySet()) {
             String infoTitle = entry.getKey();
             String info = entry.getValue();
-            IJ.log("  " + infoTitle + ": " + info);
+            IJ.log("\n");
+            IJ.log(infoTitle + ": " + autoFormat(info, TEXTWIDTH,
+                    infoTitle.length() + 2));
         }
         IJ.log("---");
+    }
+    
+    /** Produce summary table of numerical stats and interpretation. */
+    public String summary() {
+        // TODO
+        return "==== Summary ====";
+    }
+    
+    /**
+     * Automatically add line-breaks, returning text String of fixed width.
+     * titleLen shortens the first line, adjusting for length of item title.
+     * '  -' starts a new indented list item ; TODO: '--' should end list.
+     */
+    private static String autoFormat(String text, int width, int titleLen) {
+        StringBuilder sb = new StringBuilder((int)(text.length() * 1.1));
+        int thisSpace = 0;
+        int lastSpace = 0;
+        int lineStart = 0;
+        int maxIter = 100;  // prevent infinite while; implies < 100 words
+        int iter = 0;
+        boolean firstLine = true;
+        while (thisSpace != -1 && iter < maxIter) {
+            lastSpace = thisSpace;
+            thisSpace = text.indexOf(" ", lastSpace + 1);
+            if (thisSpace == -1) {
+                sb.append(text.substring(lineStart, text.length()));
+            } else if (thisSpace + 4 < text.length() - 1 &&
+                    text.substring(thisSpace, thisSpace + 4).equals("  - ")) {
+                // handle indentation of list items starting '  -'
+                sb.append(text.substring(lineStart, thisSpace) + "\n");
+                sb.append(J.nChars(INDENT * 3, " ") + "- ");
+                lineStart = thisSpace + 4;
+                thisSpace += 4;
+                // TODO: indentation of multi-line items & end lists upon '--' 
+            } else {
+                int adjustedLineStart = lineStart;
+                if (firstLine) {
+                    // first line, with title, would be too long w/o adjustment
+                    adjustedLineStart -= titleLen;
+                }
+                if (thisSpace - adjustedLineStart > width) {
+                    // backtrack to lastSpace
+                    sb.append(text.substring(lineStart, lastSpace) + "\n" +
+                            J.nChars(INDENT * 2, " "));
+                    lineStart = lastSpace + 1;
+                    if (firstLine) {
+                        firstLine = false;
+                    }
+                }
+            }
+            iter++;
+        }
+        return sb.toString();
     }
     
     /** Return an Object[] representation of the results. */
@@ -124,16 +190,13 @@ public class ResultSet {
         
         ResultSet results = new ResultSet("ResultSet Test");
         new ImageJ();
-        ImagePlus limp = IJ.openImage(
-                "/Users/graemeb/Documents/testData/Lena.tif");
-        results.addImp("a picture of Lena", limp);
-        results.addStat("stat1, imWidth", (double)limp.getWidth());
-        results.addStat("stat2, imHeight", (double)limp.getHeight());
+        ImagePlus blimp = TestData.lawn;
+        results.addImp("a bead lawn", blimp);
+        results.addStat("stat1, imWidth", (double)blimp.getWidth());
+        results.addStat("stat2, imHeight", (double)blimp.getHeight());
         results.addStat("stat3, imBytesPerPix", 
-                (double)limp.getBytesPerPixel());
-        results.addInfo("about", "this is a picture of Lena");
-        
-            
+                (double)blimp.getBytesPerPixel());
+        results.addInfo("about", "this is raw SIM data for a bead lawn");
 
         IJ.log("report()  - should show all images and log"
                 + " all stats, info. Check stats appear in order.");
