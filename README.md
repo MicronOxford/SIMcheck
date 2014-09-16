@@ -144,6 +144,7 @@ TODO
           - axial FFT: project over central slice range, not just 1
           - axial FFT: profile plot?
         - report per. angle modulation contrast and/or minimum of these?
+        - display / warn about saturated pixels in raw data MCN check
         - SI pattern focus flicker corr?
         - Fourier proj stat(s)? spots over angles, 1st vs second, stability?
         - raw -> WF same size as rec by interpolation (& preserve type??)
