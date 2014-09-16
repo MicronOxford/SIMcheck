@@ -30,7 +30,7 @@ import ij.plugin.PlugIn;
  */
 public class Util_RescaleTo16bit implements PlugIn {
 
-    public static final String name = "Threshold and 16-bit conversion";
+    public static final String name = "Threshold and 16-bit Conversion";
     public static final String TLA = "THR";
     
     @Override
