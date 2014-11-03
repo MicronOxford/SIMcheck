@@ -118,12 +118,35 @@ TODO
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - documentation: 
+        - add Lothar to copyright notices
+        - document for rec FFT which plane is used / sensible mid-plane
         - finish/improve docs, illustrate usage with pictures, examples
         - for ELYRA reconstructed .czi, discard WF and decon-WF
           (processed data have 3 channels: recon, decon pseudoWF, WF)
         - Fourier proj: document power-of-2 and that cropping causes problems
         - see google hit for "maven attach source and javadoc artifacts"
+        - citable code:
+              https://github.com/blog/1840-improving-github-for-science
       - fixes:
+        - double-check MCNR per. angle, averaging etc.
+        - auto-thresholding -- use pseudo-widefield rather than MCNR, and
+          report / show threshold
+        - per. angle MCNR
+        - standalone MCM -- does not report av mod contrast
+        - show saturated in MCM if *any* angle saturated
+        - make sure all parameters chosen are logged
+        - run multi-frame -- fix / document; all stats reported for current ime-point only?
+        - ortho rec FFT: option for full stack (for now, until 3D FFT)
+        - fix radial profile plot scaling
+        - turn CIP into plot (to be able to save raw data) and/or normalize
+        - CIP: warn about saturation? /show min/max?
+        - turn FTR profile into multi-color and/or plot
+        - FTL/FTO no intensity cutoff option
+        - rename output to include underscore!
+        - better names for max/min ratio & SAM check
+        - make sure TLAs / filenames are in the log (Justin)
+        - debug issues with crop utility & move to separate utility plugin
+        - improve "Fourier Transform Phases" info / log output
         - Rec MCM: saturated if *any* of 15 input pixels are saturated
         - CIP / intensity decay: max of 3 angles' bleach rates over central 9Z
         - recon FT radial profile scale / units
@@ -151,7 +174,6 @@ TODO
         - window positioning: dialog to top left, ...
       - tests, structure:
         - final empirical tests, param calibration, tolerances etc.
-        - move crop function code to separate utility
         - tidy up tests:
           - .main() for interactive test, .test() to unit-test private methods
           - unit tests to run without test data (download should build easily)
@@ -165,6 +187,7 @@ TODO
       - convert dialog & logging to swing GUI
       - rec: FFT automatic resolution estimation??
       - 3D FFT
+      - estimate phase drift & correct in MCNR calc
       - raw: estimate angles & line-spacing for FFT, pattern focus?
       - cal: PSF symmetry within tolerance?
       - cal: OTF extent, shape & order separation?
