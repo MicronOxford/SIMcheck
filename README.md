@@ -31,8 +31,9 @@ soft-linked to your ImageJ plugins folder. Typing "ant" to build the
 default (all) target and restarting ImageJ or Help->Refresh Menus gave
 access to the newly built plugin package.
 
-Copyright Graeme Ball and Micron Oxford, Department of Biochemistry, 
-University of Oxford. License GPL unless stated otherwise in a given file.
+Copyright Graeme Ball and Lothar Schermelleh, Micron Oxford, Department of
+Biochemistry, University of Oxford. License GPL unless stated otherwise in
+a given file.
 
 
 Features
@@ -118,31 +119,27 @@ TODO
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
       - documentation: 
-        - add Lothar to copyright notices
         - document for rec FFT which plane is used / sensible mid-plane
+        - Fourier proj: document power-of-2 and that cropping causes problems
         - finish/improve docs, illustrate usage with pictures, examples
         - for ELYRA reconstructed .czi, discard WF and decon-WF
           (processed data have 3 channels: recon, decon pseudoWF, WF)
-        - Fourier proj: document power-of-2 and that cropping causes problems
         - see google hit for "maven attach source and javadoc artifacts"
         - citable code:
               https://github.com/blog/1840-improving-github-for-science
       - fixes:
-        - double-check MCNR per. angle, averaging etc.
-        - auto-thresholding -- use pseudo-widefield rather than MCNR, and
-          report / show threshold
-        - per. angle MCNR
-        - standalone MCM -- does not report av mod contrast
+        - MCNR: auto-threshold pseudo-widefield, report per. angle MCNR
+        - standalone MCM -- report av mod contrast
         - show saturated in MCM if *any* angle saturated
         - make sure all parameters chosen are logged
-        - run multi-frame -- fix / document; all stats reported for current ime-point only?
+        - run multi-frame -- fix / document; all stats reported for current time-point only?
         - ortho rec FFT: option for full stack (for now, until 3D FFT)
         - fix radial profile plot scaling
         - turn CIP into plot (to be able to save raw data) and/or normalize
         - CIP: warn about saturation? /show min/max?
         - turn FTR profile into multi-color and/or plot
         - FTL/FTO no intensity cutoff option
-        - rename output to include underscore!
+        - rename build output to include underscore!
         - better names for max/min ratio & SAM check
         - make sure TLAs / filenames are in the log (Justin)
         - debug issues with crop utility & move to separate utility plugin
@@ -158,9 +155,9 @@ TODO
         - angle labels etc. should be overlaid, not drawn
         - remove unused intermediate results from Windows list
       - features:
+        - summary table of stats & results (pass/uncertain/fail)
         - raw data angle difference (floaty): RMS error? (at least some stat)
         - report frame-to-frame flicker
-        - summary table of stats & results (pass/uncertain/fail)
         - rec Fourier:-
           - lat: pattern angles (use "SIMcheck.angle1" pref), 3 color profiles
           - axial FFT: project over central slice range, not just 1
