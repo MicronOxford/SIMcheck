@@ -20,6 +20,7 @@ import java.util.*;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
+import ij.measure.ResultsTable;
 import java.math.BigDecimal;
 import java.math.MathContext;
 
@@ -34,7 +35,7 @@ public class ResultSet {
     private static final int INDENT = 0;
     private static final int STAT_SIG_FIGS = 2;
     
-    private String resultSetName = "";
+    String resultSetName = "";
     private LinkedHashMap<String, ImagePlus> imps = 
             new LinkedHashMap<String, ImagePlus>();
     private LinkedHashMap<String, Double> stats =
@@ -118,10 +119,24 @@ public class ResultSet {
         IJ.log("---");
     }
     
-    /** Produce summary table of numerical stats and interpretation. */
-    public String summary() {
-        // TODO
-        return "==== Summary ====";
+    /**
+     * Display summary table of numerical stats and interpretation
+     * for all results in a list of ResultSets.
+     */
+    public static void summary(List<ResultSet> resultSets, String title) {
+        ResultsTable rt = new ResultsTable();
+//        rt.incrementCounter();
+        for (ResultSet rs : resultSets) {
+            for (String statName : rs.stats.keySet()) {
+                rt.incrementCounter();
+                rt.addValue("Check", rs.resultSetName);
+                rt.addValue("Statistic", statName);
+                rt.addValue("Value", rs.stats.get(statName));
+                String statOK = "?";  // TODO, assess all stats Yes/No/Marginal
+                rt.addValue("OK?", statOK);
+            }
+        }
+        rt.show(title);
     }
     
     /**

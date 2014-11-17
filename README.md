@@ -122,12 +122,15 @@ TODO
         - document for rec FFT which plane is used / sensible mid-plane
         - Fourier proj: document power-of-2 and that cropping causes problems
         - finish/improve docs, illustrate usage with pictures, examples
+        - document examples of running checks from a macro
         - for ELYRA reconstructed .czi, discard WF and decon-WF
           (processed data have 3 channels: recon, decon pseudoWF, WF)
-        - see google hit for "maven attach source and javadoc artifacts"
         - citable code:
               https://github.com/blog/1840-improving-github-for-science
       - fixes:
+        - CIV combined channel mean intensity variation over 9Z central window
+          - intensity flicker etc. as additional diagnostic
+        - min-max range stat name: signal-to-artefact ratio
         - MCNR: auto-threshold pseudo-widefield, report per. angle MCNR
         - standalone MCM -- report av mod contrast
         - show saturated in MCM if *any* angle saturated
@@ -137,6 +140,8 @@ TODO
         - fix radial profile plot scaling
         - turn CIP into plot (to be able to save raw data) and/or normalize
         - CIP: warn about saturation? /show min/max?
+        - move spherical aberration mismatch back into reconstructed data checks??
+          (needs a bead lawn)
         - turn FTR profile into multi-color and/or plot
         - FTL/FTO no intensity cutoff option
         - rename build output to include underscore!
@@ -165,6 +170,7 @@ TODO
         - report per. angle modulation contrast and/or minimum of these?
         - display / warn about saturated pixels in raw data MCN check
         - SI pattern focus flicker corr?
+        - "target plot" on raw fourier projection?
         - Fourier proj stat(s)? spots over angles, 1st vs second, stability?
         - raw -> WF same size as rec by interpolation (& preserve type??)
         - spherical aberration mismatch check: axis always symmetrical about 0?

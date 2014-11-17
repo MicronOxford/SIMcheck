@@ -28,6 +28,7 @@ import ij.plugin.PlugIn;
 import ij.plugin.Duplicator;
 import ij.process.ImageProcessor;
 import ij.ImageJ;
+import java.util.*;
 
 /** This plugin displays a GenericDialog and runs the other SIMcheck plugins.
  * <ul>
@@ -42,7 +43,7 @@ import ij.ImageJ;
 public final class SIMcheck_ implements PlugIn {
     
     // constants
-    private static final String VERSION = "0.9.5";
+    private static final String VERSION = "0.9.6-SNAPSHOT";
     private static final String none = "[None]";  // no image
     private static final String omx = "OMX (CPZAT)";
     private static final int TEXTWIDTH = 55;
@@ -241,6 +242,7 @@ public final class SIMcheck_ implements PlugIn {
         IJ.run("Channels Tool... ", "");
         
         // run checks, report results
+        LinkedList<ResultSet> allResults = new LinkedList<ResultSet>();
         if (impRaw != null) {
             IJ.log("\n" + titleString("Raw Data Checks", "="));
             IJ.log("Using SI stack: " + impRaw.getTitle());
@@ -251,6 +253,7 @@ public final class SIMcheck_ implements PlugIn {
                 ipf.angles = angles;
                 ResultSet results = ipf.exec(impRaw);
                 results.report();
+                allResults.add(results);
             }
             if (doFourierProjections) {
                 Raw_FourierProjections fpj = new Raw_FourierProjections();
@@ -258,6 +261,7 @@ public final class SIMcheck_ implements PlugIn {
                 fpj.angles = angles;
                 ResultSet results = fpj.exec(impRaw);
                 results.report();
+                allResults.add(results);
             }
             if (doMotionCheck) {
                 Raw_MotionAndIllumVar mot = new Raw_MotionAndIllumVar();
@@ -265,6 +269,7 @@ public final class SIMcheck_ implements PlugIn {
                 mot.angles = angles;
                 ResultSet results = mot.exec(impRaw);
                 results.report();
+                allResults.add(results);
             }
             if (doModContrast) {
                 Raw_ModContrast mcn = new Raw_ModContrast();
@@ -273,6 +278,7 @@ public final class SIMcheck_ implements PlugIn {
                 ResultSet results = mcn.exec(impRaw);
                 impMCNR = results.getImp(0);
                 results.report();
+                allResults.add(results);
             }
         }
         if (impRecon != null) {
@@ -282,11 +288,13 @@ public final class SIMcheck_ implements PlugIn {
                 Rec_IntensityHistogram rih = new Rec_IntensityHistogram();
                 ResultSet results = rih.exec(impRecon);
                 results.report();
+                allResults.add(results);
             }
             if (doFourierPlots) {
                 Rec_FourierPlots ftx = new Rec_FourierPlots();
                 ResultSet results = ftx.exec(impRecon);
                 results.report();
+                allResults.add(results);
             }
             if (doModContrastMap) {
                 Rec_ModContrastMap mcm = new Rec_ModContrastMap();
@@ -295,12 +303,14 @@ public final class SIMcheck_ implements PlugIn {
                 mcm.camBitDepth = camBitDepth;
                 ResultSet results = mcm.exec(impRaw, impRecon, impMCNR);
                 results.report();
+                allResults.add(results);
             }
         }
         IJ.log("\n" + titleString("All Checks Finished!", "=") + "\n");
         if (doTileAfterRun) {
             IJ.run("Tile", "");
         }
+        ResultSet.summary(allResults, "SIMcheck Results " + J.timestamp());
     }
     
     /** Prompt user to specify and set per-channel background levels. */
