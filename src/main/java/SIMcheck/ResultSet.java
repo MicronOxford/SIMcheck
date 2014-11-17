@@ -34,12 +34,39 @@ public class ResultSet {
     private static final int TEXTWIDTH = 55;
     private static final int INDENT = 0;
     private static final int STAT_SIG_FIGS = 2;
+
+    /** Interpretation of a statistic: is it OK? yes, no, maybe. */
+    public enum StatOK {
+        
+        YES("Yes")
+        , MAYBE("Maybe")
+        , NO("No");
+
+        private String desc;
+        StatOK(String desc) {
+            this.desc = desc;
+        }
+
+        public String str() {
+            return desc;
+        }
+    }
+    
+    /** Store a numerical statistic & its interpretation. */
+    private class Stat {
+        Double value;
+        StatOK statOK;
+        Stat(Double value, StatOK statOK) {
+            this.value = value;
+            this.statOK = statOK;
+        }
+    }
     
     String resultSetName = "";
     private LinkedHashMap<String, ImagePlus> imps = 
             new LinkedHashMap<String, ImagePlus>();
-    private LinkedHashMap<String, Double> stats =
-            new LinkedHashMap<String, Double>();
+    private LinkedHashMap<String, Stat> stats =
+            new LinkedHashMap<String, Stat>();
     private LinkedHashMap<String, String> infos = 
             new  LinkedHashMap<String, String>();
     
@@ -69,12 +96,15 @@ public class ResultSet {
         return null;  // did not reach desired nImp
     }
     
-    /** Add a named Double statistic result: statName MUST be unique. */
-    public void addStat(String statName, Double value) {
+    /**
+     * Add a named Double statistic result: statName MUST be unique.
+     * NB: it is the plugin's responsibility to decide whether stat is OK.
+     */
+    public void addStat(String statName, Double value, StatOK statOK) {
         if (stats.containsKey(statName)) {
             throw new IllegalArgumentException(statName + " already exists");
         }
-        stats.put(statName, value);
+        stats.put(statName, new Stat(value, statOK));
     }
     
     /** Add an information string with title: title MUST be unique. */
@@ -101,9 +131,9 @@ public class ResultSet {
             IJ.log("\n");
             imp.show();
         }
-        for (Map.Entry<String, Double> entry : stats.entrySet()) {
+        for (Map.Entry<String, Stat> entry : stats.entrySet()) {
             String statName = entry.getKey();
-            Double stat = entry.getValue();
+            Double stat = entry.getValue().value;
             BigDecimal bd = new BigDecimal(stat);  
             bd = bd.round(new MathContext(STAT_SIG_FIGS));
             double statToSpecifiedSigFigs = bd.doubleValue();  
@@ -125,15 +155,13 @@ public class ResultSet {
      */
     public static void summary(List<ResultSet> resultSets, String title) {
         ResultsTable rt = new ResultsTable();
-//        rt.incrementCounter();
         for (ResultSet rs : resultSets) {
             for (String statName : rs.stats.keySet()) {
                 rt.incrementCounter();
                 rt.addValue("Check", rs.resultSetName);
                 rt.addValue("Statistic", statName);
-                rt.addValue("Value", rs.stats.get(statName));
-                String statOK = "?";  // TODO, assess all stats Yes/No/Marginal
-                rt.addValue("OK?", statOK);
+                rt.addValue("Value", rs.stats.get(statName).value);
+                rt.addValue("OK?", rs.stats.get(statName).statOK.str());
             }
         }
         rt.show(title);
@@ -149,7 +177,7 @@ public class ResultSet {
         int thisSpace = 0;
         int lastSpace = 0;
         int lineStart = 0;
-        int maxIter = 100;  // prevent infinite while; implies < 100 words
+        int maxIter = 100;  // prevent infinite while; implies < maxIter words
         int iter = 0;
         boolean firstLine = true;
         while (thisSpace != -1 && iter < maxIter) {
@@ -207,10 +235,12 @@ public class ResultSet {
         new ImageJ();
         ImagePlus blimp = TestData.lawn;
         results.addImp("a bead lawn", blimp);
-        results.addStat("stat1, imWidth", (double)blimp.getWidth());
-        results.addStat("stat2, imHeight", (double)blimp.getHeight());
+        results.addStat("stat1, imWidth",
+                (double)blimp.getWidth(), StatOK.YES);
+        results.addStat("stat2, imHeight",
+                (double)blimp.getHeight(), StatOK.YES);
         results.addStat("stat3, imBytesPerPix", 
-                (double)blimp.getBytesPerPixel());
+                (double)blimp.getBytesPerPixel(), StatOK.YES);
         results.addInfo("about", "this is raw SIM data for a bead lawn");
 
         IJ.log("report()  - should show all images and log"
@@ -245,7 +275,7 @@ public class ResultSet {
 
         IJ.log("addStat() duplicate throws IllegalArgument exception?");
         try {
-            results.addStat("stat1, imWidth", 7.0d);
+            results.addStat("stat1, imWidth", 7.0d, StatOK.YES);
             IJ.log("NO EXCEPTION");
         } catch (Exception e) {
             if (e instanceof IllegalArgumentException) {

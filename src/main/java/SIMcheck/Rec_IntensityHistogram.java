@@ -93,7 +93,8 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
                 String statDescription = "C" + c +
                         " max / min intensity ratio";
                 results.addStat(statDescription, 
-                        (double)((int)(posNegRatio * 10)) / 10);
+                        (double)((int)(posNegRatio * 10)) / 10,
+                        ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
                 results.addInfo("C" + c + " number of max / min" +
                         " pixels", nNegPixels + "/" + nPosPixels);
                 

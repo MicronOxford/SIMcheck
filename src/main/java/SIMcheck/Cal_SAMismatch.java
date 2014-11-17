@@ -99,7 +99,8 @@ public class Cal_SAMismatch implements PlugIn, Executable {
             plots[c - 1] = plot.getImagePlus();
             double nstdev = Math.sqrt(J.variance(sliceMinima)) / 
                     J.mean(sliceMeans);
-            results.addStat("C" + c + " normalized StdDev", nstdev);
+            results.addStat("C" + c + " normalized StdDev", nstdev,
+                    ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
             
         }
         String title = I1l.makeTitle(imps[0], TLA);

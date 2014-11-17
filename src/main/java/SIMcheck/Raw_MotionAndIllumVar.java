@@ -128,7 +128,8 @@ public class Raw_MotionAndIllumVar implements PlugIn, Executable {
             }
         }
         for (int c = 0; c < nc; c++) {
-            results.addStat("RMS error for Channel " + (c + 1), rmsErr[c]);
+            results.addStat("RMS error for Channel " + (c + 1), rmsErr[c],
+                    ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
         }
     }
     

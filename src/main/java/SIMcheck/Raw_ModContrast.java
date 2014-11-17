@@ -268,9 +268,9 @@ public class Raw_ModContrast implements PlugIn, Executable {
                 ImagePlus impC = I1l.copyChannel(impResult, c);
                 double featMCNR = I1l.stackFeatMean(impC);
                 results.addStat("C" + c + " estimated feature MCNR", 
-                        featMCNR);
+                        featMCNR, ResultSet.StatOK.MAYBE);  // FIXME, StatOK
                 results.addStat("C" + c + " estimated Wiener filter optimum", 
-                        estimWiener(featMCNR));
+                        estimWiener(featMCNR), ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
             }
         } else {
             IJ.run(impResult, "Enhance Contrast", "saturated=0.35");

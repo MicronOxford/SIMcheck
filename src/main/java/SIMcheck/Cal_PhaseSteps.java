@@ -226,14 +226,14 @@ public class Cal_PhaseSteps implements PlugIn {
                         phaseSets[c - 1], positionStdevs, stackPlots);
                 double avPosStdev = J.mean(positionStdevs);
                 results.addStat("a" + a + " c" + c + " peak postion stdev", 
-                        avPosStdev);
+                        avPosStdev, ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
 
 		//IMD dont quite understand how to add my phaseShifts variable to the stats. 
 
                 results.addStat("a" + a + " c" + c + " phase step stdev", 
-                        phaseStats[0]);
+                        phaseStats[0], ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
                 results.addStat("a" + a + " c" + c + " phase offset stdev", 
-                        phaseStats[1]);
+                        phaseStats[1], ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
                 IJ.log("  line spacing = " + J.mean(lineSpacings[c - 1]));
                 IJ.log("  k angle = " + J.mean(kAngles[c - 1]));
             }

@@ -149,7 +149,8 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
             results.addStat(
                     "C" + Integer.toString(channel) + " intensity decay"
                         + " per " + (int)zwin + " z-slices (%)",
-                    (double)Math.round(channelDecay));
+                    (double)Math.round(channelDecay),
+                    ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
             
             /// (2) "Angle differences"
             float[] angleMeans = new float[na];
@@ -173,7 +174,8 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
             largestDiff = (double)100 * largestDiff / (double)maxAngleIntensity;
             results.addStat("C" + Integer.toString(channel) 
                     + " max intensity difference between angles (%)",
-                    (double)Math.round(largestDiff));
+                    (double)Math.round(largestDiff),
+                    ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
         }
         ImagePlus impResult = plot.getImagePlus();
         I1l.drawPlotTitle(impResult, "Per Channel Intensity Profiles");
