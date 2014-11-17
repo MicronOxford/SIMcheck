@@ -38,9 +38,10 @@ public class ResultSet {
     /** Interpretation of a statistic: is it OK? yes, no, maybe. */
     public enum StatOK {
         
-        YES("Yes")
-        , MAYBE("Maybe")
-        , NO("No");
+        YES("Yes"),
+        NO("No"),
+        MAYBE("Maybe"),
+        NA("N/A"); // stat has no interpretation -- for info only
 
         private String desc;
         StatOK(String desc) {
@@ -157,11 +158,14 @@ public class ResultSet {
         ResultsTable rt = new ResultsTable();
         for (ResultSet rs : resultSets) {
             for (String statName : rs.stats.keySet()) {
-                rt.incrementCounter();
-                rt.addValue("Check", rs.resultSetName);
-                rt.addValue("Statistic", statName);
-                rt.addValue("Value", rs.stats.get(statName).value);
-                rt.addValue("OK?", rs.stats.get(statName).statOK.str());
+                // report all stats except where interpretation N/A
+                if (rs.stats.get(statName).statOK != StatOK.NA) {
+                    rt.incrementCounter();
+                    rt.addValue("Check", rs.resultSetName);
+                    rt.addValue("Statistic", statName);
+                    rt.addValue("Value", rs.stats.get(statName).value);
+                    rt.addValue("OK?", rs.stats.get(statName).statOK.str());
+                }
             }
         }
         rt.show(title);

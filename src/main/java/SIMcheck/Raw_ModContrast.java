@@ -270,7 +270,7 @@ public class Raw_ModContrast implements PlugIn, Executable {
                 results.addStat("C" + c + " estimated feature MCNR", 
                         featMCNR, ResultSet.StatOK.MAYBE);  // FIXME, StatOK
                 results.addStat("C" + c + " estimated Wiener filter optimum", 
-                        estimWiener(featMCNR), ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
+                        estimWiener(featMCNR), ResultSet.StatOK.NA);
             }
         } else {
             IJ.run(impResult, "Enhance Contrast", "saturated=0.35");

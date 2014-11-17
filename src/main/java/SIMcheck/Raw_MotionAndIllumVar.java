@@ -85,7 +85,7 @@ public class Raw_MotionAndIllumVar implements PlugIn, Executable {
 
             // TODO, RMS error between angles
             ImagePlus projImp = averagePhase(imp, nc, nz, nt, totalIntens);
-            recordRmsErr(imp, projImp);
+            recordRmsErr(imp, projImp);  // FIXME, change to correlation!
             calcNormalizationFactors(imp, nc, angles, totalIntens, normFactors);
             ImagePlus colorImp = colorAngles(imp, projImp, nc, nz, normFactors);
             results.addImp("Each angle phase-averaged, normalized," +
@@ -128,8 +128,8 @@ public class Raw_MotionAndIllumVar implements PlugIn, Executable {
             }
         }
         for (int c = 0; c < nc; c++) {
-            results.addStat("RMS error for Channel " + (c + 1), rmsErr[c],
-                    ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
+            results.addStat("C" + (c + 1) + " angle intensity correlation (%)",
+                    rmsErr[c], ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
         }
     }
     
