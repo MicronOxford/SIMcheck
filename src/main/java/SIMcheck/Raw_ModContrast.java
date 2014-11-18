@@ -268,7 +268,7 @@ public class Raw_ModContrast implements PlugIn, Executable {
                 ImagePlus impC = I1l.copyChannel(impResult, c);
                 double featMCNR = I1l.stackFeatMean(impC);
                 results.addStat("C" + c + " estimated feature MCNR", 
-                        featMCNR, ResultSet.StatOK.MAYBE);  // FIXME, StatOK
+                        featMCNR, checkMCNR(featMCNR));  // FIXME, StatOK
                 results.addStat("C" + c + " estimated Wiener filter optimum", 
                         estimWiener(featMCNR), ResultSet.StatOK.NA);
             }
@@ -365,6 +365,17 @@ public class Raw_ModContrast implements PlugIn, Executable {
             avStack.addSlice(avFp);
         }
         return avStack;
+    }
+    
+    /** Is feature MCNR value acceptable? */
+    private static ResultSet.StatOK checkMCNR(Double statValue) {
+        if (statValue >= 6.0) {
+            return ResultSet.StatOK.YES;
+        } else if (statValue >= 3.0) {
+            return ResultSet.StatOK.MAYBE;
+        } else {
+            return ResultSet.StatOK.NO;
+        }
     }
     
     /** Test private methods. */

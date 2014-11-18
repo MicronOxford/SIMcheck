@@ -130,10 +130,11 @@ TODO
       - fixes:
         - CIV combined channel mean intensity variation over 9Z central window
           - intensity flicker etc. as additional diagnostic
-        - min-max range stat name: signal-to-artefact ratio
-        - MCNR: auto-threshold pseudo-widefield, report per. angle MCNR
-        - standalone MCM -- report av mod contrast
+            - CIP / intensity decay: max of 3 angles' bleach rates over central 9Z?
+        - finish angle correlation stat/s (overall & peak?)
+        - min-max range stat name: signal-to-artefact ratio??
         - show saturated in MCM if *any* angle saturated
+        - MCNR: auto-threshold pseudo-widefield, report per. angle MCNR
         - make sure all parameters chosen are logged
         - run multi-frame -- fix / document; all stats reported for current time-point only?
         - ortho rec FFT: option for full stack (for now, until 3D FFT)
@@ -142,6 +143,7 @@ TODO
         - CIP: warn about saturation? /show min/max?
         - move spherical aberration mismatch back into reconstructed data checks??
           (needs a bead lawn)
+        - standalone MCM -- report av mod contrast
         - turn FTR profile into multi-color and/or plot
         - FTL/FTO no intensity cutoff option
         - rename build output to include underscore!
@@ -150,7 +152,6 @@ TODO
         - debug issues with crop utility & move to separate utility plugin
         - improve "Fourier Transform Phases" info / log output
         - Rec MCM: saturated if *any* of 15 input pixels are saturated
-        - CIP / intensity decay: max of 3 angles' bleach rates over central 9Z
         - recon FT radial profile scale / units
         - Wiener filter parameter estimate - calibrate, document
         - channel order: RGB vs. BGR
@@ -160,8 +161,6 @@ TODO
         - angle labels etc. should be overlaid, not drawn
         - remove unused intermediate results from Windows list
       - features:
-        - summary table of stats & results (pass/uncertain/fail)
-        - raw data angle difference (floaty): RMS error? (at least some stat)
         - report frame-to-frame flicker
         - rec Fourier:-
           - lat: pattern angles (use "SIMcheck.angle1" pref), 3 color profiles

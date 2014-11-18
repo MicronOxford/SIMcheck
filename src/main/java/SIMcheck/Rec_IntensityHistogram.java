@@ -92,9 +92,9 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
                 		stats, (double)percentile / 100, background);
                 String statDescription = "C" + c +
                         " max / min intensity ratio";
+                double roundedRatio = (double)((int)(posNegRatio * 10)) / 10;
                 results.addStat(statDescription, 
-                        (double)((int)(posNegRatio * 10)) / 10,
-                        ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
+                        roundedRatio, checkRatio(roundedRatio));
                 results.addInfo("C" + c + " number of max / min" +
                         " pixels", nNegPixels + "/" + nPosPixels);
                 
@@ -179,6 +179,17 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
         // since negTotal may or may not be negative...
         double posNegRatio = Math.abs(posTotal / negTotal);  
         return posNegRatio;
+    }
+    
+    /** Is max/min ratio value acceptable? */
+    private static ResultSet.StatOK checkRatio(Double statValue) {
+        if (statValue >= 6.0) {
+            return ResultSet.StatOK.YES;
+        } else if (statValue >= 3.0) {
+            return ResultSet.StatOK.MAYBE;
+        } else {
+            return ResultSet.StatOK.NO;
+        }
     }
 
     /** test private methods, return true if all OK */
