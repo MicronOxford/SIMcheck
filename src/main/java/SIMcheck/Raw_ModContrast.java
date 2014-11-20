@@ -367,7 +367,7 @@ public class Raw_ModContrast implements PlugIn, Executable {
         return avStack;
     }
     
-    /** Is feature MCNR value acceptable? */
+    /** Is feature MCNR stat value acceptable? */
     private static ResultSet.StatOK checkMCNR(Double statValue) {
         if (statValue >= 6.0) {
             return ResultSet.StatOK.YES;

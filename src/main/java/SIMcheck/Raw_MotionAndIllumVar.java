@@ -83,9 +83,8 @@ public class Raw_MotionAndIllumVar implements PlugIn, Executable {
             // total intensities for each [angle][channel] (max 3x3)
             double[][] totalIntens = new double[3][nc];
 
-            // TODO, RMS error between angles
             ImagePlus projImp = averagePhase(imp, nc, nz, nt, totalIntens);
-            recordRmsErr(imp, projImp);  // FIXME, change to correlation!
+            recordAngleNRMSEs(imp, projImp);
             calcNormalizationFactors(imp, nc, angles, totalIntens, normFactors);
             ImagePlus colorImp = colorAngles(imp, projImp, nc, nz, normFactors);
             results.addImp("Each angle phase-averaged, normalized," +
@@ -99,18 +98,17 @@ public class Raw_MotionAndIllumVar implements PlugIn, Executable {
         return results;
     }
     
-    /** For each channel of phase-projected raw SIM data, calculate RMS error 
-     * versus mean projection over all Z and t for all angles (averaging over
-     * angles) and add these per-channel stats to results. 
+    /** For each channel of phase-projected raw SIM data, calculate normalised
+     * RMSE of intensities all angles versus the average and add to results. 
      */
-    private void recordRmsErr(ImagePlus impRaw, ImagePlus impPP) {
+    private void recordAngleNRMSEs(ImagePlus impRaw, ImagePlus impPP) {
         Util_SItoPseudoWidefield si2wf = new Util_SItoPseudoWidefield();
         ImagePlus impWf = si2wf.exec(impRaw, phases, angles);
         int nc = impPP.getNChannels() / angles;
         int nz = impPP.getNSlices();
         int nt = impPP.getNFrames();
-        int nPP = angles * nz * nt;  // num of PP slices per channel
-        double[] rmsErr = new double[nc];
+        int nPP = nz * nt;  // num of PP slices per channel+angle
+        double[][] rmsErr = new double[nc][angles];
         int slicePP = 0;
         int sliceWf = 0;
         for (int t = 0; t < nt; t++) {
@@ -121,19 +119,24 @@ public class Raw_MotionAndIllumVar implements PlugIn, Executable {
                     for (int a = 1; a <= angles; a++) {
                         float[] ppPix = (float[])impPP.getStack().
                                 getProcessor(++slicePP).getPixels();
-                        rmsErr[c] += rmsErr(ppPix, wfPix) / nPP;
-                        // TODO: normalize to av intensity? ; test!
+                        // accumulate average normalised RMSE for channel+angle
+                        rmsErr[c][a - 1] += rmsErr(ppPix, wfPix) / nPP;
                     }
                 }
             }
         }
         for (int c = 0; c < nc; c++) {
-            results.addStat("C" + (c + 1) + " angle intensity correlation (%)",
-                    rmsErr[c], ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
+            for (int a = 0; a < angles; a++) {
+                results.addStat("C" + (c + 1) + " angle  " + (a + 1)
+                        + " normalised RMSE vs. angle mean",
+                        rmsErr[c][a], checkRmsErr(rmsErr[c][a]));  
+            }
         }
     }
     
-    /** Calculate root mean square error between arr1 and arr2. */
+    /** Calculate normalised root mean square error between arr1 and arr2.
+     * Normalisation is to mean intensity.
+     */
     private double rmsErr(float[] arr1, float[] arr2) {
         if (arr1.length != arr2.length) {
             throw new IllegalArgumentException("arrays must have same length");
@@ -143,7 +146,18 @@ public class Raw_MotionAndIllumVar implements PlugIn, Executable {
         for (int i = 0; i < n; i++) {
             sqErr += Math.pow(arr1[i] - arr2[i], 2);
         }
-        return Math.sqrt(sqErr / n);
+        return Math.sqrt(sqErr / n) / J.mean(arr2);
+    }
+    
+    /** Is this normalised RMSE stat value acceptable? */
+    private ResultSet.StatOK checkRmsErr(double statValue) {
+        if (statValue <= 0.1) {
+            return ResultSet.StatOK.YES;
+        } else if (statValue <= 0.3) {
+            return ResultSet.StatOK.MAYBE;
+        } else {
+            return ResultSet.StatOK.NO;
+        }
     }
 
     /** Arrange and run average projections of the 5 phases each CZAT. **/
