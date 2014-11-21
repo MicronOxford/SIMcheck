@@ -91,9 +91,10 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
         		"Slices in order: Phase, Z, Angle, Time (C1=red,C2=grn,C3=blu)",
         		"Slice Mean Intensity", pzat_no, avIntensities);
 
+        // assess intensities for plot scaling
         double sliceMeanMin = 0;
         double sliceMeanMax = 0;  // max of means for each slice
-        for (int slice=1; slice<=stack.getSize(); slice++) {
+        for (int slice = 1; slice <= stack.getSize(); slice++) {
             ImageProcessor ip = stack.getProcessor(slice);
             ImageStatistics stats = ImageStatistics.getStatistics(
             		ip, moptions, cal);
@@ -109,7 +110,7 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
         plot.setLimits((double)1, (double)totalPlanes 
         		/ nc, sliceMeanMin, sliceMeanMax);
 
-        // for each channel, loop through P,Z,A,T 
+        // add plot points for each channel, stepping by nc (over P,Z,A,T)
         for (int channel = 1; channel <= nc; channel++) {
             int pzat = 0;  // plot x-axis
             for (int plane = channel; plane <= totalPlanes; plane += nc) {
@@ -135,57 +136,107 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
                 plot.setColor(color);
             }
             plot.addPoints(pzat_no, avIntensities, 1);
-
-            /// (1) "Channel decay"
-            double[] xSlice = J.f2d(pzat_no);
-            double[] yIntens = J.f2d(avIntensities);
-            //  fitting with y=a*exp(bx)  ; fitter returns a, b, R^2
-            //   e.g. x=ln((2/3)/b) for 2/3 original intensity (<33% decay)
-            CurveFitter expFitter = new CurveFitter(xSlice, yIntens);
-            expFitter.doFit(CurveFitter.EXPONENTIAL);
-            double[] fitResults = expFitter.getParams();
-            double channelDecay = (double)100 * (1 - Math.exp(fitResults[1]
-            		* pzat_no.length * (zwin / nz)));
-            results.addStat(
-                    "C" + Integer.toString(channel) + " intensity decay"
-                        + " per " + (int)zwin + " z-slices (%)",
-                    (double)Math.round(channelDecay),
-                    ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
             
-            /// (2) "Angle differences"
-            float[] angleMeans = new float[na];
-            for (int angle = 1; angle <= na; angle++) {
-                float[] yIntens3 = new float[np*nz];
-                System.arraycopy(avIntensities, (angle - 1) * np * nz, 
-                		yIntens3, 0, np * nz);
-                angleMeans[angle-1] = J.mean(yIntens3);
-            }
-            double largestDiff = 0;
-            for (int angle=1; angle<=na; angle++) {
-                for (int angle2=1; angle2 < na; angle2++) {
-                    double intensityDiff = Math.abs((double)(
-                            angleMeans[angle - 1] - angleMeans[angle2 - 1]));
-                    if (intensityDiff > largestDiff) 
-                    	largestDiff = intensityDiff;
+            // calc max % intensity fluctuation over slices used to reconstruct
+            // 1 slice (e.g. 5P,9Z,3A); for central 9Z window & 1st time-point
+            int zFirst = nz / 2 - (int)zwin / 2;
+            int zLast = zFirst + (int)zwin + 1;
+            int pzMid = (np * nz / 2) + np / 2; // central phase & Z, 1st angle
+            // initialize min and max arbitrarily within window before updating
+            double intensMin = avIntensities[pzMid];
+            double intensMax = avIntensities[pzMid];
+            double intensMean = 0.0d;
+            int nWinSlices = 0;
+            for (int a = 0; a < na; a++) {
+                for (int z = 0; z < nz; z++) {
+                    if (z >= zFirst && z < zLast)  {
+                        // consider intensities inside central 9Z window
+                        for (int p = 0; p < np; p++) {
+                            nWinSlices++;
+                            int slice = (a * nz * np) + (z * np) + p;
+                            double intens = avIntensities[slice];
+                            intensMean += intens;
+                            if (intens > intensMax) {
+                                intensMax = intens;
+                            }
+                            if (intens < intensMin) {
+                                intensMin = intens;
+                            }
+                        }
+                    }
                 }
-            }
-            // normalize largest av intensity diff using max intensity angle
-            float maxAngleIntensity = J.max(angleMeans);
-            largestDiff = (double)100 * largestDiff / (double)maxAngleIntensity;
-            results.addStat("C" + Integer.toString(channel) 
-                    + " max intensity difference between angles (%)",
-                    (double)Math.round(largestDiff),
-                    ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
+            }  // TODO: test the above calc
+            intensMean /= nWinSlices;
+            double pcDiff = 100.0d * (intensMax - intensMin) / intensMean;
+            results.addStat(
+                    "C" + Integer.toString(channel) + " max % intensity"
+                        + " fluctuation over reconstruction window",
+                    (double)Math.round(pcDiff), checkPercentDiff(pcDiff));
+            // FIXME: update docs to reflect changes, noting this stat
+            // is not valid for sparse data
+            
+            
+//            /// (1) "Channel decay"
+//            double[] xSlice = J.f2d(pzat_no);
+//            double[] yIntens = J.f2d(avIntensities);
+//            //  fitting with y=a*exp(bx)  ; fitter returns a, b, R^2
+//            //   e.g. x=ln((2/3)/b) for 2/3 original intensity (<33% decay)
+//            CurveFitter expFitter = new CurveFitter(xSlice, yIntens);
+//            expFitter.doFit(CurveFitter.EXPONENTIAL);
+//            double[] fitResults = expFitter.getParams();
+//            double channelDecay = (double)100 * (1 - Math.exp(fitResults[1]
+//            		* pzat_no.length * (zwin / nz)));
+//            results.addStat(
+//                    "C" + Integer.toString(channel) + " intensity decay"
+//                        + " per " + (int)zwin + " z-slices (%)",
+//                    (double)Math.round(channelDecay),
+//                    ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
+            
+//            /// (2) "Angle differences"
+//            float[] angleMeans = new float[na];
+//            for (int angle = 1; angle <= na; angle++) {
+//                float[] yIntens3 = new float[np*nz];
+//                System.arraycopy(avIntensities, (angle - 1) * np * nz, 
+//                		yIntens3, 0, np * nz);
+//                angleMeans[angle-1] = J.mean(yIntens3);
+//            }
+//            double largestDiff = 0;
+//            for (int angle=1; angle<=na; angle++) {
+//                for (int angle2=1; angle2 < na; angle2++) {
+//                    double intensityDiff = Math.abs((double)(
+//                            angleMeans[angle - 1] - angleMeans[angle2 - 1]));
+//                    if (intensityDiff > largestDiff) 
+//                    	largestDiff = intensityDiff;
+//                }
+//            }
+//            // normalize largest av intensity diff using max intensity angle
+//            float maxAngleIntensity = J.max(angleMeans);
+//            largestDiff = (double)100 * largestDiff / (double)maxAngleIntensity;
+//            results.addStat("C" + Integer.toString(channel) 
+//                    + " max intensity difference between angles (%)",
+//                    (double)Math.round(largestDiff),
+//                    ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
         }
+        
         ImagePlus impResult = plot.getImagePlus();
         I1l.drawPlotTitle(impResult, "Per Channel Intensity Profiles");
         results.addImp(name, plot.getImagePlus());
         results.addInfo("How to interpret",
-                "intensity differences > ~30% between angles and/or" +
-                " over 9-z-window used to reconstruct each z-section" +
-                " may cause artifacts (threshold depends on" +
-                " signal-to-noise level).");
+                "intensity differences > ~30% over the 9-z-window used to"
+                + " reconstruct each z-section may cause artifacts (threshold"
+                + " depends on signal-to-noise level).");
         return results;
+    }
+    
+    /** Is this normalised RMSE stat value acceptable? */
+    private ResultSet.StatOK checkPercentDiff(double statValue) {
+        if (statValue <= 10) {
+            return ResultSet.StatOK.YES;
+        } else if (statValue <= 30) {
+            return ResultSet.StatOK.MAYBE;
+        } else {
+            return ResultSet.StatOK.NO;
+        }
     }
     
     /** Interactive test method */
