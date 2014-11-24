@@ -117,73 +117,81 @@ Style Notes
 TODO
 ====
 
-* 1.0: integration/GUI, tests, documentation & write-up up for release
-      - documentation: 
+* 0.9.6
+      - test; update docs, comments, changes & push to repos
         - document for rec FFT which plane is used / sensible mid-plane
         - Fourier proj: document power-of-2 and that cropping causes problems
+        - clearly document which checks require non-sparse data
+
+* 1.0: integration/GUI, tests, documentation & write-up up for release
+
+      - documentation: 
         - finish/improve docs, illustrate usage with pictures, examples
         - document examples of running checks from a macro
-        - for ELYRA reconstructed .czi, discard WF and decon-WF
+        - for ELYRA reconstructed .czi, discard WF and decon-WF?
           (processed data have 3 channels: recon, decon pseudoWF, WF)
         - citable code:
               https://github.com/blog/1840-improving-github-for-science
+
       - fixes:
-        - CIV combined channel mean intensity variation over 9Z central window
-          - intensity flicker etc. as additional diagnostic
-            - CIP / intensity decay: max of 3 angles' bleach rates over central 9Z?
-        - finish angle correlation stat/s (overall & peak?)
-        - min-max range stat name: signal-to-artefact ratio??
         - show saturated in MCM if *any* angle saturated
         - MCNR: auto-threshold pseudo-widefield, report per. angle MCNR
+        - check MCN noise estimate
+        - Wiener filter parameter estimate - calibrate, document
+        - fix radial profile plot scaling
+        - turn CIP into plot (to be able to save raw data) and/or normalize
+        - FTL/FTO no intensity cutoff option
+        - move spherical aberration mismatch back into reconstructed data checks??
+          (needs a bead lawn)
+        - better names for max/min ratio & SAM check
+        - min-max range stat name: signal-to-artefact ratio??
         - make sure all parameters chosen are logged
         - run multi-frame -- fix / document; all stats reported for current time-point only?
         - ortho rec FFT: option for full stack (for now, until 3D FFT)
-        - fix radial profile plot scaling
-        - turn CIP into plot (to be able to save raw data) and/or normalize
-        - CIP: warn about saturation? /show min/max?
-        - move spherical aberration mismatch back into reconstructed data checks??
-          (needs a bead lawn)
+
         - standalone MCM -- report av mod contrast
         - turn FTR profile into multi-color and/or plot
-        - FTL/FTO no intensity cutoff option
         - rename build output to include underscore!
-        - better names for max/min ratio & SAM check
         - make sure TLAs / filenames are in the log (Justin)
         - debug issues with crop utility & move to separate utility plugin
         - improve "Fourier Transform Phases" info / log output
         - Rec MCM: saturated if *any* of 15 input pixels are saturated
         - recon FT radial profile scale / units
-        - Wiener filter parameter estimate - calibrate, document
         - channel order: RGB vs. BGR
         - test / finish spherical aberration mismatch check
         - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
         - get rid of IJ.run calls & show/hide of intermediate results 
         - angle labels etc. should be overlaid, not drawn
         - remove unused intermediate results from Windows list
+
       - features:
-        - report frame-to-frame flicker
+        - display / warn about saturated pixels in raw data MCN check
+        - report per. angle modulation contrast and/or minimum of these?
+        - SI pattern focus flicker corr?
+        - raw -> WF same size as rec by interpolation (& preserve type??)
+        - re-introduce individual stats from CIV intensity fuctuation?:
+          - frame-to-frame flicker
+          - phase-to-phase variability?
+          - angle-to-angle variability?
+        - stat to detect motion? ("peak" angle difference?)
         - rec Fourier:-
           - lat: pattern angles (use "SIMcheck.angle1" pref), 3 color profiles
           - axial FFT: project over central slice range, not just 1
           - axial FFT: profile plot?
-        - report per. angle modulation contrast and/or minimum of these?
-        - display / warn about saturated pixels in raw data MCN check
-        - SI pattern focus flicker corr?
         - "target plot" on raw fourier projection?
         - Fourier proj stat(s)? spots over angles, 1st vs second, stability?
-        - raw -> WF same size as rec by interpolation (& preserve type??)
         - spherical aberration mismatch check: axis always symmetrical about 0?
         - window positioning: dialog to top left, ...
+
       - tests, structure:
         - final empirical tests, param calibration, tolerances etc.
+        - test data:
+          - compact test / example data suite for distribution
+          - work out strategy for test data distribution
         - tidy up tests:
           - .main() for interactive test, .test() to unit-test private methods
           - unit tests to run without test data (download should build easily)
           - more tests to test/debug non-interactive code, preconditions (inputs)
-        - test data:
-          - compact test / example data suite for distribution
-          - work out strategy for test data distribution
-        - add ResultTable support to ResultSet class
 
 * 1.1: future features
       - convert dialog & logging to swing GUI
