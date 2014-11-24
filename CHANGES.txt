@@ -42,3 +42,9 @@ Version 0.9.5
 * added option to specify camera bit depth (to identify saturation)
 * Look-Up Tables displayed as overlay on results when appropriate
 * the log output / report generation has been tidied up
+
+Version 0.9.6
+-------------
+* new Result Table summarising key numerical stats and interpretation
+* RMSE stat for MIV check implementation finished
+* CIP changed to report overall intensity fluctuation statistic
