@@ -117,12 +117,6 @@ Style Notes
 TODO
 ====
 
-* 0.9.6
-      - test; update docs, comments, changes & push to repos
-        - document for rec FFT which plane is used / sensible mid-plane
-        - Fourier proj: document power-of-2 and that cropping causes problems
-        - clearly document which checks require non-sparse data
-
 * 1.0: integration/GUI, tests, documentation & write-up up for release
 
       - documentation: 
