@@ -28,7 +28,7 @@ import ij.IJ;
 import java.awt.Color;
 
 /** This plugin plots slice average intensity for each channel of raw SI data
- * to evaluate bleaching as phase, Z, angle and time are incremented.
+ * to evaluate intensity stability as phase, Z, angle and time are incremented.
  * Each channel is plotted in a different (arbitrary) color.
  * @author Graeme Ball <graemeball@gmail.com>
  */
@@ -228,7 +228,7 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
         return results;
     }
     
-    /** Is this normalised RMSE stat value acceptable? */
+    /** Is this percentage difference stat value acceptable? */
     private ResultSet.StatOK checkPercentDiff(double statValue) {
         if (statValue <= 10) {
             return ResultSet.StatOK.YES;
