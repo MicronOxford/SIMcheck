@@ -119,6 +119,20 @@ TODO
 
 * 1.0: integration/GUI, tests, documentation & write-up up for release
 
+      - priority for submission
+        - CIP overall variation calc: (max - min) / max
+        - CIP components & per-angle stdev/mean for flicker
+        - improve feature means stat (MCN) -- stack hist? pseudo-wf?
+        - RIH: reduce percentage to 0.0001, with 100-pix min
+        - MCM: show saturated if *any* angle saturated
+        - MCM/MCN: note that green is saturated in log,
+          & ideally add to overlay where saturated pixels present
+        - add SAM check back into recon checks, but default un-ticked
+        - default un-tick raw fourier projection
+        - MIV RMSE stat: statOK=NA and pre-normalise over angles
+        - normalise raw fourier before projection
+        - correct flicker for illumination pattern check
+
       - documentation: 
         - finish/improve docs, illustrate usage with pictures, examples
         - document examples of running checks from a macro
@@ -128,10 +142,8 @@ TODO
               https://github.com/blog/1840-improving-github-for-science
 
       - fixes:
-        - show saturated in MCM if *any* angle saturated
         - MCNR: auto-threshold pseudo-widefield, report per. angle MCNR
         - check MCN noise estimate
-        - Wiener filter parameter estimate - calibrate, document
         - fix radial profile plot scaling
         - turn CIP into plot (to be able to save raw data) and/or normalize
         - FTL/FTO no intensity cutoff option
@@ -142,11 +154,11 @@ TODO
         - make sure all parameters chosen are logged
         - run multi-frame -- fix / document; all stats reported for current time-point only?
         - ortho rec FFT: option for full stack (for now, until 3D FFT)
+        - make sure TLAs / filenames are in the log (Justin)
 
         - standalone MCM -- report av mod contrast
         - turn FTR profile into multi-color and/or plot
         - rename build output to include underscore!
-        - make sure TLAs / filenames are in the log (Justin)
         - debug issues with crop utility & move to separate utility plugin
         - improve "Fourier Transform Phases" info / log output
         - Rec MCM: saturated if *any* of 15 input pixels are saturated
