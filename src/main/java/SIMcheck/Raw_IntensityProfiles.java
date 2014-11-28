@@ -172,50 +172,47 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
                     "C" + Integer.toString(channel) + " max % intensity"
                         + " variation over reconstruction window",
                     (double)Math.round(pcDiff), checkPercentDiff(pcDiff));
-            // FIXME: update docs to reflect changes, noting this stat
-            // is not valid for sparse data
             
+            /// (1) "Channel decay"
+            double[] xSlice = J.f2d(pzat_no);
+            double[] yIntens = J.f2d(avIntensities);
+            //  fitting with y=a*exp(bx)  ; fitter returns a, b, R^2
+            //   e.g. x=ln((2/3)/b) for 2/3 original intensity (<33% decay)
+            CurveFitter expFitter = new CurveFitter(xSlice, yIntens);
+            expFitter.doFit(CurveFitter.EXPONENTIAL);
+            double[] fitResults = expFitter.getParams();
+            double channelDecay = (double)100 * (1 - Math.exp(fitResults[1]
+            		* pzat_no.length * (zwin / nz)));
+            results.addStat(
+                    "C" + Integer.toString(channel) + " intensity decay"
+                        + " per " + (int)zwin + " z-slices (%)",
+                    (double)Math.round(channelDecay),
+                    ResultSet.StatOK.NA);
             
-//            /// (1) "Channel decay"
-//            double[] xSlice = J.f2d(pzat_no);
-//            double[] yIntens = J.f2d(avIntensities);
-//            //  fitting with y=a*exp(bx)  ; fitter returns a, b, R^2
-//            //   e.g. x=ln((2/3)/b) for 2/3 original intensity (<33% decay)
-//            CurveFitter expFitter = new CurveFitter(xSlice, yIntens);
-//            expFitter.doFit(CurveFitter.EXPONENTIAL);
-//            double[] fitResults = expFitter.getParams();
-//            double channelDecay = (double)100 * (1 - Math.exp(fitResults[1]
-//            		* pzat_no.length * (zwin / nz)));
-//            results.addStat(
-//                    "C" + Integer.toString(channel) + " intensity decay"
-//                        + " per " + (int)zwin + " z-slices (%)",
-//                    (double)Math.round(channelDecay),
-//                    ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
-            
-//            /// (2) "Angle differences"
-//            float[] angleMeans = new float[na];
-//            for (int angle = 1; angle <= na; angle++) {
-//                float[] yIntens3 = new float[np*nz];
-//                System.arraycopy(avIntensities, (angle - 1) * np * nz, 
-//                		yIntens3, 0, np * nz);
-//                angleMeans[angle-1] = J.mean(yIntens3);
-//            }
-//            double largestDiff = 0;
-//            for (int angle=1; angle<=na; angle++) {
-//                for (int angle2=1; angle2 < na; angle2++) {
-//                    double intensityDiff = Math.abs((double)(
-//                            angleMeans[angle - 1] - angleMeans[angle2 - 1]));
-//                    if (intensityDiff > largestDiff) 
-//                    	largestDiff = intensityDiff;
-//                }
-//            }
-//            // normalize largest av intensity diff using max intensity angle
-//            float maxAngleIntensity = J.max(angleMeans);
-//            largestDiff = (double)100 * largestDiff / (double)maxAngleIntensity;
-//            results.addStat("C" + Integer.toString(channel) 
-//                    + " max intensity difference between angles (%)",
-//                    (double)Math.round(largestDiff),
-//                    ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
+            /// (2) "Angle differences"
+            float[] angleMeans = new float[na];
+            for (int angle = 1; angle <= na; angle++) {
+                float[] yIntens3 = new float[np*nz];
+                System.arraycopy(avIntensities, (angle - 1) * np * nz, 
+                		yIntens3, 0, np * nz);
+                angleMeans[angle-1] = J.mean(yIntens3);
+            }
+            double largestDiff = 0;
+            for (int angle=1; angle<=na; angle++) {
+                for (int angle2=1; angle2 < na; angle2++) {
+                    double intensityDiff = Math.abs((double)(
+                            angleMeans[angle - 1] - angleMeans[angle2 - 1]));
+                    if (intensityDiff > largestDiff) 
+                    	largestDiff = intensityDiff;
+                }
+            }
+            // normalize largest av intensity diff using max intensity angle
+            float maxAngleIntensity = J.max(angleMeans);
+            largestDiff = (double)100 * largestDiff / (double)maxAngleIntensity;
+            results.addStat("C" + Integer.toString(channel) 
+                    + " max intensity difference between angles (%)",
+                    (double)Math.round(largestDiff),
+                    ResultSet.StatOK.NA);
         }
         
         ImagePlus impResult = plot.getImagePlus();
