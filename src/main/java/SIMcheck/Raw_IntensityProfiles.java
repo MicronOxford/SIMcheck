@@ -170,7 +170,7 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
             double pcDiff = 100.0d * (intensMax - intensMin) / intensMean;
             results.addStat(
                     "C" + Integer.toString(channel) + " max % intensity"
-                        + " fluctuation over reconstruction window",
+                        + " variation over reconstruction window",
                     (double)Math.round(pcDiff), checkPercentDiff(pcDiff));
             // FIXME: update docs to reflect changes, noting this stat
             // is not valid for sparse data
