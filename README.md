@@ -120,7 +120,6 @@ TODO
 * 1.0: integration/GUI, tests, documentation & write-up up for release
 
       - priority for submission
-        - MCM: note that green is saturated in log
         - MCM: add note to overlay where saturated pixels present?
         - MCM: show saturated if *any* angle saturated
         - CIP components & per-angle stdev/mean for flicker
@@ -142,7 +141,6 @@ TODO
         - MCNR: auto-threshold pseudo-widefield, report per. angle MCNR
         - check MCN noise estimate
         - fix radial profile plot scaling
-        - handle MCM w/o MCN ticked elegantly in main dialog
         - fix / re-introduce working MIV stats -- RMSE? peak RMSE?
         - turn CIP into plot (to be able to save raw data) and/or normalize
         - FTL/FTO no intensity cutoff option

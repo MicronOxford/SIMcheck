@@ -119,7 +119,7 @@ public final class SIMcheck_ implements PlugIn {
         gd.addCheckbox(Rec_SAMismatch.name, doSAMismatch);
         gd.addCheckbox(Rec_FourierPlots.name, doFourierPlots);
         gd.addCheckbox(Rec_ModContrastMap.name +
-                " (requires Raw Mod Contrast)", doModContrastMap);
+                " (requires raw data)", doModContrastMap);
         gd.addMessage("---------- Select Subregion (XYZ) ----------");
         gd.addCheckbox("Crop data? (use reconstructed data ROI for XY)", doCrop);
         gd.addMessage("To crop in Z, enter slice numbers, 'first' or 'last'");
