@@ -120,17 +120,16 @@ TODO
 * 1.0: integration/GUI, tests, documentation & write-up up for release
 
       - priority for submission
-        - CIP overall variation calc: (max - min) / max
-        - CIP components & per-angle stdev/mean for flicker
-        - improve feature means stat (MCN) -- stack hist? pseudo-wf?
-        - RIH: reduce percentage to 0.0001, with 100-pix min
-        - MCM: show saturated if *any* angle saturated
-        - MCM/MCN: note that green is saturated in log,
-          & ideally add to overlay where saturated pixels present
         - add SAM check back into recon checks, but default un-ticked
-        - default un-tick raw fourier projection
+        - CIP overall variation calc: (max - min) / max
+        - RIH: reduce percentage to 0.0001, with 100-pix min
         - MIV RMSE stat: statOK=NA and pre-normalise over angles
         - normalise raw fourier before projection
+        - MCM/MCN: note that green is saturated in log,
+          & ideally add to overlay where saturated pixels present
+        - MCM: show saturated if *any* angle saturated
+        - CIP components & per-angle stdev/mean for flicker
+        - improve feature means stat (MCN) -- stack hist? pseudo-wf?
         - correct flicker for illumination pattern check
 
       - documentation: 

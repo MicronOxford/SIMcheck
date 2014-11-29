@@ -55,7 +55,7 @@ public final class SIMcheck_ implements PlugIn {
     private int angles = 3;
     private boolean doTileAfterRun = true;
     private boolean doIntensityProfiles = true;
-    private boolean doFourierProjections = true;
+    private boolean doFourierProjections = false;
     private boolean doMotionCheck = true;
     private boolean doModContrast = true;
     private ImagePlus impMCNR = null;
