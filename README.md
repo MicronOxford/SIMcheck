@@ -120,7 +120,6 @@ TODO
 * 1.0: integration/GUI, tests, documentation & write-up up for release
 
       - priority for submission
-        - add SAM check back into recon checks, but default un-ticked
         - CIP overall variation calc: (max - min) / max
         - RIH: reduce percentage to 0.0001, with 100-pix min
         - MIV RMSE stat: statOK=NA and pre-normalise over angles
@@ -129,6 +128,7 @@ TODO
           & ideally add to overlay where saturated pixels present
         - MCM: show saturated if *any* angle saturated
         - CIP components & per-angle stdev/mean for flicker
+        - proper SAMismatch stat value check
         - improve feature means stat (MCN) -- stack hist? pseudo-wf?
         - correct flicker for illumination pattern check
 
@@ -144,6 +144,7 @@ TODO
         - MCNR: auto-threshold pseudo-widefield, report per. angle MCNR
         - check MCN noise estimate
         - fix radial profile plot scaling
+        - handle MCM w/o MCN ticked elegantly in main dialog
         - turn CIP into plot (to be able to save raw data) and/or normalize
         - FTL/FTO no intensity cutoff option
         - move spherical aberration mismatch back into reconstructed data checks??

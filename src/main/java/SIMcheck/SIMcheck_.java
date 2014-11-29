@@ -61,6 +61,7 @@ public final class SIMcheck_ implements PlugIn {
     private ImagePlus impMCNR = null;
     private ImagePlus impRecon = null;
     private boolean doHistograms = true;
+    private boolean doSAMismatch = false;
     private boolean doFourierPlots = true;
     private boolean doModContrastMap = true;
     private boolean doCrop = false;
@@ -115,6 +116,7 @@ public final class SIMcheck_ implements PlugIn {
         gd.addMessage("------------ Reconstructed Data ------------");
         gd.addChoice("Reconstructed_Data:", titles, titles[0]);
         gd.addCheckbox(Rec_IntensityHistogram.name, doHistograms);
+        gd.addCheckbox(Rec_SAMismatch.name, doSAMismatch);
         gd.addCheckbox(Rec_FourierPlots.name, doFourierPlots);
         gd.addCheckbox(Rec_ModContrastMap.name +
                 " (requires Raw Mod Contrast)", doModContrastMap);
@@ -148,6 +150,7 @@ public final class SIMcheck_ implements PlugIn {
                 impRecon = WindowManager.getImage(reconTitle);
             }
             doHistograms = gd.getNextBoolean();
+            doSAMismatch = gd.getNextBoolean();
             doFourierPlots = gd.getNextBoolean();
             doModContrastMap = gd.getNextBoolean();
             doCrop = gd.getNextBoolean();
@@ -287,6 +290,12 @@ public final class SIMcheck_ implements PlugIn {
             if (doHistograms) {
                 Rec_IntensityHistogram rih = new Rec_IntensityHistogram();
                 ResultSet results = rih.exec(impRecon);
+                results.report();
+                allResults.add(results);
+            }
+            if (doSAMismatch) {
+                Rec_SAMismatch sam = new Rec_SAMismatch();
+                ResultSet results = sam.exec(impRecon);
                 results.report();
                 allResults.add(results);
             }
