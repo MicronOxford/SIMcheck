@@ -120,7 +120,6 @@ TODO
 * 1.0: integration/GUI, tests, documentation & write-up up for release
 
       - priority for submission
-        - RIH: reduce percentage to 0.0001, with 100-pix min
         - MIV RMSE stat: statOK=NA and pre-normalise over angles
         - normalise raw fourier before projection
         - MCM/MCN: note that green is saturated in log,

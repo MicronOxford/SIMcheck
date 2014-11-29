@@ -38,7 +38,8 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
     
     // parameter fields
     // FIXME -- percentile with lower limit??
-    public double percentile = 0.0001;  // use 0-100% of histogram extrema
+    public double percentile = 0.0005;  // use 0-100% of histogram extrema
+    public long minPixels = 100; // minimum pixels at histogram extrema to use
     public double modeTol = 0.25;  // mode should be within modeTol*stdev of 0
     
     // noise cut-off
@@ -87,10 +88,15 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
                         + Math.round(background) 
                         + " not within " + modeTol + " stdDev of 0\n");
             }
-            if (stats.histMin < background) {
+            if (stats.histMin <= background) {
+                // ensure we consider a bare minimum of pixels
+                long totalPixels = stats.longPixelCount;
+                if (totalPixels * percentile / 100 < minPixels) {
+                    percentile = (double)minPixels * 100 / totalPixels;
+                }
                 // caluclate +ve / -ve ratio if histogram has negatives
                 double posNegRatio = calcPosNegRatio(
-                		stats, (double)percentile / 100, background);
+                		stats, percentile / 100, background);
                 String statDescription = "C" + c +
                         " max / min intensity ratio";
                 double roundedRatio = (double)((int)(posNegRatio * 10)) / 10;
@@ -156,7 +162,7 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
         double negTotal = 0;
         int bin = 0;
         double binValue = stats.histMin;
-        while (negPc < pc && binValue < bg && bin < hist.length) {
+        while (negPc < pc && binValue <= bg && bin < hist.length) {
             negPc += (double)hist[bin] / nPixels;
             negTotal += (binValue - bg) * hist[bin];  // make mode 0
             bin += 1;
