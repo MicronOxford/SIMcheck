@@ -119,6 +119,7 @@ public class J {
         }
         return result;
     }
+    
 
     /** Divide two float arrays fN, fD of identical dimensions element-wise. */
     public static float[] div(float[] fN, float[] fD) {
@@ -210,6 +211,16 @@ public class J {
             if (f[i] < min) min = f[i];
         }
         return min;
+    }
+
+    /** Multiply each element of a float array by a float. */
+    public static float[] mult(float[] f, float factor) {
+        int len = f.length;
+        float[] result = new float[len];
+        for (int i = 0; i < f.length; i++) {
+            result[i] = (float)f[i] * factor;
+        }
+        return result;
     }
     
     /** Return a string containing n repeats of charString. */

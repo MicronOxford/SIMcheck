@@ -120,7 +120,6 @@ TODO
 * 1.0: integration/GUI, tests, documentation & write-up up for release
 
       - priority for submission
-        - MIV RMSE stat: statOK=NA and pre-normalise over angles
         - normalise raw fourier before projection
         - MCM/MCN: note that green is saturated in log,
           & ideally add to overlay where saturated pixels present
@@ -143,6 +142,7 @@ TODO
         - check MCN noise estimate
         - fix radial profile plot scaling
         - handle MCM w/o MCN ticked elegantly in main dialog
+        - fix / re-introduce working MIV stats -- RMSE? peak RMSE?
         - turn CIP into plot (to be able to save raw data) and/or normalize
         - FTL/FTO no intensity cutoff option
         - move spherical aberration mismatch back into reconstructed data checks??
@@ -177,6 +177,7 @@ TODO
           - frame-to-frame flicker
           - phase-to-phase variability?
           - angle-to-angle variability?
+        - establish appropriate check bounds for MIV RMSE stat
         - stat to detect motion? ("peak" angle difference?)
         - rec Fourier:-
           - lat: pattern angles (use "SIMcheck.angle1" pref), 3 color profiles
