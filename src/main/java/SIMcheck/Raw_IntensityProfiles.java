@@ -145,17 +145,17 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
             // initialize min and max arbitrarily within window before updating
             double intensMin = avIntensities[pzMid];
             double intensMax = avIntensities[pzMid];
-            double intensMean = 0.0d;
-            int nWinSlices = 0;
+//            double intensMean = 0.0d;
+//            int nWinSlices = 0;
             for (int a = 0; a < na; a++) {
                 for (int z = 0; z < nz; z++) {
                     if (z >= zFirst && z < zLast)  {
                         // consider intensities inside central 9Z window
                         for (int p = 0; p < np; p++) {
-                            nWinSlices++;
+//                            nWinSlices++;
                             int slice = (a * nz * np) + (z * np) + p;
                             double intens = avIntensities[slice];
-                            intensMean += intens;
+//                            intensMean += intens;
                             if (intens > intensMax) {
                                 intensMax = intens;
                             }
@@ -166,7 +166,7 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
                     }
                 }
             }  // TODO: test the above calc
-            intensMean /= nWinSlices;
+//            intensMean /= nWinSlices;
             double pcDiff = 100.0d * (intensMax - intensMin) / intensMax;
             results.addStat(
                     "C" + Integer.toString(channel) + " max % intensity"
