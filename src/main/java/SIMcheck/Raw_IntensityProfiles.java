@@ -167,7 +167,7 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
                 }
             }  // TODO: test the above calc
             intensMean /= nWinSlices;
-            double pcDiff = 100.0d * (intensMax - intensMin) / intensMean;
+            double pcDiff = 100.0d * (intensMax - intensMin) / intensMax;
             results.addStat(
                     "C" + Integer.toString(channel) + " max % intensity"
                         + " variation over reconstruction window",
