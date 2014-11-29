@@ -72,6 +72,7 @@ public class Raw_FourierProjections implements PlugIn, Executable {
         for (int a = 1; a <= angles; a++) {
           	ImagePlus impCurrentA = SIMcheck_.getImpForAngle(
           	        imp, a, phases, angles);
+//          	impCurrentA = Util_RescaleTo16bit.exec(impCurrentA);
           	String statusString = "Performing FFT for angle " 
           			+ Integer.toString(a);
           	IJ.showStatus(statusString);

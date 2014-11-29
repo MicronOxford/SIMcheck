@@ -120,14 +120,15 @@ TODO
 * 1.0: integration/GUI, tests, documentation & write-up up for release
 
       - priority for submission
-        - normalise raw fourier before projection
-        - MCM/MCN: note that green is saturated in log,
-          & ideally add to overlay where saturated pixels present
+        - MCM: note that green is saturated in log
+        - MCM: add note to overlay where saturated pixels present?
         - MCM: show saturated if *any* angle saturated
         - CIP components & per-angle stdev/mean for flicker
         - proper SAMismatch stat value check
-        - improve feature means stat (MCN) -- stack hist? pseudo-wf?
         - correct flicker for illumination pattern check
+        - raw fourier proj: subract per-channel mode prior to FFT?
+        - improve feature means stat (MCN) -- stack hist? pseudo-wf?
+        - MCN: introduce saturated pixel check
 
       - documentation: 
         - finish/improve docs, illustrate usage with pictures, examples
