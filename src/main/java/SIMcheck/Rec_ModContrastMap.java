@@ -116,9 +116,7 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
                     impRec.getHeight() + "," + impRec.getNSlices() + "\n");
             return results;
         }
-        // convert raw data imp into pseudo-widefield
-        Util_SItoPseudoWidefield si2wf = new Util_SItoPseudoWidefield();
-        ImagePlus wfImp = si2wf.exec(impRaw, phases, angles);
+        ImagePlus impMax = siRawMax(impRaw);  // max of phase+angle set
         IJ.showStatus(name + "...");
         ImagePlus impRec2 = (ImagePlus)impRec.duplicate();
         IJ.run(impRec2, "32-bit", "");
@@ -135,7 +133,7 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
         for (int c = 1; c <= nc; c++) {
             ImagePlus impRecC = I1l.copyChannel(impRec2, c); 
             ImagePlus MCNimpC = I1l.copyChannel(impMCNR2, c); 
-            ImagePlus wfImpC = I1l.copyChannel(wfImp, c); 
+            ImagePlus impMaxC = I1l.copyChannel(impMax, c); 
             StackStatistics stats = new ij.process.StackStatistics(impRecC);
             float chMax = (float)stats.max; 
             int slices = impRecC.getStack().getSize();
@@ -152,9 +150,9 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
                 FloatProcessor fpBlu = new FloatProcessor(width, height);
                 ImageStack RGBset = new ImageStack(width, height);  // 1 set
                 // 2. copy scaled values from input Processors to new Processors
-                FloatProcessor wfFp = 
-                        (FloatProcessor)wfImpC.getStack().getProcessor(slice);
-                scaledRGBintensities(fpRec, MCNRfpRsz, wfFp, chMax,
+                FloatProcessor fpMax = 
+                        (FloatProcessor)impMaxC.getStack().getProcessor(slice);
+                scaledRGBintensities(fpRec, MCNRfpRsz, fpMax, chMax,
                         fpRed, fpGrn, fpBlu);
                 // 3. assemble 1 RGBset (3 slices)
                 ByteProcessor bpRed = (ByteProcessor)fpRed.convertToByte(false);
@@ -230,6 +228,13 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
         }
         return match;
     }
+    
+    /** For raw SIM data, return max each of phase+angle set. */
+    private ImagePlus siRawMax(ImagePlus impRaw) {
+        Util_SItoPseudoWidefield siProj = new Util_SItoPseudoWidefield();
+        return siProj.exec(impRaw, phases, angles,
+                Util_SItoPseudoWidefield.ProjMode.MAX);
+    }
 
     /** Method to resize a FloatProcessor - IJ's doesn't work or doesn't update
      * size info :-(
@@ -272,9 +277,9 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
      */
     private void scaledRGBintensities(
             FloatProcessor fpRec, FloatProcessor MCNRfp2,
-            FloatProcessor wfFp, float chMax,
+            FloatProcessor fpMax, float chMax,
             FloatProcessor fpRed, FloatProcessor fpGrn, FloatProcessor fpBlu) {
-        float[] wfPix = (float[])wfFp.getPixels();
+        float[] fpixMax = (float[])fpMax.getPixels();
         float[] fpixRec = (float[])fpRec.getPixels();
         float[] fpixMCNR = (float[])MCNRfp2.getPixels();
         float[] fpixRed = (float[])fpRed.getPixels();
@@ -343,7 +348,7 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
         for (int i = 1; i < fpixRec.length; i++) {
             int j = i / widthRec;
             int rawI = (i / 2) % (widthRec / 2) + ((j / 2) * widthRec / 2);
-            if (wfPix[rawI] > Math.pow(2, camBitDepth) - 2) {
+            if (fpixMax[rawI] > Math.pow(2, camBitDepth) - 2) {
                 this.saturatedPixelsDetected = true;
                 fpixRed[i] = 0.0f;
                 fpixGrn[i] = 255.0f;

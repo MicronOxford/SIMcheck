@@ -35,6 +35,8 @@ public class Util_SItoPseudoWidefield implements PlugIn {
     public int angles = 3;                                                         
     
     private static ImagePlus projImg = null;  // intermediate & final results
+    
+    public enum ProjMode { AVG, MAX }  // can do projections other than average
 
     @Override 
     public void run(String arg) {
@@ -55,7 +57,7 @@ public class Util_SItoPseudoWidefield implements PlugIn {
                     "Error: stack size not consistent with phases/angles.");
             return;                                                             
         }
-        projImg = exec(imp, phases, angles);  
+        projImg = exec(imp, phases, angles, ProjMode.AVG);  
         IJ.run("Brightness/Contrast...");
         projImg.show();
     }
@@ -66,7 +68,7 @@ public class Util_SItoPseudoWidefield implements PlugIn {
      * @param angles number of angles                                   
      * @return ImagePlus with all phases and angles averaged
      */ 
-    public ImagePlus exec(ImagePlus imp, int phases, int angles) {
+    public ImagePlus exec(ImagePlus imp, int phases, int angles, ProjMode m) {
         ImagePlus impCopy = imp.duplicate();
         this.angles = angles;
         this.phases = phases;
@@ -75,14 +77,14 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         int frames = imp.getNFrames();
         Zplanes = Zplanes/(phases*angles);  // take phase & angle out of Z
         new StackConverter(impCopy).convertToGray32();  
-        averagePandA(impCopy, channels, Zplanes, frames);
+        projectPandA(impCopy, channels, Zplanes, frames, m);
         I1l.copyCal(imp, projImg);
         projImg.setTitle(I1l.makeTitle(imp, TLA));  
         return projImg;
     }
 
-    /** Average projections of 5 phases, 3 angles for each CZT **/
-    private ImagePlus averagePandA(ImagePlus imp, int nc, int nz, int nt) {
+    /** Projection e.g. 5 phases, 3 angles for each CZT. **/
+    ImagePlus projectPandA(ImagePlus imp, int nc, int nz, int nt, ProjMode m) {
         ImageStack stack = imp.getStack(); 
         ImageStack PAset = new ImageStack(imp.getWidth(), imp.getHeight());
         ImageStack avStack = new ImageStack(imp.getWidth(), imp.getHeight());
@@ -106,7 +108,17 @@ public class Util_SItoPseudoWidefield implements PlugIn {
                             ImageProcessor ip = stack.getProcessor(sliceIn);
                             PAset.addSlice(null, stack.getProcessor(sliceIn));
                             if ((p * a == PAsetSize)) {
-                                ip = avSlices(imp, PAset, PAsetSize);
+                                switch (m)
+                                {
+                                  case AVG:
+                                      ip = avSlices(imp, PAset, PAsetSize);
+                                      break;
+                                  case MAX:
+                                      ip = maxSlices(imp, PAset, PAsetSize);
+                                      break;
+                                  default: 
+                                      ip = avSlices(imp, PAset, PAsetSize);
+                                }
                                 for (int slice = PAsetSize; slice >= 1; slice--) {
                                     PAset.deleteSlice(slice);
                                 }
@@ -129,7 +141,7 @@ public class Util_SItoPseudoWidefield implements PlugIn {
     }
 
     /** Average slices (32-bit floats). */
-    private ImageProcessor avSlices(
+    private static ImageProcessor avSlices(
             ImagePlus imp, ImageStack stack, int slices) {
         int width = imp.getWidth();                                             
         int height = imp.getHeight();
@@ -149,6 +161,30 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         }
         oip = new FloatProcessor(width, height, avpixels, null);
         return oip;
+    }
+
+    /** Max of slices (32-bit floats). */
+    private static ImageProcessor maxSlices(
+            ImagePlus imp, ImageStack stack, int slices) {
+        int width = imp.getWidth();                                             
+        int height = imp.getHeight();
+        int len = width * height;
+        FloatProcessor fpOut = new FloatProcessor(width, height);
+        float[] maxPixels = null;
+        for (int slice = 1; slice <= slices; slice++){
+            FloatProcessor fp = (FloatProcessor)stack.getProcessor(slice).convertToFloat();  
+            float[] fpixels = (float[])fp.getPixels();
+            if (slice == 1) {
+                maxPixels = fpixels;
+            }
+            for (int i = 0; i < len; i++) {
+                if (fpixels[i] > maxPixels[i]) {
+                    maxPixels[i] = fpixels[i];
+                }
+            }
+        }
+        fpOut = new FloatProcessor(width, height, maxPixels, null);
+        return fpOut;
     }
     
     /** Interactive test method. */
