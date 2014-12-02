@@ -120,7 +120,7 @@ TODO
 * 1.0: integration/GUI, tests, documentation & write-up up for release
 
       - priority for submission
-        - CIP components & per-angle stdev/mean for flicker
+        - fix intensity stdev stat to detect flicker
         - correct flicker for illumination pattern check
         - MCM: add note to overlay where saturated pixels present?
         - proper SAMismatch stat value check

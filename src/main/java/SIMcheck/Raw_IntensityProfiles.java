@@ -137,10 +137,14 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
             }
             plot.addPoints(pzat_no, avIntensities, 1);
             
+            // TODO: refactor the code below, which has grown very messy!
+            
+            // (0) overall stat, influenced by (1), (2) and (3)
             // calc max % intensity fluctuation over slices used to reconstruct
             // 1 slice (e.g. 5P,9Z,3A); for central 9Z window & 1st time-point
             int zFirst = nz / 2 - (int)zwin / 2;
-            int zLast = zFirst + (int)zwin + 1;
+//            int zLast = zFirst + (int)zwin + 1;
+            int zLast = zFirst + (int)zwin;
             int pzMid = (np * nz / 2) + np / 2; // central phase & Z, 1st angle
             // initialize min and max arbitrarily within window before updating
             double intensMin = avIntensities[pzMid];
@@ -173,7 +177,7 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
                         + " variation over reconstruction window",
                     (double)Math.round(pcDiff), checkPercentDiff(pcDiff));
             
-            /// (1) "Channel decay"
+            /// (1) per-channel intensity decay
             double[] xSlice = J.f2d(pzat_no);
             double[] yIntens = J.f2d(avIntensities);
             //  fitting with y=a*exp(bx)  ; fitter returns a, b, R^2
@@ -189,7 +193,7 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
                     (double)Math.round(channelDecay),
                     ResultSet.StatOK.NA);
             
-            /// (2) "Angle differences"
+            /// (2) angle intensity differences
             float[] angleMeans = new float[na];
             for (int angle = 1; angle <= na; angle++) {
                 float[] yIntens3 = new float[np*nz];
@@ -213,6 +217,32 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
                     + " max intensity difference between angles (%)",
                     (double)Math.round(largestDiff),
                     ResultSet.StatOK.NA);
+            
+            // (3) intensity stdDev over central 9Z, averaged over P and A
+            // re-use zFirst and zLast for central 9Z window from (0) above
+            double[][] zSeries = new double[na * np][(int)zwin];
+            for (int a = 0; a < na; a++) {
+                for (int z = 0; z < nz; z++) {
+                    if (z >= zFirst && z < zLast) {
+                        // consider intensities inside central 9Z window
+                        for (int p = 0; p < np; p++) {
+                            int slice = (a * nz * np) + (z * np) + p;
+                            zSeries[a * p + p][z - zFirst] = avIntensities[slice];
+                        }
+                    }
+                }
+            }
+            double avStdDev = 0.0d;
+            for (int ap = 0; ap < na * np; ap++) {
+                avStdDev += Math.sqrt(J.variance(zSeries[ap]));
+            }
+            avStdDev /= (na * np);
+            avStdDev = 100.0d * avStdDev / intensMax;
+            results.addStat("C" + Integer.toString(channel) 
+                    + " intensity standard deviation over reconstruction"
+                    + " window, averaged over phase and angle (%)", avStdDev,
+                    ResultSet.StatOK.NA);
+            
         }
         
         ImagePlus impResult = plot.getImagePlus();
