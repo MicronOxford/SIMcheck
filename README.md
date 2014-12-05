@@ -109,7 +109,7 @@ Style Notes
 * simple, modular structure - each check is a standalone plugin
 * plugin exec methods take input images and return ResultSet
   (no GUI calls within exec when easily avoidable)
-* no dependencies other than ImageJ1, apart from JUnit for testing
+* no run-time dependencies other than ImageJ1
 * ImageJ1-like preference for pre- java 5 features (i.e. not many generics)
   and reliance on float primitive type for most calculations
 
@@ -117,15 +117,29 @@ Style Notes
 TODO
 ====
 
-* 1.0: integration/GUI, tests, documentation & write-up up for release
+* 0.9.7: final pre-submission features & fixes
 
-      - priority for submission
-        - fix intensity stdev stat to detect flicker
-        - correct flicker for illumination pattern check
-        - MCM: add note to overlay where saturated pixels present?
-        - proper SAMismatch stat value check
-        - raw fourier proj: subract per-channel mode prior to FFT?
-        - improve feature means stat (MCN) -- stack hist? pseudo-wf?
+      - fix intensity stdev stat to detect flicker (max-min)/max
+      - use the term "slice" for the raw data and "z-section" for the
+        reconstructed data
+      - for the raw FFT projection: apply stack FFT with win func,
+        bleach correction "simple ratio", subtract 50, max-intensity
+        project, auto-contrast mode-max
+      - correct flicker for illumination pattern check
+      - pseudo-widefield: simple ratio bleach correction, project & perserve
+        16-bit, bicubic interpolation
+      - check CIP bleaching stat calculation
+        (SIMcheck->0_good_3colormultinuclearstaining->DAPI_PNCA_514_15)
+      - proper SAMismatch stat value check
+
+      - sort out stats rounding to zero
+      - FTO, project some slices, not just single central slice
+      - improve feature means stat (MCN) -- stack hist? pseudo-wf?
+      - z min variation, use >=10 pixels to estimate minimum
+      - MCM: add note to overlay where saturated pixels present?
+      - MCN, show saturated pixels in raw data?
+
+* 0.9.8: post-submission refactoring & documentation updates
 
       - documentation: 
         - finish/improve docs, illustrate usage with pictures, examples
@@ -135,6 +149,22 @@ TODO
         - citable code:
               https://github.com/blog/1840-improving-github-for-science
 
+      - tests, structure:
+        - test data:
+          - compact test / example data suite for distribution
+          - work out strategy for test data distribution
+        - test crop utility & move to separate utility plugin
+        - tidy up tests:
+          - .main() for interactive test, .test() to unit-test private methods
+          - unit tests to run without test data (download should build easily)
+          - more tests to test/debug non-interactive code, preconditions (inputs)
+
+* 0.9.9: additional features & updates suggested by referees
+
+      - ???
+
+* 1.0: final updates & documentation for release
+
       - fixes:
         - MCNR: auto-threshold pseudo-widefield, report per. angle MCNR
         - check MCN noise estimate
@@ -142,10 +172,7 @@ TODO
         - fix / re-introduce working MIV stats -- RMSE? peak RMSE?
         - turn CIP into plot (to be able to save raw data) and/or normalize
         - FTL/FTO no intensity cutoff option
-        - move spherical aberration mismatch back into reconstructed data checks??
-          (needs a bead lawn)
         - better names for max/min ratio & SAM check
-        - min-max range stat name: signal-to-artefact ratio??
         - make sure all parameters chosen are logged
         - run multi-frame -- fix / document; all stats reported for current time-point only?
         - ortho rec FFT: option for full stack (for now, until 3D FFT)
@@ -154,13 +181,11 @@ TODO
         - standalone MCM -- report av mod contrast
         - turn FTR profile into multi-color and/or plot
         - rename build output to include underscore!
-        - debug issues with crop utility & move to separate utility plugin
         - improve "Fourier Transform Phases" info / log output
-        - Rec MCM: saturated if *any* of 15 input pixels are saturated
         - recon FT radial profile scale / units
+        - spherical aberration mismatch check: axis always symmetrical about 0?
+        - test & refactor Cal_Phases: unwrap (+test case), stats and structure
         - channel order: RGB vs. BGR
-        - test / finish spherical aberration mismatch check
-        - finish & refactor Cal_Phases: unwrap (+test case), stats and structure
         - get rid of IJ.run calls & show/hide of intermediate results 
         - angle labels etc. should be overlaid, not drawn
         - remove unused intermediate results from Windows list
@@ -168,45 +193,18 @@ TODO
       - features:
         - display / warn about saturated pixels in raw data MCN check
         - report per. angle modulation contrast and/or minimum of these?
-        - SI pattern focus flicker corr?
-        - raw -> WF same size as rec by interpolation (& preserve type??)
-        - re-introduce individual stats from CIV intensity fuctuation?:
-          - frame-to-frame flicker
-          - phase-to-phase variability?
-          - angle-to-angle variability?
-        - establish appropriate check bounds for MIV RMSE stat
-        - stat to detect motion? ("peak" angle difference?)
+        - stats to detect motion & illumination variation?
         - rec Fourier:-
           - lat: pattern angles (use "SIMcheck.angle1" pref), 3 color profiles
-          - axial FFT: project over central slice range, not just 1
-          - axial FFT: profile plot?
-        - "target plot" on raw fourier projection?
-        - Fourier proj stat(s)? spots over angles, 1st vs second, stability?
-        - spherical aberration mismatch check: axis always symmetrical about 0?
         - window positioning: dialog to top left, ...
 
-      - tests, structure:
-        - final empirical tests, param calibration, tolerances etc.
-        - test data:
-          - compact test / example data suite for distribution
-          - work out strategy for test data distribution
-        - tidy up tests:
-          - .main() for interactive test, .test() to unit-test private methods
-          - unit tests to run without test data (download should build easily)
-          - more tests to test/debug non-interactive code, preconditions (inputs)
+* 1.1: integrated swing GUI control
 
-* 1.1: future features
-      - convert dialog & logging to swing GUI
-      - rec: FFT automatic resolution estimation??
-      - 3D FFT
-      - estimate phase drift & correct in MCNR calc
-      - raw: estimate angles & line-spacing for FFT, pattern focus?
-      - cal: PSF symmetry within tolerance?
-      - cal: OTF extent, shape & order separation?
-      - util: merge/shuffle:-
-        - tool for merging SIM & widefield data (Julio)
-        - re-order channels
-      - pre: plot channel color from channel metadata
+* 1.2: 3D FFT and estimation of phase drift, angles and line-spacing
+
+* 1.3: additional numerical stats, including resolution estimate
+
+* 1.4: PSF and OTF symmetry, extent, shape & order separation
 
 
 SIM Reconstruction Problems & Remedies 
