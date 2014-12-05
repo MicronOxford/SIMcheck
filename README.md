@@ -155,6 +155,17 @@ TODO
           - .main() for interactive test, .test() to unit-test private methods
           - unit tests to run without test data (download should build easily)
           - more tests to test/debug non-interactive code, preconditions (inputs)
+        - rename build output to include underscore!
+        - make sure all parameters chosen are logged
+        - run multi-frame -- fix / document; all stats reported for current time-point only?
+
+      - fixes:
+        - ensure MCN noise estimate includes Poisson
+        - fix radial profile plot scaling
+        - turn CIP into plot (to be able to save raw data) and/or normalize
+        - FTL/FTO no intensity cutoff option
+        - better names for max/min ratio & SAM check
+        - make sure TLAs / filenames are in the log (Justin)
 
 * 0.9.9: additional features & updates suggested by referees
 
@@ -163,21 +174,7 @@ TODO
 * 1.0: final updates & documentation for release
 
       - fixes:
-        - MCNR: auto-threshold pseudo-widefield, report per. angle MCNR
-        - check MCN noise estimate
-        - fix radial profile plot scaling
-        - fix / re-introduce working MIV stats -- RMSE? peak RMSE?
-        - turn CIP into plot (to be able to save raw data) and/or normalize
-        - FTL/FTO no intensity cutoff option
-        - better names for max/min ratio & SAM check
-        - make sure all parameters chosen are logged
-        - run multi-frame -- fix / document; all stats reported for current time-point only?
-        - ortho rec FFT: option for full stack (for now, until 3D FFT)
-        - make sure TLAs / filenames are in the log (Justin)
-
-        - standalone MCM -- report av mod contrast
         - turn FTR profile into multi-color and/or plot
-        - rename build output to include underscore!
         - improve "Fourier Transform Phases" info / log output
         - recon FT radial profile scale / units
         - spherical aberration mismatch check: axis always symmetrical about 0?
@@ -189,11 +186,11 @@ TODO
 
       - features:
         - display / warn about saturated pixels in raw data MCN check
+        - MCN: auto-threshold pseudo-widefield, report per. angle MCNR
         - report per. angle modulation contrast and/or minimum of these?
         - stats to detect motion & illumination variation?
         - rec Fourier:-
           - lat: pattern angles (use "SIMcheck.angle1" pref), 3 color profiles
-        - window positioning: dialog to top left, ...
 
 * 1.1: integrated swing GUI control
 
