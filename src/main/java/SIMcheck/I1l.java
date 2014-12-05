@@ -355,6 +355,18 @@ public final class I1l {
         return imp2;
     }
     
+    /** Simple Ratio Intensity Normalization (RIN) of ImagePlus slices. */
+    public static ImagePlus normalizeImp(ImagePlus imp) {
+        int nc = imp.getNChannels();
+        ImagePlus[] impsNorm = new ImagePlus[nc];
+        for (int c = 0; c < nc; c++) {
+            impsNorm[c] = copyChannel(imp, c + 1);
+            impsNorm[c].setStack(normalizeStack(impsNorm[c].getStack()));
+        }
+        // FIXME: does not preserve channels
+        return I1l.mergeChannels("RIN", impsNorm);
+    }
+     
     /** Normalize fluctuations in inner 'b' dim average intensity. */
     public static float[][] normalizeInner(float[][] ab) {
         int blen = ab[0].length;
@@ -372,6 +384,25 @@ public final class I1l {
             }
         }
         return abOut;
+    }
+    
+    /** Normalize stack slice intensity using simple ratio of slice means. */
+    public static ImageStack normalizeStack(ImageStack stack) {
+        ImageStack stackN = stack.duplicate();
+        int ns = stack.getSize();
+        double meanSliceMean = 0.0d;
+        for (int s = 1; s <= ns; s++) {
+            ImageProcessor ip = stack.getProcessor(s);
+            meanSliceMean += ip.getStatistics().mean;
+        }
+        meanSliceMean /= ns;
+        for (int s = 1; s <= ns; s++) {
+            ImageProcessor ip = stackN.getProcessor(s);
+            double ratio = (double)meanSliceMean / ip.getStatistics().mean;
+            ip.multiply(ratio);
+            stackN.setProcessor(ip, s);
+        }
+        return stackN;
     }
     
     /** Rescale an 8-bit stack to range 0-255 for input range min to max. */

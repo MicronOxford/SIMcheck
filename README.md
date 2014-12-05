@@ -119,9 +119,7 @@ TODO
 
 * 0.9.7: final pre-submission features & fixes
 
-      - for the raw FFT projection: apply stack FFT with win func,
-        bleach correction "simple ratio", subtract 50, max-intensity
-        project, auto-contrast mode-max
+      - FPJ: auto-contrast mode-max and update comments, docs
       - correct flicker for illumination pattern check
       - pseudo-widefield: simple ratio bleach correction, project & perserve
         16-bit, bicubic interpolation

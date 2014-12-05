@@ -20,7 +20,7 @@ package SIMcheck;
 
 import ij.*;
 import ij.plugin.*;
-import ij.process.ImageStatistics;
+import ij.process.*;
 import ij.gui.GenericDialog; 
 import ij.IJ;
 
@@ -36,7 +36,8 @@ public class Raw_FourierProjections implements PlugIn, Executable {
 
     // parameter fields
     public int phases = 5;                                                         
-    public int angles = 3;                                                         
+    public int angles = 3;                    
+    public float offsetF = 75;
 
     @Override
     public void run(String arg) {
@@ -59,13 +60,45 @@ public class Raw_FourierProjections implements PlugIn, Executable {
         results = exec(imp);
         results.report();
     }
+    
+    /** Execute plugin functionality: apply stack FFT with win func,
+     * bleach correction "simple ratio", subtract 50, max-intensity
+     * project, auto-contrast mode-max.
+     */
+    public ResultSet exec(ImagePlus... imps) {
+        ImagePlus imp = imps[0];
+        imp = Util_RescaleTo16bit.exec(imp);
+        Util_StackFFT2D stackFFT2D = new Util_StackFFT2D();
+        ImagePlus impF = stackFFT2D.exec(imp);
+        IJ.run(impF, "Subtract...", "value=" + offsetF + " stack");
+        ImagePlus impNormF = impF.duplicate();
+        impNormF.setStack(I1l.normalizeStack(impF.getStack()));
+        IJ.run(impNormF, "Z Project...", "projection=[Max Intensity]");
+        ImagePlus impProjF = ij.WindowManager.getCurrentImage();
+        for (int c = 0; c < impProjF.getNChannels(); c++) {
+            impProjF.setC(c+1);
+            int projMode = impProjF.getStatistics().mode;
+            int projMax = (int)impProjF.getStatistics().max;
+//            IJ.setMinAndMax(imp, projMode, projMax);
+//            IJ.run(imp, "Apply LUT", "");
+//        impProjF.setProcessor((ImageProcessor)I1l.setBPminMax(
+//                (ByteProcessor)impProjF.getProcessor(),
+//                projMode, projMax, 255));  // rescale input mode-max to 0-255
+        }
+        impProjF.setTitle(I1l.makeTitle(imps[0], TLA));
+        results.addImp("2D FFT max-intensity projection", impProjF);
+        results.addInfo("How to interpret", "look for clean 1st & 2nd" +
+                " order spots, similar across angles. N.B. Spot intensity" +
+                " depends on image content.");
+        return results;
+    }        
 
     /** Execute plugin functionality (old version): split angles into separate
      * stacks and perform 2D FFT on each slice for V2 OMX CPZAT dimension order.
      * @param imps first imp should be input raw SI data ImagePlus
      * @return ResultSet containing FFTs for each angle
      */
-    public ResultSet exec(ImagePlus... imps) {
+    public ResultSet exec2(ImagePlus... imps) {
         ImagePlus imp = imps[0];
         ImagePlus montage = null;
         StackCombiner comb = new StackCombiner();
