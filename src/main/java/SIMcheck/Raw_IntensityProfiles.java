@@ -189,7 +189,7 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
             		* pzat_no.length * (zwin / nz)));
             results.addStat(
                     "C" + Integer.toString(channel) + " intensity decay"
-                        + " per " + (int)zwin + " z-slices (%)",
+                        + " per " + (int)zwin + " sections (%)",
                     (double)Math.round(channelDecay),
                     ResultSet.StatOK.NA);
             

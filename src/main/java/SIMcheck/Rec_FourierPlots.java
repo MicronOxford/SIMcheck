@@ -102,10 +102,10 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         } else {
             imp2 = Util_RescaleTo16bit.exec(imps[0].duplicate());
         }
-        IJ.showStatus("Fourier transforming slices (lateral view)");
+        IJ.showStatus("Fourier transforming z-sections (lateral view)");
         ImagePlus impF = FFT2D.fftImp(imp2, winFraction);
         blurRadius *= (double)impF.getWidth() / 512.0d;
-        IJ.showStatus("Blurring & rescaling slices (lateral view)");
+        IJ.showStatus("Blurring & rescaling z-sections (lateral view)");
         autoscaleSlices(impF);
         impF = gaussBlur(impF);
         if (imps[0].isComposite()) {
@@ -131,9 +131,9 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             impOrtho = orthoReslicer.exec(impOrtho, false);
             impOrtho = I1l.takeCentralZ(impOrtho);
             Calibration calOrtho = impOrtho.getCalibration();
-            IJ.showStatus("Fourier transforming slices (orthogonal view)");
+            IJ.showStatus("Fourier transforming z-sections (orthogonal view)");
             ImagePlus impOrthoF = FFT2D.fftImp(impOrtho, winFraction);
-            IJ.showStatus("Blurring & rescaling slices (orthogonal view)");
+            IJ.showStatus("Blurring & rescaling z-sections (orthogonal view)");
             autoscaleSlices(impOrthoF);
             impOrthoF = resizeAndPad(impOrthoF, cal);
             impOrthoF = gaussBlur(impOrthoF);

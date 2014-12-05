@@ -85,7 +85,7 @@ public class Rec_SAMismatch implements PlugIn, Executable {
             }
             Plot plot = new Plot(
                     "Reconstructed normalized min variation, C" + c,
-                    "Z plane", "slice feature means (gray) & minima (black)");
+                    "z-section", "z-section minimum (black) and mean feature intensity (gray)");
             // display 20% beyond min and max
             plotMin -= 0.2 * Math.abs(plotMin);
             plotMax += 0.2 * Math.abs(plotMax);
@@ -107,11 +107,11 @@ public class Rec_SAMismatch implements PlugIn, Executable {
         ImagePlus impAllPlots = I1l.mergeChannels(title, plots);
         impAllPlots.setDimensions(nc, 1, 1);
         impAllPlots.setOpenAsHyperStack(true);
-        results.addImp("z-slice minimum (black) and feature mean (gray)",
+        results.addImp("z-section minimum (black) and mean feature intensity (gray)",
                 impAllPlots);
         results.addInfo("How to interpret", 
-                "high normalized standard deviation of z-slice minimum"
-                + " intensity with respect to slice average feature"
+                "high normalized standard deviation of z-section minimum"
+                + " intensity with respect to section average feature"
                 + " intensity indicates sample / PSF Spherical Aberration"
                 + " mismatch. Typically this is seen as a peak / dip in"
                 + " normalized minimum StdDev at the sample boundary, but"

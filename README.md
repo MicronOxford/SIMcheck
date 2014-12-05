@@ -119,8 +119,6 @@ TODO
 
 * 0.9.7: final pre-submission features & fixes
 
-      - use the term "slice" for the raw data and "z-section" for the
-        reconstructed data
       - for the raw FFT projection: apply stack FFT with win func,
         bleach correction "simple ratio", subtract 50, max-intensity
         project, auto-contrast mode-max
