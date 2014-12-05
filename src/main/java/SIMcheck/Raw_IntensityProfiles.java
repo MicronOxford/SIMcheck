@@ -218,29 +218,33 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
                     (double)Math.round(largestDiff),
                     ResultSet.StatOK.NA);
             
-            // (3) intensity stdDev over central 9Z, averaged over P and A
+            // (3) intensity range over central 9Z, averaged over P and A
             // re-use zFirst and zLast for central 9Z window from (0) above
             double[][] zSeries = new double[na * np][(int)zwin];
+            IJ.log("zFirst=" + zFirst);
+            IJ.log("zLast=" + zLast);
             for (int a = 0; a < na; a++) {
                 for (int z = 0; z < nz; z++) {
                     if (z >= zFirst && z < zLast) {
                         // consider intensities inside central 9Z window
                         for (int p = 0; p < np; p++) {
                             int slice = (a * nz * np) + (z * np) + p;
-                            zSeries[a * p + p][z - zFirst] = avIntensities[slice];
+                            zSeries[a * np + p][z - zFirst] = avIntensities[slice];
                         }
                     }
                 }
             }
-            double avStdDev = 0.0d;
+            double avRangeN = 0.0d;  // normalised to max
             for (int ap = 0; ap < na * np; ap++) {
-                avStdDev += Math.sqrt(J.variance(zSeries[ap]));
+                double max = J.max(J.d2f(zSeries[ap]));
+                double min = J.min(J.d2f(zSeries[ap]));
+                avRangeN += (max - min) / max;
             }
-            avStdDev /= (na * np);
-            avStdDev = 100.0d * avStdDev / intensMax;
+            avRangeN /= (na * np);
+            avRangeN *= 100.0d;
             results.addStat("C" + Integer.toString(channel) 
-                    + " intensity standard deviation over reconstruction"
-                    + " window, averaged over phase and angle (%)", avStdDev,
+                    + " intensity range over reconstruction"
+                    + " window, averaged over phase and angle (%)", avRangeN,
                     ResultSet.StatOK.NA);
             
         }

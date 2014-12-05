@@ -119,7 +119,6 @@ TODO
 
 * 0.9.7: final pre-submission features & fixes
 
-      - fix intensity stdev stat to detect flicker (max-min)/max
       - use the term "slice" for the raw data and "z-section" for the
         reconstructed data
       - for the raw FFT projection: apply stack FFT with win func,
