@@ -127,6 +127,8 @@ TODO
         (SIMcheck->0_good_3colormultinuclearstaining->DAPI_PNCA_514_15)
       - proper SAMismatch stat value check
 
+      - rename raw fourier to Raw Fourier Projection (RFP?)
+      - recon FT radial profile scale / units
       - sort out stats rounding to zero
       - FTO, project some slices, not just single central slice
       - improve feature means stat (MCN) -- stack hist? pseudo-wf?
@@ -156,6 +158,7 @@ TODO
         - rename build output to include underscore!
         - make sure all parameters chosen are logged
         - run multi-frame -- fix / document; all stats reported for current time-point only?
+        - get rid of IJ.run calls & show/hide of intermediate results 
 
       - fixes:
         - ensure MCN noise estimate includes Poisson
@@ -172,17 +175,15 @@ TODO
 * 1.0: final updates & documentation for release
 
       - fixes:
-        - turn FTR profile into multi-color and/or plot
         - improve "Fourier Transform Phases" info / log output
-        - recon FT radial profile scale / units
         - spherical aberration mismatch check: axis always symmetrical about 0?
         - test & refactor Cal_Phases: unwrap (+test case), stats and structure
         - channel order: RGB vs. BGR
-        - get rid of IJ.run calls & show/hide of intermediate results 
         - angle labels etc. should be overlaid, not drawn
         - remove unused intermediate results from Windows list
 
       - features:
+        - turn FTR profile into multi-color and/or plot
         - display / warn about saturated pixels in raw data MCN check
         - MCN: auto-threshold pseudo-widefield, report per. angle MCNR
         - report per. angle modulation contrast and/or minimum of these?
