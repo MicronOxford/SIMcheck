@@ -44,7 +44,7 @@ public class Util_StackFFT2D implements PlugIn {
      * @return ImagePlus after 2D FFT of each slice
      */ 
     public ImagePlus exec(ImagePlus imp) {
-        ImagePlus impF = FFT2D.fftImp(imp, 0.01d);
+        ImagePlus impF = FFT2D.fftImp(imp);
         impF.setTitle(I1l.makeTitle(imp, TLA));
         return impF;
     }
