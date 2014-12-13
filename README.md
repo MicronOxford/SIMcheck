@@ -128,14 +128,6 @@ projection without further scaling. You could re-use the existing code, only
 adding the projection, leaving out the radial plot and maybe hide the overlay
 not too obscure the second order spots (but keeping it as an option).
 """
-      - rec Fourier:
-"""
-For the Reconstructed Fourier Plots and the Threshold and 16-bit conversion
-I just figured out, as it can induce some artificial low-level flickering.
-Instead we need to use the STACK mode.
-For both tools, I would like to have three options (1) Auto cut-off (stack
-mode, default), (2) manual cut-off, (3) no cut-off.
-"""
       - raw mod contrast:
 """
 Fig S4 explaining the Modulation contrast for the DAPI example. Please let me

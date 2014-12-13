@@ -63,8 +63,10 @@ public class Util_RescaleTo16bit implements PlugIn {
     public static ImagePlus exec(ImagePlus imp) {
         String title = I1l.makeTitle(imp, TLA);
         ImagePlus imp2 = imp.duplicate();
-        I1l.subtractPerSliceMode(imp2);
-        IJ.log(name + ", using per slice mode.");
+        I1l.subtractMode(imp2);
+//        I1l.subtractPerSliceMode(imp2);
+        IJ.log(name + ", using per channel mode.");
+//        IJ.log(name + ", using per slice mode.");
         IJ.run("Conversions...", " ");
         IJ.run(imp2, "16-bit", "");
         imp2.setTitle(title);
