@@ -119,6 +119,37 @@ TODO
 
 * 0.9.7: final pre-submission features & fixes
 
+      - FPJ: see fig S2, as in rec FFT
+ """
+It is probably a bit late, but I figured the easiest way is to run the
+"reconstructed FFT plot" on the raw data, with the first three boxes ticked
+(manual noise cut-off = 0, W-function, auto-scale FFT) and then applying a max.
+projection without further scaling. You could re-use the existing code, only
+adding the projection, leaving out the radial plot and maybe hide the overlay
+not too obscure the second order spots (but keeping it as an option).
+"""
+      - rec Fourier:
+"""
+For the Reconstructed Fourier Plots and the Threshold and 16-bit conversion
+I just figured out, as it can induce some artificial low-level flickering.
+Instead we need to use the STACK mode.
+For both tools, I would like to have three options (1) Auto cut-off (stack
+mode, default), (2) manual cut-off, (3) no cut-off.
+"""
+      - raw mod contrast:
+"""
+Fig S4 explaining the Modulation contrast for the DAPI example. Please let me
+know if in particular panel d looks alright for you. Am I correct that the MCNR
+is calculated from the 1 order MC (orange box) and the highest frequency
+noise (purple box)? What is the binning of frequencies? 
+
+Related to this, I have copied bead layer raw SI dataset shown in Fig S2 in the
+SIMcheck_Shared_214 dropbox folder (green_bead-layer_512_02_CRP.tif). I am
+quite puzzled that SIMcheck spits out an MCNR of only 8.7. If I apply an OTSU
+threshold by hand and measure the average feature MCNR the value is above 19,
+consistent with the visual impression. Could you please have a look what is
+going on?   
+"""
       - FPJ: auto-contrast mode-max and update comments, docs
       - correct flicker for illumination pattern check
       - pseudo-widefield: simple ratio bleach correction, project & perserve
@@ -126,6 +157,7 @@ TODO
       - check CIP bleaching stat calculation
         (SIMcheck->0_good_3colormultinuclearstaining->DAPI_PNCA_514_15)
       - proper SAMismatch stat value check
+      - copy calibration to MCNR
 
       - rename raw fourier to Raw Fourier Projection (RFP?)
       - recon FT radial profile scale / units
