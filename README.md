@@ -119,15 +119,6 @@ TODO
 
 * 0.9.7: final pre-submission features & fixes
 
-      - FPJ: see fig S2, as in rec FFT
- """
-It is probably a bit late, but I figured the easiest way is to run the
-"reconstructed FFT plot" on the raw data, with the first three boxes ticked
-(manual noise cut-off = 0, W-function, auto-scale FFT) and then applying a max.
-projection without further scaling. You could re-use the existing code, only
-adding the projection, leaving out the radial plot and maybe hide the overlay
-not too obscure the second order spots (but keeping it as an option).
-"""
       - raw mod contrast:
 """
 Fig S4 explaining the Modulation contrast for the DAPI example. Please let me

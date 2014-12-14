@@ -61,11 +61,51 @@ public class Raw_FourierProjections implements PlugIn, Executable {
         results.report();
     }
     
+    /**
+     * Execute plugin functionality: stack FFT with window function,
+     * auto-scaling and projection over all slices (phase, Z angle).
+     */
+    public ResultSet exec(ImagePlus... imps) {
+        ImagePlus imp = imps[0];
+        Util_StackFFT2D stackFFT2D = new Util_StackFFT2D();
+        ImagePlus impF = stackFFT2D.exec(imp);
+        autoscaleSlices(impF);
+        IJ.run(impF, "Z Project...", "projection=[Max Intensity]");
+        ImagePlus impProjF = ij.WindowManager.getCurrentImage();
+        if (impProjF.isComposite()) {
+            // display grayscale, not colored composite
+            CompositeImage ci = (CompositeImage)impProjF;
+            ci.setMode(IJ.GRAYSCALE);
+            impProjF.updateAndDraw();
+        }
+        impProjF.setTitle(I1l.makeTitle(imps[0], TLA));
+        results.addImp("2D FFT max-intensity projection", impProjF);
+        results.addInfo("How to interpret", "look for clean 1st & 2nd" +
+                " order spots, similar across angles. N.B. Spot intensity" +
+                " depends on image content.");
+        return results;
+    }
+    
+    /** Rescale 8-bit imp 0-255 for input mode to max. */
+    private void autoscaleSlices(ImagePlus imp) {  // FIXME, duplicated in Rec_fourier
+        int ns = imp.getStackSize();
+        for (int s = 1; s <= ns; s++) {
+            imp.setSlice(s);
+            ImageProcessor ip = imp.getProcessor();
+            ImageStatistics stats = imp.getProcessor().getStatistics();
+            int min = (int)stats.mode;
+            int max = (int)stats.max;
+            ByteProcessor bp = (ByteProcessor)imp.getProcessor();
+            ip = (ImageProcessor)I1l.setBPminMax(bp, min, max, 255);
+            imp.setProcessor(ip);
+        }
+    }
+    
     /** Execute plugin functionality: apply stack FFT with win func,
      * bleach correction "simple ratio", subtract 50, max-intensity
      * project, auto-contrast mode-max.
      */
-    public ResultSet exec(ImagePlus... imps) {
+    public ResultSet exec2(ImagePlus... imps) {
         ImagePlus imp = imps[0];
         imp = Util_RescaleTo16bit.exec(imp);
         Util_StackFFT2D stackFFT2D = new Util_StackFFT2D();
@@ -98,7 +138,7 @@ public class Raw_FourierProjections implements PlugIn, Executable {
      * @param imps first imp should be input raw SI data ImagePlus
      * @return ResultSet containing FFTs for each angle
      */
-    public ResultSet exec2(ImagePlus... imps) {
+    public ResultSet exec3(ImagePlus... imps) {
         ImagePlus imp = imps[0];
         ImagePlus montage = null;
         StackCombiner comb = new StackCombiner();
