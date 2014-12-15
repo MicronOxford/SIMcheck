@@ -106,6 +106,7 @@ public class Cal_PatternFocus implements PlugIn, Executable {
             IJ.showMessage("Error", name + " only works for 1 channel/frame");
             return results;
         }
+        imp.setStack(I1l.normalizeStack(imp.getStack()));
         double angleDegrees = 90.0d - angle1;
         ImagePlus[] phase1imps = phase1eachAngle(imp);
         ImagePlus montage = null;

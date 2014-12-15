@@ -119,7 +119,6 @@ TODO
 
 * 0.9.7: final pre-submission features & fixes
 
-      - correct flicker for illumination pattern check
       - pseudo-widefield: simple ratio bleach correction, project & perserve
         16-bit, bicubic interpolation
       - proper SAMismatch stat value check
