@@ -538,25 +538,18 @@ public final class I1l {
     }
     
 
-    /** Return mean value of auto-thresholded features in impIn. */
+    /** Return mean value of auto-thresholded (Otsu) features in impIn. */
     public static double stackFeatMean(ImagePlus impIn) {
+        int mOptionsInitial = ij.plugin.filter.Analyzer.getMeasurements();
+        ij.plugin.filter.Analyzer.setMeasurements(
+                ij.plugin.filter.Analyzer.LIMIT +
+                ij.plugin.filter.Analyzer.MEAN);
         ImagePlus imp = impIn.duplicate();
-        double stackFeatMean = 0;
-        int ns = imp.getNSlices();
-        for (int s = 1; s <= ns; s++) {
-            imp.setSlice(s);
-            ImageProcessor ip =  imp.getProcessor();
-            ImageProcessor maskIp = ip.duplicate();
-            maskIp = maskIp.convertToByte(true);
-            maskIp.setAutoThreshold("Triangle", true, ImageProcessor.RED_LUT);
-            ImagePlus tImp = new ImagePlus("I1l.featStats slice", maskIp);
-            IJ.run(tImp, "Convert to Mask", "method=Triangle background=Dark black");
-            ImageProcessor maskedIp = ip.duplicate();
-            maskedIp.setMask(maskIp);
-            stackFeatMean += maskedIp.getStatistics().mean;
-            imp.setProcessor(maskedIp);
-        }
-        return stackFeatMean / ns;  // FIXME, account for feat pix / slice
+        IJ.setAutoThreshold(imp, "Otsu dark stack");
+        StackStatistics stackStats = new StackStatistics(imp);
+        double stackThresholdedMean = stackStats.mean;
+        ij.plugin.filter.Analyzer.setMeasurements(mOptionsInitial); // restore
+        return stackThresholdedMean;
     }
 
     /** 
