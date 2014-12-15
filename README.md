@@ -123,7 +123,6 @@ TODO
       - pseudo-widefield: simple ratio bleach correction, project & perserve
         16-bit, bicubic interpolation
       - proper SAMismatch stat value check
-      - copy calibration to MCNR
 
       - tidy raw fourier proj, add target overlay?
       - recon FT radial profile scale / units

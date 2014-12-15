@@ -19,6 +19,7 @@
 package SIMcheck;
 
 import ij.*;
+import ij.measure.Calibration;
 import ij.process.*;
 import ij.plugin.*;
 import ij.gui.GenericDialog;
@@ -244,6 +245,7 @@ public class Raw_ModContrast implements PlugIn, Executable {
         impResult.setC(1);
         impResult.setT(1);
         impResult.setOpenAsHyperStack(true);
+        I1l.copyCal(imp, impResult);
         if (!doRawFourier) {
             I1l.applyLUT(impResult, mcnrLUT, displayRange);
             // overlay a LUT "calibration bar" if the image is big enough 
