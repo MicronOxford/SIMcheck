@@ -122,8 +122,6 @@ TODO
       - correct flicker for illumination pattern check
       - pseudo-widefield: simple ratio bleach correction, project & perserve
         16-bit, bicubic interpolation
-      - check CIP bleaching stat calculation
-        (SIMcheck->0_good_3colormultinuclearstaining->DAPI_PNCA_514_15)
       - proper SAMismatch stat value check
       - copy calibration to MCNR
 

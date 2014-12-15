@@ -221,8 +221,6 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
             // (3) intensity range over central 9Z, averaged over P and A
             // re-use zFirst and zLast for central 9Z window from (0) above
             double[][] zSeries = new double[na * np][(int)zwin];
-            IJ.log("zFirst=" + zFirst);
-            IJ.log("zLast=" + zLast);
             for (int a = 0; a < na; a++) {
                 for (int z = 0; z < nz; z++) {
                     if (z >= zFirst && z < zLast) {
