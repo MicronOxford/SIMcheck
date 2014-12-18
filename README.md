@@ -119,7 +119,6 @@ TODO
 
 * 0.9.7: final pre-submission features & fixes
 
-      - 16-bit/thresh utility: indicate in log file which mode used
       - pseudo-widefield: simple ratio bleach correction, project & perserve
         16-bit, bicubic interpolation
       - recon FT radial profile scale / units
