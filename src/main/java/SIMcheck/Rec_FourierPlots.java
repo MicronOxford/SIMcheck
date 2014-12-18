@@ -46,7 +46,8 @@ public class Rec_FourierPlots implements PlugIn, Executable {
     // parameter fields
     public double[] resolutions = {0.10, 0.12, 0.15, 0.2, 0.3, 0.6};
     public double blurRadius = 6.0d;  // default for 512x512
-    public double winFraction = 0.05d;  // window function size, 0-1
+    public double winFraction = 0.06d;  // window function size, 0-1
+    // TODO: refactor & remove default winFraction from here
     
     // options
     public boolean manualCutoff = false;  // manual noise cut-off?

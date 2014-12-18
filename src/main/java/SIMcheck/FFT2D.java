@@ -32,6 +32,7 @@ public class FFT2D extends FHT {
     
     // tolerance to check if a double precision float is approx. equal to 0
     private static final double ZERO_TOL = 0.000001d;
+    private static final double WIN_FRACTION_DEFAULT = 0.06d;
 
     public FFT2D(ImageProcessor ip){
         super(ip);
@@ -157,7 +158,7 @@ public class FFT2D extends FHT {
      * @return new ImagePlus after 2D FFT
      **/
     public static ImagePlus fftImp(ImagePlus impIn) {
-        return fftImp(impIn, 0.05d);
+        return fftImp(impIn, WIN_FRACTION_DEFAULT);
     }
     
     /**

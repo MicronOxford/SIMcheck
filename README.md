@@ -119,18 +119,15 @@ TODO
 
 * 0.9.7: final pre-submission features & fixes
 
+      - 16-bit/thresh utility: indicate in log file which mode used
       - pseudo-widefield: simple ratio bleach correction, project & perserve
         16-bit, bicubic interpolation
-      - proper SAMismatch stat value check
-
-      - tidy raw fourier proj, add target overlay?
       - recon FT radial profile scale / units
-      - sort out stats rounding to zero
-      - FTO, project some slices, not just single central slice
-      - improve feature means stat (MCN) -- stack hist? pseudo-wf?
-      - z min variation, use >=10 pixels to estimate minimum
-      - MCM: add note to overlay where saturated pixels present?
-      - MCN, show saturated pixels in raw data?
+      - proper SAMismatch stat value check
+      - CIP: text/fix intensity decay -- often too high
+      - do not report false decimal, i.e. XX.0 / fix rounding
+      - get rid of warnings & update docs before release
+
 
 * 0.9.8: post-submission refactoring & documentation updates
 
@@ -157,6 +154,11 @@ TODO
         - get rid of IJ.run calls & show/hide of intermediate results 
 
       - fixes:
+        - tidy raw FPJ & add target overlay & hide by default
+        - z min variation, ensure >=10 pixels to estimate minimum
+        - MCM: add note to overlay where saturated pixels present?
+        - MCN, show saturated pixels in raw data?
+        - FTO, project some slices, not just single central slice
         - ensure MCN noise estimate includes Poisson
         - fix radial profile plot scaling
         - turn CIP into plot (to be able to save raw data) and/or normalize
