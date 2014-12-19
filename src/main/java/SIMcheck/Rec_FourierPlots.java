@@ -96,6 +96,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
      * @return ResultSet containing FFT imp, ortho FFT imp, radial profile plot 
      */
     public ResultSet exec(ImagePlus... imps) {
+        // TODO: check we have micron calibrations before continuing..
         Calibration cal = imps[0].getCalibration();
         ImagePlus imp2 = null;
         if (manualCutoff) {
@@ -122,8 +123,8 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         // radial profile of lateral FFT
         ImagePlus radialProfiles = makeRadialProfiles(impF);
         radialProfiles.setTitle(I1l.makeTitle(imps[0], TLA2));
-        results.addImp("Fourier Transform Radial profile (lateral, central Z)", 
-                radialProfiles);
+        results.addImp("Fourier Transform Radial profile "
+                + "(lateral, central Z)", radialProfiles);
         /// for orthogonal (axial) view, reslice first
         if (showAxial) {
             new StackConverter(imp2).convertToGray32();  // for OrthoReslicer
