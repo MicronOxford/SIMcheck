@@ -119,7 +119,6 @@ TODO
 
 * 0.9.7: final pre-submission features & fixes
 
-      - recon FT radial profile scale / units
       - proper SAMismatch stat value check
       - CIP: text/fix intensity decay -- often too high
       - do not report false decimal, i.e. XX.0 / fix rounding
@@ -137,6 +136,7 @@ TODO
               https://github.com/blog/1840-improving-github-for-science
 
       - tests, structure:
+        - ensure MCN noise estimate includes Poisson
         - test data:
           - compact test / example data suite for distribution
           - work out strategy for test data distribution
@@ -156,8 +156,6 @@ TODO
         - MCM: add note to overlay where saturated pixels present?
         - MCN, show saturated pixels in raw data?
         - FTO, project some slices, not just single central slice
-        - ensure MCN noise estimate includes Poisson
-        - fix radial profile plot scaling
         - turn CIP into plot (to be able to save raw data) and/or normalize
         - FTL/FTO no intensity cutoff option
         - better names for max/min ratio & SAM check
