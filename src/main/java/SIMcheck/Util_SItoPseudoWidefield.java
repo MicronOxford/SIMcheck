@@ -76,11 +76,18 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         int Zplanes = imp.getNSlices();
         int frames = imp.getNFrames();
         Zplanes = Zplanes/(phases*angles);  // take phase & angle out of Z
+        IJ.run("Conversions...", " ");  // TODO: reset option state when done..
         new StackConverter(impCopy).convertToGray32();  
         projectPandA(impCopy, channels, Zplanes, frames, m);
+        new StackConverter(projImg).convertToGray16(); 
         I1l.copyCal(imp, projImg);
-        projImg.setTitle(I1l.makeTitle(imp, TLA));  
-        return projImg;
+        int newWidth = imp.getWidth() * 2;
+        int newHeight = imp.getHeight() * 2;
+        String newTitle = I1l.makeTitle(imp, TLA);
+        IJ.run(projImg, "Scale...", "x=2 y=2 z=2 width=" + newWidth
+                + " height=" + newHeight + " interpolation=Bicubic average"
+                + " create title=" + newTitle);
+        return ij.WindowManager.getCurrentImage();
     }
 
     /** Projection e.g. 5 phases, 3 angles for each CZT. **/

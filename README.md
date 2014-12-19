@@ -119,8 +119,6 @@ TODO
 
 * 0.9.7: final pre-submission features & fixes
 
-      - pseudo-widefield: simple ratio bleach correction, project & perserve
-        16-bit, bicubic interpolation
       - recon FT radial profile scale / units
       - proper SAMismatch stat value check
       - CIP: text/fix intensity decay -- often too high
