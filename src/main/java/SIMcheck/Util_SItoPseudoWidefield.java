@@ -33,6 +33,7 @@ public class Util_SItoPseudoWidefield implements PlugIn {
     // parameter fields
     public int phases = 5;                                                         
     public int angles = 3;                                                         
+    public boolean doNormalize = true;                                                         
     
     private static ImagePlus projImg = null;  // intermediate & final results
     
@@ -46,18 +47,26 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         gd.addMessage("Requires SI raw data in OMX (CPZAT) order.");        
         gd.addNumericField("Angles", angles, 0);                               
         gd.addNumericField("Phases", phases, 0);
+        gd.addCheckbox("Ratio intensity normalization?", doNormalize);
         gd.showDialog();                                                        
         if (gd.wasCanceled()) return;                                           
         if(gd.wasOKed()){                                                     
             angles = (int)gd.getNextNumber();                                   
-            phases = (int)gd.getNextNumber();                                   
+            phases = (int)gd.getNextNumber();  
+            doNormalize = gd.getNextBoolean();
         }                                                                       
         if (!I1l.stackDivisibleBy(imp, phases * angles)) {                                                 
             IJ.showMessage( "SI to Pseudo-Wide-Field", 
                     "Error: stack size not consistent with phases/angles.");
             return;                                                             
         }
-        projImg = exec(imp, phases, angles, ProjMode.AVG);  
+        if (doNormalize) {  // TODO: done in a rush -- ugly
+            ImagePlus imp2 = imp.duplicate();
+            imp2.setStack(I1l.normalizeStack(imp.getStack()));
+            projImg = exec(imp2, phases, angles, ProjMode.AVG);  
+        } else {
+            projImg = exec(imp, phases, angles, ProjMode.AVG);
+        }
         IJ.run("Brightness/Contrast...");
         projImg.show();
     }
@@ -77,11 +86,11 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         int frames = imp.getNFrames();
         Zplanes = Zplanes/(phases*angles);  // take phase & angle out of Z
         IJ.run("Conversions...", " ");  // TODO: reset option state when done..
-        new StackConverter(impCopy).convertToGray32();  
+        new StackConverter(impCopy).convertToGray32(); 
         projectPandA(impCopy, channels, Zplanes, frames, m);
         // AVG projection results 16-bit, MAX projection used in MCM needs 32-
         if (m == ProjMode.AVG) {
-            new StackConverter(projImg).convertToGray16();
+            new StackConverter(projImg).convertToGray16();  // TODO: was original?
         }
         I1l.copyCal(imp, projImg);
         int newWidth = imp.getWidth() * 2;
