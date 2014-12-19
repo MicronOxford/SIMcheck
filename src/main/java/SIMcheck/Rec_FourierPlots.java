@@ -51,6 +51,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
     
     // options
     public boolean manualCutoff = false;  // manual noise cut-off?
+    public boolean noCutoff = false;  // no noise cut-off?
     public boolean applyWinFunc = true;  // apply window function?
     public boolean autoScale = true;  // re-scale FFT to mode->max?
     public boolean showAxial = true;  // show axial FFT?
@@ -64,6 +65,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         GenericDialog gd = new GenericDialog(name);
         imp.getWidth();
         gd.addCheckbox("Manual noise cut-off?", manualCutoff);
+        gd.addCheckbox("No noise cut-off?", noCutoff);
         gd.addCheckbox("Window function**", applyWinFunc);
         gd.addCheckbox("Auto-scale FFT (mode-max)", autoScale);
         gd.addCheckbox("Show axial FFT", showAxial);
@@ -72,6 +74,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         gd.showDialog();
         if (gd.wasOKed()) {
             this.manualCutoff = gd.getNextBoolean();
+            this.noCutoff = gd.getNextBoolean();
             this.applyWinFunc = gd.getNextBoolean();
             this.autoScale = gd.getNextBoolean();
             this.showAxial = gd.getNextBoolean();
@@ -99,7 +102,11 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         // TODO: check we have micron calibrations before continuing..
         Calibration cal = imps[0].getCalibration();
         ImagePlus imp2 = null;
-        if (manualCutoff) {
+        if (noCutoff) {
+            imp2 = imps[0].duplicate();
+            IJ.run("Conversions...", " ");
+            IJ.run(imp2, "16-bit", "");
+        } else if (manualCutoff) {
             imp2 = Util_RescaleTo16bit.exec(imps[0].duplicate(), channelMinima);
         } else {
             imp2 = Util_RescaleTo16bit.exec(imps[0].duplicate());
