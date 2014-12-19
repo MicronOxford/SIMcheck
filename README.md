@@ -119,9 +119,15 @@ TODO
 
 * 0.9.7: final pre-submission features & fixes
 
-      - proper SAMismatch stat value check
+      - Rec Fourier, option to *not* cut off at mode or specific value
+        (option in second window)
+      - change RIH standalone menu entry to "Intensity Histogram"
+      - remove (2D) from Stack FFT (2D) menu
+      - pre-submission log updates
+        - remove row numbers from ResultsTable if necessary
+        - check / adjust max width of log text, try to fix display width
+        - do not report false decimal, i.e. XX.0 / fix rounding
       - CIP: text/fix intensity decay -- often too high
-      - do not report false decimal, i.e. XX.0 / fix rounding
       - get rid of warnings & update docs before release
 
 
@@ -151,15 +157,16 @@ TODO
         - get rid of IJ.run calls & show/hide of intermediate results 
 
       - fixes:
+        - for Rec data, auto-scale if data has >16-bit values
         - tidy raw FPJ & add target overlay & hide by default
+        - try to find a more robust bleach estimation procedure (CIP)
+        - proper SAMismatch stat value check
         - z min variation, ensure >=10 pixels to estimate minimum
         - MCM: add note to overlay where saturated pixels present?
         - MCN, show saturated pixels in raw data?
         - FTO, project some slices, not just single central slice
         - turn CIP into plot (to be able to save raw data) and/or normalize
-        - FTL/FTO no intensity cutoff option
         - better names for max/min ratio & SAM check
-        - make sure TLAs / filenames are in the log (Justin)
 
 * 0.9.9: additional features & updates suggested by referees
 
