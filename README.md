@@ -121,14 +121,11 @@ TODO
 
       - Rec Fourier, option to *not* cut off at mode or specific value
         (option in second window)
-      - change RIH standalone menu entry to "Intensity Histogram"
-      - remove (2D) from Stack FFT (2D) menu
       - pre-submission log updates
         - remove row numbers from ResultsTable if necessary
         - check / adjust max width of log text, try to fix display width
         - do not report false decimal, i.e. XX.0 / fix rounding
-      - CIP: text/fix intensity decay -- often too high
-      - get rid of warnings & update docs before release
+      - get rid of warnings & update docs, credits etc. before release
 
 
 * 0.9.8: post-submission refactoring & documentation updates
