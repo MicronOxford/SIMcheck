@@ -119,8 +119,6 @@ TODO
 
 * 0.9.7: final pre-submission features & fixes
 
-      - Rec Fourier, option to *not* cut off at mode or specific value
-        (option in second window)
       - pre-submission log updates
         - remove row numbers from ResultsTable if necessary
         - check / adjust max width of log text, try to fix display width
