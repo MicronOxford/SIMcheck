@@ -12,28 +12,18 @@ reliability of Structured Illumination Microscopy (SIM) data.
 * Further help is available
 [here](http://www.micron.ox.ac.uk/microngroup/software/SIMcheck.html)
 
-The project was recently converted to the maven build and dependency
-management tool (the previous ant build setup is described in the 
-next paragraph below). A solution for local deployment of the latest
-maven build is still being worked on, and there is no Fiji update site
-yet. To build, run the following (.jar file appears in ./target/):-
+The project uses the maven build and dependency management tool, so to
+build run the following command (.jar file appears in ./target/):-
 
     mvn package
 
-
-The code has always been arranged in a conventional Maven-like structure,
-and previously came with an ant build script that copied the resulting
-SIMcheck_.jar to a local plugin folder. It was necessary, before building
-the project, to create a ./lib/ directory containing a soft link to the
-ij.jar from the desired ImageJ version, as well as a soft link to junit.jar.
-The built result was then copied to ./plugins/ so this needed to be
-soft-linked to your ImageJ plugins folder. Typing "ant" to build the
-default (all) target and restarting ImageJ or Help->Refresh Menus gave
-access to the newly built plugin package.
+There is currently no Fiji update site, but we plan to create one for
+versions 1.0 and above.
 
 Copyright Graeme Ball and Lothar Schermelleh, Micron Oxford, Department of
 Biochemistry, University of Oxford. License GPL unless stated otherwise in
-a given file.
+a given file (in particular, SIMcheck uses modified versions of ImageJ's
+Slicer plugin and Paul Baggethun's Radial Profile Plot plugin).
 
 
 Features
@@ -44,6 +34,7 @@ Features
 -----------------------
 
 - dialog to choose and set up all checks with standard parameters
+- cropping utility for raw and reconstructed data
 - results: images will appear and key statistics will be logged
 - help button: link to instructions, help, documentation
 
@@ -53,10 +44,10 @@ Features
 
     Check            |        Statistic(s)                 |      Comments   
 -------------------- | ----------------------------------- | ------------------
- Intensity Profiles  | bleaching, flicker, angle intensity | TODO: flicker     
- Motion / Illum Var  | angle difference (motion, illum.)   | TODO: correlation 
- Fourier Projections | None: check pattern / spots OK      | TODO? k0 & linspc 
- Mod Contrast        | feature MCNR acceptable?            | Wiener estimate   
+ Intensity Profiles  | bleaching, flicker, angle intensity | 
+ Motion / Illum Var  | angle difference (motion, illum.)   | 
+ Fourier Projections | None: check pattern / spots OK      | 
+ Modulation Contrast | feature MCNR acceptable?            | Wiener estimate   
 
 -----------------------------
 2: Post-reconstruction Checks
@@ -65,8 +56,9 @@ Features
     Check            |        Statistic(s)                 |      Comments
 -------------------- | ----------------------------------- | ------------------
  Intensity Histogram | +ve/-ve ratio acceptable?           | top/bottom 0.01%  
- Fourier Plots       | None: symmetry+profile OK?          | TODO: resolution  
- Mod Contrast Map    | None: inspect MCNR of features      | MCNR & intensity  
+ SA Mismatch         | stdDev of miniumum vs. mean         | shows OTF mismatch
+ Fourier Plots       | None: symmetry+profile OK?          | 
+ Mod Contrast Map    | None: inspect MCNR of features      | green=saturated
 
 ---------------------
 3: Calibration Checks
@@ -75,16 +67,15 @@ Features
     Check            |        Statistic(s)                 |      Comments
 -------------------- | ----------------------------------- | ------------------
  Illum. Phase Steps  | phase step & range stable?          | +k0, linespacing  
- Pattern focus       | None: check no "zipper" pattern     |                   
- SA Mismatch         | stdDev of miniumum vs. mean         | shows OTF mismatch
+ Pattern Focus       | None: check for "zipper" pattern    |                   
 
 4: Utilities
 ------------
 
 - Format Converter for SIM data
-- Raw SI Data to Pseudo-Widefield conversion
-- Threshold and 16-bit conversion (i.e. "discard neagtives")
-- Stack FFT (2D)
+- Raw SIM Data to Pseudo-Widefield conversion
+- Threshold and 16-bit conversion (i.e. "discard negatives")
+- Stack FFT, performs 2D FFT on each slice
 
 
 PROJECT STRUCTURE
@@ -106,10 +97,10 @@ PROJECT STRUCTURE
 Style Notes
 ===========
 
+* no run-time dependencies other than ImageJ1
 * simple, modular structure - each check is a standalone plugin
 * plugin exec methods take input images and return ResultSet
   (no GUI calls within exec when easily avoidable)
-* no run-time dependencies other than ImageJ1
 * ImageJ1-like preference for pre- java 5 features (i.e. not many generics)
   and reliance on float primitive type for most calculations
 
@@ -120,9 +111,9 @@ TODO
 * 0.9.7: final pre-submission features & fixes
 
       - pre-submission log updates
-        - remove row numbers from ResultsTable if necessary
         - check / adjust max width of log text, try to fix display width
         - do not report false decimal, i.e. XX.0 / fix rounding
+      - fix no-cutoff option
       - get rid of warnings & update docs, credits etc. before release
 
 
