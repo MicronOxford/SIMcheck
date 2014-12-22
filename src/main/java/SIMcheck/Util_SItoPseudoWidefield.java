@@ -88,7 +88,10 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         IJ.run("Conversions...", " ");  // TODO: reset option state when done..
         new StackConverter(impCopy).convertToGray32(); 
         projectPandA(impCopy, channels, Zplanes, frames, m);
-        new StackConverter(projImg).convertToGray16();  // TODO: was original?
+        // AVG projection results 16-bit, MAX projection used in MCM needs 32-
+        if (m == ProjMode.AVG) {
+            new StackConverter(projImg).convertToGray16();  // TODO: was original?
+        }
         I1l.copyCal(imp, projImg);
         int newWidth = imp.getWidth() * 2;
         int newHeight = imp.getHeight() * 2;
