@@ -111,10 +111,9 @@ TODO
 * 0.9.7: final pre-submission features & fixes
 
       - pre-submission log updates
-        - do not report false decimal, i.e. XX.0 / fix rounding
-        - tweak line widths / auto-formatting
         - display main, checked stats before & separeated from others
         - remove double space in the absence of any stats
+        - tweak auto-formatting: line widths, - indent
       - get rid of warnings & update docs, credits etc. before release
 
 

@@ -137,11 +137,7 @@ public class ResultSet {
         }
         for (Map.Entry<String, Stat> entry : stats.entrySet()) {
             String statName = entry.getKey();
-            Double stat = entry.getValue().value;
-            BigDecimal bd = new BigDecimal(stat);  
-            bd = bd.round(new MathContext(STAT_SIG_FIGS));
-            double statToSpecifiedSigFigs = bd.doubleValue();  
-            IJ.log(statName + " = " + statToSpecifiedSigFigs);
+            IJ.log(statName + " = " + statStr(entry.getValue().value));
         }
         for (Map.Entry<String, String> entry : infos.entrySet()) {
             String infoTitle = entry.getKey();
@@ -165,7 +161,7 @@ public class ResultSet {
                     rt.incrementCounter();
                     rt.addValue("Check", rs.resultSetTLA);
                     rt.addValue("Statistic", statName);
-                    rt.addValue("Value", rs.stats.get(statName).value);
+                    rt.addValue("Value", statStr(rs.stats.get(statName).value));
                     rt.addValue("OK?", rs.stats.get(statName).statOK.str());
                 }
             }
@@ -232,6 +228,14 @@ public class ResultSet {
         objList.addAll(Arrays.asList(infos.values().toArray()));
         Object[] objArray = objList.toArray();
         return objArray;
+    }
+    
+    /** Format numerical stat, returning a sane String representation. */
+    private static String statStr(double dStat) {
+        BigDecimal bd = new BigDecimal(dStat);
+        bd = bd.round(new MathContext(STAT_SIG_FIGS));
+        bd.stripTrailingZeros();
+        return bd.toString();
     }
     
     /** test method */

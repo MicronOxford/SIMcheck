@@ -174,9 +174,7 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
             double pcDiff = 100.0d * (intensMax - intensMin) / intensMax;
             results.addStat(
                     "C" + Integer.toString(channel) + " total intensity"
-//                            + " variation over central " + (int)zwin + "sections (%)",
-                    + " variation (%)",
-                    (double)Math.round(pcDiff), checkPercentDiff(pcDiff));
+                    + " variation (%)", pcDiff, checkPercentDiff(pcDiff));
             
             /// (1) per-channel intensity decay
             double[] xSlice = J.f2d(pzat_no);
@@ -191,8 +189,7 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
             results.addStat(
                     "C" + Integer.toString(channel) + " average intensity"
                     + " decay per " + (int)zwin + " section window (%)",
-                    (double)Math.round(channelDecay),
-                    ResultSet.StatOK.NA);
+                    channelDecay, ResultSet.StatOK.NA);
             
             /// (2) angle intensity differences
             float[] angleMeans = new float[na];
@@ -216,8 +213,7 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
             largestDiff = (double)100 * largestDiff / (double)maxAngleIntensity;
             results.addStat("C" + Integer.toString(channel) 
                     + " maximum intensity difference between angles (%)",
-                    (double)Math.round(largestDiff),
-                    ResultSet.StatOK.NA);
+                    largestDiff, ResultSet.StatOK.NA);
             
             // (3) intensity range over central 9Z, averaged over P and A
             // re-use zFirst and zLast for central 9Z window from (0) above
