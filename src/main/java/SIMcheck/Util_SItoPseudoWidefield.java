@@ -99,7 +99,9 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         IJ.run(projImg, "Scale...", "x=2 y=2 z=2 width=" + newWidth
                 + " height=" + newHeight + " interpolation=Bicubic average"
                 + " create title=" + newTitle);
-        return ij.WindowManager.getCurrentImage();
+        ImagePlus scaledProjImg = ij.WindowManager.getCurrentImage();
+        scaledProjImg.hide();
+        return scaledProjImg;
     }
 
     /** Projection e.g. 5 phases, 3 angles for each CZT. **/
