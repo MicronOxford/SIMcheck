@@ -135,9 +135,19 @@ public class ResultSet {
             IJ.log("\n");
             imp.show();
         }
+        // loop over stats twice: log checked (non-NA) stats first, rest after
         for (Map.Entry<String, Stat> entry : stats.entrySet()) {
             String statName = entry.getKey();
-            IJ.log(statName + " = " + statStr(entry.getValue().value));
+            if (stats.get(statName).statOK != StatOK.NA) {
+                IJ.log(statName + " = " + statStr(entry.getValue().value));
+            }
+        }
+        IJ.log("--");
+        for (Map.Entry<String, Stat> entry : stats.entrySet()) {
+            String statName = entry.getKey();
+            if (stats.get(statName).statOK == StatOK.NA) {
+                IJ.log(statName + " = " + statStr(entry.getValue().value));
+            }
         }
         for (Map.Entry<String, String> entry : infos.entrySet()) {
             String infoTitle = entry.getKey();
