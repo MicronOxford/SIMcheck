@@ -17,12 +17,11 @@
 package SIMcheck;
 
 import java.util.*;
+
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.measure.ResultsTable;
-import java.math.BigDecimal;
-import java.math.MathContext;
 
 /** ImageJ1 plugin result container using HashMaps: items must have 
  * unique names within result types.
@@ -33,7 +32,7 @@ public class ResultSet {
     // for automatic formatting of result log / output
     private static final int TEXTWIDTH = 55;
     private static final int INDENT = 0;
-    private static final int STAT_SIG_FIGS = 2;
+    static final int STAT_SIG_FIGS = 2;
 
     /** Interpretation of a statistic: is it OK? yes, no, maybe. */
     public enum StatOK {
@@ -140,7 +139,7 @@ public class ResultSet {
         for (Map.Entry<String, Stat> entry : stats.entrySet()) {
             String statName = entry.getKey();
             if (stats.get(statName).statOK != StatOK.NA) {
-                IJ.log(statName + " = " + statStr(entry.getValue().value));
+                IJ.log(statName + " = " + J.d2s(entry.getValue().value));
                 hasCheckedStats = true;
             }
         }
@@ -150,7 +149,7 @@ public class ResultSet {
         for (Map.Entry<String, Stat> entry : stats.entrySet()) {
             String statName = entry.getKey();
             if (stats.get(statName).statOK == StatOK.NA) {
-                IJ.log(statName + " = " + statStr(entry.getValue().value));
+                IJ.log(statName + " = " + J.d2s(entry.getValue().value));
             }
         }
         for (Map.Entry<String, String> entry : infos.entrySet()) {
@@ -175,7 +174,7 @@ public class ResultSet {
                     rt.incrementCounter();
                     rt.addValue("Check", rs.resultSetTLA);
                     rt.addValue("Statistic", statName);
-                    rt.addValue("Value", statStr(rs.stats.get(statName).value));
+                    rt.addValue("Value", J.d2s(rs.stats.get(statName).value));
                     rt.addValue("OK?", rs.stats.get(statName).statOK.str());
                 }
             }
@@ -242,14 +241,6 @@ public class ResultSet {
         objList.addAll(Arrays.asList(infos.values().toArray()));
         Object[] objArray = objList.toArray();
         return objArray;
-    }
-    
-    /** Format numerical stat, returning a sane String representation. */
-    private static String statStr(double dStat) {
-        BigDecimal bd = new BigDecimal(dStat);
-        bd = bd.round(new MathContext(STAT_SIG_FIGS));
-        bd.stripTrailingZeros();
-        return bd.toString();
     }
     
     /** test method */

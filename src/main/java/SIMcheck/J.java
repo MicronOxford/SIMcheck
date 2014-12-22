@@ -17,6 +17,8 @@
 
 package SIMcheck;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -92,6 +94,15 @@ public class J {
     public static int closestEven(int n) {
         return n % 2 == 0 ? n : n - 1;
     }
+    
+    /** Convert double to string (2 sig figs). */
+    public static String d2s(double dStat) {
+        BigDecimal bd = new BigDecimal(dStat);
+        bd = bd.round(new MathContext(ResultSet.STAT_SIG_FIGS));
+        bd.stripTrailingZeros();
+        return bd.toString();
+    }
+    
 
     /** Convert double array to float array. */
     public static float[] d2f(double[] d) {
@@ -287,4 +298,5 @@ public class J {
         }
         return variance;
     }
+
 }

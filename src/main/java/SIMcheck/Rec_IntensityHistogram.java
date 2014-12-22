@@ -134,7 +134,7 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
                 + " background areas (so that the mode reflects background)"
                 + " and should be constrained to z-slices containing features.");
         results.addInfo("About", "MMR is calculated as"
-                + " the ratio of the averaged " + percentile*100 + "%"
+                + " the ratio of the averaged " + J.d2s(percentile) + "%"
                 + " highest (Max*) and lowest (Min*) intensity pixels in a"
                 + " 32-bit stack, centered at the stack mode (assumed to be"
                 + " the center of the noise distribution),"
