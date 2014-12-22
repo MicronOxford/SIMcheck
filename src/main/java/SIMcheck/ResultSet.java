@@ -121,9 +121,9 @@ public class ResultSet {
     /** Report all results */
     public void report() {
         IJ.log("");
-        IJ.log(J.nChars((int)(TEXTWIDTH * 0.67), "-"));
+        IJ.log(J.nChars((int)(TEXTWIDTH * 0.7), "-"));
         IJ.log(resultSetName);
-        IJ.log(J.nChars((int)(TEXTWIDTH * 0.67), "-"));
+        IJ.log(J.nChars((int)(TEXTWIDTH * 0.7), "-"));
         for (Map.Entry<String, ImagePlus> entry : imps.entrySet()) {
             String description = entry.getKey();
             ImagePlus imp = (ImagePlus)entry.getValue();
@@ -136,13 +136,17 @@ public class ResultSet {
             imp.show();
         }
         // loop over stats twice: log checked (non-NA) stats first, rest after
+        boolean hasCheckedStats = false;
         for (Map.Entry<String, Stat> entry : stats.entrySet()) {
             String statName = entry.getKey();
             if (stats.get(statName).statOK != StatOK.NA) {
                 IJ.log(statName + " = " + statStr(entry.getValue().value));
+                hasCheckedStats = true;
             }
         }
-        IJ.log("--");
+        if (hasCheckedStats) {
+            IJ.log("--");  // only print a separator if something to separate
+        }
         for (Map.Entry<String, Stat> entry : stats.entrySet()) {
             String statName = entry.getKey();
             if (stats.get(statName).statOK == StatOK.NA) {
