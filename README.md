@@ -113,7 +113,6 @@ TODO
       - pre-submission log updates
         - check / adjust max width of log text, try to fix display width
         - do not report false decimal, i.e. XX.0 / fix rounding
-      - fix no-cutoff option
       - get rid of warnings & update docs, credits etc. before release
 
 
@@ -139,6 +138,7 @@ TODO
           - more tests to test/debug non-interactive code, preconditions (inputs)
         - rename build output to include underscore!
         - make sure all parameters chosen are logged
+        - Rec Fourier: RadioButtons for mutually exclusive cut-off options
         - run multi-frame -- fix / document; all stats reported for current time-point only?
         - get rid of IJ.run calls & show/hide of intermediate results 
 

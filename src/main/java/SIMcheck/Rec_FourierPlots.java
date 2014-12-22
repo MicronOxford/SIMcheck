@@ -64,8 +64,8 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);
         imp.getWidth();
-        gd.addCheckbox("Manual noise cut-off?", manualCutoff);
-        gd.addCheckbox("No noise cut-off?", noCutoff);
+        gd.addCheckbox("No noise cut-off", noCutoff);
+        gd.addCheckbox("Manual noise cut-off...", manualCutoff);
         gd.addCheckbox("Window function**", applyWinFunc);
         gd.addCheckbox("Auto-scale FFT (mode-max)", autoScale);
         gd.addCheckbox("Show axial FFT", showAxial);
@@ -73,8 +73,9 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         gd.addMessage("** suppress edge artifacts");
         gd.showDialog();
         if (gd.wasOKed()) {
-            this.manualCutoff = gd.getNextBoolean();
+            // TODO: notCutoff, manualCutoff and autoScale radioButton group
             this.noCutoff = gd.getNextBoolean();
+            this.manualCutoff = gd.getNextBoolean();
             this.applyWinFunc = gd.getNextBoolean();
             this.autoScale = gd.getNextBoolean();
             this.showAxial = gd.getNextBoolean();
@@ -82,7 +83,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             if (!applyWinFunc) {
                 winFraction = 0.0d;
             }
-            if (manualCutoff) {
+            if (manualCutoff && !noCutoff) {  // skip if noCutoff
                 this.channelMinima = new double[imp.getNChannels()];
                 SIMcheck_.specifyBackgrounds(
                         channelMinima, "Set noise cut-off:");

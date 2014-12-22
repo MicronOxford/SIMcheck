@@ -53,7 +53,7 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);
-        gd.addCheckbox("Specify manual noise cut-off?", manualCutoff);
+        gd.addCheckbox("Specify manual noise cut-off...", manualCutoff);
         gd.showDialog();
         if (gd.wasOKed()) {
             this.manualCutoff = gd.getNextBoolean();
