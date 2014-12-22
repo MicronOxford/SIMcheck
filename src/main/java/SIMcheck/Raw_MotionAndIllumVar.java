@@ -33,7 +33,7 @@ public class Raw_MotionAndIllumVar implements PlugIn, Executable {
 
     public static final String name = "Motion & Illumination Variation";
     public static final String TLA = "MIV";
-    private ResultSet results = new ResultSet(name);
+    private ResultSet results = new ResultSet(name, TLA);
 
     // parameter fields
     public int phases = 5;

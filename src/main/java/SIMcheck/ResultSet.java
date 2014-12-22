@@ -40,7 +40,7 @@ public class ResultSet {
         
         YES("Yes"),
         NO("No"),
-        MAYBE("Maybe"),
+        MAYBE("?"),
         NA("N/A"); // stat has no interpretation -- for info only
 
         private String desc;
@@ -64,6 +64,7 @@ public class ResultSet {
     }
     
     String resultSetName = "";
+    String resultSetTLA = "";
     private LinkedHashMap<String, ImagePlus> imps = 
             new LinkedHashMap<String, ImagePlus>();
     private LinkedHashMap<String, Stat> stats =
@@ -71,8 +72,9 @@ public class ResultSet {
     private LinkedHashMap<String, String> infos = 
             new  LinkedHashMap<String, String>();
     
-    ResultSet(String name) {
+    ResultSet(String name, String tla) {
         resultSetName = name;
+        resultSetTLA = tla;  // TODO: store ref to ePlugin class instead
     }
 
     /** Add ImagePlus result & description: title+description MUST be unique. */
@@ -161,7 +163,7 @@ public class ResultSet {
                 // report all stats except where interpretation N/A
                 if (rs.stats.get(statName).statOK != StatOK.NA) {
                     rt.incrementCounter();
-                    rt.addValue("Check", rs.resultSetName);
+                    rt.addValue("Check", rs.resultSetTLA);
                     rt.addValue("Statistic", statName);
                     rt.addValue("Value", rs.stats.get(statName).value);
                     rt.addValue("OK?", rs.stats.get(statName).statOK.str());
@@ -235,7 +237,7 @@ public class ResultSet {
     /** test method */
     public static void main(String[] args) {
         
-        ResultSet results = new ResultSet("ResultSet Test");
+        ResultSet results = new ResultSet("ResultSet Test", "TST");
         new ImageJ();
         ImagePlus blimp = TestData.lawn;
         results.addImp("a bead lawn", blimp);

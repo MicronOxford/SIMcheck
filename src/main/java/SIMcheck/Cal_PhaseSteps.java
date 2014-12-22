@@ -39,8 +39,8 @@ import ij.gui.*;
 public class Cal_PhaseSteps implements PlugIn {
 
     public static final String name = "Illumination Phase Steps";
-//    public static final String TLA = "IPS";
-    ResultSet results = new ResultSet(name);
+    public static final String TLA = "IPS";
+    ResultSet results = new ResultSet(name, TLA);
 	
     // parameter / option fields
     public int phases = 5;

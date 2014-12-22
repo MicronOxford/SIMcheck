@@ -36,7 +36,7 @@ public class Cal_PatternFocus implements PlugIn, Executable {
 
     public static final String name = "Illumination Pattern Focus";
     public static final String TLA = "IPF";
-    ResultSet results = new ResultSet(name);
+    ResultSet results = new ResultSet(name, TLA);
 	
 	private int width;
 	private int height;

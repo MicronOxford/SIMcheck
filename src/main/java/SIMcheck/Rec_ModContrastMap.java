@@ -39,7 +39,7 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
     
     public static final String name = "Modulation Contrast Map";
     public static final String TLA = "MCM";
-    private ResultSet results = new ResultSet(name);
+    private ResultSet results = new ResultSet(name, TLA);
     private boolean saturatedPixelsDetected = false;
     
     // parameter fields

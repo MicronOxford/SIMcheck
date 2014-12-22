@@ -32,7 +32,7 @@ public class Raw_FourierProjections implements PlugIn, Executable {
 
     public static final String name = "Raw Data Fourier Projections";
     public static final String TLA = "FPJ";
-    private ResultSet results = new ResultSet(name);
+    private ResultSet results = new ResultSet(name, TLA);
 
     // parameter fields
     public int phases = 5;                                                         

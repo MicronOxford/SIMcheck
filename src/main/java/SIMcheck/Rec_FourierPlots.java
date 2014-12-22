@@ -36,10 +36,10 @@ import java.awt.image.IndexColorModel;
 public class Rec_FourierPlots implements PlugIn, Executable {
 
     public static final String name = "Fourier Plots";
-    public static final String TLA1 = "FTL";  // Fourier Transform Lateral
+    public static final String TLA = "FTL";  // Fourier Transform Lateral
     public static final String TLA2 = "FTR";  // FT Radial profile
     public static final String TLA3 = "FTO";  // FT Orthogonal (XZ)
-    private ResultSet results = new ResultSet(name);
+    private ResultSet results = new ResultSet(name, TLA);
     private static final IndexColorModel fourierLUT = 
             I1l.loadLut("SIMcheck/SIMcheckFourier.lut");
     
@@ -123,7 +123,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         setLUT(impF);
         impF = overlayResRings(impF, cal);
         I1l.copyStackDims(imps[0], impF);
-        impF.setTitle(I1l.makeTitle(imps[0], TLA1));
+        impF.setTitle(I1l.makeTitle(imps[0], TLA));
         results.addImp("Fourier Transform Lateral (XY), showing resolution" +
                 " rings in microns", impF);
         // radial profile of lateral FFT

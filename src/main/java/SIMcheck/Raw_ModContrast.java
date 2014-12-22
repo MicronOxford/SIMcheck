@@ -70,7 +70,7 @@ public class Raw_ModContrast implements PlugIn, Executable {
 
     public static final String name = "Modulation Contrast";
     public static final String TLA = "MCN";
-    private ResultSet results = new ResultSet(name);
+    private ResultSet results = new ResultSet(name, TLA);
     private static final IndexColorModel mcnrLUT = 
             I1l.loadLut("SIMcheck/MCNR.lut");
     

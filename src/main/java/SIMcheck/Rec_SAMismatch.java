@@ -34,7 +34,7 @@ public class Rec_SAMismatch implements PlugIn, Executable {
     
     public static final String name = "Spherical Aberration Mismatch";
     public static final String TLA = "SAM";
-    private ResultSet results = new ResultSet(name);
+    private ResultSet results = new ResultSet(name, TLA);
     
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
@@ -99,7 +99,8 @@ public class Rec_SAMismatch implements PlugIn, Executable {
             plots[c - 1] = plot.getImagePlus();
             double nstdev = Math.sqrt(J.variance(sliceMinima)) / 
                     J.mean(sliceMeans);
-            results.addStat("C" + c + " Z-minimum variation (ZMV)", nstdev,
+//            results.addStat("C" + c + " Z-minimum variation (ZMV)", nstdev,
+            results.addStat("C" + c + " Z-minimum variation", nstdev,
                     ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
             
         }
@@ -109,8 +110,9 @@ public class Rec_SAMismatch implements PlugIn, Executable {
         impAllPlots.setOpenAsHyperStack(true);
         results.addImp("z-section minimum (black) and mean feature intensity (gray)",
                 impAllPlots);
-        results.addInfo("How to interpret", "ZMV is calculated as the "
-                + "standard deviation of z-section minimum intensity"
+        results.addInfo("How to interpret", "z-minimum variation ZMV"
+                + " is calculated as the"
+                + " standard deviation of z-section minimum intensity"
                 + " normalized to the average feature intensity. High ZMV"
                 + " indicates spherical aberration mismatch between sample"
                 + " and optical transfer function used for the reconstruction."

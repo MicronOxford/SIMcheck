@@ -34,7 +34,7 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
     
     public static final String name = "Reconstructed Intensity Histogram";
     public static final String TLA = "RIH";
-    private ResultSet results = new ResultSet(name);
+    private ResultSet results = new ResultSet(name, TLA);
     
     // parameter fields
     // FIXME -- percentile with lower limit??
@@ -98,7 +98,8 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
                 double posNegRatio = calcPosNegRatio(
                 		stats, percentile / 100, background);
                 String statDescription = "C" + c +
-                        " max-to-min intensity ratio MMR";
+//                        " max-to-min intensity ratio MMR";
+                        " max-to-min intensity ratio";
                 double roundedRatio = (double)((int)(posNegRatio * 10)) / 10;
                 results.addStat(statDescription, 
                         roundedRatio, checkRatio(roundedRatio));
@@ -127,7 +128,7 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
         impAllPlots.setOpenAsHyperStack(true);
         results.addImp("Intensity counts in black (linear) & gray (log-scale).",
                 impAllPlots);
-        results.addInfo("How to interpret", "MMR "
+        results.addInfo("How to interpret", "Max-to-min intensity ratio, MMR "
                 + " <3 is inadequate, 3-6 is low, 6-12 is good, >12 excellent."
                 + " For valid results, the data set must contain sufficient"
                 + " background areas (so that the mode reflects background)"

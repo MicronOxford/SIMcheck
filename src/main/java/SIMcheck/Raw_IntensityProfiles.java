@@ -36,7 +36,7 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
 
     public static final String name = "Channel Intensity Profiles";
     public static final String TLA = "CIP";
-    private ResultSet results = new ResultSet(name);
+    private ResultSet results = new ResultSet(name, TLA);
 
     // parameter fields
     public int phases = 5;
@@ -174,7 +174,8 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
             double pcDiff = 100.0d * (intensMax - intensMin) / intensMax;
             results.addStat(
                     "C" + Integer.toString(channel) + " total intensity"
-                    + " variation over central " + (int)zwin + "sections (%)",
+//                            + " variation over central " + (int)zwin + "sections (%)",
+                    + " variation (%)",
                     (double)Math.round(pcDiff), checkPercentDiff(pcDiff));
             
             /// (1) per-channel intensity decay
@@ -250,7 +251,7 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
         I1l.drawPlotTitle(impResult, "Per Channel Intensity Profiles");
         results.addImp(name, plot.getImagePlus());
         results.addInfo("How to interpret",
-                "intensity differences > ~50% over the 9-z-window used to"
+                "total intensity variation > ~50% over the 9-z-window used to"
                 + " reconstruct each z-section may cause artifacts (threshold"
                 + " depends on signal-to-noise level and the fraction of"
                 + " low-intensity images).");
