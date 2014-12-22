@@ -104,8 +104,6 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         ImagePlus imp2 = null;
         if (noCutoff) {
             imp2 = imps[0].duplicate();
-            IJ.run("Conversions...", " ");
-            IJ.run(imp2, "16-bit", "");
         } else if (manualCutoff) {
             imp2 = Util_RescaleTo16bit.exec(imps[0].duplicate(), channelMinima);
         } else {
