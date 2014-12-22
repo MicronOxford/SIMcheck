@@ -32,7 +32,7 @@ import ij.process.*;
  */
 public class Rec_SAMismatch implements PlugIn, Executable {
     
-    public static final String name = "Sperical Aberration Mismatch";
+    public static final String name = "Spherical Aberration Mismatch";
     public static final String TLA = "SAM";
     private ResultSet results = new ResultSet(name);
     
@@ -99,7 +99,7 @@ public class Rec_SAMismatch implements PlugIn, Executable {
             plots[c - 1] = plot.getImagePlus();
             double nstdev = Math.sqrt(J.variance(sliceMinima)) / 
                     J.mean(sliceMeans);
-            results.addStat("C" + c + " normalized StdDev", nstdev,
+            results.addStat("C" + c + " Z-minimum variation (ZMV)", nstdev,
                     ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
             
         }
@@ -109,13 +109,14 @@ public class Rec_SAMismatch implements PlugIn, Executable {
         impAllPlots.setOpenAsHyperStack(true);
         results.addImp("z-section minimum (black) and mean feature intensity (gray)",
                 impAllPlots);
-        results.addInfo("How to interpret", 
-                "high normalized standard deviation of z-section minimum"
-                + " intensity with respect to section average feature"
-                + " intensity indicates sample / PSF Spherical Aberration"
-                + " mismatch. Typically this is seen as a peak / dip in"
-                + " normalized minimum StdDev at the sample boundary, but"
-                + " the absolute value depends on image content.");
+        results.addInfo("How to interpret", "ZMV is calculated as the "
+                + "standard deviation of z-section minimum intensity"
+                + " normalized to the average feature intensity. High ZMV"
+                + " indicates spherical aberration mismatch between sample"
+                + " and optical transfer function used for the reconstruction."
+                + " Typically this is seen as dip in the minimum intensity"
+                + " plot at the sample boundary. Note, that the absolute value"
+                + " depends on image content.");
         return results;
     }
 

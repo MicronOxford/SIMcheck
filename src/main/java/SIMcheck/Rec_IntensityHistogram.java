@@ -98,7 +98,7 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
                 double posNegRatio = calcPosNegRatio(
                 		stats, percentile / 100, background);
                 String statDescription = "C" + c +
-                        " max / min intensity ratio";
+                        " max-to-min intensity ratio MMR";
                 double roundedRatio = (double)((int)(posNegRatio * 10)) / 10;
                 results.addStat(statDescription, 
                         roundedRatio, checkRatio(roundedRatio));
@@ -127,17 +127,17 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
         impAllPlots.setOpenAsHyperStack(true);
         results.addImp("Intensity counts in black (linear) & gray (log-scale).",
                 impAllPlots);
-        results.addInfo("How to interpret", "Max / Min intensity ratio " +
-                " <3 is inadequate, 3-6 is low, 6-12 is good, >12 excellent." +
-                " For valid results, the data set must contain sufficient" +
-                " background areas (so that the mode reflects background)" +
-                " and should be constrained to z-slices containing features.");
-        results.addInfo("About the Max / min intensity ratio",
-                "the ratio of the averaged " + percentile + "%" +
-                " highest (Max*) and lowest (Min*) intensity pixels in a" +
-                " 32-bit stack, centered at the stack mode (assumed to be" +
-                " the center of the noise distribution)." +
-                " i.e.: Max* - Mode / |Min* - Mode|");
+        results.addInfo("How to interpret", "MMR "
+                + " <3 is inadequate, 3-6 is low, 6-12 is good, >12 excellent."
+                + " For valid results, the data set must contain sufficient"
+                + " background areas (so that the mode reflects background)"
+                + " and should be constrained to z-slices containing features.");
+        results.addInfo("About", "MMR is calculated as"
+                + " the ratio of the averaged " + percentile*100 + "%"
+                + " highest (Max*) and lowest (Min*) intensity pixels in a"
+                + " 32-bit stack, centered at the stack mode (assumed to be"
+                + " the center of the noise distribution),"
+                + " that is, Max* - Mode / |Min* - Mode|");
         return results;
     }
 

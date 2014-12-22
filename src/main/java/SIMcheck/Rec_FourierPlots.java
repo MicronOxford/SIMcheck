@@ -125,7 +125,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         I1l.copyStackDims(imps[0], impF);
         impF.setTitle(I1l.makeTitle(imps[0], TLA1));
         results.addImp("Fourier Transform Lateral (XY), showing resolution" +
-                " rings (in Microns)", impF);
+                " rings in microns", impF);
         // radial profile of lateral FFT
         ImagePlus radialProfiles = makeRadialProfiles(impF);
         radialProfiles.setTitle(I1l.makeTitle(imps[0], TLA2));
@@ -166,14 +166,14 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             + " resolution due to: angle-to-angle intensity variations,"
             + " angle-specific illumination pattern ('k0') fit error, or"
             + " angle-specific z-modulation issues");
-        results.addInfo("About the Fourier plots",
-                "By default reconstructed data cropped to mode; "
-                + " window function applied to reduce edge artifacts prior"
-                + "to FFT; FFT slices are normalized (mode-max); and target"
+        results.addInfo("About",
+                "By default the reconstructed data are (1) cropped to mode; "
+                + " (2) a window function applied to reduce edge artifacts prior"
+                + "to FFT; (3) FFT slices are normalized (mode-max); (4) target"
                 + "rings (overlay) are added to translate frequency to"
-                + " spatial resolution. Optionally results may be blurred"
-                + " and a color Look-Up Table applied to highlight slope /"
-                + " flatness of Fourier spectrum.");
+                + " spatial resolution. (5) Optionally results may be blurred"
+                + " and a 16-color LUT applied to highlight slope or "
+                + " flatness of the Fourier spectrum.");
         return results;
     }
     

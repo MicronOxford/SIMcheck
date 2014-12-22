@@ -173,8 +173,8 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
 //            intensMean /= nWinSlices;
             double pcDiff = 100.0d * (intensMax - intensMin) / intensMax;
             results.addStat(
-                    "C" + Integer.toString(channel) + " max % intensity"
-                        + " variation over reconstruction window",
+                    "C" + Integer.toString(channel) + " total intensity"
+                    + " variation over central " + (int)zwin + "sections (%)",
                     (double)Math.round(pcDiff), checkPercentDiff(pcDiff));
             
             /// (1) per-channel intensity decay
@@ -188,8 +188,8 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
             double channelDecay = (double)100 * (1 - Math.exp(fitResults[1]
             		* pzat_no.length * (zwin / nz)));
             results.addStat(
-                    "C" + Integer.toString(channel) + " intensity decay"
-                        + " per " + (int)zwin + " sections (%)",
+                    "C" + Integer.toString(channel) + " average intensity"
+                    + " decay per " + (int)zwin + " section window (%)",
                     (double)Math.round(channelDecay),
                     ResultSet.StatOK.NA);
             
@@ -214,7 +214,7 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
             float maxAngleIntensity = J.max(angleMeans);
             largestDiff = (double)100 * largestDiff / (double)maxAngleIntensity;
             results.addStat("C" + Integer.toString(channel) 
-                    + " max intensity difference between angles (%)",
+                    + " maximum intensity difference between angles (%)",
                     (double)Math.round(largestDiff),
                     ResultSet.StatOK.NA);
             
@@ -241,8 +241,7 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
             avRangeN /= (na * np);
             avRangeN *= 100.0d;
             results.addStat("C" + Integer.toString(channel) 
-                    + " intensity range over reconstruction"
-                    + " window, averaged over phase and angle (%)", avRangeN,
+                    + " relative intensity fluctuations (%)", avRangeN,
                     ResultSet.StatOK.NA);
             
         }
@@ -251,17 +250,18 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
         I1l.drawPlotTitle(impResult, "Per Channel Intensity Profiles");
         results.addImp(name, plot.getImagePlus());
         results.addInfo("How to interpret",
-                "intensity differences > ~30% over the 9-z-window used to"
+                "intensity differences > ~50% over the 9-z-window used to"
                 + " reconstruct each z-section may cause artifacts (threshold"
-                + " depends on signal-to-noise level).");
+                + " depends on signal-to-noise level and the fraction of"
+                + " low-intensity images).");
         return results;
     }
     
     /** Is this percentage difference stat value acceptable? */
     private ResultSet.StatOK checkPercentDiff(double statValue) {
-        if (statValue <= 10) {
+        if (statValue <= 20) {
             return ResultSet.StatOK.YES;
-        } else if (statValue <= 30) {
+        } else if (statValue <= 50) {
             return ResultSet.StatOK.MAYBE;
         } else {
             return ResultSet.StatOK.NO;
