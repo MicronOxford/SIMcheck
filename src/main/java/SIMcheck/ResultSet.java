@@ -121,8 +121,9 @@ public class ResultSet {
     /** Report all results */
     public void report() {
         IJ.log("");
+        IJ.log(J.nChars((int)(TEXTWIDTH * 0.67), "-"));
         IJ.log(resultSetName);
-        IJ.log(J.nChars(TEXTWIDTH, "-"));
+        IJ.log(J.nChars((int)(TEXTWIDTH * 0.67), "-"));
         for (Map.Entry<String, ImagePlus> entry : imps.entrySet()) {
             String description = entry.getKey();
             ImagePlus imp = (ImagePlus)entry.getValue();
@@ -149,7 +150,6 @@ public class ResultSet {
             IJ.log(infoTitle + ": " + autoFormat(info, TEXTWIDTH,
                     infoTitle.length() + 2));
         }
-        IJ.log("---");
     }
     
     /**

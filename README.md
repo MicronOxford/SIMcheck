@@ -111,8 +111,6 @@ TODO
 * 0.9.7: final pre-submission features & fixes
 
       - pre-submission log updates
-        - short stat names in summary table
-        - overline as well as underline check names in log (replace ---)
         - do not report false decimal, i.e. XX.0 / fix rounding
         - tweak line widths / auto-formatting
         - display main, checked stats before & separeated from others
