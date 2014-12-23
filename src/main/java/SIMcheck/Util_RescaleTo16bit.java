@@ -23,6 +23,7 @@ import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.plugin.ChannelSplitter;
 import ij.plugin.PlugIn;
+import ij.process.StackStatistics;
 
 /**
  * This plugin discards values below zero-point and converts to 16-bit.
@@ -32,6 +33,7 @@ public class Util_RescaleTo16bit implements PlugIn {
 
     public static final String name = "Threshold and 16-bit Conversion";
     public static final String TLA = "THR";
+    private static final int MAX_16_BIT = 65535;
     
     @Override
     public void run(String arg) {
@@ -64,9 +66,16 @@ public class Util_RescaleTo16bit implements PlugIn {
         String title = I1l.makeTitle(imp, TLA);
         ImagePlus imp2 = imp.duplicate();
         I1l.subtractMode(imp2);
-//        IJ.log(name + ", auto-scaled using per channel mode.");
-        IJ.run("Conversions...", " ");
+        IJ.log(name + ", auto-scale using per channel mode.");
+        // TODO: copy some logic to version with channelMinima?
+        if (exceeds16bit(imp2)) {
+            IJ.run("Conversions...", "scale");
+            IJ.log("Data exceeds 16-bit range and has been rescaled!");
+        } else {
+            IJ.run("Conversions...", " ");
+        }
         IJ.run(imp2, "16-bit", "");
+        IJ.run("Conversions...", " ");  // assume default no rescaling
         imp2.setTitle(title);
         return imp2;
     }
@@ -98,6 +107,12 @@ public class Util_RescaleTo16bit implements PlugIn {
             IJ.run(imps[c], "Subtract...", "value=" + minimum + " stack");
         }
         imp.setStack(I1l.mergeChannels(imp.getTitle(), imps).getStack());
+    }
+    
+    /** Return true if StackStatistics report a max outside 16-bit range. */
+    private static boolean exceeds16bit(ImagePlus imp) {
+        StackStatistics sstats = new StackStatistics(imp);
+        return sstats.histMax > (double)MAX_16_BIT;
     }
     
     /** Interactive test method. */
