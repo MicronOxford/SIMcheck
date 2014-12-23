@@ -22,7 +22,6 @@ class Radial_Profile implements PlugIn {
     private double X0;
     private double Y0;
     private double mR;
-    private boolean useCalibration = true;
 
     public void run(String arg) {
         ImagePlus plotImp = exec(IJ.getImage());
@@ -47,6 +46,11 @@ class Radial_Profile implements PlugIn {
     }
 
     private ImagePlus doRadialDistribution(ImageProcessor ip) {
+        Calibration cal = imp.getCalibration();
+        if (cal.getUnit().equals("pixel")) {
+            IJ.log("Aborting radial profile due to lack of calibration info!");
+            return null;
+        }
         nBins = (int) (3*mR/4);
         int thisBin;
         float[][] Accumulator = new float[2][nBins];
@@ -67,40 +71,27 @@ class Radial_Profile implements PlugIn {
                         Accumulator[1][thisBin]+ip.getPixelValue((int)i,(int)j);
             }
         }
-        Calibration cal = imp.getCalibration();
         Properties props = imp.getProperties();
         boolean isFourier = false;
         if (props != null) {
             isFourier = props.containsKey("FHT");
         }
-        if (cal.getUnit() == "pixel") useCalibration=false;
         Plot plot = null;
-        if (useCalibration) {
-            for (int i = 0; i < nBins; i++) {
-                Accumulator[1][i] =  Accumulator[1][i] / Accumulator[0][i];
-                // gb: looks like we re-use Accumulator[0] for x-axis
-                Accumulator[0][i] =
-                        (float)(((double)(i+1)/nBins)*0.5/cal.pixelWidth);
-                // plotting x for 1/x micron freq, x = (i/nBins)*.5/cal
-                // originally (float)(cal.pixelWidth*mR*((double)(i+1)/nBins));
-            }
-            String units = cal.getUnits();
-            if (isFourier) {
-                units = "1/x " + units;
-            }
-            plot = new Plot("Radial Profile Plot", "Radius ["+ units +"]", 
-                    "Normalized Integrated Intensity",
-                    Accumulator[0], Accumulator[1]);
-        } else {
-            for (int i = 0; i < nBins; i++) {
-                Accumulator[1][i] = Accumulator[1][i] / Accumulator[0][i];
-                // FIXME: but w/o calibration info, we're lost anyway
-                Accumulator[0][i] = (float)(mR * ((double)(i+1)/nBins));
-            }
-            plot = new Plot("Radial Profile Plot", "Radius [pixels]", 
-                    "Normalized Integrated Intensity",
-                    Accumulator[0], Accumulator[1]);
+        for (int i = 0; i < nBins; i++) {
+            Accumulator[1][i] =  Accumulator[1][i] / Accumulator[0][i];
+            // gb: looks like we re-use Accumulator[0] for x-axis
+            Accumulator[0][i] =
+                    (float)(((double)(i+1)/nBins)*0.5/cal.pixelWidth);
+            // plotting x for 1/x micron freq, x = (i/nBins)*.5/cal
+            // originally (float)(cal.pixelWidth*mR*((double)(i+1)/nBins));
         }
+        String units = cal.getUnits();
+        if (isFourier) {
+            units = "1/x " + units;
+        }
+        plot = new Plot("Radial Profile Plot", "Radius ["+ units +"]", 
+                "Normalized Integrated Intensity",
+                Accumulator[0], Accumulator[1]);
         return plot.getImagePlus();
     }
 

@@ -129,34 +129,38 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         impF.setTitle(I1l.makeTitle(imps[0], TLA));
         results.addImp("Fourier Transform Lateral (XY), showing resolution" +
                 " rings in microns", impF);
-        // radial profile of lateral FFT
-        ImagePlus radialProfiles = makeRadialProfiles(impF);
-        radialProfiles.setTitle(I1l.makeTitle(imps[0], TLA2));
-        results.addImp("Fourier Transform Radial profile "
-                + "(lateral, central Z)", radialProfiles);
-        /// for orthogonal (axial) view, reslice first
-        if (showAxial) {
-            new StackConverter(imp2).convertToGray32();  // for OrthoReslicer
-            OrthoReslicer orthoReslicer = new OrthoReslicer();
-            ImagePlus impOrtho = imp2.duplicate();
-            impOrtho = orthoReslicer.exec(impOrtho, false);
-            impOrtho = I1l.takeCentralZ(impOrtho);
-            Calibration calOrtho = impOrtho.getCalibration();
-            IJ.showStatus("Fourier transforming z-sections (orthogonal view)");
-            ImagePlus impOrthoF = FFT2D.fftImp(impOrtho, winFraction);
-            IJ.showStatus("Blurring & rescaling z-sections (orthogonal view)");
-            autoscaleSlices(impOrthoF);
-            impOrthoF = resizeAndPad(impOrthoF, cal);
-            impOrthoF = gaussBlur(impOrthoF);
-            // TODO, for multi-frame images, ensure impOrthoF is composite
-            rescaleToStackMax(impOrthoF);
-            setLUT(impOrthoF);
-            calOrtho.pixelHeight = calOrtho.pixelWidth;  // after resizeAndPad
-            impOrthoF = overlayResRings(impOrthoF, calOrtho);
-            I1l.copyStackDims(imps[0], impOrthoF);
-            impOrthoF.setPosition(1, impF.getNSlices() / 2, 1);
-            impOrthoF.setTitle(I1l.makeTitle(imps[0], TLA3));
-            results.addImp("Fourier Transform Orthogonal (XZ)", impOrthoF);
+        // radial & axial profiles only if we have calibration info
+        if (imp2.getCalibration().getUnit().equals("pixel")) {
+            IJ.log("Calibration info required for Radial & Axial FFT plots!");
+        } else {
+            ImagePlus radialProfiles = makeRadialProfiles(impF);
+            radialProfiles.setTitle(I1l.makeTitle(imps[0], TLA2));
+            results.addImp("Fourier Transform Radial profile "
+                    + "(lateral, central Z)", radialProfiles);
+            if (showAxial) {
+                /// for orthogonal (axial) view, reslice first
+                new StackConverter(imp2).convertToGray32();  // for OrthoReslicer
+                OrthoReslicer orthoReslicer = new OrthoReslicer();
+                ImagePlus impOrtho = imp2.duplicate();
+                impOrtho = orthoReslicer.exec(impOrtho, false);
+                impOrtho = I1l.takeCentralZ(impOrtho);
+                Calibration calOrtho = impOrtho.getCalibration();
+                IJ.showStatus("FFT z-sections (orthogonal view)");
+                ImagePlus impOrthoF = FFT2D.fftImp(impOrtho, winFraction);
+                IJ.showStatus("Blur & rescale z-sections (orthogonal view)");
+                autoscaleSlices(impOrthoF);
+                impOrthoF = resizeAndPad(impOrthoF, cal);
+                impOrthoF = gaussBlur(impOrthoF);
+                // TODO, for multi-frame images, ensure impOrthoF is composite
+                rescaleToStackMax(impOrthoF);
+                setLUT(impOrthoF);
+                calOrtho.pixelHeight = calOrtho.pixelWidth;  // after resizeAndPad
+                impOrthoF = overlayResRings(impOrthoF, calOrtho);
+                I1l.copyStackDims(imps[0], impOrthoF);
+                impOrthoF.setPosition(1, impF.getNSlices() / 2, 1);
+                impOrthoF.setTitle(I1l.makeTitle(imps[0], TLA3));
+                results.addImp("Fourier Transform Orthogonal (XZ)", impOrthoF);
+            }
         }
         impF.setPosition(1, impF.getNSlices() / 2, 1);
         results.addInfo("How to interpret", 
