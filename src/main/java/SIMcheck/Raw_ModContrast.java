@@ -19,7 +19,6 @@
 package SIMcheck;
 
 import ij.*;
-import ij.measure.Calibration;
 import ij.process.*;
 import ij.plugin.*;
 import ij.gui.GenericDialog;

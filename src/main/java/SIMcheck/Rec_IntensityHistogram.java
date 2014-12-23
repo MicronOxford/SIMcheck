@@ -37,7 +37,6 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
     private ResultSet results = new ResultSet(name, TLA);
     
     // parameter fields
-    // FIXME -- percentile with lower limit??
     public double percentile = 0.0005;  // use 0-100% of histogram extrema
     public long minPixels = 100; // minimum pixels at histogram extrema to use
     public double modeTol = 0.25;  // mode should be within modeTol*stdev of 0

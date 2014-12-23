@@ -117,8 +117,8 @@ public class Raw_FourierProjections implements PlugIn, Executable {
         ImagePlus impProjF = ij.WindowManager.getCurrentImage();
         for (int c = 0; c < impProjF.getNChannels(); c++) {
             impProjF.setC(c+1);
-            int projMode = impProjF.getStatistics().mode;
-            int projMax = (int)impProjF.getStatistics().max;
+//            int projMode = impProjF.getStatistics().mode;
+//            int projMax = (int)impProjF.getStatistics().max;
 //            IJ.setMinAndMax(imp, projMode, projMax);
 //            IJ.run(imp, "Apply LUT", "");
 //        impProjF.setProcessor((ImageProcessor)I1l.setBPminMax(

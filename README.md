@@ -110,7 +110,7 @@ TODO
 
 * 0.9.7: final pre-submission features & fixes
 
-      - get rid of warnings & update docs, credits etc. before release
+      - update docs before release
 
 
 * 0.9.8: post-submission refactoring & documentation updates
