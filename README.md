@@ -101,8 +101,8 @@ Style Notes
 * simple, modular structure - each check is a standalone plugin
 * plugin exec methods take input images and return ResultSet
   (no GUI calls within exec when easily avoidable)
-* ImageJ1-like preference for pre- java 5 features (i.e. not many generics)
-  and reliance on float primitive type for most calculations
+* ImageJ1-like preference for pre- java 5 features and reliance on float
+  primitive type for most calculations
 
 
 TODO
@@ -110,7 +110,22 @@ TODO
 
 * 0.9.7: final pre-submission features & fixes
 
-      - update docs before release
+      - Projected widefield: the normalisation should act on each channel
+        independently. Currently normalises both channels to one value. The
+        result image is not a "multichannel image" anymore (you realise this if you
+        click in the "channel tools" on a different channel, you are asked if to
+        "convert to multi-channel composite image") . Ideally they should be normalised
+        independently to the respective start value and the resulting image should
+        still be a multichannel image. The option should be termed "Intensity
+        normalisation (simple ratio correction)". (No question mark!)
+      - Regarding "Threshold and 16-bit conversion" in the case of dynamic
+        range exceeding the 16-bit range, I noted that there is no cut-off and
+        that the  dynamic range is not filling the 16-bit range (see attached
+        illustration). Ideally the part between cut-off and brightest pixel in the
+        stack should stretch out from 0 to 65535.
+      - log output formatting
+      - update docs before release (javadoc, README cross-ref manual)
+      - bump version number, update manual ref
 
 
 * 0.9.8: post-submission refactoring & documentation updates

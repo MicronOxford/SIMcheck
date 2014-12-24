@@ -175,7 +175,7 @@ public class ResultSet {
                     rt.addValue("Check", rs.resultSetTLA);
                     rt.addValue("Statistic", statName);
                     rt.addValue("Value", J.d2s(rs.stats.get(statName).value));
-                    rt.addValue("OK?", rs.stats.get(statName).statOK.str());
+                    rt.addValue("Pass", rs.stats.get(statName).statOK.str());
                 }
             }
         }

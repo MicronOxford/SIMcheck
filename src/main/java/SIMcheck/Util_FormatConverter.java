@@ -90,7 +90,7 @@ public class Util_FormatConverter implements PlugIn {
             throw new IllegalArgumentException("Unknown format " + format);
         }
         ImagePlus convertedImp = 
-                new ImagePlus(I1l.makeTitle(imp, "_OMX"), outStack);
+                new ImagePlus(I1l.makeTitle(imp, "OMX"), outStack);
         convertedImp.copyScale(imp);
         convertedImp.setDimensions(nc, (phases * nz * angles), nt);
         convertedImp.setOpenAsHyperStack(true);
