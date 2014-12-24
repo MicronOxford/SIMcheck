@@ -110,6 +110,7 @@ TODO
 
 * 0.9.7: final pre-submission features & fixes
 
+      - util_thresh thresholding bug? (not discarding below mode?) check / fix
       - Projected widefield: the normalisation should act on each channel
         independently. Currently normalises both channels to one value. The
         result image is not a "multichannel image" anymore (you realise this if you
@@ -118,11 +119,6 @@ TODO
         independently to the respective start value and the resulting image should
         still be a multichannel image. The option should be termed "Intensity
         normalisation (simple ratio correction)". (No question mark!)
-      - Regarding "Threshold and 16-bit conversion" in the case of dynamic
-        range exceeding the 16-bit range, I noted that there is no cut-off and
-        that the  dynamic range is not filling the 16-bit range (see attached
-        illustration). Ideally the part between cut-off and brightest pixel in the
-        stack should stretch out from 0 to 65535.
       - log output formatting
       - update docs before release (javadoc, README cross-ref manual)
       - bump version number, update manual ref

@@ -67,7 +67,6 @@ public class Util_RescaleTo16bit implements PlugIn {
         ImagePlus imp2 = imp.duplicate();
         I1l.subtractMode(imp2);
         IJ.log(name + ", auto-scale using per channel mode.");
-        // TODO: copy some logic to version with channelMinima?
         if (exceeds16bit(imp2)) {
             IJ.run("Conversions...", "scale");
             IJ.log("Data exceeds 16-bit range and has been rescaled!");
@@ -93,8 +92,14 @@ public class Util_RescaleTo16bit implements PlugIn {
             IJ.log("  Channel " + c + " minimum = " + channelMinima[c - 1]);
         }
         subtractChannelMinima(imp2, channelMinima);
-        IJ.run("Conversions...", " ");
+        if (exceeds16bit(imp2)) {
+            IJ.run("Conversions...", "scale");
+            IJ.log("Data exceeds 16-bit range and has been rescaled!");
+        } else {
+            IJ.run("Conversions...", " ");
+        }
         IJ.run(imp2, "16-bit", "");
+        IJ.run("Conversions...", " ");  // assume default no rescaling
         imp2.setTitle(title);
         return imp2;
     }
