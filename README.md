@@ -110,7 +110,6 @@ TODO
 
 * 0.9.7: final pre-submission features & fixes
 
-      - util_thresh thresholding bug? (not discarding below mode?) check / fix
       - Projected widefield: the normalisation should act on each channel
         independently. Currently normalises both channels to one value. The
         result image is not a "multichannel image" anymore (you realise this if you

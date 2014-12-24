@@ -600,16 +600,6 @@ public final class I1l {
         }
     }
 
-    /** Subtract per-channel mode value from all slices in a hyperstack. */
-    public static void subtractMode(ImagePlus imp) {
-        ImagePlus[] imps = ChannelSplitter.split(imp);
-        for (int c = 0; c < imps.length; c++) {
-            double dmode = new StackStatistics(imps[c]).dmode;
-            IJ.run(imps[c], "Subtract...", "value=" + dmode + " stack");
-        }
-        imp.setStack(mergeChannels(imp.getTitle(), imps).getStack());
-    }
-    
     /** Subtract per-slice mode from all slices in a hyperstack. */
     public static void subtractPerSliceMode(ImagePlus imp) {
         for (int s = 1; s <= imp.getStackSize(); s++) {
