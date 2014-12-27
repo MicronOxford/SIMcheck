@@ -17,8 +17,7 @@
 
 package SIMcheck;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
+import java.math.*;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -95,15 +94,6 @@ public class J {
         return n % 2 == 0 ? n : n - 1;
     }
     
-    /** Convert double to string (2 sig figs). */
-    public static String d2s(double dStat) {
-        BigDecimal bd = new BigDecimal(dStat);
-        bd = bd.round(new MathContext(ResultSet.STAT_SIG_FIGS));
-        bd.stripTrailingZeros();
-        return bd.toString();
-    }
-    
-
     /** Convert double array to float array. */
     public static float[] d2f(double[] d) {
         if (d == null) {
@@ -114,6 +104,18 @@ public class J {
             output[i] = (float)d[i];
         }
         return output;
+    }
+    
+    /** Convert double to string (2 sig figs). */
+    public static String d2s(double dStat) {
+        BigDecimal bd = new BigDecimal(dStat);
+        if (Math.abs(dStat) >= 100.0d) {
+            bd = bd.setScale(0, RoundingMode.HALF_UP);
+        } else {
+            bd = bd.round(new MathContext(ResultSet.STAT_SIG_FIGS));
+        }
+        bd.stripTrailingZeros();
+        return bd.toString();
     }
     
     /** Euclidean distance */

@@ -139,7 +139,9 @@ public class Cal_PatternFocus implements PlugIn, Executable {
         montage.setTitle(I1l.makeTitle(imp, TLA));
         String description = "Projected side view along the illumination"
                 + " stripes (phase 1 only) for each angle to illustrate"
-                + " alignment of the z-modulation with the focal plane.";
+                + " alignment of the z-modulation with the focal plane."
+                + " Slice intensities are normalized to correct for"
+                + " intensity variations.";
         results.addImp(description, montage);
         results.addInfo("\nHow to interpret",
                 "100 nm bead layer in the focal plane should display distinct"
@@ -178,7 +180,7 @@ public class Cal_PatternFocus implements PlugIn, Executable {
     /** Rotate stripes for each angle to vertical. */
     private void rotateStripes(ImagePlus imp2, double angleDeg) {
         angleDeg = -angleDeg;
-        results.addInfo(imp2.getTitle(), "rotated " + angleDeg + "° CCW");
+        results.addInfo(imp2.getTitle(), "rotated " + J.d2s(angleDeg) + "° CCW");
         IJ.run(imp2, "Rotate... ", "angle=" + angleDeg +
                 " grid=1 interpolation=Bilinear stack");
         // draw central vertical line to visually check angle after rotation 
