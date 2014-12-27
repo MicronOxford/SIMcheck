@@ -110,7 +110,6 @@ TODO
 
 * 0.9.7: final pre-submission features & fixes
 
-      - log output formatting
       - update docs before release (javadoc, README cross-ref manual)
       - bump version number, update manual ref
 

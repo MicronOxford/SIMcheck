@@ -338,7 +338,7 @@ public final class I1l {
 
     /**
      * Merge identically-dimensioned single-channel images, channel fastest.
-     * Returns a grayscale-mode composite image.
+     * Returns a grayscale-mode composite image for all but RGB
      * */ 
     public static ImagePlus mergeChannels(String title, ImagePlus imps[]) {
         if (imps.length > 1) {
