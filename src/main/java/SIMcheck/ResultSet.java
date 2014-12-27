@@ -120,9 +120,9 @@ public class ResultSet {
     /** Report all results */
     public void report() {
         IJ.log("");
-        IJ.log(J.nChars((int)(TEXTWIDTH * 0.7), "-"));
-        IJ.log(resultSetName);
-        IJ.log(J.nChars((int)(TEXTWIDTH * 0.7), "-"));
+        IJ.log(J.nChars((int)(TEXTWIDTH * 1.0), "-"));
+        IJ.log(titleString(resultSetName, " "));
+        IJ.log(J.nChars((int)(TEXTWIDTH * 1.0), "-"));
         for (Map.Entry<String, ImagePlus> entry : imps.entrySet()) {
             String description = entry.getKey();
             ImagePlus imp = (ImagePlus)entry.getValue();
@@ -243,6 +243,21 @@ public class ResultSet {
         return objArray;
     }
     
+    /** Return a String containing 'title' centered in a line of charX. */
+    static String titleString(String title, String charX) {
+        if (!title.equals("")) {
+            title = " " + title + " ";
+        }
+        int nPadChars = (int)(0.5 * (TEXTWIDTH - title.length()));
+        // char width corrections for IJ's non-fixed-width font
+        if (charX.equals("=")) {
+            nPadChars = (int)(0.75 * nPadChars);  // correct for wider '='
+        } else if (charX.equals(" ")) {
+            nPadChars = (int)(2.0 * nPadChars);  // correct for narrow ' '
+        }
+        return J.nChars(nPadChars, charX) + title + J.nChars(nPadChars, charX);
+    }
+
     /** test method */
     public static void main(String[] args) {
         

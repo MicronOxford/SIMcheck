@@ -35,7 +35,7 @@ import java.awt.image.IndexColorModel;
  */
 public class Rec_FourierPlots implements PlugIn, Executable {
 
-    public static final String name = "Fourier Plots";
+    public static final String name = "Reconstructed Fourier Plots";
     public static final String TLA = "FTL";  // Fourier Transform Lateral
     public static final String TLA2 = "FTR";  // FT Radial profile
     public static final String TLA3 = "FTO";  // FT Orthogonal (XZ)
