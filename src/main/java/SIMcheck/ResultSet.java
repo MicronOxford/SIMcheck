@@ -165,7 +165,7 @@ public class ResultSet {
                     infoTitle.length() + 2));
             sb.append("\n");
         }
-        IJ.log(sb.toString());
+        IJ.log(stripMultipleBlankLines(sb.toString()));
     }
     
     /**
@@ -263,6 +263,11 @@ public class ResultSet {
             nPadChars = (int)(2.0 * nPadChars);  // correct for narrow ' '
         }
         return J.nChars(nPadChars, charX) + title + J.nChars(nPadChars, charX);
+    }
+    
+    /** Replace occurrences of multiple blank lines with 1 blank line. */
+    private static String stripMultipleBlankLines(String s) {
+        return s.replaceAll("\n{3,}", "\n\n");
     }
 
     /** test method */
