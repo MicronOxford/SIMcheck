@@ -341,12 +341,15 @@ public final class I1l {
      * Returns a grayscale-mode composite image.
      * */ 
     public static ImagePlus mergeChannels(String title, ImagePlus imps[]) {
-        if (imps.length < 2) {
-            throw new IllegalArgumentException("Cannot merge <2 imps!");
-        } else {
+        if (imps.length > 1) {
             int[] dims1 = imps[0].getDimensions();
-            // just compare each imp's dimensionality to the first
             for (ImagePlus imp : imps) {
+                // ensure each imp is single-channel
+                if (imp.getNChannels() > 1) {
+                    throw new IllegalArgumentException(
+                            "Each ImagePlus should have 1 channel!");
+                }
+                // ensure each imp's dimensionality matches first
                 if (!Arrays.equals(imp.getDimensions(), dims1)) {
                     throw new IllegalArgumentException(
                             "Cannot merge imps of differing dimensionality!");
@@ -367,9 +370,14 @@ public final class I1l {
         }
         ImagePlus imp2 = new ImagePlus(title, nuStack);
         imp2.setDimensions(nc, nz, nt);
-        CompositeImage ci = new CompositeImage(imp2);
-        ci.setMode(IJ.GRAYSCALE);
-        return (ImagePlus)ci;
+        if (imp2.getBitDepth() == 24) {
+            return imp2;  // CompositeImage does not support RGB
+        } else {
+            // ordinary multi-channel images should be CompositeImage 
+            CompositeImage ci = new CompositeImage(imp2);
+            ci.setMode(IJ.GRAYSCALE);
+            return (ImagePlus)ci;
+        }
     }
     
     /** Simple Ratio Intensity Normalization (RIN) of ImagePlus slices. */
