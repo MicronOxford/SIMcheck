@@ -118,8 +118,8 @@ public class Cal_PhaseSteps implements PlugIn {
         // TODO 1, measure k0 angle and line spacing from 1st order peaks 
         // TODO 2, add phase amplitude stat, or plot??
         ResultsTable rt = new ResultsTable();
-	//IMD constant of expected phase steps	    
-	double expectedStep = 2.0*Math.PI/phases; //
+        //IMD constant of expected phase steps	    
+        double expectedStep = 2.0*Math.PI/phases; //
         for (int a = 1; a <= angles; a++) {
             IJ.showStatus("FFT & peak-finding for angle " + a);
             ImageStack stackAmp = new ImageStack(width, height);
@@ -131,7 +131,7 @@ public class Cal_PhaseSteps implements PlugIn {
             double[][] kAngles = new double[nc][phases * (zLast - zFirst + 1)];
             Overlay peakOverlay = new Overlay();
             int sliceOut = 0;
-	    int index = 0;
+            int index = 0;
             for (int z = zFirst ; z <= zLast; z++) {
                 for (int p = 1; p <= phases; p++) {
                     for (int c = 1; c <= nc; c++) {
@@ -188,7 +188,9 @@ public class Cal_PhaseSteps implements PlugIn {
 			    }
 			    if ((Math.abs(phaseShifts[c-1][index]) > 1.5*expectedStep) | 
 				(Math.abs(phaseShifts[c-1][index]) < 0.5*expectedStep)){
-				IJ.log("C"+c+"-A"+a+"-Z"+z+"-p"+p+" : Phase step > 1.5 or  <0.5 times expected step size");
+			        results.addInfo("C" + c + "/A" + a + "/Z" + z + "/P" + p,
+			                "Phase step >1.5 or <0.5 times expected step size");
+//				IJ.log("C"+c+"-A"+a+"-Z"+z+"-p"+p+" : Phase step > 1.5 or  <0.5 times expected step size");
 			    }
 			    // need some way to decide on the initial direction to triger this warning.
 			    //if(phaseShift*phaseDirection < 1){
@@ -199,8 +201,16 @@ public class Cal_PhaseSteps implements PlugIn {
                 }
                 IJ.showProgress(z - zFirst + 1, zLast - zFirst + 1);
             }
-            // suppress local variable not used warning :-||
-            IJ.log("=== Cal_Phases ===\n  considering " + sliceOut-- + " slices");
+            if (a == 1) {
+                results.addInfo("How to interpret",
+                        "" + sliceOut + " slices covering " +
+                        phases + " phase steps x" + sliceOut / phases +
+                        " analyzed to find 1st order spots" +
+                        " (see \"FTA\" FFT Amplitude images)" +
+                        " and measure phases, which are plotted as series." +
+                        " Stats summarise stability of frequency and phase.");
+            }
+//            IJ.log("=== Cal_Phases ===\n  considering " + sliceOut-- + " slices");
             // add transforms & peak overlays to results
             String title = I1l.makeTitle(imp, "A" + a + "_FTA");
             ampImps[a - 1] = new ImagePlus(title, stackAmp);
@@ -214,28 +224,29 @@ public class Cal_PhaseSteps implements PlugIn {
             phaseImps[a - 1] = new ImagePlus(title, stackPhase);
             phaseImps[a - 1].setDimensions(nc, phases * (zLast - zFirst + 1), 1);
             phaseImps[a - 1].setOpenAsHyperStack(true);
-            results.addImp("Angle " + a + " FFT phase", phaseImps[a - 1]);
+//            results.addImp("Angle " + a + " FFT phase", phaseImps[a - 1]);
             // do phase plotting & statistics, and add to results
             ImageStack stackPlots = new ImageStack(pltW, pltH); 
 
             for (int c = 1; c <= nc; c++) {
 //                String colName = "A" + a + "/C" + c;
-                IJ.log("\n= Channel " + c + " =");
+//                IJ.log("\n= Channel " + c + " =");
                 double[] positionStdevs = peakPositionStdevs(peakSets[c - 1]);
                 double[] phaseStats = plotPhases(
                         phaseSets[c - 1], positionStdevs, stackPlots);
                 double avPosStdev = J.mean(positionStdevs);
-                results.addStat("a" + a + " c" + c + " peak postion stdev", 
+                String channelAngleString = "C" + c + " A" + a;
+                results.addStat(channelAngleString + " peak postion stdev", 
                         avPosStdev, ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
 
 		//IMD dont quite understand how to add my phaseShifts variable to the stats. 
 
-                results.addStat("a" + a + " c" + c + " phase step stdev", 
+                results.addStat(channelAngleString + " phase step stdev", 
                         phaseStats[0], ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
-                results.addStat("a" + a + " c" + c + " phase offset stdev", 
+                results.addStat(channelAngleString + " phase offset stdev", 
                         phaseStats[1], ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
-                IJ.log("  line spacing = " + J.mean(lineSpacings[c - 1]));
-                IJ.log("  k angle = " + J.mean(kAngles[c - 1]));
+//                IJ.log("  line spacing = " + J.mean(lineSpacings[c - 1]));
+//                IJ.log("  k angle = " + J.mean(kAngles[c - 1]));
             }
             title = I1l.makeTitle(imp, "A" + a + "_PPL");
             plotImps[a - 1] = new ImagePlus(title, stackPlots);
@@ -382,9 +393,9 @@ public class Cal_PhaseSteps implements PlugIn {
     // TODO: move to util class?
     double[] peakPositionStdevs(Polygon[] peakSets) {
         // TODO, test me
-        String debug = "  filtered peak+ position ";
+//        String debug = "  filtered peak+ position ";
         Polygon medCoord = medianCoords(peakSets);
-        debug += "median coords: " + medCoord.xpoints[0] + "," + medCoord.ypoints[0];
+//        debug += "median coords: " + medCoord.xpoints[0] + "," + medCoord.ypoints[0];
         int ncyc = peakSets.length / phases;
         double[] stdevs = new double[ncyc];
 
@@ -405,7 +416,7 @@ public class Cal_PhaseSteps implements PlugIn {
                 stdevs[cyc] = -stdevs[cyc];  // FIXME, -ve indicates outside tolerance
             }
         }
-        IJ.log(debug);
+//        IJ.log(debug);
         return stdevs;
     }
     
@@ -544,8 +555,8 @@ public class Cal_PhaseSteps implements PlugIn {
         float[] phaseSet = rawPhaseSet.clone();
         int len = phaseSet.length;
 //        int sign = -1;  // i.e. the slope
-        float initialStep = phaseSet[1] - phaseSet[0];
-        IJ.log("initial step = " + initialStep);
+//        float initialStep = phaseSet[1] - phaseSet[0];
+//        IJ.log("initial step = " + initialStep);
 //        if (phaseSet[1] - phaseSet[0] > 0) {                                        
 //            sign = 1;
 //        }
