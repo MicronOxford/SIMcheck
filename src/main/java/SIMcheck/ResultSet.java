@@ -31,7 +31,6 @@ public class ResultSet {
 
     // for automatic formatting of result log / output
     private static final int TEXTWIDTH = 55;
-    private static final int INDENT = 0;
     static final int STAT_SIG_FIGS = 2;
     private static final int CHECK_MAX_CHARS = TEXTWIDTH * 100;
 
@@ -192,7 +191,8 @@ public class ResultSet {
     /**
      * Automatically add line-breaks, returning text String of fixed width.
      * titleLen shortens the first line, adjusting for length of item title.
-     * '  -' starts a new indented list item ; TODO: '--' should end list.
+     * '  -' starts a new indented list item
+     * lists *must* be terminated with '  -- '
      */
     private static String autoFormat(String text, int width, int titleLen) {
         StringBuilder sb = new StringBuilder((int)(text.length() * 1.1));
@@ -202,19 +202,29 @@ public class ResultSet {
         int maxIter = 100;  // prevent infinite while; implies < maxIter words
         int iter = 0;
         boolean firstLine = true;
+        boolean insideList = false;
+        boolean hasItemList = false;
         while (thisSpace != -1 && iter < maxIter) {
             lastSpace = thisSpace;
             thisSpace = text.indexOf(" ", lastSpace + 1);
+//            if (thisSpace >= 0 && thisSpace + 4 < text.length())
+//                J.out(text.substring(thisSpace, thisSpace + 4));
             if (thisSpace == -1) {
                 sb.append(text.substring(lineStart, text.length()));
             } else if (thisSpace + 4 < text.length() - 1 &&
                     text.substring(thisSpace, thisSpace + 4).equals("  - ")) {
+                insideList = true;
                 // handle indentation of list items starting '  -'
                 sb.append(text.substring(lineStart, thisSpace) + "\n");
-                sb.append(J.nChars(INDENT * 3, " ") + "- ");
+                sb.append("- ");
                 lineStart = thisSpace + 4;
                 thisSpace += 4;
-                // TODO: indentation of multi-line items & end lists upon '--' 
+            } else if (thisSpace + 4 < text.length() &&
+                    text.substring(thisSpace, thisSpace + 4).equals("  --")) {
+//                J.out("found double-dash");
+                // end multi-line lists upon ' --'
+                hasItemList = true;
+                insideList = false;
             } else {
                 int adjustedLineStart = lineStart;
                 if (firstLine) {
@@ -223,9 +233,11 @@ public class ResultSet {
                 }
                 if (thisSpace - adjustedLineStart > width) {
                     // backtrack to lastSpace
-                    sb.append(text.substring(lineStart, lastSpace) + "\n" +
-                            J.nChars(INDENT * 2, " "));
+                    sb.append(text.substring(lineStart, lastSpace) + "\n");
                     lineStart = lastSpace + 1;
+                    if (insideList) {
+                        sb.append("   ");  // extra indent for list items
+                    }
                     if (firstLine) {
                         firstLine = false;
                     }
@@ -233,7 +245,17 @@ public class ResultSet {
             }
             iter++;
         }
-        return sb.toString();
+        if (insideList == true) {
+            throw new IllegalArgumentException(
+                    "malformed text for autoformatting:\n" +
+                    " item lists should be terminated with '  -- '");
+        }
+        if (hasItemList) {
+            // trim off "  --" before returning
+            return sb.toString().substring(0, sb.length() - 4);
+        } else {
+            return sb.toString();
+        }
     }
     
     /** Return an Object[] representation of the results. */
@@ -284,12 +306,17 @@ public class ResultSet {
         results.addStat("stat3, imBytesPerPix", 
                 (double)blimp.getBytesPerPixel(), StatOK.YES);
         results.addInfo("about", "this is raw SIM data for a bead lawn");
+        results.addInfo("info list", "list items auto-formatted:"
+                + "  - item 1  - item 2  - item 3"
+                + "  - item 4: long item exceeding TEXTWIDTH that tests"
+                + " multi-line wrap indentation"
+                + "  -- ");  // '  -- ' teminated
 
         IJ.log("report()  - should show all images and log"
                 + " all stats, info. Check stats appear in order.");
         results.report();
         
-        IJ.log("checking identity of " + results.objects().length 
+        IJ.log("\nchecking identity of " + results.objects().length 
                 + " (expected " + 11 + ") returned objects...");
         Object[] objs = results.objects();
         IJ.log("resultSetName, objs[0] instanceof String? " 
@@ -305,11 +332,11 @@ public class ResultSet {
         IJ.log("stats key 3, objs[5] instanceof String? " 
                 + new Boolean(objs[5] instanceof String).toString());
         IJ.log("stats value 1, objs[6] instanceof Double? " 
-                + new Boolean((Double)objs[6] instanceof Double).toString());
+                + new Boolean(((Stat)objs[6]).value instanceof Double).toString());
         IJ.log("stats value 2, objs[7] instanceof Double? " 
-                + new Boolean((Double)objs[6] instanceof Double).toString());
+                + new Boolean(((Stat)objs[7]).value instanceof Double).toString());
         IJ.log("stats value 3, objs[8] instanceof Double? " 
-                + new Boolean((Double)objs[6] instanceof Double).toString());
+                + new Boolean(((Stat)objs[8]).value instanceof Double).toString());
         IJ.log("infos key 1, objs[9] instanceof String? " 
                 + new Boolean(objs[9] instanceof String).toString());
         IJ.log("infos value 1, objs[10] instanceof String? " 

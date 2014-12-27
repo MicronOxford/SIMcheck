@@ -172,7 +172,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             + "  - asymmetric FFT indicates angle-specific decrease in"
             + " resolution due to: angle-to-angle intensity variations,"
             + " angle-specific illumination pattern ('k0') fit error, or"
-            + " angle-specific z-modulation issues");
+            + " angle-specific z-modulation issues  -- ");
         results.addInfo("About",
                 "By default the reconstructed data are (1) cropped to mode; "
                 + " (2) a window function applied to reduce edge artifacts prior"

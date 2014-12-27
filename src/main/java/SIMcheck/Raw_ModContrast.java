@@ -260,7 +260,7 @@ public class Raw_ModContrast implements PlugIn, Executable {
                     "  - purple is inadequate (3 or less)" +
                     "  - red is an acceptable value of 6+" +
                     "  - orange is good" +
-                    "  - yellow-white is very good-excellent");
+                    "  - yellow-white is very good-excellent  -- ");
             results.addInfo("Average feature MCNR",
                     "features selected by auto-thresholding (Otsu).");
             results.addInfo("Estimated Wiener filter parameter",
