@@ -33,6 +33,7 @@ public class ResultSet {
     private static final int TEXTWIDTH = 55;
     private static final int INDENT = 0;
     static final int STAT_SIG_FIGS = 2;
+    private static final int CHECK_MAX_CHARS = TEXTWIDTH * 100;
 
     /** Interpretation of a statistic: is it OK? yes, no, maybe. */
     public enum StatOK {
@@ -119,46 +120,52 @@ public class ResultSet {
     
     /** Report all results */
     public void report() {
-        IJ.log("");
-        IJ.log(J.nChars((int)(TEXTWIDTH * 1.0), "-"));
-        IJ.log(titleString(resultSetName, " "));
-        IJ.log(J.nChars((int)(TEXTWIDTH * 1.0), "-"));
+        StringBuilder sb = new StringBuilder(CHECK_MAX_CHARS);
+        sb.append("\n");
+        sb.append(J.nChars((int)(TEXTWIDTH * 1.0), "-") + "\n");
+        sb.append(titleString(resultSetName, " ") + "\n");
+        sb.append(J.nChars((int)(TEXTWIDTH * 1.0), "-") + "\n");
         for (Map.Entry<String, ImagePlus> entry : imps.entrySet()) {
             String description = entry.getKey();
             ImagePlus imp = (ImagePlus)entry.getValue();
-            IJ.log("Displaying " + imp.getTitle() + ":\n");
+            sb.append("Displaying " + imp.getTitle() + ":\n");
             int nTitleChars = imp.getTitle().length() + 2;
             description = description.substring(
                     nTitleChars, description.length());
-            IJ.log(autoFormat(description, TEXTWIDTH, 0));
-            IJ.log("\n");
+            sb.append(autoFormat(description, TEXTWIDTH, 0));
+            sb.append("\n");
             imp.show();
         }
+        sb.append("\n");
         // loop over stats twice: log checked (non-NA) stats first, rest after
         boolean hasCheckedStats = false;
         for (Map.Entry<String, Stat> entry : stats.entrySet()) {
             String statName = entry.getKey();
             if (stats.get(statName).statOK != StatOK.NA) {
-                IJ.log(statName + " = " + J.d2s(entry.getValue().value));
+                sb.append(statName + " = " + J.d2s(entry.getValue().value));
+                sb.append("\n");
                 hasCheckedStats = true;
             }
         }
         if (hasCheckedStats) {
-            IJ.log("--");  // only print a separator if something to separate
+            sb.append("--\n");  // print a separator if something to separate
         }
         for (Map.Entry<String, Stat> entry : stats.entrySet()) {
             String statName = entry.getKey();
             if (stats.get(statName).statOK == StatOK.NA) {
-                IJ.log(statName + " = " + J.d2s(entry.getValue().value));
+                sb.append(statName + " = " + J.d2s(entry.getValue().value));
+                sb.append("\n");
             }
         }
         for (Map.Entry<String, String> entry : infos.entrySet()) {
             String infoTitle = entry.getKey();
             String info = entry.getValue();
-            IJ.log("\n");
-            IJ.log(infoTitle + ": " + autoFormat(info, TEXTWIDTH,
+            sb.append("\n");
+            sb.append(infoTitle + ": " + autoFormat(info, TEXTWIDTH,
                     infoTitle.length() + 2));
+            sb.append("\n");
         }
+        IJ.log(sb.toString());
     }
     
     /**
