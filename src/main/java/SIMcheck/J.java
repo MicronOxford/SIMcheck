@@ -238,6 +238,11 @@ public class J {
     public static String nChars(int n, String charString) {
         return new String(new char[n]).replace("\0", charString);
     }
+    
+    /** Print object as "\n"-terminated String to standard out. */
+    public static void out(Object o) {
+        System.out.println(o.toString());
+    }
 
     /** Square each element of a float array. */                                
     public static float[] sq(float[] f) {                                       

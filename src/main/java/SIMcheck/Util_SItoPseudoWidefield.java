@@ -47,7 +47,8 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         gd.addMessage("Requires SI raw data in OMX (CPZAT) order.");        
         gd.addNumericField("Angles", angles, 0);                               
         gd.addNumericField("Phases", phases, 0);
-        gd.addCheckbox("Ratio intensity normalization?", doNormalize);
+        gd.addCheckbox("Intensity normalisation (simple ratio correction)",
+                doNormalize);
         gd.showDialog();                                                        
         if (gd.wasCanceled()) return;                                           
         if(gd.wasOKed()){                                                     

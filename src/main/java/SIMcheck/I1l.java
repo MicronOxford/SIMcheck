@@ -1,5 +1,5 @@
 /*  
- *  Copyright (c) 2013, Graeme Ball.
+ *  Copyright (c) 2014, Graeme Ball.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@
 package SIMcheck;
 import ij.*;
 import ij.plugin.LutLoader;
-import ij.plugin.ChannelSplitter;
 import ij.plugin.filter.GaussianBlur;
 import ij.process.*;
 import ij.measure.Calibration;
@@ -29,10 +28,12 @@ import java.awt.Polygon;
 import java.awt.image.*;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 /** 
  * I1l (<b>I</b>mageJ <b>1</b> <b>l</b>ibrary) is a class containing static
  * utility methods for ImageJ1. How good is your font?
+ * Some methods check preconditions and throw IllegalArugmentExceptions.
  * @author Graeme Ball <graemeball@gmail.com>
  */
 public final class I1l {
@@ -335,9 +336,23 @@ public final class I1l {
         return WindowManager.makeUniqueName(nuTitle);
     }
 
-    /** Merge identically-dimensioned single-channel images, channel fastest. */ 
+    /**
+     * Merge identically-dimensioned single-channel images, channel fastest.
+     * Returns a grayscale-mode composite image.
+     * */ 
     public static ImagePlus mergeChannels(String title, ImagePlus imps[]) {
-        // TODO: check imps.length >= 1 and all imps identical
+        if (imps.length < 2) {
+            throw new IllegalArgumentException("Cannot merge <2 imps!");
+        } else {
+            int[] dims1 = imps[0].getDimensions();
+            // just compare each imp's dimensionality to the first
+            for (ImagePlus imp : imps) {
+                if (!Arrays.equals(imp.getDimensions(), dims1)) {
+                    throw new IllegalArgumentException(
+                            "Cannot merge imps of differing dimensionality!");
+                }
+            }
+        }
         int width = imps[0].getWidth();
         int height = imps[0].getHeight();
         int nc = imps.length;  // one imp per channel
@@ -352,7 +367,9 @@ public final class I1l {
         }
         ImagePlus imp2 = new ImagePlus(title, nuStack);
         imp2.setDimensions(nc, nz, nt);
-        return imp2;
+        CompositeImage ci = new CompositeImage(imp2);
+        ci.setMode(IJ.GRAYSCALE);
+        return (ImagePlus)ci;
     }
     
     /** Simple Ratio Intensity Normalization (RIN) of ImagePlus slices. */
@@ -363,7 +380,6 @@ public final class I1l {
             impsNorm[c] = copyChannel(imp, c + 1);
             impsNorm[c].setStack(normalizeStack(impsNorm[c].getStack()));
         }
-        // FIXME: does not preserve channels
         return I1l.mergeChannels("RIN", impsNorm);
     }
      
@@ -390,15 +406,10 @@ public final class I1l {
     public static ImageStack normalizeStack(ImageStack stack) {
         ImageStack stackN = stack.duplicate();
         int ns = stack.getSize();
-        double meanSliceMean = 0.0d;
-        for (int s = 1; s <= ns; s++) {
-            ImageProcessor ip = stack.getProcessor(s);
-            meanSliceMean += ip.getStatistics().mean;
-        }
-        meanSliceMean /= ns;
+        double firstSliceMean = stack.getProcessor(1).getStatistics().mean;
         for (int s = 1; s <= ns; s++) {
             ImageProcessor ip = stackN.getProcessor(s);
-            double ratio = (double)meanSliceMean / ip.getStatistics().mean;
+            double ratio = (double)firstSliceMean / ip.getStatistics().mean;
             ip.multiply(ratio);
             stackN.setProcessor(ip, s);
         }
