@@ -131,7 +131,7 @@ public class ResultSet {
             int nTitleChars = imp.getTitle().length() + 2;
             description = description.substring(
                     nTitleChars, description.length());
-            sb.append(autoFormat(description, TEXTWIDTH, 0));
+            sb.append(autoFormat(description, (int)(TEXTWIDTH * 1.15), 0));
             sb.append("\n");
             imp.show();
         }
@@ -160,7 +160,7 @@ public class ResultSet {
             String infoTitle = entry.getKey();
             String info = entry.getValue();
             sb.append("\n");
-            sb.append(infoTitle + ": " + autoFormat(info, TEXTWIDTH,
+            sb.append(infoTitle + ": " + autoFormat(info, (int)(TEXTWIDTH * 1.15),
                     infoTitle.length() + 2));
             sb.append("\n");
         }
