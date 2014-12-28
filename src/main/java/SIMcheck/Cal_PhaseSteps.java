@@ -17,6 +17,7 @@
  */
 
 package SIMcheck;
+
 import ij.*;
 import ij.plugin.*;
 import ij.plugin.filter.*;
@@ -32,8 +33,10 @@ import java.awt.Polygon;
 
 import ij.gui.*;
 
-/** This plugin takes raw SI data for an even field of fluorescence and
+/**
+ * This plugin takes raw SI data for an even field of fluorescence and
  * calculates illumination pattern phase-step and offset stability.
+ * 
  * @author Graeme Ball <graemeball@gmail.com>
  **/
 public class Cal_PhaseSteps implements PlugIn {
@@ -41,17 +44,17 @@ public class Cal_PhaseSteps implements PlugIn {
     public static final String name = "Illumination Phase Steps";
     public static final String TLA = "IPS";
     ResultSet results = new ResultSet(name, TLA);
-	
+
     // parameter / option fields
     public int phases = 5;
-	public int angles = 3;
-	public double gaussRad = 0.08;  // gaussian radius, units of image width
-	public double stripeWidth = 0.005;  // units of image width
-	public double peakStdev = 6;  // stdevs above background for peaks
-	public int peakPosTolerance = 6;  // allowed deviation from ideal in pixels
-	
-	private ImagePlus imp;
-	private Calibration cal;
+    public int angles = 3;
+    public double gaussRad = 0.08; // gaussian radius, units of image width
+    public double stripeWidth = 0.005; // units of image width
+    public double peakStdev = 6; // stdevs above background for peaks
+    public int peakPosTolerance = 6; // allowed deviation from ideal in pixels
+
+    private ImagePlus imp;
+    private Calibration cal;
     private int zFirst = 1;
     private int zLast = 1;
     private int width = 0;
@@ -79,64 +82,67 @@ public class Cal_PhaseSteps implements PlugIn {
         gd.addNumericField("first Z slice to analyze", zFirst, 0);
         gd.addNumericField("last Z slice to analyze", zLast, 0);
         gd.showDialog();
-        if (gd.wasCanceled()) return;
+        if (gd.wasCanceled())
+            return;
         if (gd.wasOKed()) {
-            angles = (int)gd.getNextNumber();
-            phases = (int)gd.getNextNumber();
-            zFirst = (int)gd.getNextNumber();
-            zLast = (int)gd.getNextNumber();
+            angles = (int) gd.getNextNumber();
+            phases = (int) gd.getNextNumber();
+            zFirst = (int) gd.getNextNumber();
+            zLast = (int) gd.getNextNumber();
         }
         if (!I1l.stackDivisibleBy(imp, phases * angles)) {
-            IJ.showMessage( "Calibrate phases", 
-                    "Error: stack size not consistent with phases/angles." );
+            IJ.showMessage("Calibrate phases",
+                    "Error: stack size not consistent with phases/angles.");
             return;
         }
         results = exec(imp);
         results.report();
     }
 
-    /** Execute plugin functionality: split the angles into separate stacks
-     * and perform a 2D FFT on each slice.
-     * @param imps input raw SI data ImagePlus should be first imp
+    /**
+     * Execute plugin functionality: split the angles into separate stacks and
+     * perform a 2D FFT on each slice.
+     * 
+     * @param imps
+     *            input raw SI data ImagePlus should be first imp
      * @return ResultSet containing FFT with detected peaks
      */
     public ResultSet exec(ImagePlus... imps) {
         // TODO, check we have micron calibration
-//        ImagePlus imp = imps[0];
         this.imp = imps[0];
         this.cal = imp.getCalibration();
         int nc = imp.getNChannels();
         int nz = imp.getNSlices();
-        nz = nz / (phases * angles);  // take phase & angle out of Z
+        nz = nz / (phases * angles); // take phase & angle out of Z
         width = imp.getWidth();
         height = imp.getHeight();
-        setResultSize(imp);  // work out FFT padding, update width/height fields 
+        setResultSize(imp); // work out FFT padding, update width/height fields
         ImageStack stack = imp.getStack();
-        ImagePlus[] ampImps = new ImagePlus[angles];    // FFT amplitude 
-        ImagePlus[] phaseImps = new ImagePlus[angles];  // FFT phase
-        ImagePlus[] plotImps = new ImagePlus[angles];   // phase fit plots
-        // TODO 1, measure k0 angle and line spacing from 1st order peaks 
-        // TODO 2, add phase amplitude stat, or plot??
+        ImagePlus[] ampImps = new ImagePlus[angles]; // FFT amplitude
+        ImagePlus[] phaseImps = new ImagePlus[angles]; // FFT phase
+        ImagePlus[] plotImps = new ImagePlus[angles]; // phase fit plots
         ResultsTable rt = new ResultsTable();
-        //IMD constant of expected phase steps	    
-        double expectedStep = 2.0*Math.PI/phases; //
+        // IMD constant of expected phase steps
+        double expectedStep = 2.0 * Math.PI / phases; //
         for (int a = 1; a <= angles; a++) {
             IJ.showStatus("FFT & peak-finding for angle " + a);
             ImageStack stackAmp = new ImageStack(width, height);
             ImageStack stackPhase = new ImageStack(width, height);
             float[][] phaseSets = new float[nc][phases * (zLast - zFirst + 1)];
             float[][] phaseShifts = new float[nc][phases * (zLast - zFirst + 1)];
-            Polygon[][] peakSets = new Polygon[nc][phases * (zLast - zFirst + 1)];
-            double[][] lineSpacings = new double[nc][phases * (zLast - zFirst + 1)];
+            Polygon[][] peakSets = new Polygon[nc][phases
+                    * (zLast - zFirst + 1)];
+            double[][] lineSpacings = new double[nc][phases
+                    * (zLast - zFirst + 1)];
             double[][] kAngles = new double[nc][phases * (zLast - zFirst + 1)];
             Overlay peakOverlay = new Overlay();
             int sliceOut = 0;
             int index = 0;
-            for (int z = zFirst ; z <= zLast; z++) {
+            for (int z = zFirst; z <= zLast; z++) {
                 for (int p = 1; p <= phases; p++) {
                     for (int c = 1; c <= nc; c++) {
-                        int sliceIn = I1l.stackSliceNo(
-                        		c, nc, p, phases, z, nz, a, angles);
+                        int sliceIn = I1l.stackSliceNo(c, nc, p, phases, z, nz,
+                                a, angles);
                         sliceOut++;
                         ImageProcessor ip = stack.getProcessor(sliceIn);
                         FloatProcessor[] complexPair = complexFFT(ip);
@@ -144,8 +150,8 @@ public class Cal_PhaseSteps implements PlugIn {
                         FloatProcessor fpPhase = complexPair[1];
                         Polygon peaks1stOrder = findSIpeakPair(fpAmp, 1);
                         Polygon peakPlus = selectPeakPlus(peaks1stOrder, width);
-                        double lineSpacing = calcLineSpacing(
-                                peaks1stOrder, width, height, cal, 1);
+                        double lineSpacing = calcLineSpacing(peaks1stOrder,
+                                width, height, cal, 1);
                         lineSpacings[c - 1][(p - 1) + (z - zFirst) * phases] = lineSpacing;
                         double kAngle = calcKangle(peakPlus, width, height);
                         kAngles[c - 1][(p - 1) + (z - zFirst) * phases] = kAngle;
@@ -159,58 +165,56 @@ public class Cal_PhaseSteps implements PlugIn {
                             pointRoi.setStrokeColor(Color.YELLOW);
                             pointRoi.setStrokeWidth(1);
                             pointRoi.setName("Z" + z + "/P" + p + "/C" + c);
-                            fpAmp.setRoi((Roi)pointRoi);
-                            peakOverlay.add((Roi)pointRoi);
+                            fpAmp.setRoi((Roi) pointRoi);
+                            peakOverlay.add((Roi) pointRoi);
                         } else {
                             phaseSets[c - 1][(p - 1) + (z - zFirst) * phases] = Float.NaN;
                         }
-                        String sliceName = "Z" + z + "/P" + p; 
+                        String sliceName = "Z" + z + "/P" + p;
                         stackAmp.addSlice(String.valueOf(sliceName), fpAmp);
                         stackPhase.addSlice(String.valueOf(sliceName), fpPhase);
-			//IMD 20131207 Attemp to unwrap phases adnncalucate phase steps. 
-			if (p>1){ //cant do phase sift from  single data point
-			    index=(p-1) + (z - zFirst) * phases;
-			    phaseShifts[c-1][index]= 
-				phaseSets[c-1][index]
-				-phaseSets[c-1][index-1];
-			    
-			    //slack of .5 X expectedStep for noise, error etc... 
-			    if ((Math.abs(phaseShifts[c-1][index]) > 1.5*expectedStep) | 
-				(Math.abs(phaseShifts[c-1][index]) < 0.5*expectedStep)){
-				if (phaseShifts[c-1][index]<0) {
-				    phaseShifts[c-1][index] += 2.0*Math.PI;
-				    phaseSets[c-1][index]+=2.0*Math.PI;
-				}
-				else {
-				    phaseShifts[c-1][index] -= 2.0*Math.PI;
-				    phaseSets[c-1][index]-=2.0*Math.PI;
-				}
-			    }
-			    if ((Math.abs(phaseShifts[c-1][index]) > 1.5*expectedStep) | 
-				(Math.abs(phaseShifts[c-1][index]) < 0.5*expectedStep)){
-			        results.addInfo("C" + c + "/A" + a + "/Z" + z + "/P" + p,
-			                "Phase step >1.5 or <0.5 times expected step size");
-//				IJ.log("C"+c+"-A"+a+"-Z"+z+"-p"+p+" : Phase step > 1.5 or  <0.5 times expected step size");
-			    }
-			    // need some way to decide on the initial direction to triger this warning.
-			    //if(phaseShift*phaseDirection < 1){
-			    //	IJ.log("Phase step changing direction.");
-			    //}
-			}
-		    }
+                        // IMD 20131207 Attemp to unwrap phases adnncalucate
+                        // phase steps.
+                        if (p > 1) { // cant do phase shift from 1 data point
+                            index = (p - 1) + (z - zFirst) * phases;
+                            phaseShifts[c - 1][index] = phaseSets[c - 1][index]
+                                    - phaseSets[c - 1][index - 1];
+                            // slack of .5 X expectedStep for noise, error etc.
+                            if ((Math.abs(phaseShifts[c - 1][index]) > 1.5 * expectedStep)
+                                    | (Math.abs(phaseShifts[c - 1][index]) < 0.5 * expectedStep)) {
+                                if (phaseShifts[c - 1][index] < 0) {
+                                    phaseShifts[c - 1][index] += 2.0 * Math.PI;
+                                    phaseSets[c - 1][index] += 2.0 * Math.PI;
+                                } else {
+                                    phaseShifts[c - 1][index] -= 2.0 * Math.PI;
+                                    phaseSets[c - 1][index] -= 2.0 * Math.PI;
+                                }
+                            }
+                            if ((Math.abs(phaseShifts[c - 1][index]) > 1.5 * expectedStep)
+                                    | (Math.abs(phaseShifts[c - 1][index]) < 0.5 * expectedStep)) {
+                                results.addInfo("C" + c + "/A" + a + "/Z" + z
+                                        + "/P" + p,
+                                        "Phase step >1.5 or <0.5 times expected step size");
+                            }
+                            // need some way to decide on the initial direction
+                            // to triger this warning.
+                            // if(phaseShift*phaseDirection < 1){
+                            // IJ.log("Phase step changing direction.");
+                            // }
+                        }
+                    }
                 }
                 IJ.showProgress(z - zFirst + 1, zLast - zFirst + 1);
             }
             if (a == 1) {
-                results.addInfo("How to interpret",
-                        "" + sliceOut + " slices covering " +
-                        phases + " phase steps x" + sliceOut / phases +
-                        " analyzed to find 1st order spots" +
-                        " (see \"FTA\" FFT Amplitude images)" +
-                        " and measure phases, which are plotted as series." +
-                        " Stats summarise stability of frequency and phase.");
+                results.addInfo("How to interpret", "" + sliceOut
+                        + " slices covering " + phases + " phase steps x"
+                        + sliceOut / phases
+                        + " analyzed to find 1st order spots"
+                        + " (see \"FTA\" FFT Amplitude images)"
+                        + " and measure phases, which are plotted as series."
+                        + " Stats summarise stability of frequency and phase.");
             }
-//            IJ.log("=== Cal_Phases ===\n  considering " + sliceOut-- + " slices");
             // add transforms & peak overlays to results
             String title = I1l.makeTitle(imp, "A" + a + "_FTA");
             ampImps[a - 1] = new ImagePlus(title, stackAmp);
@@ -222,31 +226,33 @@ public class Cal_PhaseSteps implements PlugIn {
             results.addImp("Angle " + a + " FFT amplitude", ampImps[a - 1]);
             title = I1l.makeTitle(imp, "A" + a + "_FTP");
             phaseImps[a - 1] = new ImagePlus(title, stackPhase);
-            phaseImps[a - 1].setDimensions(nc, phases * (zLast - zFirst + 1), 1);
+            phaseImps[a - 1]
+                    .setDimensions(nc, phases * (zLast - zFirst + 1), 1);
             phaseImps[a - 1].setOpenAsHyperStack(true);
-//            results.addImp("Angle " + a + " FFT phase", phaseImps[a - 1]);
+            // results.addImp("Angle " + a + " FFT phase", phaseImps[a - 1]);
             // do phase plotting & statistics, and add to results
-            ImageStack stackPlots = new ImageStack(pltW, pltH); 
+            ImageStack stackPlots = new ImageStack(pltW, pltH);
 
             for (int c = 1; c <= nc; c++) {
-//                String colName = "A" + a + "/C" + c;
-//                IJ.log("\n= Channel " + c + " =");
                 double[] positionStdevs = peakPositionStdevs(peakSets[c - 1]);
-                double[] phaseStats = plotPhases(
-                        phaseSets[c - 1], positionStdevs, stackPlots);
+                double[] phaseStats = plotPhases(phaseSets[c - 1],
+                        positionStdevs, stackPlots);
                 double avPosStdev = J.mean(positionStdevs);
-                String channelAngleString = "C" + c + " A" + a;
-                results.addStat(channelAngleString + " peak postion stdev", 
-                        avPosStdev, ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
+                String channelAngleString = "C" + c + "/A" + a;
+                results.addStat(channelAngleString + " peak postion stdev",
+                        avPosStdev, ResultSet.StatOK.MAYBE); // FIXME, StatOK);
 
-		//IMD dont quite understand how to add my phaseShifts variable to the stats. 
-
-                results.addStat(channelAngleString + " phase step stdev", 
-                        phaseStats[0], ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
-                results.addStat(channelAngleString + " phase offset stdev", 
-                        phaseStats[1], ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
-//                IJ.log("  line spacing = " + J.mean(lineSpacings[c - 1]));
-//                IJ.log("  k angle = " + J.mean(kAngles[c - 1]));
+                // IMD dont quite understand how to add my phaseShifts variable
+                // to the stats.
+                results.addStat(channelAngleString + " phase step stdev",
+                        phaseStats[0], ResultSet.StatOK.MAYBE); // FIXME,
+                                                                // StatOK);
+                results.addStat(channelAngleString + " phase offset stdev",
+                        phaseStats[1], ResultSet.StatOK.MAYBE); // FIXME,
+                                                                // StatOK);
+                // IJ.log("  line spacing = " + J.mean(lineSpacings[c - 1]));
+                // IJ.log("  k angle = " + J.mean(kAngles[c - 1]));
+                writeResults(rt, "C" + c + "/A" + a, phaseSets[c - 1]);
             }
             title = I1l.makeTitle(imp, "A" + a + "_PPL");
             plotImps[a - 1] = new ImagePlus(title, stackPlots);
@@ -258,7 +264,7 @@ public class Cal_PhaseSteps implements PlugIn {
         rt.show("Phase measurements");
         return results;
     }
-    
+
     /** Determine if padding necessary for FFT, update result width/height */
     private void setResultSize(ImagePlus imp) {
         int paddedSize = FFT2D.calcPadSize(imp);
@@ -268,7 +274,7 @@ public class Cal_PhaseSteps implements PlugIn {
             this.height = paddedSize;
         }
     }
-    
+
     /** Complex FFT an ImageProcessor, returining Amp, Phase FloatProcessors */
     private FloatProcessor[] complexFFT(ImageProcessor ip) {
         ip = FFT2D.gaussWindow(ip, 0.08d);
@@ -277,9 +283,9 @@ public class Cal_PhaseSteps implements PlugIn {
         }
         FFT2D ifft = new FFT2D(ip);
         ifft.transform();
-        FloatProcessor amp = (FloatProcessor)ifft.getComplexAbs();
-        FloatProcessor phase = (FloatProcessor)ifft.getComplexPhase();
-        amp = (FloatProcessor)FFT2D.filterLow(amp, gaussRad, stripeWidth);
+        FloatProcessor amp = (FloatProcessor) ifft.getComplexAbs();
+        FloatProcessor phase = (FloatProcessor) ifft.getComplexPhase();
+        amp = (FloatProcessor) FFT2D.filterLow(amp, gaussRad, stripeWidth);
         FloatProcessor[] complexPair = new FloatProcessor[2];
         complexPair[0] = amp;
         complexPair[1] = phase;
@@ -291,39 +297,39 @@ public class Cal_PhaseSteps implements PlugIn {
         double tolerance = fp.getStatistics().stdDev * peakStdev;
         MaximumFinder maxfind = new MaximumFinder();
         Polygon maxima = maxfind.getMaxima(fp, tolerance, true);
-//        IJ.log("raw maxima");
-//        logPosMaxima(maxima);
+        // IJ.log("raw maxima");
+        // logPosMaxima(maxima);
         // TODO, magic numbers
         double minR = 0.14d * 2.0d / order;
         double maxR = 0.29d * 2.0d / order;
-        maxima = I1l.filterPeaksRadial(maxima, cal, width, height, minR, maxR);  
-//        IJ.log("maxima in band order " + order);
-//        logPosMaxima(maxima);
-//        IJ.log("brightest 2 maxima in 1st order band");
-        maxima = Cal_PhaseSteps.filterPeakPair(maxima, fp, peakPosTolerance);  
-//        logPosMaxima(maxima);
+        maxima = I1l.filterPeaksRadial(maxima, cal, width, height, minR, maxR);
+        // IJ.log("maxima in band order " + order);
+        // logPosMaxima(maxima);
+        // IJ.log("brightest 2 maxima in 1st order band");
+        maxima = Cal_PhaseSteps.filterPeakPair(maxima, fp, peakPosTolerance);
+        // logPosMaxima(maxima);
         return maxima;
     }
-    
+
     // TODO, temporary
-//    private void logPosMaxima(Polygon maxima) {
-//        if (maxima != null) {
-//            for (int i = 0; i < maxima.npoints; i++) {
-//                int x = maxima.xpoints[i];
-//                int y = maxima.ypoints[i];
-//                double r = I1l.calcFourierR(x, y, width, height, cal);
-//                IJ.log("x,y,r:" + x + "," + y + "," + r + cal.getUnit() + "/c");
-//            }
-//        }
-//    }
-    
+    // private void logPosMaxima(Polygon maxima) {
+    // if (maxima != null) {
+    // for (int i = 0; i < maxima.npoints; i++) {
+    // int x = maxima.xpoints[i];
+    // int y = maxima.ypoints[i];
+    // double r = I1l.calcFourierR(x, y, width, height, cal);
+    // IJ.log("x,y,r:" + x + "," + y + "," + r + cal.getUnit() + "/c");
+    // }
+    // }
+    // }
+
     /** Peak pair? i.e. on line through center at equal distance? */
     private static boolean isPeakPair(Polygon peaks, int w, int h, int tol) {
         boolean ispeakPair = true;
-        int[] x = {peaks.xpoints[0], w / 2, peaks.xpoints[1]};
-        int[] y = {peaks.ypoints[0], h / 2, peaks.ypoints[1]};
+        int[] x = { peaks.xpoints[0], w / 2, peaks.xpoints[1] };
+        int[] y = { peaks.ypoints[0], h / 2, peaks.ypoints[1] };
         // line between peaks, y = mx + c, passes through center?
-        double m = (double)(y[2] - y[0]) / (x[2] - x[0]);
+        double m = (double) (y[2] - y[0]) / (x[2] - x[0]);
         double yCenEstim = y[0] + m * (w / 2 - x[0]);
         if (Math.abs(yCenEstim - h / 2) > tol) {
             ispeakPair = false;
@@ -338,7 +344,7 @@ public class Cal_PhaseSteps implements PlugIn {
     }
 
     /** Calculate angle between peak pair and x-axis (radians) */
-    // TODO, check
+    // TODO, test
     private static double calcKangle(Polygon peakPlus, int w, int h) {
         if (peakPlus == null) {
             return Double.NaN;
@@ -348,9 +354,9 @@ public class Cal_PhaseSteps implements PlugIn {
         int yc = peakPlus.ypoints[0] - h / 2;
         return I1l.calcAngle(xc, yc);
     }
-    
+
     /** Calculate SI line spacing based on 1st or 2nd order peak positions */
-    private static double calcLineSpacing(Polygon peakPair, int w, int h, 
+    private static double calcLineSpacing(Polygon peakPair, int w, int h,
             Calibration cal, int order) {
         if (peakPair == null) {
             return Double.NaN;
@@ -371,10 +377,11 @@ public class Cal_PhaseSteps implements PlugIn {
             return Double.NaN;
         }
     }
-    
+
     /** Select k+, i.e. x > 0, from a pair of peaks and return as new Polygon */
     private static Polygon selectPeakPlus(Polygon peakPair, int w) {
-        if (peakPair == null) return null;
+        if (peakPair == null)
+            return null;
         Polygon peakPlus;
         int[] xpt = new int[1];
         int[] ypt = new int[1];
@@ -388,14 +395,14 @@ public class Cal_PhaseSteps implements PlugIn {
         peakPlus = new Polygon(xpt, ypt, 1);
         return peakPlus;
     }
-    
+
     /** Return standard deviation of array of single point Polygon coords */
-    // TODO: move to util class?
     double[] peakPositionStdevs(Polygon[] peakSets) {
         // TODO, test me
-//        String debug = "  filtered peak+ position ";
+        // String debug = "  filtered peak+ position ";
         Polygon medCoord = medianCoords(peakSets);
-//        debug += "median coords: " + medCoord.xpoints[0] + "," + medCoord.ypoints[0];
+        // debug += "median coords: " + medCoord.xpoints[0] + "," +
+        // medCoord.ypoints[0];
         int ncyc = peakSets.length / phases;
         double[] stdevs = new double[ncyc];
 
@@ -405,23 +412,23 @@ public class Cal_PhaseSteps implements PlugIn {
                 int n = p + phases * cyc;
                 peakSet[p] = new Polygon();
                 if (peakSets[n] != null) {
-                    peakSet[p].addPoint(peakSets[n].xpoints[0], peakSets[n].ypoints[0]);
+                    peakSet[p].addPoint(peakSets[n].xpoints[0],
+                            peakSets[n].ypoints[0]);
                 }
             }
             stdevs[cyc] = stdev2D(peakSet) + 0.0001f;
             Polygon setMedCoord = medianCoords(peakSet);
-            if (J.dist(medCoord.xpoints[0], medCoord.ypoints[0], 
-                    setMedCoord.xpoints[0], setMedCoord.ypoints[0]) 
-                    > (double)peakPosTolerance) {
-                stdevs[cyc] = -stdevs[cyc];  // FIXME, -ve indicates outside tolerance
+            if (J.dist(medCoord.xpoints[0], medCoord.ypoints[0],
+                    setMedCoord.xpoints[0], setMedCoord.ypoints[0]) > (double) peakPosTolerance) {
+                stdevs[cyc] = -stdevs[cyc]; // FIXME, -ve indicates outside
+                                            // tolerance
             }
         }
-//        IJ.log(debug);
+        // IJ.log(debug);
         return stdevs;
     }
-    
-    /** Return median x,y coordinates of a set */ 
-    // TODO: check median x,y pair below are valid & move to util class?
+
+    /** Return median x,y coordinates of a set */
     static Polygon medianCoords(Polygon[] coordSetRaw) {
         Polygon[] coordSet = filterNull(coordSetRaw);
         int len = coordSet.length;
@@ -431,11 +438,11 @@ public class Cal_PhaseSteps implements PlugIn {
             x[i] = coordSet[i].xpoints[0];
             y[i] = coordSet[i].ypoints[0];
         }
-        int[] xm = {J.median(x)};
-        int[] ym = {J.median(y)};
+        int[] xm = { J.median(x) };
+        int[] ym = { J.median(y) };
         return new Polygon(xm, ym, 1);
     }
-    
+
     /** Filter out null Polygons from an array of Polygons */
     // TODO: move to util class
     static Polygon[] filterNull(Polygon[] coordSetRaw) {
@@ -456,12 +463,11 @@ public class Cal_PhaseSteps implements PlugIn {
         }
         return coordSetFiltered;
     }
-    
-    /** 
-     * Positional standard deviation for 2D x, y coordinates in Polygon[] 
-     * where each Polygon contains a single coordiate pair only.
+
+    /**
+     * Positional standard deviation for 2D x, y coordinates in Polygon[] where
+     * each Polygon contains a single coordiate pair only.
      */
-    // TODO: move to util class
     static double stdev2D(Polygon[] pos) {
         double stdev = 0;
         double xm = 0, ym = 0;
@@ -472,37 +478,37 @@ public class Cal_PhaseSteps implements PlugIn {
         xm /= pos.length;
         ym /= pos.length;
         for (int i = 0; i < pos.length; i++) {
-            stdev += Math.pow((double)pos[i].xpoints[0] - xm, 2);
-            stdev += Math.pow((double)pos[i].ypoints[0] - ym, 2);
+            stdev += Math.pow((double) pos[i].xpoints[0] - xm, 2);
+            stdev += Math.pow((double) pos[i].ypoints[0] - ym, 2);
         }
-        stdev /= pos.length * 2;  // 2 since x & y coords
+        stdev /= pos.length * 2; // 2 since x & y coords
         return Math.sqrt(stdev);
     }
-    
+
     /** Write a series of phase measurements as a column to a ResultsTable */
-//    private void writeResults(
-//            ResultsTable rt, String colName, float[] phaseSet) {
-//        //  To enable writing in columns, both addValue and setValue are
-//        //  called - addValue prevents prior columns disappearing,
-//        //  setValue actually writes values to correct row.
-//        //  It's a hack: I found ResultsTable awkward to use.
-//        int p = 0;  // phase
-//        for (int s = 0; s < phaseSet.length; s++) {
-//            if (s + 1 > rt.getCounter()) {
-//                rt.incrementCounter();
-//            }
-//            if (s % phases == 0) {
-//                p = 0;
-//            }
-//            rt.addValue(colName, phaseSet[s]);
-//            rt.setValue(colName, s, phaseSet[s]);
-//            String rowLabel = "Z" + s / phases + "/P" + p;
-//            rt.setLabel(rowLabel, s);
-//            p++;
-//        }
-//        
-//    }
-    
+    private void writeResults(ResultsTable rt,
+         String colName, float[] phaseSet) {
+        // To enable writing in columns, both addValue and setValue are
+        // called - addValue prevents prior columns disappearing,
+        // setValue actually writes values to correct row.
+        // It's a hack .. I found ResultsTable awkward to use.
+        int p = 0; // phase
+        for (int s = 0; s < phaseSet.length; s++) {
+            if (s + 1 > rt.getCounter()) {
+                rt.incrementCounter();
+            }
+            if (s % phases == 0) {
+                p = 0;
+            }
+            String rowLabel = "Z" + s / phases + "/P" + p;
+            rt.addValue("Slice", rowLabel);
+            rt.setValue("Slice", s, rowLabel);
+            rt.addValue(colName, phaseSet[s]);
+            rt.setValue(colName, s, phaseSet[s]);
+            p++;
+        }
+    }
+
     /** Plot phase step series and return step, offset stdevs */
     private double[] plotPhases(float[] phaseSet, double[] positionStdevs,
             ImageStack stackPlots) {
@@ -513,10 +519,10 @@ public class Cal_PhaseSteps implements PlugIn {
         Plot plot = new Plot("Phase plot", "Z,P", "phase (radians)");
         plot.setLineWidth(1);
         plot.setColor(Color.BLACK);
-        plot.setLimits(1.0d, (double)phaseSet.length, plotMin, plotMax);
+        plot.setLimits(1.0d, (double) phaseSet.length, plotMin, plotMax);
         float[] slices = new float[phaseSet.length];
         for (int s = 0; s < phaseSet.length; s++) {
-            slices[s] = (float)(s + 1);
+            slices[s] = (float) (s + 1);
         }
         plot.addPoints(slices, phaseSet, Plot.LINE);
         slices = new float[phases];
@@ -542,62 +548,64 @@ public class Cal_PhaseSteps implements PlugIn {
         stackPlots.addSlice(String.valueOf("m +1"), ipPlot);
         return phaseStats;
     }
-    
+
     /** Unwrap phase discontinuities in a set of cycles */
     private float[] unwrapPhaseCycles(float[] rawPhaseSet) {
         // unwrap discontinuities over first phase of each cycle
         return unwrapPhaseCycle(rawPhaseSet);
         // unwrap discontinuities over phases within each cycle
     }
-    
+
     /** Unwrap phase discontinuities in a single cycle, relative to first */
     private float[] unwrapPhaseCycle(float[] rawPhaseSet) {
         float[] phaseSet = rawPhaseSet.clone();
         int len = phaseSet.length;
-//        int sign = -1;  // i.e. the slope
-//        float initialStep = phaseSet[1] - phaseSet[0];
-//        IJ.log("initial step = " + initialStep);
-//        if (phaseSet[1] - phaseSet[0] > 0) {                                        
-//            sign = 1;
-//        }
+        // int sign = -1; // i.e. the slope
+        // float initialStep = phaseSet[1] - phaseSet[0];
+        // IJ.log("initial step = " + initialStep);
+        // if (phaseSet[1] - phaseSet[0] > 0) {
+        // sign = 1;
+        // }
         float[] uPhaseSet = new float[len];
-//        String debug = "  discontinuities: ";
-        for (int i = 0; i < len; i++) {                                                 
-            if (i % phases == 0) {                                                    
-                uPhaseSet[i] = phaseSet[i];                                              
-            } else {        
-                uPhaseSet[i] = phaseSet[i];                                              
+        // String debug = "  discontinuities: ";
+        for (int i = 0; i < len; i++) {
+            if (i % phases == 0) {
+                uPhaseSet[i] = phaseSet[i];
+            } else {
+                uPhaseSet[i] = phaseSet[i];
                 // handle sign changes in phase step
-////                if (sign == -1 && phaseSet[i] > phaseSet[i - 1]) {  
-////                    debug +=  i + ",";
-////                    uPhaseSet[i] = (-2.0f * (float)Math.PI + phaseSet[i]);             
-////                } else if (sign == 1 && phaseSet[i] < phaseSet[i - 1]) {          
-////                    uPhaseSet[i] = (2.0f * (float)Math.PI + phaseSet[i]);             
-////                    debug +=  i + ",";
-//                if (sign == -1 && phaseSet[i] > phaseSet[i - 1]) {  
-//                    debug +=  i + ",";
-//                    uPhaseSet[i] = (-2.0f * (float)Math.PI + phaseSet[i]);             
-//                } else if (sign == 1 && phaseSet[i] < phaseSet[i - 1]) {          
-//                    uPhaseSet[i] = (2.0f * (float)Math.PI + phaseSet[i]);             
-//                    debug +=  i + ",";
-//                } else {                                                                
-//                    uPhaseSet[i] = uPhaseSet[i-1] + (phaseSet[i] - phaseSet[i-1]);       
-//                }      
-            }                                                                           
+                // // if (sign == -1 && phaseSet[i] > phaseSet[i - 1]) {
+                // // debug += i + ",";
+                // // uPhaseSet[i] = (-2.0f * (float)Math.PI + phaseSet[i]);
+                // // } else if (sign == 1 && phaseSet[i] < phaseSet[i - 1]) {
+                // // uPhaseSet[i] = (2.0f * (float)Math.PI + phaseSet[i]);
+                // // debug += i + ",";
+                // if (sign == -1 && phaseSet[i] > phaseSet[i - 1]) {
+                // debug += i + ",";
+                // uPhaseSet[i] = (-2.0f * (float)Math.PI + phaseSet[i]);
+                // } else if (sign == 1 && phaseSet[i] < phaseSet[i - 1]) {
+                // uPhaseSet[i] = (2.0f * (float)Math.PI + phaseSet[i]);
+                // debug += i + ",";
+                // } else {
+                // uPhaseSet[i] = uPhaseSet[i-1] + (phaseSet[i] -
+                // phaseSet[i-1]);
+                // }
+            }
         }
-//        IJ.log(debug);
+        // IJ.log(debug);
         return uPhaseSet;
     }
-    
+
     /** Return phase step and offset stdev */
     private double[] analyzePhases(float[] phaseSet) {
-        double[] phaseStats = {0.0d, 0.0d};
+        double[] phaseStats = { 0.0d, 0.0d };
         if (phaseMeasurementSeriesLongEnough(phaseSet)) {
             // 2. TODO, step stdev
             int nsteps = 0;
             for (int i = 0; i < phaseSet.length; i++) {
                 if (i % phases != 0) {
-                    if (!Float.isNaN(phaseSet[i]) && !Float.isNaN(phaseSet[i - 1])) {
+                    if (!Float.isNaN(phaseSet[i])
+                            && !Float.isNaN(phaseSet[i - 1])) {
                         nsteps++;
                     }
                 }
@@ -606,7 +614,8 @@ public class Cal_PhaseSteps implements PlugIn {
             int i2 = 0;
             for (int i = 0; i < phaseSet.length; i++) {
                 if (i % phases != 0) {
-                    if (!Float.isNaN(phaseSet[i]) && !Float.isNaN(phaseSet[i - 1])) {
+                    if (!Float.isNaN(phaseSet[i])
+                            && !Float.isNaN(phaseSet[i - 1])) {
                         steps[i2] = phaseSet[i] - phaseSet[i - 1];
                         i2++;
                     }
@@ -619,9 +628,7 @@ public class Cal_PhaseSteps implements PlugIn {
         }
         return phaseStats;
     }
-    
-    
-    
+
     /** Require at least (2 * phases) measurements without gap */
     private boolean phaseMeasurementSeriesLongEnough(float[] phaseSet) {
         int thisRun = 0;
@@ -645,35 +652,36 @@ public class Cal_PhaseSteps implements PlugIn {
             return false;
         }
     }
-    
-    /** Filter for pair of peaks with highest intensity, check symmetric 
-     * about image center within tol.
-     * Returns Polygon containing peak pair x,y coords or null if failed.
+
+    /**
+     * Filter for pair of peaks with highest intensity, check symmetric about
+     * image center within tol. Returns Polygon containing peak pair x,y coords
+     * or null if failed.
      */
     private static Polygon filterPeakPair(Polygon peaks, FloatProcessor fp,
             int tol) {
         int npeaks = peaks.npoints;
         if (npeaks < 2) {
-            return null;  // RETURN EARLY IF INSUFFICIENT PEAKS
+            return null; // RETURN EARLY IF INSUFFICIENT PEAKS
         }
         float[] peakIntens = new float[npeaks];
         for (int pk = 0; pk < npeaks; pk++) {
-            peakIntens[pk] = 
-                    fp.getPixelValue(peaks.xpoints[pk], peaks.ypoints[pk]);
+            peakIntens[pk] = fp.getPixelValue(peaks.xpoints[pk],
+                    peaks.ypoints[pk]);
         }
         int indexMax1 = J.maxIndex(peakIntens);
-        peakIntens[indexMax1] = 0;  // so we don't find 1st max again...
+        peakIntens[indexMax1] = 0; // so we don't find 1st max again...
         int indexMax2 = J.maxIndex(peakIntens);
-        int[] filtPkX = {peaks.xpoints[indexMax1], peaks.xpoints[indexMax2]};
-        int[] filtPkY = {peaks.ypoints[indexMax1], peaks.ypoints[indexMax2]};
+        int[] filtPkX = { peaks.xpoints[indexMax1], peaks.xpoints[indexMax2] };
+        int[] filtPkY = { peaks.ypoints[indexMax1], peaks.ypoints[indexMax2] };
         Polygon filteredPeaks = new Polygon(filtPkX, filtPkY, 2);
         if (isPeakPair(filteredPeaks, fp.getWidth(), fp.getHeight(), tol)) {
             return filteredPeaks;
         } else {
-            return null;  
+            return null;
         }
     }
-    
+
     /** Unit test runner for private methods: return true if all OK. */
     boolean test(boolean verbose) {
         boolean pass = true;
@@ -701,5 +709,5 @@ public class Cal_PhaseSteps implements PlugIn {
         TestData.lawn.show();
         IJ.runPlugIn(Cal_PhaseSteps.class.getName(), "");
     }
-    
+
 }
