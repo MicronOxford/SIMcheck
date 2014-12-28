@@ -46,7 +46,6 @@ public final class SIMcheck_ implements PlugIn {
     private static final String VERSION = "0.9.7-SNAPSHOT";
     private static final String none = "[None]";  // no image
     private static final String omx = "OMX (CPZAT)";
-    static final int TEXTWIDTH = 55;
 
     // options with default values
     private ImagePlus impRaw = null;

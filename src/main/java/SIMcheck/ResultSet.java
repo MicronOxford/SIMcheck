@@ -30,7 +30,7 @@ import ij.measure.ResultsTable;
 public class ResultSet {
 
     // for automatic formatting of result log / output
-    private static final int TEXTWIDTH = 55;
+    private static final int TEXTWIDTH = 52;
     static final int STAT_SIG_FIGS = 2;
     private static final int CHECK_MAX_CHARS = TEXTWIDTH * 100;
 
@@ -274,15 +274,22 @@ public class ResultSet {
     
     /** Return a String containing 'title' centered in a line of charX. */
     static String titleString(String title, String charX) {
+        // trial & error formatting tweaks due to non-fixed-width font :-(
+        double textLen = title.length() * 0.83;
         if (!title.equals("")) {
             title = " " + title + " ";
         }
-        int nPadChars = (int)(0.5 * (TEXTWIDTH - title.length()));
+        int nPadChars = (int)(0.5 * (TEXTWIDTH - textLen));
         // char width corrections for IJ's non-fixed-width font
         if (charX.equals("=")) {
-            nPadChars = (int)(0.75 * nPadChars);  // correct for wider '='
+            nPadChars = (int)(0.72 * nPadChars);  // correct for wider '='
+            if (title.equals("")) {
+                nPadChars++;  // minor tweak
+            }
         } else if (charX.equals(" ")) {
-            nPadChars = (int)(2.0 * nPadChars);  // correct for narrow ' '
+            nPadChars = (int)(1.9 * nPadChars);  // correct for narrow ' '
+        } else if (charX.equals("-")) {
+            nPadChars = (int)(0.9 * nPadChars);  // correct for '-' width
         }
         return J.nChars(nPadChars, charX) + title + J.nChars(nPadChars, charX);
     }
