@@ -61,10 +61,8 @@ public class Util_SItoPseudoWidefield implements PlugIn {
                     "Error: stack size not consistent with phases/angles.");
             return;                                                             
         }
-        if (doNormalize) {  // TODO: done in a rush -- ugly
-            ImagePlus imp2 = imp.duplicate();
-            imp2.setStack(I1l.normalizeStack(imp.getStack()));
-            projImg = exec(imp2, phases, angles, ProjMode.AVG);  
+        if (doNormalize) {
+            projImg = exec(I1l.normalizeImp(imp), phases, angles, ProjMode.AVG);  
         } else {
             projImg = exec(imp, phases, angles, ProjMode.AVG);
         }
@@ -102,7 +100,9 @@ public class Util_SItoPseudoWidefield implements PlugIn {
                 + " create title=" + newTitle);
         ImagePlus scaledProjImg = ij.WindowManager.getCurrentImage();
         scaledProjImg.hide();
-        return scaledProjImg;
+        CompositeImage ci = new CompositeImage(scaledProjImg);
+        ci.setMode(IJ.GRAYSCALE);
+        return (ImagePlus)ci;
     }
 
     /** Projection e.g. 5 phases, 3 angles for each CZT. **/

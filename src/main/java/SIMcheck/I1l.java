@@ -388,7 +388,7 @@ public final class I1l {
             impsNorm[c] = copyChannel(imp, c + 1);
             impsNorm[c].setStack(normalizeStack(impsNorm[c].getStack()));
         }
-        return I1l.mergeChannels("RIN", impsNorm);
+        return I1l.mergeChannels(I1l.makeTitle(imp, "RIN"), impsNorm);
     }
      
     /** Normalize fluctuations in inner 'b' dim average intensity. */
