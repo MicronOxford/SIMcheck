@@ -87,6 +87,7 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         IJ.run("Conversions...", " ");  // TODO: reset option state when done..
         new StackConverter(impCopy).convertToGray32(); 
         projectPandA(impCopy, channels, Zplanes, frames, m);
+        // projectPandA result in projImg; Zplanes reduced by phases*angles
         // AVG projection results 16-bit, MAX projection used in MCM needs 32-
         if (m == ProjMode.AVG) {
             new StackConverter(projImg).convertToGray16();  // TODO: was original?
@@ -95,14 +96,28 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         int newWidth = imp.getWidth() * 2;
         int newHeight = imp.getHeight() * 2;
         String newTitle = I1l.makeTitle(imp, TLA);
-        IJ.run(projImg, "Scale...", "x=2 y=2 z=2 width=" + newWidth
-                + " height=" + newHeight + " interpolation=Bicubic average"
-                + " create title=" + newTitle);
+        if (channels > 1) {
+            IJ.run(projImg, "Scale...", "x=2 y=2 z=1.0 width=" + newWidth
+                    + " height=" + newHeight + " depth=" + Zplanes
+                    + " interpolation=Bicubic average"
+                    + " create title=" + newTitle);
+        } else {
+            // damned "Scale..." command requires "process" to do full stack
+            //   if we have an ordinary stack rather than a hyperstack
+            IJ.run(projImg, "Scale...", "x=2 y=2 z=1.0 width=" + newWidth
+                    + " height=" + newHeight + " depth=" + Zplanes
+                    + " interpolation=Bicubic average process"  // "process"
+                    + " create title=" + newTitle);
+        }
         ImagePlus scaledProjImg = ij.WindowManager.getCurrentImage();
         scaledProjImg.hide();
-        CompositeImage ci = new CompositeImage(scaledProjImg);
-        ci.setMode(IJ.GRAYSCALE);
-        return (ImagePlus)ci;
+        if (channels > 1) {
+            CompositeImage ci = new CompositeImage(scaledProjImg);
+            ci.setMode(IJ.GRAYSCALE);
+            return (ImagePlus)ci;
+        } else {
+            return scaledProjImg;
+        }
     }
 
     /** Projection e.g. 5 phases, 3 angles for each CZT. **/
