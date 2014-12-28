@@ -99,7 +99,6 @@ public class Rec_SAMismatch implements PlugIn, Executable {
             plots[c - 1] = plot.getImagePlus();
             double nstdev = Math.sqrt(J.variance(sliceMinima)) / 
                     J.mean(sliceMeans);
-//            results.addStat("C" + c + " Z-minimum variation (ZMV)", nstdev,
             results.addStat("C" + c + " Z-minimum variation", nstdev,
                     ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
             
@@ -110,7 +109,7 @@ public class Rec_SAMismatch implements PlugIn, Executable {
         impAllPlots.setOpenAsHyperStack(true);
         results.addImp("z-section minimum (black) and mean feature intensity (gray)",
                 impAllPlots);
-        results.addInfo("How to interpret", "z-minimum variation ZMV"
+        results.addInfo("How to interpret", "Z-Minimum Variation (ZMV)"
                 + " is calculated as the"
                 + " standard deviation of z-section minimum intensity"
                 + " normalized to the average feature intensity. High ZMV"
