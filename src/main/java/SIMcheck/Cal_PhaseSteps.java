@@ -190,12 +190,12 @@ public class Cal_PhaseSteps implements PlugIn {
                                     phaseSets[c - 1][index] -= 2.0 * Math.PI;
                                 }
                             }
-                            if ((Math.abs(phaseShifts[c - 1][index]) > 1.5 * expectedStep)
-                                    | (Math.abs(phaseShifts[c - 1][index]) < 0.5 * expectedStep)) {
-                                results.addInfo("C" + c + "/A" + a + "/Z" + z
-                                        + "/P" + p,
-                                        "Phase step >1.5 or <0.5 times expected step size");
-                            }
+//                            if ((Math.abs(phaseShifts[c - 1][index]) > 1.5 * expectedStep)
+//                                    | (Math.abs(phaseShifts[c - 1][index]) < 0.5 * expectedStep)) {
+//                                results.addInfo("C" + c + "/A" + a + "/Z" + z
+//                                        + "/P" + p,
+//                                        "Phase step >1.5 or <0.5 times expected step size");
+//                            }
                             // need some way to decide on the initial direction
                             // to triger this warning.
                             // if(phaseShift*phaseDirection < 1){
@@ -207,13 +207,13 @@ public class Cal_PhaseSteps implements PlugIn {
                 IJ.showProgress(z - zFirst + 1, zLast - zFirst + 1);
             }
             if (a == 1) {
-                results.addInfo("How to interpret", "" + sliceOut
+                results.addInfo("About", "" + sliceOut
                         + " slices covering " + phases + " phase steps x"
                         + sliceOut / phases
-                        + " analyzed to find 1st order spots"
-                        + " (see \"FTA\" FFT Amplitude images)"
+                        + " Z sections analyzed to find 1st order spots"
+                        + " (see \"FTA\" FFT amplitude images)"
                         + " and measure phases, which are plotted as series."
-                        + " Stats summarise stability of frequency and phase.");
+                        + " Stats summarize stability of frequency and phase.");
             }
             // add transforms & peak overlays to results
             String title = I1l.makeTitle(imp, "A" + a + "_FTA");
@@ -239,7 +239,7 @@ public class Cal_PhaseSteps implements PlugIn {
                         positionStdevs, stackPlots);
                 double avPosStdev = J.mean(positionStdevs);
                 String channelAngleString = "C" + c + "/A" + a;
-                results.addStat(channelAngleString + " peak postion stdev",
+                results.addStat(channelAngleString + " peak position stdev",
                         avPosStdev, ResultSet.StatOK.MAYBE); // FIXME, StatOK);
 
                 // IMD dont quite understand how to add my phaseShifts variable
