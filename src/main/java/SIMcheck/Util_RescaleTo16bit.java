@@ -46,10 +46,18 @@ public class Util_RescaleTo16bit implements PlugIn {
         if (gd.wasOKed()) {
             if (gd.getNextBoolean()) {
                 imp2 = exec(imp);
+                IJ.log(name + ", auto-scaled using per channel mode.");
+                if (exceeds16bit(imp)) {
+                    IJ.log("Data exceeded 16-bit range and has been rescaled!");
+                }
             } else {
                 SIMcheck_.specifyBackgrounds(
                         channelMinima, "Discard intensities up to:");
                 imp2 = exec(imp, channelMinima);
+                IJ.log(name + ", thresholded using specified minima:");
+                for (int c = 1; c <= channelMinima.length; c++) {
+                    IJ.log("  Channel " + c + " minimum = " + channelMinima[c - 1]);
+                }
             }
             IJ.run("Brightness/Contrast...");
             imp2.show();
@@ -65,7 +73,6 @@ public class Util_RescaleTo16bit implements PlugIn {
     public static ImagePlus exec(ImagePlus imp) {
         ImagePlus imp2 = imp.duplicate();
         threshMode(imp2);
-        IJ.log(name + ", auto-scale using per channel mode.");
         imp2 = convertTo16bit(imp2);
         imp2.setTitle(I1l.makeTitle(imp, TLA));
         return imp2;
@@ -78,10 +85,6 @@ public class Util_RescaleTo16bit implements PlugIn {
      */
     public static ImagePlus exec(ImagePlus imp, double[] channelMinima) {
         ImagePlus imp2 = imp.duplicate();
-        IJ.log(name + ", using specified minima:");
-        for (int c = 1; c <= channelMinima.length; c++) {
-            IJ.log("  Channel " + c + " minimum = " + channelMinima[c - 1]);
-        }
         threshChannelMinima(imp2, channelMinima);
         imp2 = convertTo16bit(imp2);
         imp2.setTitle(I1l.makeTitle(imp, TLA));
@@ -92,7 +95,6 @@ public class Util_RescaleTo16bit implements PlugIn {
     private static ImagePlus convertTo16bit(ImagePlus imp) {
         if (exceeds16bit(imp)) {
             IJ.run("Conversions...", "scale");
-            IJ.log("Data exceeds 16-bit range and has been rescaled!");
         } else {
             IJ.run("Conversions...", " ");
         }
