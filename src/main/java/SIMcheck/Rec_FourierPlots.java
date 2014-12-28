@@ -127,8 +127,8 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         impF = overlayResRings(impF, cal);
         I1l.copyStackDims(imps[0], impF);
         impF.setTitle(I1l.makeTitle(imps[0], TLA));
-        results.addImp("Fourier Transform Lateral (XY), showing resolution" +
-                " rings in microns", impF);
+        results.addImp("Fourier Transform Lateral (XY; resolution rings" +
+                " in microns)", impF);
         // radial & axial profiles only if we have calibration info
         if (imp2.getCalibration().getUnit().equals("pixel")) {
             IJ.log("Calibration info required for Radial & Axial FFT plots!");
@@ -166,19 +166,19 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         results.addInfo("How to interpret", 
             " Fourier plots highlight potential artifacts and indicate"
             + "effective resolution:"
-            + "  - spots in Fourier spectrum indicate periodic patterns"
-            + "  - flat Fourier spectrum (plateau in radial profile) indicates"
-            + " lack of real high frequency signal and poor resolution"
-            + "  - asymmetric FFT indicates angle-specific decrease in"
+            + "  - Spots in Fourier spectrum indicate periodic patterns."
+            + "  - Flat Fourier spectrum (plateau in radial profile) indicates"
+            + " lack of real high frequency signal and poor resolution."
+            + "  - Asymmetric FFT indicates angle-specific decrease in"
             + " resolution due to: angle-to-angle intensity variations,"
             + " angle-specific illumination pattern ('k0') fit error, or"
-            + " angle-specific z-modulation issues  -- ");
+            + " angle-specific z-modulation issues.  -- ");
         results.addInfo("About",
                 "By default the reconstructed data are (1) cropped to mode; "
                 + " (2) a window function applied to reduce edge artifacts prior"
-                + "to FFT; (3) FFT slices are normalized (mode-max); (4) target"
-                + "rings (overlay) are added to translate frequency to"
-                + " spatial resolution. (5) Optionally results may be blurred"
+                + " to FFT; (3) FFT slices are normalized (mode-max); (4) target"
+                + " rings (overlay) are added to translate frequency to"
+                + " spatial resolution. (5) Optionally, results may be blurred"
                 + " and a 16-color LUT applied to highlight slope or "
                 + " flatness of the Fourier spectrum.");
         return results;
