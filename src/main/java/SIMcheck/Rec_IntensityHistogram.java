@@ -37,7 +37,7 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
     private ResultSet results = new ResultSet(name, TLA);
     
     // parameter fields
-    public double percentile = 0.0005;  // use 0-100% of histogram extrema
+    public double percentile = 0.0001;  // use 0-100% of histogram extrema
     public long minPixels = 100; // minimum pixels at histogram extrema to use
     public double modeTol = 0.25;  // mode should be within modeTol*stdev of 0
     
@@ -71,7 +71,7 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
      * @param imps reconstructed data ImagePlus should be first imp
      * @return ResultSet containing histogram plots                                  
      */
-    public ResultSet exec(ImagePlus... imps) { 
+    public ResultSet exec(ImagePlus... imps) {
         IJ.showStatus(name + "...");
         int nc = imps[0].getNChannels();
         ImagePlus[] plots = new ImagePlus[nc];
@@ -133,11 +133,11 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
                 + " background areas (so that the mode reflects background)"
                 + " and should be constrained to z-slices containing features.");
         results.addInfo("About", "MMR is calculated as"
-                + " the ratio of the averaged " + J.d2s(percentile) + "%"
+                + " the ratio of the averaged 0.001%"
                 + " highest (Max*) and lowest (Min*) intensity pixels in a"
                 + " 32-bit stack, centered at the stack mode (assumed to be"
                 + " the center of the noise distribution),"
-                + " that is, Max* - Mode / |Min* - Mode|");
+                + " that is,                Max* - Mode / |Min* - Mode|");
         return results;
     }
 
