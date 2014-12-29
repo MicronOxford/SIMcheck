@@ -125,9 +125,9 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
         }
         impAllPlots.setDimensions(nc, 1, 1);
         impAllPlots.setOpenAsHyperStack(true);
-        results.addImp("Intensity counts in black (linear) & gray (log-scale).",
+        results.addImp("Intensity counts in black (linear) & gray (log-scale)",
                 impAllPlots);
-        results.addInfo("How to interpret", "Max-to-min intensity ratio, MMR "
+        results.addInfo("How to interpret", "max-to-min intensity ratio, MMR"
                 + " <3 is inadequate, 3-6 is low, 6-12 is good, >12 excellent."
                 + " For valid results, the data set must contain sufficient"
                 + " background areas (so that the mode reflects background)"

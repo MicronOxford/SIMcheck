@@ -91,7 +91,7 @@ public class Raw_MotionAndIllumVar implements PlugIn, Executable {
                     " and false-colored (A1 cyan, A2 magenta, A3 yellow)",
                     colorImp);
             results.addInfo("How to interpret",
-                    " non-white areas indicate differences between angles" +
+                    "non-white areas indicate differences between angles" +
                     " due to drift, floating particles or" +
                     " illumination variations.");
         }

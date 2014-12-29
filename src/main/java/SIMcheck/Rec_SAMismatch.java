@@ -107,9 +107,9 @@ public class Rec_SAMismatch implements PlugIn, Executable {
         ImagePlus impAllPlots = I1l.mergeChannels(title, plots);
         impAllPlots.setDimensions(nc, 1, 1);
         impAllPlots.setOpenAsHyperStack(true);
-        results.addImp("z-section minimum (black) and mean feature intensity (gray)",
+        results.addImp("Z-section minimum (black) and mean feature intensity (gray)",
                 impAllPlots);
-        results.addInfo("How to interpret", "Z-Minimum Variation (ZMV)"
+        results.addInfo("How to interpret", "Z-minimum variation (ZMV)"
                 + " is calculated as the"
                 + " standard deviation of z-section minimum intensity"
                 + " normalized to the average feature intensity. High ZMV"
