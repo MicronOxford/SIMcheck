@@ -256,6 +256,11 @@ public class Cal_PhaseSteps implements PlugIn {
             }
             title = I1l.makeTitle(imp, "A" + a + "_PPL");
             plotImps[a - 1] = new ImagePlus(title, stackPlots);
+            for (int c = 1; c <= nc; c++) {
+                plotImps[a - 1].setC(c);
+                I1l.drawPlotTitle(plotImps[a - 1],
+                        "Illumination phase steps: angle " + a);
+            }
             plotImps[a - 1].setDimensions(nc, 1, 1);
             plotImps[a - 1].setOpenAsHyperStack(true);
             results.addImp("Angle " + a + " phase plot", plotImps[a - 1]);
@@ -516,7 +521,8 @@ public class Cal_PhaseSteps implements PlugIn {
         float plotMin = J.min(phaseSet);
         float plotMax = J.max(phaseSet);
         double[] phaseStats = analyzePhases(phaseSet);
-        Plot plot = new Plot("Phase plot", "Z,P", "phase (radians)");
+        Plot plot = new Plot("Phase plot", "Slices in order: Z, phase",
+                "Phase [radians]");
         plot.setLineWidth(1);
         plot.setColor(Color.BLACK);
         plot.setLimits(1.0d, (double) phaseSet.length, plotMin, plotMax);

@@ -90,9 +90,11 @@ class Radial_Profile implements PlugIn {
             units = "1/x " + units;
         }
         plot = new Plot("Radial Profile Plot", "Radius ["+ units +"]", 
-                "Normalized Integrated Intensity",
+                "Integrated Fourier amplitude (a.u.)",
                 Accumulator[0], Accumulator[1]);
-        return plot.getImagePlus();
+        ImagePlus impPlot = plot.getImagePlus();
+        I1l.drawPlotTitle(impPlot, "FFT radial profile plot");
+        return impPlot;
     }
 
     /** main() method for testing. */

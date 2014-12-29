@@ -88,8 +88,8 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
         float[] avIntensities = new float[totalPlanes / nc];
         float[] pzat_no = new float[totalPlanes / nc];
         Plot plot = new Plot(I1l.makeTitle(imp, TLA), 
-        		"Slices in order: Phase, Z, Angle, Time (C1=red,C2=grn,C3=blu)",
-        		"Slice Mean Intensity", pzat_no, avIntensities);
+        		"Slices in order: phase, Z, angle, time",
+        		"Mean intensity", pzat_no, avIntensities);
 
         // assess intensities for plot scaling
         double sliceMeanMin = 0;
@@ -244,7 +244,8 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
         }
         
         ImagePlus impResult = plot.getImagePlus();
-        I1l.drawPlotTitle(impResult, "Per Channel Intensity Profiles");
+        I1l.drawPlotTitle(impResult, "Raw data intensity profile (C1=red,"
+                + " C2=green, C3=blue, C4=black)");
         results.addImp(name, plot.getImagePlus());
         results.addInfo("How to interpret",
                 "total intensity variation > ~50% over the 9-z-window used to"

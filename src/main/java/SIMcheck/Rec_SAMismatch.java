@@ -85,7 +85,7 @@ public class Rec_SAMismatch implements PlugIn, Executable {
             }
             Plot plot = new Plot(
                     "Reconstructed normalized min variation, C" + c,
-                    "z-section", "z-section minimum (black) and mean feature intensity (gray)");
+                    "Z-section", "Intensity");
             // display 20% beyond min and max
             plotMin -= 0.2 * Math.abs(plotMin);
             plotMax += 0.2 * Math.abs(plotMax);
@@ -96,7 +96,10 @@ public class Rec_SAMismatch implements PlugIn, Executable {
             plot.setColor(Color.LIGHT_GRAY);
             plot.addPoints(zPlanes, sliceMeans, Plot.LINE);
             plot.setLineWidth(1);
-            plots[c - 1] = plot.getImagePlus();
+            ImagePlus impPlot = plot.getImagePlus();
+            I1l.drawPlotTitle(impPlot, "Reconstructed data intensity profile"
+                    + " (feature mean=gray, z-minimum=black)");
+            plots[c - 1] = impPlot;
             double nstdev = Math.sqrt(J.variance(sliceMinima)) / 
                     J.mean(sliceMeans);
             results.addStat("C" + c + " Z-minimum variation", nstdev,
