@@ -171,6 +171,7 @@ public final class SIMcheck_ implements PlugIn {
                     " to OMX format");
             impRaw = formatConverter.exec(
                     impRaw, phases, angles, formatChoice - 1);
+            impRaw.show();
         }
         if (impRaw != null && !I1l.stackDivisibleBy(impRaw, phases * angles)) {
             IJ.log("  ! invalid raw SI data - raw data checks aborted");
@@ -236,6 +237,7 @@ public final class SIMcheck_ implements PlugIn {
                 impRaw.setRoi(new Roi(crop.x / 2, crop.y / 2,
                         crop.w / 2, crop.h / 2));
                 IJ.run(impRaw, "Crop", "");
+                impRaw.show();
             }
         } else if (doCrop && impRecon != null) {
             IJ.log("! cannot crop: require reconstructed image ROI");
