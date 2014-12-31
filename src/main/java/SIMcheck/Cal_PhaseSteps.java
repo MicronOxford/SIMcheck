@@ -249,7 +249,10 @@ public class Cal_PhaseSteps implements PlugIn {
                                                                 // StatOK);
                 results.addStat(channelAngleString + " phase offset stdev",
                         phaseStats[1], ResultSet.StatOK.MAYBE); // FIXME,
-                                                                // StatOK);
+                results.addStat(channelAngleString + " line spacing (micron)",
+                        J.mean(lineSpacings[c - 1]), ResultSet.StatOK.NA);
+                results.addStat(channelAngleString + " k0 angle (rad)",
+                        J.mean(kAngles[c - 1]), ResultSet.StatOK.NA);
                 // IJ.log("  line spacing = " + J.mean(lineSpacings[c - 1]));
                 // IJ.log("  k angle = " + J.mean(kAngles[c - 1]));
                 writeResults(rt, "C" + c + "/A" + a, phaseSets[c - 1]);
