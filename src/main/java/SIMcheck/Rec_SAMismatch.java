@@ -103,7 +103,7 @@ public class Rec_SAMismatch implements PlugIn, Executable {
             double nstdev = Math.sqrt(J.variance(sliceMinima)) / 
                     J.mean(sliceMeans);
             results.addStat("C" + c + " Z-minimum variation", nstdev,
-                    ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
+                    checkZmv(nstdev));  // FIXME, StatOK);
             
         }
         String title = I1l.makeTitle(imps[0], TLA);
@@ -123,6 +123,17 @@ public class Rec_SAMismatch implements PlugIn, Executable {
                 + " depends on image content.");
         return results;
     }
+     
+     /** Is ZMV value acceptable? */
+     private static ResultSet.StatOK checkZmv(Double statValue) {
+         if (statValue < 0.3) {
+             return ResultSet.StatOK.YES;
+         } else if (statValue < 1.0) {
+             return ResultSet.StatOK.MAYBE;
+         } else {
+             return ResultSet.StatOK.NO;
+         }
+     }
 
     /**  Return a new ImagePlus containing a single channel of the input. */
     private ImagePlus singleChannel(ImagePlus imp, int channel) {
