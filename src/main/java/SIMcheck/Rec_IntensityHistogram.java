@@ -82,11 +82,11 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
             if (manualCutoff) {
                 background = backgrounds[c - 1];
             }
-            if (Math.abs(background) > (stats.stdDev*modeTol)) {
-                IJ.log("! warning, C" + c + " histogram mode=" 
-                        + Math.round(background) 
-                        + " not within " + modeTol + " stdDev of 0\n");
-            }
+//            if (Math.abs(background) > (stats.stdDev*modeTol)) {
+//                IJ.log("! warning, C" + c + " histogram mode=" 
+//                        + Math.round(background) 
+//                        + " not within " + modeTol + " stdDev of 0\n");
+//            }
             if (stats.histMin <= background) {
                 // ensure we consider a bare minimum of pixels
                 long totalPixels = stats.longPixelCount;
