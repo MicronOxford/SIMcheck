@@ -61,7 +61,9 @@ public class Rec_SAMismatch implements PlugIn, Executable {
             double[] zPlanes = new double[nz];
             double plotMax = stackStats.min;
             double plotMin = stackStats.max;
-            double stackMode = stackStats.dmode;
+            // commented out normalization to mode -- may add back in as option
+//            double stackMode = stackStats.dmode;
+            double stackMode = 0.0d;
             for (int z = 0; z < nz; z++) {
                 zPlanes[z] = z + 1;  // Z value for the plot (x-axis)
                 imp2.setSlice(z + 1);
