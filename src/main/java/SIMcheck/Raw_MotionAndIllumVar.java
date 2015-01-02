@@ -82,11 +82,12 @@ public class Raw_MotionAndIllumVar implements PlugIn, Executable {
             double[][] normFactors = new double[3][nc];
             // total intensities for each [angle][channel] (max 3x3)
             double[][] totalIntens = new double[3][nc];
-
             ImagePlus projImp = averagePhase(imp, nc, nz, nt, totalIntens);
+            // TODO: complete or replace NRMSE stat check below
             calcNormalizationFactors(imp, nc, angles, totalIntens, normFactors);
 //            recordAngleNRMSEs(imp, projImp, normFactors);
             ImagePlus colorImp = colorAngles(imp, projImp, nc, nz, normFactors);
+            I1l.copyCal(imp, colorImp);
             results.addImp("Each angle phase-averaged, normalized," +
                     " and false-colored (A1 cyan, A2 magenta, A3 yellow)",
                     colorImp);
