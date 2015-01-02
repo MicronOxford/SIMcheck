@@ -108,16 +108,10 @@ Style Notes
 TODO
 ====
 
-* 0.9.7: final pre-submission features & fixes
-
-      - update docs before release (javadoc, README cross-ref manual)
-      - bump version number, update manual ref
-
-
 * 0.9.8: post-submission refactoring & documentation updates
 
       - documentation: 
-        - finish/improve docs, illustrate usage with pictures, examples
+        - finish/improve docs (incl. javadoc!), illustrate usage with pictures, examples
         - document examples of running checks from a macro
         - for ELYRA reconstructed .czi, discard WF and decon-WF?
           (processed data have 3 channels: recon, decon pseudoWF, WF)
@@ -140,7 +134,8 @@ TODO
         - run multi-frame -- fix / document; all stats reported for current time-point only?
         - get rid of IJ.run calls & show/hide of intermediate results 
 
-      - fixes:
+      - updates:
+        - progress bar for FPJ plugin (& others?)
         - for Rec data, auto-scale if data has >16-bit values
         - tidy raw FPJ & add target overlay & hide by default
         - try to find a more robust bleach estimation procedure (CIP)
@@ -158,7 +153,7 @@ TODO
 
 * 1.0: final updates & documentation for release
 
-      - fixes:
+      - updates:
         - improve "Fourier Transform Phases" info / log output
         - spherical aberration mismatch check: axis always symmetrical about 0?
         - test & refactor Cal_Phases: unwrap (+test case), stats and structure
