@@ -17,6 +17,7 @@
 
 package SIMcheck;
 import ij.*;
+import ij.measure.Calibration;
 import ij.plugin.*;
 import ij.process.*;
 import ij.gui.GenericDialog; 
@@ -92,7 +93,6 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         if (m == ProjMode.AVG) {
             new StackConverter(projImg).convertToGray16();  // TODO: was original?
         }
-        I1l.copyCal(imp, projImg);
         int newWidth = imp.getWidth() * 2;
         int newHeight = imp.getHeight() * 2;
         String newTitle = I1l.makeTitle(imp, TLA);
@@ -110,6 +110,10 @@ public class Util_SItoPseudoWidefield implements PlugIn {
                     + " create title=" + newTitle);
         }
         ImagePlus scaledProjImg = ij.WindowManager.getCurrentImage();
+        I1l.copyCal(imp, scaledProjImg);
+        Calibration cal = scaledProjImg.getCalibration();
+        cal.pixelWidth /= 2;
+        cal.pixelHeight /= 2;
         scaledProjImg.hide();
         if (channels > 1) {
             CompositeImage ci = new CompositeImage(scaledProjImg);

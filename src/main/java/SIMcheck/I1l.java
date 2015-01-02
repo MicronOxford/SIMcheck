@@ -388,7 +388,9 @@ public final class I1l {
             impsNorm[c] = copyChannel(imp, c + 1);
             impsNorm[c].setStack(normalizeStack(impsNorm[c].getStack()));
         }
-        return I1l.mergeChannels(I1l.makeTitle(imp, "RIN"), impsNorm);
+        ImagePlus nImp = mergeChannels(I1l.makeTitle(imp, "RIN"), impsNorm);
+        copyCal(imp, nImp);
+        return nImp;
     }
      
     /** Normalize fluctuations in inner 'b' dim average intensity. */
