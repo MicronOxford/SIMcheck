@@ -38,7 +38,8 @@ public class Util_SItoPseudoWidefield implements PlugIn {
     
     private static ImagePlus projImg = null;  // intermediate & final results
     
-    public enum ProjMode { AVG, MAX }  // can do projections other than average
+    public enum ProjMode { AVG, MAX }  // can do average or max projection
+    // TODO: refactor -- AVG and MAX projection details different / unexpected
 
     @Override 
     public void run(String arg) {
@@ -87,45 +88,48 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         Zplanes = Zplanes/(phases*angles);  // take phase & angle out of Z
         IJ.run("Conversions...", " ");  // TODO: reset option state when done..
         new StackConverter(impCopy).convertToGray32(); 
-        projectPandA(impCopy, channels, Zplanes, frames, m);
+        projImg = projectPandA(impCopy, channels, Zplanes, frames, m);
         // projectPandA result in projImg; Zplanes reduced by phases*angles
-        // AVG projection results 16-bit, MAX projection used in MCM needs 32-
         if (m == ProjMode.AVG) {
+            // AVG projection results 16-bit, resized x2 in XY
             new StackConverter(projImg).convertToGray16();  // TODO: was original?
-        }
-        int newWidth = imp.getWidth() * 2;
-        int newHeight = imp.getHeight() * 2;
-        String newTitle = I1l.makeTitle(imp, TLA);
-        if (channels > 1) {
-            IJ.run(projImg, "Scale...", "x=2 y=2 z=1.0 width=" + newWidth
-                    + " height=" + newHeight + " depth=" + Zplanes
-                    + " interpolation=Bicubic average"
-                    + " create title=" + newTitle);
+            int newWidth = imp.getWidth() * 2;
+            int newHeight = imp.getHeight() * 2;
+            String newTitle = I1l.makeTitle(imp, TLA);
+            if (channels > 1) {
+                IJ.run(projImg, "Scale...", "x=2 y=2 z=1.0 width=" + newWidth
+                        + " height=" + newHeight + " depth=" + Zplanes
+                        + " interpolation=Bicubic average"
+                        + " create title=" + newTitle);
+            } else {
+                // damned "Scale..." command requires "process" to do full stack
+                //   if we have an ordinary stack rather than a hyperstack
+                IJ.run(projImg, "Scale...", "x=2 y=2 z=1.0 width=" + newWidth
+                        + " height=" + newHeight + " depth=" + Zplanes
+                        + " interpolation=Bicubic average process"  // "process"
+                        + " create title=" + newTitle);
+            }
+            projImg = ij.WindowManager.getCurrentImage();
+            I1l.copyCal(imp, projImg);
+            Calibration cal = projImg.getCalibration();
+            cal.pixelWidth /= 2;
+            cal.pixelHeight /= 2;
+            projImg.hide();
         } else {
-            // damned "Scale..." command requires "process" to do full stack
-            //   if we have an ordinary stack rather than a hyperstack
-            IJ.run(projImg, "Scale...", "x=2 y=2 z=1.0 width=" + newWidth
-                    + " height=" + newHeight + " depth=" + Zplanes
-                    + " interpolation=Bicubic average process"  // "process"
-                    + " create title=" + newTitle);
+            // MAX proj used in MCM needs 32-bit result, *NOT* resized x2
+            I1l.copyCal(imp, projImg);
         }
-        ImagePlus scaledProjImg = ij.WindowManager.getCurrentImage();
-        I1l.copyCal(imp, scaledProjImg);
-        Calibration cal = scaledProjImg.getCalibration();
-        cal.pixelWidth /= 2;
-        cal.pixelHeight /= 2;
-        scaledProjImg.hide();
         if (channels > 1) {
-            CompositeImage ci = new CompositeImage(scaledProjImg);
+            CompositeImage ci = new CompositeImage(projImg);
             ci.setMode(IJ.GRAYSCALE);
             return (ImagePlus)ci;
         } else {
-            return scaledProjImg;
+            return projImg;
         }
     }
 
     /** Projection e.g. 5 phases, 3 angles for each CZT. **/
-    ImagePlus projectPandA(ImagePlus imp, int nc, int nz, int nt, ProjMode m) {
+    private ImagePlus projectPandA(ImagePlus imp, int nc, int nz, int nt, ProjMode m) {
         ImageStack stack = imp.getStack(); 
         ImageStack PAset = new ImageStack(imp.getWidth(), imp.getHeight());
         ImageStack avStack = new ImageStack(imp.getWidth(), imp.getHeight());
@@ -230,8 +234,20 @@ public class Util_SItoPseudoWidefield implements PlugIn {
     
     /** Interactive test method. */
     public static void main(String[] args) {
+        // TODO: automatic tests for private methods
         new ImageJ();
         TestData.raw.show();
+        // interactive tests of exec (AVG and MAX projections)
+        ImagePlus impTest = ij.WindowManager.getCurrentImage();
+        // 1. AVG
+        Util_SItoPseudoWidefield si2wf = new Util_SItoPseudoWidefield();
+        ImagePlus impAvg = si2wf.exec(impTest, 5, 3, ProjMode.AVG);
+        impAvg.setTitle("impAvg");
+        impAvg.show();
+        // 2. AVG
+        ImagePlus impMax = si2wf.exec(impTest, 5, 3, ProjMode.MAX);
+        impMax.setTitle("impMax");
+        impMax.show();
         IJ.runPlugIn(Util_SItoPseudoWidefield.class.getName(), "");
     }
 }
