@@ -6,9 +6,9 @@ SIMcheck is a package of ImageJ tools for assessing the quality and
 reliability of Structured Illumination Microscopy (SIM) data.
 
 * More information can be found on the 
-[Micron Oxford Website](http://www.micron.ox.ac.uk/software/SIMCheck.shtml)
-* **The latest .jar can be downloaded from
-[here](http://www.micron.ox.ac.uk/microngroup/software/SIMcheck_.jar)**
+[Micron Oxford Website](http://www.micron.ox.ac.uk/software/SIMCheck.php)
+* **The .jar for the latest release can be downloaded from
+[here](http://www.micron.ox.ac.uk/software/SIMcheck_-0.9.7.jar)**
 * Further help is available
 [here](http://www.micron.ox.ac.uk/microngroup/software/SIMcheck.html)
 
@@ -150,7 +150,7 @@ TODO
 * 0.9.9: additional features & updates suggested by referees
 
       - ???
-
+      
 * 1.0: final updates & documentation for release
 
       - updates:
@@ -160,6 +160,12 @@ TODO
         - channel order: RGB vs. BGR
         - angle labels etc. should be overlaid, not drawn
         - remove unused intermediate results from Windows list
+        - thresh / 16-bit: explanation of steps in log file (incl. thresh for each channel)
+        - SIR checks: exclude 0s from mode finding
+        - si2wf: add option without 2x size scaling
+        - si2wf: ption to select only one angle
+        - FTO: project central e.g. 10 mid sections
+        - FTO: crop to remove empty stripes at top/bottom?
 
       - features:
         - turn FTR profile into multi-color and/or plot
