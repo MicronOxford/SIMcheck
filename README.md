@@ -110,11 +110,10 @@ TODO
 
 * 0.9.8: post-submission refactoring & documentation updates
 
-      - documentation: 
-        - finish/improve docs (incl. javadoc!), illustrate usage with pictures, examples
+      - documentation:
+        - update docs with pictures and examples
         - document examples of running checks from a macro
-        - for ELYRA reconstructed .czi, discard WF and decon-WF?
-          (processed data have 3 channels: recon, decon pseudoWF, WF)
+        - javadoc updates
         - citable code:
               https://github.com/blog/1840-improving-github-for-science
 
@@ -166,6 +165,7 @@ TODO
         - si2wf: ption to select only one angle
         - FTO: project central e.g. 10 mid sections
         - FTO: crop to remove empty stripes at top/bottom?
+        - for ELYRA reconstructed .czi, discard WF and decon-WF
 
       - features:
         - turn FTR profile into multi-color and/or plot
