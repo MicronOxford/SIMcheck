@@ -52,7 +52,13 @@ public class FFT2D extends FHT {
 
     /** Return absolute value image of Fourier transform (no log scaling). */
     public ImageProcessor getComplexAbs() {
-        ImageStack complexFourier = super.getComplexTransform();
+        FHT fht = (FHT)this;
+        return getComplexAbs(fht);
+    }
+
+    /** Return absolute value image of Fourier transform (no log scaling). */
+    public static ImageProcessor getComplexAbs(FHT fht) {
+        ImageStack complexFourier = fht.getComplexTransform();
         FloatProcessor fpReal =
             (FloatProcessor)complexFourier.getProcessor(1).convertToFloat();
         float[] realPix = (float[])fpReal.getPixels();
@@ -158,13 +164,15 @@ public class FFT2D extends FHT {
      * @return new ImagePlus after 2D FFT
      **/
     public static ImagePlus fftImp(ImagePlus impIn) {
-        return fftImp(impIn, WIN_FRACTION_DEFAULT);
+        return fftImp(impIn, WIN_FRACTION_DEFAULT, false);
     }
     
     /**
      * 2D FFT hyperstack, specify window function size as input size fraction.
      */
-    public static ImagePlus fftImp(ImagePlus impIn, double winFraction) {
+    public static ImagePlus fftImp(
+            ImagePlus impIn, double winFraction, boolean gammaScaling)
+    {
         ImagePlus imp = impIn.duplicate();
         Calibration cal = impIn.getCalibration();
         int width = imp.getWidth();
@@ -198,7 +206,12 @@ public class FFT2D extends FHT {
             }
             ip = FFT2D.pad(ip, paddedSize);  
             fht = FFT2D.fftSlice(ip, imp);
-            ImageProcessor ps = fht.getPowerSpectrum();
+            ImageProcessor ps = null;
+            if (gammaScaling) {
+                ps = gammaScaledPowerSpectrum(fht, 0.5);
+            } else {
+                ps = fht.getPowerSpectrum();
+            }
             stackF.addSlice(String.valueOf(slice), ps);  // FFT power spectrum
             progress += (double) slice / (double) slices;
             IJ.showProgress(progress); 
@@ -213,7 +226,23 @@ public class FFT2D extends FHT {
         return impF;
     }
     
-    
+    /** Return a gamma-corrected power spectrum rescaled to fill 8-bit. */
+    public static ImageProcessor gammaScaledPowerSpectrum(
+            FHT fht, double gamma)
+    {
+        ImageProcessor ipAbs = getComplexAbs(fht);
+        float[] psAbsPix = (float[])ipAbs.getPixels();
+        // rescale absolute values so min=0, max=8 before gamma scaling
+        psAbsPix = J.sub(psAbsPix, (float)ipAbs.getMin());
+        psAbsPix = J.div(psAbsPix, (float)(ipAbs.getMax() / 8.0f));
+        int nPix = psAbsPix.length;
+        for (int i = 0; i < nPix; i++) {
+            psAbsPix[i] = (float)Math.pow((double)psAbsPix[i], gamma);
+        }
+        ipAbs.setPixels(psAbsPix);  // N.B. update min and max after setPixels!
+        ipAbs.setMinAndMax(J.min(psAbsPix), J.max(psAbsPix));
+        return ipAbs.convertToByte(true);  // as 8-bit image, filling 0-255
+    }
 
     /** 
      * Calculate the padded width and height for an ImagePlus to be
