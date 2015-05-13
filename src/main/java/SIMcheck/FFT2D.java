@@ -233,16 +233,18 @@ public class FFT2D extends FHT {
     {
         ImageProcessor ipAbs = getComplexAbs(fht);
         float[] psAbsPix = (float[])ipAbs.getPixels();
+        // TODO: decide whether to scale 0-8 and convert to 8-bit
         // rescale absolute values so min=0, max=8 before gamma scaling
-        psAbsPix = J.sub(psAbsPix, (float)ipAbs.getMin());
-        psAbsPix = J.div(psAbsPix, (float)(ipAbs.getMax() / 8.0f));
+//        psAbsPix = J.sub(psAbsPix, (float)ipAbs.getMin());
+//        psAbsPix = J.div(psAbsPix, (float)(ipAbs.getMax() / 8.0f));
         int nPix = psAbsPix.length;
         for (int i = 0; i < nPix; i++) {
             psAbsPix[i] = (float)Math.pow((double)psAbsPix[i], gamma);
         }
         ipAbs.setPixels(psAbsPix);  // N.B. update min and max after setPixels!
         ipAbs.setMinAndMax(J.min(psAbsPix), J.max(psAbsPix));
-        return ipAbs.convertToByte(true);  // as 8-bit image, filling 0-255
+        return ipAbs;
+//        return ipAbs.convertToByte(true);  // as 8-bit image, filling 0-255
     }
 
     /** 
