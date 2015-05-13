@@ -56,7 +56,6 @@ public class Rec_FourierPlots implements PlugIn, Executable {
     public boolean autoScale = true;  // re-scale FFT to mode->max?
     public boolean showAxial = true;  // show axial FFT?
     public boolean blurAndLUT = false;  // blur & apply false color LUT?
-    public boolean gammaScaling = false;  // gamma rather than log scale FFT?
     
     private double[] channelMinima = null;
     
@@ -71,7 +70,6 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         gd.addCheckbox("Auto-scale FFT (mode-max)", autoScale);
         gd.addCheckbox("Show axial FFT", showAxial);
         gd.addCheckbox("Blur & false-color LUT", blurAndLUT);
-        gd.addCheckbox("Gamma FFT scaling (0.5)", gammaScaling);
         gd.addMessage("** suppress edge artifacts");
         gd.showDialog();
         if (gd.wasOKed()) {
@@ -82,12 +80,11 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             this.autoScale = gd.getNextBoolean();
             this.showAxial = gd.getNextBoolean();
             this.blurAndLUT = gd.getNextBoolean();
-            this.gammaScaling = gd.getNextBoolean();
             if (!applyWinFunc) {
                 winFraction = 0.0d;
             }
-            if (manualCutoff && !noCutoff && !gammaScaling) {
-                // skip if noCutoff or gammaScaling
+            if (manualCutoff && !noCutoff) {
+                // skip if noCutoff
                 this.channelMinima = new double[imp.getNChannels()];
                 SIMcheck_.specifyBackgrounds(
                         channelMinima, "Set noise cut-off:");
@@ -118,7 +115,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             imp2 = Util_RescaleTo16bit.exec(imps[0].duplicate());
         }
         IJ.showStatus("Fourier transforming z-sections (lateral view)");
-        ImagePlus impF = FFT2D.fftImp(imp2, winFraction, gammaScaling);
+        ImagePlus impF = FFT2D.fftImp(imp2, winFraction, 0.0d);
         blurRadius *= (double)impF.getWidth() / 512.0d;
         IJ.showStatus("Blurring & rescaling z-sections (lateral view)");
         autoscaleSlices(impF);
@@ -150,7 +147,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
                 impOrtho = I1l.takeCentralZ(impOrtho);
                 Calibration calOrtho = impOrtho.getCalibration();
                 IJ.showStatus("FFT z-sections (orthogonal view)");
-                ImagePlus impOrthoF = FFT2D.fftImp(impOrtho, winFraction, gammaScaling);
+                ImagePlus impOrthoF = FFT2D.fftImp(impOrtho, winFraction, 0.0d);
                 IJ.showStatus("Blur & rescale z-sections (orthogonal view)");
                 autoscaleSlices(impOrthoF);
                 impOrthoF = resizeAndPad(impOrthoF, cal);

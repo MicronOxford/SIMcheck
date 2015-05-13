@@ -33,6 +33,7 @@ public class FFT2D extends FHT {
     // tolerance to check if a double precision float is approx. equal to 0
     private static final double ZERO_TOL = 0.000001d;
     private static final double WIN_FRACTION_DEFAULT = 0.06d;
+    private static final double NO_GAMMA = 0.0d;  // no gamma correction
 
     public FFT2D(ImageProcessor ip){
         super(ip);
@@ -164,14 +165,14 @@ public class FFT2D extends FHT {
      * @return new ImagePlus after 2D FFT
      **/
     public static ImagePlus fftImp(ImagePlus impIn) {
-        return fftImp(impIn, WIN_FRACTION_DEFAULT, false);
+        return fftImp(impIn, WIN_FRACTION_DEFAULT, NO_GAMMA);
     }
     
     /**
      * 2D FFT hyperstack, specify window function size as input size fraction.
      */
     public static ImagePlus fftImp(
-            ImagePlus impIn, double winFraction, boolean gammaScaling)
+            ImagePlus impIn, double winFraction, double gamma)
     {
         ImagePlus imp = impIn.duplicate();
         Calibration cal = impIn.getCalibration();
@@ -207,8 +208,8 @@ public class FFT2D extends FHT {
             ip = FFT2D.pad(ip, paddedSize);  
             fht = FFT2D.fftSlice(ip, imp);
             ImageProcessor ps = null;
-            if (gammaScaling) {
-                ps = gammaScaledPowerSpectrum(fht, 0.5);
+            if (gamma > 0.0d) {
+                ps = gammaScaledPowerSpectrum(fht, gamma);
             } else {
                 ps = fht.getPowerSpectrum();
             }
