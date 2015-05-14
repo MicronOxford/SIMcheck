@@ -23,6 +23,7 @@ import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.plugin.ChannelSplitter;
 import ij.plugin.PlugIn;
+import ij.process.StackStatistics;
 
 /**
  * This plugin discards values below zero-point and converts to 16-bit.
@@ -32,6 +33,7 @@ public class Util_RescaleTo16bit implements PlugIn {
 
     public static final String name = "Threshold and 16-bit Conversion";
     public static final String TLA = "THR";
+    private static final int MAX_16_BIT = 65535;
     
     @Override
     public void run(String arg) {
@@ -44,10 +46,18 @@ public class Util_RescaleTo16bit implements PlugIn {
         if (gd.wasOKed()) {
             if (gd.getNextBoolean()) {
                 imp2 = exec(imp);
+                IJ.log(name + ", auto-scaled using per channel mode.");
+                if (exceeds16bit(imp)) {
+                    IJ.log("Data exceeded 16-bit range and has been rescaled!");
+                }
             } else {
                 SIMcheck_.specifyBackgrounds(
                         channelMinima, "Discard intensities up to:");
                 imp2 = exec(imp, channelMinima);
+                IJ.log(name + ", thresholded using specified minima:");
+                for (int c = 1; c <= channelMinima.length; c++) {
+                    IJ.log("  Channel " + c + " minimum = " + channelMinima[c - 1]);
+                }
             }
             IJ.run("Brightness/Contrast...");
             imp2.show();
@@ -61,13 +71,10 @@ public class Util_RescaleTo16bit implements PlugIn {
      * @return ImagePlus (16-bit) after discarding below channel mode
      */
     public static ImagePlus exec(ImagePlus imp) {
-        String title = I1l.makeTitle(imp, TLA);
         ImagePlus imp2 = imp.duplicate();
-        I1l.subtractPerSliceMode(imp2);
-        IJ.log(name + ", using per slice mode.");
-        IJ.run("Conversions...", " ");
-        IJ.run(imp2, "16-bit", "");
-        imp2.setTitle(title);
+        threshMode(imp2);
+        imp2 = convertTo16bit(imp2);
+        imp2.setTitle(I1l.makeTitle(imp, TLA));
         return imp2;
     }
 
@@ -77,27 +84,53 @@ public class Util_RescaleTo16bit implements PlugIn {
      * @return ImagePlus (16-bit) after discarding below channel minimum
      */
     public static ImagePlus exec(ImagePlus imp, double[] channelMinima) {
-        String title = I1l.makeTitle(imp, TLA);
         ImagePlus imp2 = imp.duplicate();
-        IJ.log(name + ", using specified minima:");
-        for (int c = 1; c <= channelMinima.length; c++) {
-            IJ.log("  Channel " + c + " minimum = " + channelMinima[c - 1]);
-        }
-        subtractChannelMinima(imp2, channelMinima);
-        IJ.run("Conversions...", " ");
-        IJ.run(imp2, "16-bit", "");
-        imp2.setTitle(title);
+        threshChannelMinima(imp2, channelMinima);
+        imp2 = convertTo16bit(imp2);
+        imp2.setTitle(I1l.makeTitle(imp, TLA));
         return imp2;
     }
     
+    /** Convert to 16-bit, rescaling to 16-bit range if input exceeds it. */
+    private static ImagePlus convertTo16bit(ImagePlus imp) {
+        if (exceeds16bit(imp)) {
+            IJ.run("Conversions...", "scale");
+        } else {
+            IJ.run("Conversions...", " ");
+        }
+        ImagePlus[] imps = ChannelSplitter.split(imp);
+        for (int c = 0; c < imps.length; c++) {
+            IJ.run(imps[c], "16-bit", "");
+        }
+        imp.setStack(I1l.mergeChannels(imp.getTitle(), imps).getStack());
+        IJ.run("Conversions...", " ");  // assume default no rescaling
+        return imp;
+    }
+    
+    /** Subtract per-channel mode value from all slices in a hyperstack. */
+    private static void threshMode(ImagePlus imp) {
+        ImagePlus[] imps = ChannelSplitter.split(imp);
+        for (int c = 0; c < imps.length; c++) {
+            double dmode = new StackStatistics(imps[c]).dmode;
+            IJ.run(imps[c], "Min...", "value=" + dmode + " stack");
+        }
+        imp.setStack(I1l.mergeChannels(imp.getTitle(), imps).getStack());
+    }
+    
     /** Subtract specified minimum from each channel. */
-    static void subtractChannelMinima(ImagePlus imp, double[] minima) {
+    private static void threshChannelMinima(ImagePlus imp, double[] minima) {
         ImagePlus[] imps = ChannelSplitter.split(imp);
         for (int c = 0; c < imps.length; c++) {
             double minimum = minima[c];
-            IJ.run(imps[c], "Subtract...", "value=" + minimum + " stack");
+            IJ.run(imps[c], "Min...", "value=" + minimum + " stack");
         }
         imp.setStack(I1l.mergeChannels(imp.getTitle(), imps).getStack());
+    }
+
+    /** Return true if StackStatistics report a max outside 16-bit range. */
+    private static boolean exceeds16bit(ImagePlus imp) {
+        StackStatistics sstats = new StackStatistics(imp);
+        return sstats.histMax > (double)MAX_16_BIT;
     }
     
     /** Interactive test method. */

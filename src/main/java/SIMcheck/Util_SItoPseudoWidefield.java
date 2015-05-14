@@ -17,6 +17,7 @@
 
 package SIMcheck;
 import ij.*;
+import ij.measure.Calibration;
 import ij.plugin.*;
 import ij.process.*;
 import ij.gui.GenericDialog; 
@@ -33,8 +34,12 @@ public class Util_SItoPseudoWidefield implements PlugIn {
     // parameter fields
     public int phases = 5;                                                         
     public int angles = 3;                                                         
+    public boolean doNormalize = true;                                                         
     
     private static ImagePlus projImg = null;  // intermediate & final results
+    
+    public enum ProjMode { AVG, MAX }  // can do average or max projection
+    // TODO: refactor -- AVG and MAX projection details different / unexpected
 
     @Override 
     public void run(String arg) {
@@ -44,18 +49,25 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         gd.addMessage("Requires SI raw data in OMX (CPZAT) order.");        
         gd.addNumericField("Angles", angles, 0);                               
         gd.addNumericField("Phases", phases, 0);
+        gd.addCheckbox("Intensity normalisation (simple ratio correction)",
+                doNormalize);
         gd.showDialog();                                                        
         if (gd.wasCanceled()) return;                                           
         if(gd.wasOKed()){                                                     
             angles = (int)gd.getNextNumber();                                   
-            phases = (int)gd.getNextNumber();                                   
+            phases = (int)gd.getNextNumber();  
+            doNormalize = gd.getNextBoolean();
         }                                                                       
         if (!I1l.stackDivisibleBy(imp, phases * angles)) {                                                 
             IJ.showMessage( "SI to Pseudo-Wide-Field", 
                     "Error: stack size not consistent with phases/angles.");
             return;                                                             
         }
-        projImg = exec(imp, phases, angles);  
+        if (doNormalize) {
+            projImg = exec(I1l.normalizeImp(imp), phases, angles, ProjMode.AVG);  
+        } else {
+            projImg = exec(imp, phases, angles, ProjMode.AVG);
+        }
         IJ.run("Brightness/Contrast...");
         projImg.show();
     }
@@ -66,7 +78,7 @@ public class Util_SItoPseudoWidefield implements PlugIn {
      * @param angles number of angles                                   
      * @return ImagePlus with all phases and angles averaged
      */ 
-    public ImagePlus exec(ImagePlus imp, int phases, int angles) {
+    public ImagePlus exec(ImagePlus imp, int phases, int angles, ProjMode m) {
         ImagePlus impCopy = imp.duplicate();
         this.angles = angles;
         this.phases = phases;
@@ -74,15 +86,50 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         int Zplanes = imp.getNSlices();
         int frames = imp.getNFrames();
         Zplanes = Zplanes/(phases*angles);  // take phase & angle out of Z
-        new StackConverter(impCopy).convertToGray32();  
-        averagePandA(impCopy, channels, Zplanes, frames);
-        I1l.copyCal(imp, projImg);
-        projImg.setTitle(I1l.makeTitle(imp, TLA));  
-        return projImg;
+        IJ.run("Conversions...", " ");  // TODO: reset option state when done..
+        new StackConverter(impCopy).convertToGray32(); 
+        projImg = projectPandA(impCopy, channels, Zplanes, frames, m);
+        // projectPandA result in projImg; Zplanes reduced by phases*angles
+        if (m == ProjMode.AVG) {
+            // AVG projection results 16-bit, resized x2 in XY
+            new StackConverter(projImg).convertToGray16();  // TODO: was original?
+            int newWidth = imp.getWidth() * 2;
+            int newHeight = imp.getHeight() * 2;
+            String newTitle = I1l.makeTitle(imp, TLA);
+            if (channels > 1) {
+                IJ.run(projImg, "Scale...", "x=2 y=2 z=1.0 width=" + newWidth
+                        + " height=" + newHeight + " depth=" + Zplanes
+                        + " interpolation=Bicubic average"
+                        + " create title=" + newTitle);
+            } else {
+                // damned "Scale..." command requires "process" to do full stack
+                //   if we have an ordinary stack rather than a hyperstack
+                IJ.run(projImg, "Scale...", "x=2 y=2 z=1.0 width=" + newWidth
+                        + " height=" + newHeight + " depth=" + Zplanes
+                        + " interpolation=Bicubic average process"  // "process"
+                        + " create title=" + newTitle);
+            }
+            projImg = ij.WindowManager.getCurrentImage();
+            I1l.copyCal(imp, projImg);
+            Calibration cal = projImg.getCalibration();
+            cal.pixelWidth /= 2;
+            cal.pixelHeight /= 2;
+            projImg.hide();
+        } else {
+            // MAX proj used in MCM needs 32-bit result, *NOT* resized x2
+            I1l.copyCal(imp, projImg);
+        }
+        if (channels > 1) {
+            CompositeImage ci = new CompositeImage(projImg);
+            ci.setMode(IJ.GRAYSCALE);
+            return (ImagePlus)ci;
+        } else {
+            return projImg;
+        }
     }
 
-    /** Average projections of 5 phases, 3 angles for each CZT **/
-    private ImagePlus averagePandA(ImagePlus imp, int nc, int nz, int nt) {
+    /** Projection e.g. 5 phases, 3 angles for each CZT. **/
+    private ImagePlus projectPandA(ImagePlus imp, int nc, int nz, int nt, ProjMode m) {
         ImageStack stack = imp.getStack(); 
         ImageStack PAset = new ImageStack(imp.getWidth(), imp.getHeight());
         ImageStack avStack = new ImageStack(imp.getWidth(), imp.getHeight());
@@ -106,7 +153,17 @@ public class Util_SItoPseudoWidefield implements PlugIn {
                             ImageProcessor ip = stack.getProcessor(sliceIn);
                             PAset.addSlice(null, stack.getProcessor(sliceIn));
                             if ((p * a == PAsetSize)) {
-                                ip = avSlices(imp, PAset, PAsetSize);
+                                switch (m)
+                                {
+                                  case AVG:
+                                      ip = avSlices(imp, PAset, PAsetSize);
+                                      break;
+                                  case MAX:
+                                      ip = maxSlices(imp, PAset, PAsetSize);
+                                      break;
+                                  default: 
+                                      ip = avSlices(imp, PAset, PAsetSize);
+                                }
                                 for (int slice = PAsetSize; slice >= 1; slice--) {
                                     PAset.deleteSlice(slice);
                                 }
@@ -129,7 +186,7 @@ public class Util_SItoPseudoWidefield implements PlugIn {
     }
 
     /** Average slices (32-bit floats). */
-    private ImageProcessor avSlices(
+    private static ImageProcessor avSlices(
             ImagePlus imp, ImageStack stack, int slices) {
         int width = imp.getWidth();                                             
         int height = imp.getHeight();
@@ -150,11 +207,47 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         oip = new FloatProcessor(width, height, avpixels, null);
         return oip;
     }
+
+    /** Max of slices (32-bit floats). */
+    private static ImageProcessor maxSlices(
+            ImagePlus imp, ImageStack stack, int slices) {
+        int width = imp.getWidth();                                             
+        int height = imp.getHeight();
+        int len = width * height;
+        FloatProcessor fpOut = new FloatProcessor(width, height);
+        float[] maxPixels = null;
+        for (int slice = 1; slice <= slices; slice++){
+            FloatProcessor fp = (FloatProcessor)stack.getProcessor(slice).convertToFloat();  
+            float[] fpixels = (float[])fp.getPixels();
+            if (slice == 1) {
+                maxPixels = fpixels;
+            }
+            for (int i = 0; i < len; i++) {
+                if (fpixels[i] > maxPixels[i]) {
+                    maxPixels[i] = fpixels[i];
+                }
+            }
+        }
+        fpOut = new FloatProcessor(width, height, maxPixels, null);
+        return fpOut;
+    }
     
     /** Interactive test method. */
     public static void main(String[] args) {
+        // TODO: automatic tests for private methods
         new ImageJ();
         TestData.raw.show();
+        // interactive tests of exec (AVG and MAX projections)
+        ImagePlus impTest = ij.WindowManager.getCurrentImage();
+        // 1. AVG
+        Util_SItoPseudoWidefield si2wf = new Util_SItoPseudoWidefield();
+        ImagePlus impAvg = si2wf.exec(impTest, 5, 3, ProjMode.AVG);
+        impAvg.setTitle("impAvg");
+        impAvg.show();
+        // 2. AVG
+        ImagePlus impMax = si2wf.exec(impTest, 5, 3, ProjMode.MAX);
+        impMax.setTitle("impMax");
+        impMax.show();
         IJ.runPlugIn(Util_SItoPseudoWidefield.class.getName(), "");
     }
 }

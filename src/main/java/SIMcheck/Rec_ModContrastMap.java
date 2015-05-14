@@ -39,7 +39,8 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
     
     public static final String name = "Modulation Contrast Map";
     public static final String TLA = "MCM";
-    private ResultSet results = new ResultSet(name);
+    private ResultSet results = new ResultSet(name, TLA);
+    private boolean saturatedPixelsDetected = false;
     
     // parameter fields
     public int phases = 5;
@@ -90,25 +91,24 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
     }
 
     /** Execute plugin functionality: create a modulation contrast color map.
-     * @param imps ImagePluses should be impRec reconstructed data
-     *        and impMCNR MCNR result for raw data used to produce impRec
+     * @param imps ImagePluses should be
+     *        impRaw raw data
+     *        impRec reconstructed data
      * @return ResultSet with map of reconstructed intensity colored by MCNR
      */
     public ResultSet exec(ImagePlus... imps) {
         ImagePlus impRaw = imps[0];  
         ImagePlus impRec = imps[1];
         ImagePlus impMCNR = imps[2];
-        if (impRaw == null) {
-            IJ.showMessage("Error", "Mod contrast map requires raw data image");
-            return results;
-        } else if (impRec == null) {
-            IJ.showMessage("Error", "Specify reconstructed image");
-            return results;
-        } else if (impMCNR == null) {
-            IJ.showMessage("Error", "Specify modulation contrast image");
-            return results;
+        if (impMCNR == null) {  // no MCNR image, so calculate it
+            Raw_ModContrast mcnrPlugin = new Raw_ModContrast();
+            mcnrPlugin.angles = angles;
+            mcnrPlugin.phases = phases;
+            IJ.showStatus("calculating modulation contrast...");
+            ResultSet mcnrResults = mcnrPlugin.exec(impRaw);
+            impMCNR = mcnrResults.getImp(0);
         }
-        if (!rawAndRecImpMatch(impMCNR, impRec)) {
+        if (!rawAndRecImpMatch(impRaw, impRec)) {
             IJ.log("! Rec_ModContrastMap: input stack size mismatch");
             IJ.log("  - impRaw nx,ny,nz = " + impRaw.getWidth() + "," +
                     impRaw.getHeight() + "," + impRaw.getNSlices() + "\n");
@@ -116,9 +116,7 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
                     impRec.getHeight() + "," + impRec.getNSlices() + "\n");
             return results;
         }
-        // convert raw data imp into pseudo-widefield
-        Util_SItoPseudoWidefield si2wf = new Util_SItoPseudoWidefield();
-        ImagePlus wfImp = si2wf.exec(impRaw, phases, angles);
+        ImagePlus impMax = siRawMax(impRaw);  // max of phase+angle set
         IJ.showStatus(name + "...");
         ImagePlus impRec2 = (ImagePlus)impRec.duplicate();
         IJ.run(impRec2, "32-bit", "");
@@ -135,7 +133,7 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
         for (int c = 1; c <= nc; c++) {
             ImagePlus impRecC = I1l.copyChannel(impRec2, c); 
             ImagePlus MCNimpC = I1l.copyChannel(impMCNR2, c); 
-            ImagePlus wfImpC = I1l.copyChannel(wfImp, c); 
+            ImagePlus impMaxC = I1l.copyChannel(impMax, c); 
             StackStatistics stats = new ij.process.StackStatistics(impRecC);
             float chMax = (float)stats.max; 
             int slices = impRecC.getStack().getSize();
@@ -152,9 +150,9 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
                 FloatProcessor fpBlu = new FloatProcessor(width, height);
                 ImageStack RGBset = new ImageStack(width, height);  // 1 set
                 // 2. copy scaled values from input Processors to new Processors
-                FloatProcessor wfFp = 
-                        (FloatProcessor)wfImpC.getStack().getProcessor(slice);
-                scaledRGBintensities(fpRec, MCNRfpRsz, wfFp, chMax,
+                FloatProcessor fpMax = 
+                        (FloatProcessor)impMaxC.getStack().getProcessor(slice);
+                scaledRGBintensities(fpRec, MCNRfpRsz, fpMax, chMax,
                         fpRed, fpGrn, fpBlu);
                 // 3. assemble 1 RGBset (3 slices)
                 ByteProcessor bpRed = (ByteProcessor)fpRed.convertToByte(false);
@@ -195,30 +193,33 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
                 + " underlying Modulation Contrast-to-Noise Ratio (MCNR)"
                 + " in the raw data",
                 outImp);
-        results.addInfo("How to interpret", "The MCNR map indicates local"
+        results.addInfo("How to interpret", "the MCNR map indicates local"
                 + " variations in reconstruction quality, e.g. due to"
                 + " variations in out-of-focus blur contribution due to"
                 + " feature density, or due to uneven SI illumination.");
-        results.addInfo("MCNR values", " 0-3 purple (inadequate),"
+        results.addInfo("MCNR values", "0-3 purple (inadequate),"
                 + " to 6 red (acceptable), to 12 orange (good),"
                 + " to 18 yellow (very good), to 24 white (excellent).");
+        if (saturatedPixelsDetected) {
+            results.addInfo("Saturated pixels!", "Saturated pixels detected"
+                    + " in the raw data and false-colored green.");
+        }
         return results;
     }
 
     /** Check rec imp width and height are 2x raw data width and height. */
-    private static boolean rawAndRecImpMatch(
-            ImagePlus impRaw, ImagePlus impRec) {
+    private boolean rawAndRecImpMatch(ImagePlus impRaw, ImagePlus impRec) {
         boolean match = false;
-        int slicesMCNR = impRaw.getStackSize();
-        int widthMCNR = impRaw.getStack().getWidth();
-        int heightMCNR = impRaw.getStack().getHeight();
+        int slicesRaw = impRaw.getStackSize() / (phases * angles);
+        int widthRaw = impRaw.getStack().getWidth();
+        int heightRaw = impRaw.getStack().getHeight();
         int slicesRec = impRec.getStackSize();
         int widthRec = impRec.getStack().getWidth();
         int heightRec = impRec.getStack().getHeight();
         if ((impRec != null) && (impRaw != null)){
-            boolean stackMatch = slicesMCNR == slicesRec;
-            boolean widthMatch = (int)(widthMCNR * 2) == widthRec;
-            boolean heightMatch = (int)(heightMCNR * 2) == heightRec;
+            boolean stackMatch = slicesRaw == slicesRec;
+            boolean widthMatch = (int)(widthRaw * 2) == widthRec;
+            boolean heightMatch = (int)(heightRaw * 2) == heightRec;
             if (stackMatch && widthMatch && heightMatch) { 
                 match = true;
             }
@@ -226,6 +227,13 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
             IJ.log("! warning: raw or reconstructed stack was null");
         }
         return match;
+    }
+    
+    /** For raw SIM data, return max each of phase+angle set. */
+    private ImagePlus siRawMax(ImagePlus impRaw) {
+        Util_SItoPseudoWidefield siProj = new Util_SItoPseudoWidefield();
+        return siProj.exec(impRaw, phases, angles,
+                Util_SItoPseudoWidefield.ProjMode.MAX);
     }
 
     /** Method to resize a FloatProcessor - IJ's doesn't work or doesn't update
@@ -269,9 +277,9 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
      */
     private void scaledRGBintensities(
             FloatProcessor fpRec, FloatProcessor MCNRfp2,
-            FloatProcessor wfFp, float chMax,
+            FloatProcessor fpMax, float chMax,
             FloatProcessor fpRed, FloatProcessor fpGrn, FloatProcessor fpBlu) {
-        float[] wfPix = (float[])wfFp.getPixels();
+        float[] fpixMax = (float[])fpMax.getPixels();
         float[] fpixRec = (float[])fpRec.getPixels();
         float[] fpixMCNR = (float[])MCNRfp2.getPixels();
         float[] fpixRed = (float[])fpRed.getPixels();
@@ -340,7 +348,8 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
         for (int i = 1; i < fpixRec.length; i++) {
             int j = i / widthRec;
             int rawI = (i / 2) % (widthRec / 2) + ((j / 2) * widthRec / 2);
-            if (wfPix[rawI] > Math.pow(2, camBitDepth) - 2) {
+            if (fpixMax[rawI] > Math.pow(2, camBitDepth) - 2) {
+                this.saturatedPixelsDetected = true;
                 fpixRed[i] = 0.0f;
                 fpixGrn[i] = 255.0f;
                 fpixBlu[i] = 0.0f;

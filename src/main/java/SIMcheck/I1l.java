@@ -1,5 +1,5 @@
 /*  
- *  Copyright (c) 2013, Graeme Ball.
+ *  Copyright (c) 2014, Graeme Ball.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@
 package SIMcheck;
 import ij.*;
 import ij.plugin.LutLoader;
-import ij.plugin.ChannelSplitter;
 import ij.plugin.filter.GaussianBlur;
 import ij.process.*;
 import ij.measure.Calibration;
@@ -29,10 +28,12 @@ import java.awt.Polygon;
 import java.awt.image.*;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 /** 
  * I1l (<b>I</b>mageJ <b>1</b> <b>l</b>ibrary) is a class containing static
  * utility methods for ImageJ1. How good is your font?
+ * Some methods check preconditions and throw IllegalArugmentExceptions.
  * @author Graeme Ball <graemeball@gmail.com>
  */
 public final class I1l {
@@ -335,9 +336,26 @@ public final class I1l {
         return WindowManager.makeUniqueName(nuTitle);
     }
 
-    /** Merge identically-dimensioned single-channel images, channel fastest. */ 
+    /**
+     * Merge identically-dimensioned single-channel images, channel fastest.
+     * Returns a grayscale-mode composite image for all but RGB
+     * */ 
     public static ImagePlus mergeChannels(String title, ImagePlus imps[]) {
-        // TODO: check imps.length >= 1 and all imps identical
+        if (imps.length > 1) {
+            int[] dims1 = imps[0].getDimensions();
+            for (ImagePlus imp : imps) {
+                // ensure each imp is single-channel
+                if (imp.getNChannels() > 1) {
+                    throw new IllegalArgumentException(
+                            "Each ImagePlus should have 1 channel!");
+                }
+                // ensure each imp's dimensionality matches first
+                if (!Arrays.equals(imp.getDimensions(), dims1)) {
+                    throw new IllegalArgumentException(
+                            "Cannot merge imps of differing dimensionality!");
+                }
+            }
+        }
         int width = imps[0].getWidth();
         int height = imps[0].getHeight();
         int nc = imps.length;  // one imp per channel
@@ -352,9 +370,29 @@ public final class I1l {
         }
         ImagePlus imp2 = new ImagePlus(title, nuStack);
         imp2.setDimensions(nc, nz, nt);
-        return imp2;
+        if (imp2.getBitDepth() == 24) {
+            return imp2;  // CompositeImage does not support RGB
+        } else {
+            // ordinary multi-channel images should be CompositeImage 
+            CompositeImage ci = new CompositeImage(imp2);
+            ci.setMode(IJ.GRAYSCALE);
+            return (ImagePlus)ci;
+        }
     }
     
+    /** Simple Ratio Intensity Normalization (RIN) of ImagePlus slices. */
+    public static ImagePlus normalizeImp(ImagePlus imp) {
+        int nc = imp.getNChannels();
+        ImagePlus[] impsNorm = new ImagePlus[nc];
+        for (int c = 0; c < nc; c++) {
+            impsNorm[c] = copyChannel(imp, c + 1);
+            impsNorm[c].setStack(normalizeStack(impsNorm[c].getStack()));
+        }
+        ImagePlus nImp = mergeChannels(I1l.makeTitle(imp, "RIN"), impsNorm);
+        copyCal(imp, nImp);
+        return nImp;
+    }
+     
     /** Normalize fluctuations in inner 'b' dim average intensity. */
     public static float[][] normalizeInner(float[][] ab) {
         int blen = ab[0].length;
@@ -372,6 +410,20 @@ public final class I1l {
             }
         }
         return abOut;
+    }
+    
+    /** Normalize stack slice intensity using simple ratio of slice means. */
+    public static ImageStack normalizeStack(ImageStack stack) {
+        ImageStack stackN = stack.duplicate();
+        int ns = stack.getSize();
+        double firstSliceMean = stack.getProcessor(1).getStatistics().mean;
+        for (int s = 1; s <= ns; s++) {
+            ImageProcessor ip = stackN.getProcessor(s);
+            double ratio = (double)firstSliceMean / ip.getStatistics().mean;
+            ip.multiply(ratio);
+            stackN.setProcessor(ip, s);
+        }
+        return stackN;
     }
     
     /** Rescale an 8-bit stack to range 0-255 for input range min to max. */
@@ -507,25 +559,18 @@ public final class I1l {
     }
     
 
-    /** Return mean value of auto-thresholded features in impIn. */
+    /** Return mean value of auto-thresholded (Otsu) features in impIn. */
     public static double stackFeatMean(ImagePlus impIn) {
+        int mOptionsInitial = ij.plugin.filter.Analyzer.getMeasurements();
+        ij.plugin.filter.Analyzer.setMeasurements(
+                ij.plugin.filter.Analyzer.LIMIT +
+                ij.plugin.filter.Analyzer.MEAN);
         ImagePlus imp = impIn.duplicate();
-        double stackFeatMean = 0;
-        int ns = imp.getNSlices();
-        for (int s = 1; s <= ns; s++) {
-            imp.setSlice(s);
-            ImageProcessor ip =  imp.getProcessor();
-            ImageProcessor maskIp = ip.duplicate();
-            maskIp = maskIp.convertToByte(true);
-            maskIp.setAutoThreshold("Triangle", true, ImageProcessor.RED_LUT);
-            ImagePlus tImp = new ImagePlus("I1l.featStats slice", maskIp);
-            IJ.run(tImp, "Convert to Mask", "method=Triangle background=Dark black");
-            ImageProcessor maskedIp = ip.duplicate();
-            maskedIp.setMask(maskIp);
-            stackFeatMean += maskedIp.getStatistics().mean;
-            imp.setProcessor(maskedIp);
-        }
-        return stackFeatMean / ns;  // FIXME, account for feat pix / slice
+        IJ.setAutoThreshold(imp, "Otsu dark stack");
+        StackStatistics stackStats = new StackStatistics(imp);
+        double stackThresholdedMean = stackStats.mean;
+        ij.plugin.filter.Analyzer.setMeasurements(mOptionsInitial); // restore
+        return stackThresholdedMean;
     }
 
     /** 
@@ -576,16 +621,6 @@ public final class I1l {
         }
     }
 
-    /** Subtract per-channel mode value from all slices in a hyperstack. */
-    public static void subtractMode(ImagePlus imp) {
-        ImagePlus[] imps = ChannelSplitter.split(imp);
-        for (int c = 0; c < imps.length; c++) {
-            double dmode = new StackStatistics(imps[c]).dmode;
-            IJ.run(imps[c], "Subtract...", "value=" + dmode + " stack");
-        }
-        imp.setStack(mergeChannels(imp.getTitle(), imps).getStack());
-    }
-    
     /** Subtract per-slice mode from all slices in a hyperstack. */
     public static void subtractPerSliceMode(ImagePlus imp) {
         for (int s = 1; s <= imp.getStackSize(); s++) {

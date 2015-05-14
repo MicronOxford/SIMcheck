@@ -17,6 +17,7 @@
 
 package SIMcheck;
 
+import java.math.*;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -92,7 +93,7 @@ public class J {
     public static int closestEven(int n) {
         return n % 2 == 0 ? n : n - 1;
     }
-
+    
     /** Convert double array to float array. */
     public static float[] d2f(double[] d) {
         if (d == null) {
@@ -103,6 +104,18 @@ public class J {
             output[i] = (float)d[i];
         }
         return output;
+    }
+    
+    /** Convert double to string (2 sig figs). */
+    public static String d2s(double dStat) {
+        BigDecimal bd = new BigDecimal(dStat);
+        if (Math.abs(dStat) >= 100.0d) {
+            bd = bd.setScale(0, RoundingMode.HALF_UP);
+        } else {
+            bd = bd.round(new MathContext(ResultSet.STAT_SIG_FIGS));
+        }
+        bd.stripTrailingZeros();
+        return bd.toString();
     }
     
     /** Euclidean distance */
@@ -119,6 +132,7 @@ public class J {
         }
         return result;
     }
+    
 
     /** Divide two float arrays fN, fD of identical dimensions element-wise. */
     public static float[] div(float[] fN, float[] fD) {
@@ -211,10 +225,25 @@ public class J {
         }
         return min;
     }
+
+    /** Multiply each element of a float array by a float. */
+    public static float[] mult(float[] f, float factor) {
+        int len = f.length;
+        float[] result = new float[len];
+        for (int i = 0; i < f.length; i++) {
+            result[i] = (float)f[i] * factor;
+        }
+        return result;
+    }
     
     /** Return a string containing n repeats of charString. */
     public static String nChars(int n, String charString) {
         return new String(new char[n]).replace("\0", charString);
+    }
+    
+    /** Print object as "\n"-terminated String to standard out. */
+    public static void out(Object o) {
+        System.out.println(o.toString());
     }
 
     /** Square each element of a float array. */                                
@@ -276,4 +305,5 @@ public class J {
         }
         return variance;
     }
+
 }

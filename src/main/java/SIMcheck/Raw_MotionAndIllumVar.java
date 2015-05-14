@@ -33,7 +33,7 @@ public class Raw_MotionAndIllumVar implements PlugIn, Executable {
 
     public static final String name = "Motion & Illumination Variation";
     public static final String TLA = "MIV";
-    private ResultSet results = new ResultSet(name);
+    private ResultSet results = new ResultSet(name, TLA);
 
     // parameter fields
     public int phases = 5;
@@ -82,83 +82,89 @@ public class Raw_MotionAndIllumVar implements PlugIn, Executable {
             double[][] normFactors = new double[3][nc];
             // total intensities for each [angle][channel] (max 3x3)
             double[][] totalIntens = new double[3][nc];
-
             ImagePlus projImp = averagePhase(imp, nc, nz, nt, totalIntens);
-            recordAngleNRMSEs(imp, projImp);
+            // TODO: complete or replace NRMSE stat check below
             calcNormalizationFactors(imp, nc, angles, totalIntens, normFactors);
+//            recordAngleNRMSEs(imp, projImp, normFactors);
             ImagePlus colorImp = colorAngles(imp, projImp, nc, nz, normFactors);
+            I1l.copyCal(imp, colorImp);
             results.addImp("Each angle phase-averaged, normalized," +
                     " and false-colored (A1 cyan, A2 magenta, A3 yellow)",
                     colorImp);
             results.addInfo("How to interpret",
-                    " non-white areas indicate differences between angles" +
+                    "non-white areas indicate differences between angles" +
                     " due to drift, floating particles or" +
                     " illumination variations.");
         }
         return results;
     }
     
-    /** For each channel of phase-projected raw SIM data, calculate normalised
-     * RMSE of intensities all angles versus the average and add to results. 
-     */
-    private void recordAngleNRMSEs(ImagePlus impRaw, ImagePlus impPP) {
-        Util_SItoPseudoWidefield si2wf = new Util_SItoPseudoWidefield();
-        ImagePlus impWf = si2wf.exec(impRaw, phases, angles);
-        int nc = impPP.getNChannels() / angles;
-        int nz = impPP.getNSlices();
-        int nt = impPP.getNFrames();
-        int nPP = nz * nt;  // num of PP slices per channel+angle
-        double[][] rmsErr = new double[nc][angles];
-        int slicePP = 0;
-        int sliceWf = 0;
-        for (int t = 0; t < nt; t++) {
-            for (int z = 0; z < nz; z++) {
-                for (int c = 0; c < nc; c++) {
-                    float[] wfPix = (float[])impWf.getStack().
-                            getProcessor(++sliceWf).getPixels();
-                    for (int a = 1; a <= angles; a++) {
-                        float[] ppPix = (float[])impPP.getStack().
-                                getProcessor(++slicePP).getPixels();
-                        // accumulate average normalised RMSE for channel+angle
-                        rmsErr[c][a - 1] += rmsErr(ppPix, wfPix) / nPP;
-                    }
-                }
-            }
-        }
-        for (int c = 0; c < nc; c++) {
-            for (int a = 0; a < angles; a++) {
-                results.addStat("C" + (c + 1) + " angle  " + (a + 1)
-                        + " normalised RMSE vs. angle mean",
-                        rmsErr[c][a], checkRmsErr(rmsErr[c][a]));  
-            }
-        }
-    }
+//    /** For each channel of phase-projected raw SIM data, calculate normalised
+//     * RMSE of intensities all angles versus the average and add to results. 
+//     */
+//    private void recordAngleNRMSEs(ImagePlus impRaw, ImagePlus impPP,
+//            double[][] normFactors) {
+//        Util_SItoPseudoWidefield si2wf = new Util_SItoPseudoWidefield();
+//        ImagePlus impWf = si2wf.exec(impRaw, phases, angles);
+//        int nc = impPP.getNChannels() / angles;
+//        int nz = impPP.getNSlices();
+//        int nt = impPP.getNFrames();
+//        int nPP = nz * nt;  // num of PP slices per channel+angle
+//        double[][] rmsErr = new double[nc][angles];
+//        int slicePP = 0;
+//        int sliceWf = 0;
+//        for (int t = 0; t < nt; t++) {
+//            for (int z = 0; z < nz; z++) {
+//                for (int c = 0; c < nc; c++) {
+//                    float[] wfPix = (float[])impWf.getStack().
+//                            getProcessor(++sliceWf).getPixels();
+//                    for (int a = 1; a <= angles; a++) {
+//                        float[] ppPix = (float[])impPP.getStack().
+//                                getProcessor(++slicePP).getPixels();
+//                        // ignore differences in avg intensity between angles
+//                        ppPix = J.mult(ppPix, (float)normFactors[a - 1][c]);
+//                        // accumulate average normalised RMSE (motion+uneven)
+//                        rmsErr[c][a - 1] += rmsErr(ppPix, wfPix) / nPP;
+//                    }
+//                }
+//            }
+//        }
+//        for (int c = 0; c < nc; c++) {
+//            for (int a = 0; a < angles; a++) {
+//                results.addStat("C" + (c + 1) + " angle  " + (a + 1)
+//                        + " normalised RMSE vs. angle mean", rmsErr[c][a],
+//                        ResultSet.StatOK.NA);
+////                        checkRmsErr(rmsErr[c][a]));  
+//            }
+//        }
+//    }
     
-    /** Calculate normalised root mean square error between arr1 and arr2.
-     * Normalisation is to mean intensity.
-     */
-    private double rmsErr(float[] arr1, float[] arr2) {
-        if (arr1.length != arr2.length) {
-            throw new IllegalArgumentException("arrays must have same length");
-        }
-        double sqErr = 0.0d;
-        int n = arr1.length;
-        for (int i = 0; i < n; i++) {
-            sqErr += Math.pow(arr1[i] - arr2[i], 2);
-        }
-        return Math.sqrt(sqErr / n) / J.mean(arr2);
-    }
+//    /** Calculate normalised root mean square error between arr1 and arr2.
+//     * Normalisation is to mean intensity.
+//     */
+//    private double rmsErr(float[] arr1, float[] arr2) {
+//        if (arr1.length != arr2.length) {
+//            throw new IllegalArgumentException("arrays must have same length");
+//        }
+//        double sqErr = 0.0d;
+//        int n = arr1.length;
+//        for (int i = 0; i < n; i++) {
+//            sqErr += Math.pow(arr1[i] - arr2[i], 2);
+//        }
+//        return Math.sqrt(sqErr / n) / J.mean(arr2);
+//    }
     
-    /** Is this normalised RMSE stat value acceptable? */
-    private ResultSet.StatOK checkRmsErr(double statValue) {
-        if (statValue <= 0.1) {
-            return ResultSet.StatOK.YES;
-        } else if (statValue <= 0.3) {
-            return ResultSet.StatOK.MAYBE;
-        } else {
-            return ResultSet.StatOK.NO;
-        }
-    }
+    // TODO: establish check bounds for this statistic
+//    /** Is this normalised RMSE stat value acceptable? */
+//    private ResultSet.StatOK checkRmsErr(double statValue) {
+//        if (statValue <= 0.1) {
+//            return ResultSet.StatOK.YES;
+//        } else if (statValue <= 0.3) {
+//            return ResultSet.StatOK.MAYBE;
+//        } else {
+//            return ResultSet.StatOK.NO;
+//        }
+//    }
 
     /** Arrange and run average projections of the 5 phases each CZAT. **/
     private ImagePlus averagePhase(ImagePlus imp, int nc, int nz, int nt,
