@@ -108,81 +108,69 @@ Style Notes
 TODO
 ====
 
-* 0.9.8: post-submission refactoring & documentation updates
+* 0.9.9: post-submission refactoring
 
       - documentation:
-        - update docs with pictures and examples
-        - document examples of running checks from a macro
         - javadoc updates
-        - citable code:
-              https://github.com/blog/1840-improving-github-for-science
 
       - tests, structure:
-        - ensure MCN noise estimate includes Poisson
+        - make sure all parameters chosen are logged
         - test data:
           - compact test / example data suite for distribution
           - work out strategy for test data distribution
-        - test crop utility & move to separate utility plugin
-        - tidy up tests:
-          - .main() for interactive test, .test() to unit-test private methods
-          - unit tests to run without test data (download should build easily)
-          - more tests to test/debug non-interactive code, preconditions (inputs)
-        - rename build output to include underscore!
-        - make sure all parameters chosen are logged
-        - Rec Fourier: RadioButtons for mutually exclusive cut-off options
-        - run multi-frame -- fix / document; all stats reported for current time-point only?
-        - get rid of IJ.run calls & show/hide of intermediate results 
+        - refactor / test Cal_Phases: unwrap (+test case), stats and structure
+        - more crop utility tests, move to separate utility plugin
+      
+* 1.0: final updates & documentation for 1.0 release with publication
+
+      - documentation:
+        - SIMcheck manual revision & additions
+        - citable code:
+              https://github.com/blog/1840-improving-github-for-science
 
       - updates:
+        - make compatible with running from a macro and document batch run
+        - spherical aberration mismatch check: axis always symmetrical about 0?
+        - thresh / 16-bit: explain steps in log file (& per. channel thresh)
+
+* 1.1: post-release updates, bugfixes & suggestions from feedback
+
+      - features:
+        - replace 2D FFTs with 3D FFTs (at least in Fiji)
+        - display / warn about saturated pixels in raw data MCN check
+        - stat for motion & illumination variation
+        - turn FTR profile into multi-color and/or plot
+
+      - updates:
+        - si2wf: add option without 2x size scaling
+        - si2wf: option to select only one angle
+        - MCN: auto-threshold using pseudo-widefield, report per. angle MCNR
+        - SIR checks: exclude 0s from mode finding
+        - improve "Fourier Transform Phases" info / log output
+        - turn CIP into plot (to be able to save raw data) and/or normalize
+        - angle labels etc. should be overlaid, not drawn
+        - channel order: RGB vs. BGR
+        - for ELYRA reconstructed .czi, discard WF and decon-WF?
         - progress bar for FPJ plugin (& others?)
         - for Rec data, auto-scale if data has >16-bit values
         - tidy raw FPJ & add target overlay & hide by default
         - try to find a more robust bleach estimation procedure (CIP)
-        - proper SAMismatch stat value check
-        - z min variation, ensure >=10 pixels to estimate minimum
         - MCM: add note to overlay where saturated pixels present?
         - MCN, show saturated pixels in raw data?
-        - FTO, project some slices, not just single central slice
-        - turn CIP into plot (to be able to save raw data) and/or normalize
-        - better names for max/min ratio & SAM check
-
-* 0.9.9: additional features & updates suggested by referees
-
-      - ???
-      
-* 1.0: final updates & documentation for release
-
-      - updates:
-        - improve "Fourier Transform Phases" info / log output
-        - spherical aberration mismatch check: axis always symmetrical about 0?
-        - test & refactor Cal_Phases: unwrap (+test case), stats and structure
-        - channel order: RGB vs. BGR
-        - angle labels etc. should be overlaid, not drawn
         - remove unused intermediate results from Windows list
-        - thresh / 16-bit: explanation of steps in log file (incl. thresh for each channel)
-        - SIR checks: exclude 0s from mode finding
-        - si2wf: add option without 2x size scaling
-        - si2wf: ption to select only one angle
-        - FTO: project central e.g. 10 mid sections
-        - FTO: crop to remove empty stripes at top/bottom?
-        - for ELYRA reconstructed .czi, discard WF and decon-WF
+        - Rec Fourier: RadioButtons for mutually exclusive cut-off options?
 
-      - features:
-        - turn FTR profile into multi-color and/or plot
-        - display / warn about saturated pixels in raw data MCN check
-        - MCN: auto-threshold pseudo-widefield, report per. angle MCNR
-        - report per. angle modulation contrast and/or minimum of these?
-        - stats to detect motion & illumination variation?
-        - rec Fourier:-
-          - lat: pattern angles (use "SIMcheck.angle1" pref), 3 color profiles
+      - tests, structure:
+        - multi-frame: test / document stats for current time-point only
+        - get rid of IJ.run calls & show/hide of intermediate results 
 
-* 1.1: integrated swing GUI control
+      - documentation:
 
-* 1.2: 3D FFT and estimation of phase drift, angles and line-spacing
+* 1.2: additional numerical stats, including resolution estimate
 
-* 1.3: additional numerical stats, including resolution estimate
+* 1.3: PSF and OTF symmetry, extent, shape & order separation
 
-* 1.4: PSF and OTF symmetry, extent, shape & order separation
+* 2.0: integrated swing GUI control
 
 
 SIM Reconstruction Problems & Remedies 
