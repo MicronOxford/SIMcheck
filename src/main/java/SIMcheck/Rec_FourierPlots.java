@@ -35,21 +35,23 @@ import java.awt.image.IndexColorModel;
  */
 public class Rec_FourierPlots implements PlugIn, Executable {
 
-    public static final String name = "Reconstructed Data Fourier Plots";
-    public static final String TLA1 = "FTL";  // Fourier Transform Lateral
+    public static final String name = "Reconstructed Fourier Plots";
+    public static final String TLA = "FTL";  // Fourier Transform Lateral
     public static final String TLA2 = "FTR";  // FT Radial profile
     public static final String TLA3 = "FTO";  // FT Orthogonal (XZ)
-    private ResultSet results = new ResultSet(name);
+    private ResultSet results = new ResultSet(name, TLA);
     private static final IndexColorModel fourierLUT = 
             I1l.loadLut("SIMcheck/SIMcheckFourier.lut");
     
     // parameter fields
     public double[] resolutions = {0.10, 0.12, 0.15, 0.2, 0.3, 0.6};
     public double blurRadius = 6.0d;  // default for 512x512
-    public double winFraction = 0.01d;  // window function size, 0-1
+    public double winFraction = 0.06d;  // window function size, 0-1
+    // TODO: refactor & remove default winFraction from here
     
     // options
     public boolean manualCutoff = false;  // manual noise cut-off?
+    public boolean noCutoff = false;  // no noise cut-off?
     public boolean applyWinFunc = true;  // apply window function?
     public boolean autoScale = true;  // re-scale FFT to mode->max?
     public boolean showAxial = true;  // show axial FFT?
@@ -62,7 +64,8 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);
         imp.getWidth();
-        gd.addCheckbox("Manual noise cut-off?", manualCutoff);
+        gd.addCheckbox("No noise cut-off", noCutoff);
+        gd.addCheckbox("Manual noise cut-off...", manualCutoff);
         gd.addCheckbox("Window function**", applyWinFunc);
         gd.addCheckbox("Auto-scale FFT (mode-max)", autoScale);
         gd.addCheckbox("Show axial FFT", showAxial);
@@ -70,6 +73,8 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         gd.addMessage("** suppress edge artifacts");
         gd.showDialog();
         if (gd.wasOKed()) {
+            // TODO: notCutoff, manualCutoff and autoScale radioButton group
+            this.noCutoff = gd.getNextBoolean();
             this.manualCutoff = gd.getNextBoolean();
             this.applyWinFunc = gd.getNextBoolean();
             this.autoScale = gd.getNextBoolean();
@@ -78,7 +83,8 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             if (!applyWinFunc) {
                 winFraction = 0.0d;
             }
-            if (manualCutoff) {
+            if (manualCutoff && !noCutoff) {
+                // skip if noCutoff
                 this.channelMinima = new double[imp.getNChannels()];
                 SIMcheck_.specifyBackgrounds(
                         channelMinima, "Set noise cut-off:");
@@ -95,17 +101,23 @@ public class Rec_FourierPlots implements PlugIn, Executable {
      * @return ResultSet containing FFT imp, ortho FFT imp, radial profile plot 
      */
     public ResultSet exec(ImagePlus... imps) {
+        // TODO: check we have micron calibrations before continuing..
         Calibration cal = imps[0].getCalibration();
         ImagePlus imp2 = null;
-        if (manualCutoff) {
+        if (noCutoff) {
+            imp2 = imps[0].duplicate();
+            IJ.run("Conversions...", "scale");
+            IJ.run(imp2, "16-bit", "");
+            IJ.run("Conversions...", " ");
+        } else if (manualCutoff) {
             imp2 = Util_RescaleTo16bit.exec(imps[0].duplicate(), channelMinima);
         } else {
             imp2 = Util_RescaleTo16bit.exec(imps[0].duplicate());
         }
-        IJ.showStatus("Fourier transforming slices (lateral view)");
-        ImagePlus impF = FFT2D.fftImp(imp2, winFraction);
+        IJ.showStatus("Fourier transforming z-sections (lateral view)");
+        ImagePlus impF = FFT2D.fftImp(imp2, winFraction, 0.0d);
         blurRadius *= (double)impF.getWidth() / 512.0d;
-        IJ.showStatus("Blurring & rescaling slices (lateral view)");
+        IJ.showStatus("Blurring & rescaling z-sections (lateral view)");
         autoscaleSlices(impF);
         impF = gaussBlur(impF);
         if (imps[0].isComposite()) {
@@ -115,57 +127,61 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         setLUT(impF);
         impF = overlayResRings(impF, cal);
         I1l.copyStackDims(imps[0], impF);
-        impF.setTitle(I1l.makeTitle(imps[0], TLA1));
-        results.addImp("Fourier Transform Lateral (XY), showing resolution" +
-                " rings (in Microns)", impF);
-        // radial profile of lateral FFT
-        ImagePlus radialProfiles = makeRadialProfiles(impF);
-        radialProfiles.setTitle(I1l.makeTitle(imps[0], TLA2));
-        results.addImp("Fourier Transform Radial profile (lateral, central Z)", 
-                radialProfiles);
-        /// for orthogonal (axial) view, reslice first
-        if (showAxial) {
-            new StackConverter(imp2).convertToGray32();  // for OrthoReslicer
-            OrthoReslicer orthoReslicer = new OrthoReslicer();
-            ImagePlus impOrtho = imp2.duplicate();
-            impOrtho = orthoReslicer.exec(impOrtho, false);
-            impOrtho = I1l.takeCentralZ(impOrtho);
-            Calibration calOrtho = impOrtho.getCalibration();
-            IJ.showStatus("Fourier transforming slices (orthogonal view)");
-            ImagePlus impOrthoF = FFT2D.fftImp(impOrtho, winFraction);
-            IJ.showStatus("Blurring & rescaling slices (orthogonal view)");
-            autoscaleSlices(impOrthoF);
-            impOrthoF = resizeAndPad(impOrthoF, cal);
-            impOrthoF = gaussBlur(impOrthoF);
-            // TODO, for multi-frame images, ensure impOrthoF is composite
-            rescaleToStackMax(impOrthoF);
-            setLUT(impOrthoF);
-            calOrtho.pixelHeight = calOrtho.pixelWidth;  // after resizeAndPad
-            impOrthoF = overlayResRings(impOrthoF, calOrtho);
-            I1l.copyStackDims(imps[0], impOrthoF);
-            impOrthoF.setPosition(1, impF.getNSlices() / 2, 1);
-            impOrthoF.setTitle(I1l.makeTitle(imps[0], TLA3));
-            results.addImp("Fourier Transform Orthogonal (XZ)", impOrthoF);
+        impF.setTitle(I1l.makeTitle(imps[0], TLA));
+        results.addImp("Fourier Transform Lateral (XY; resolution rings" +
+                " in microns)", impF);
+        // radial & axial profiles only if we have calibration info
+        if (imp2.getCalibration().getUnit().equals("pixel")) {
+            IJ.log("Calibration info required for Radial & Axial FFT plots!");
+        } else {
+            ImagePlus radialProfiles = makeRadialProfiles(impF);
+            radialProfiles.setTitle(I1l.makeTitle(imps[0], TLA2));
+            results.addImp("Fourier Transform Radial profile "
+                    + "(lateral, central Z)", radialProfiles);
+            if (showAxial) {
+                /// for orthogonal (axial) view, reslice first
+                new StackConverter(imp2).convertToGray32();  // for OrthoReslicer
+                OrthoReslicer orthoReslicer = new OrthoReslicer();
+                ImagePlus impOrtho = imp2.duplicate();
+                impOrtho = orthoReslicer.exec(impOrtho, false);
+                impOrtho = I1l.takeCentralZ(impOrtho);
+                Calibration calOrtho = impOrtho.getCalibration();
+                IJ.showStatus("FFT z-sections (orthogonal view)");
+                ImagePlus impOrthoF = FFT2D.fftImp(impOrtho, winFraction, 0.0d);
+                IJ.showStatus("Blur & rescale z-sections (orthogonal view)");
+                autoscaleSlices(impOrthoF);
+                impOrthoF = resizeAndPad(impOrthoF, cal);
+                impOrthoF = gaussBlur(impOrthoF);
+                // TODO, for multi-frame images, ensure impOrthoF is composite
+                rescaleToStackMax(impOrthoF);
+                setLUT(impOrthoF);
+                calOrtho.pixelHeight = calOrtho.pixelWidth;  // after resizeAndPad
+                impOrthoF = overlayResRings(impOrthoF, calOrtho);
+                I1l.copyStackDims(imps[0], impOrthoF);
+                impOrthoF.setPosition(1, impF.getNSlices() / 2, 1);
+                impOrthoF.setTitle(I1l.makeTitle(imps[0], TLA3));
+                results.addImp("Fourier Transform Orthogonal (XZ)", impOrthoF);
+            }
         }
         impF.setPosition(1, impF.getNSlices() / 2, 1);
         results.addInfo("How to interpret", 
-            " Fourier plots highlight potential artifacts and indicate"
-            + "effective resolution:"
-            + "  - spots in Fourier spectrum indicate periodic patterns"
-            + "  - flat Fourier spectrum (plateau in radial profile) indicates"
-            + " lack of real high frequency signal and poor resolution"
-            + "  - asymmetric FFT indicates angle-specific decrease in"
+            "Fourier plots highlight potential artifacts and indicate"
+            + " effective resolution:"
+            + "  - Spots in Fourier spectrum indicate periodic patterns."
+            + "  - Flat Fourier spectrum (plateau in radial profile) indicates"
+            + " lack of real high frequency signal and poor resolution."
+            + "  - Asymmetric FFT indicates angle-specific decrease in"
             + " resolution due to: angle-to-angle intensity variations,"
             + " angle-specific illumination pattern ('k0') fit error, or"
-            + " angle-specific z-modulation issues");
-        results.addInfo("About the Fourier plots",
-                "By default reconstructed data cropped to mode; "
-                + " window function applied to reduce edge artifacts prior"
-                + "to FFT; FFT slices are normalized (mode-max); and target"
-                + "rings (overlay) are added to translate frequency to"
-                + " spatial resolution. Optionally results may be blurred"
-                + " and a color Look-Up Table applied to highlight slope /"
-                + " flatness of Fourier spectrum.");
+            + " angle-specific z-modulation issues.  -- ");
+        results.addInfo("About",
+                "by default the reconstructed data are (1) cropped to mode;"
+                + " (2) a window function applied to reduce edge artifacts prior"
+                + " to FFT; (3) FFT slices are normalized (mode-max); (4) target"
+                + " rings (overlay) are added to translate frequency to"
+                + " spatial resolution. (5) Optionally, results may be blurred"
+                + " and a 16-color LUT applied to highlight slope or "
+                + " flatness of the Fourier spectrum.");
         return results;
     }
     

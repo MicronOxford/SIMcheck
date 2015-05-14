@@ -48,3 +48,31 @@ Version 0.9.6
 * new Result Table summarising key numerical stats and interpretation
 * RMSE stat for MIV check implementation finished
 * CIP changed to report overall intensity fluctuation statistic
+
+Version 0.9.7
+-------------
+fixed many minor bugs, the most important of which are:
+* preserve calibration info in all checks
+* several bugs in SI to pseudo-widefield utility
+* incorrect FTR radial profile scale
+* show saturation in MCM if *any* raw data angle saturated (not all as before)
+other updates and notable new features:
+* added check for ZMV value
+* reformatted and tidied log output, plot axes and titles
+* added Results summary table with stat value checks
+* SI to pseudo-widefield: preserve data type, scale XY x2 to match super-res
+* added flicker correction routine to IPF cabliration check and PWF utility
+* improved intensity profile stats, inlcluding total variation and flicker
+* improved stack feature intensity estimates (now using Otsu method)
+* raw fourier projection now projects all angles for 1 summary image
+* increased default FFT window function size
+* raw FPJ and reconstructed SAM checks default off in main dialog
+* change SA mismatch calibration check back to reconstructed
+
+Version 0.9.8
+-------------
+* extensive SIMcheck Manual updates, with figures for visual guide
+* feature: Stack FFT 2D gamma scaling display option (reviewer request)
+* add '_' to jar finalName via pom so plugin appears in IJ Plugins
+* bugfix: si2wf accidental rescale
+* Cal_PatternFocus change default angle def method to line

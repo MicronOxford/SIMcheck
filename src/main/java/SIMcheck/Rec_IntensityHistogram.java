@@ -34,10 +34,11 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
     
     public static final String name = "Reconstructed Intensity Histogram";
     public static final String TLA = "RIH";
-    private ResultSet results = new ResultSet(name);
+    private ResultSet results = new ResultSet(name, TLA);
     
     // parameter fields
-    public double percentile = 0.01;  // use 0-100% of histogram extrema
+    public double percentile = 0.0001;  // use 0-100% of histogram extrema
+    public long minPixels = 100; // minimum pixels at histogram extrema to use
     public double modeTol = 0.25;  // mode should be within modeTol*stdev of 0
     
     // noise cut-off
@@ -51,7 +52,7 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);
-        gd.addCheckbox("Specify manual noise cut-off?", manualCutoff);
+        gd.addCheckbox("Specify manual noise cut-off...", manualCutoff);
         gd.showDialog();
         if (gd.wasOKed()) {
             this.manualCutoff = gd.getNextBoolean();
@@ -70,7 +71,7 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
      * @param imps reconstructed data ImagePlus should be first imp
      * @return ResultSet containing histogram plots                                  
      */
-    public ResultSet exec(ImagePlus... imps) { 
+    public ResultSet exec(ImagePlus... imps) {
         IJ.showStatus(name + "...");
         int nc = imps[0].getNChannels();
         ImagePlus[] plots = new ImagePlus[nc];
@@ -81,17 +82,23 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
             if (manualCutoff) {
                 background = backgrounds[c - 1];
             }
-            if (Math.abs(background) > (stats.stdDev*modeTol)) {
-                IJ.log("! warning, C" + c + " histogram mode=" 
-                        + Math.round(background) 
-                        + " not within " + modeTol + " stdDev of 0\n");
-            }
-            if (stats.histMin < background) {
+//            if (Math.abs(background) > (stats.stdDev*modeTol)) {
+//                IJ.log("! warning, C" + c + " histogram mode=" 
+//                        + Math.round(background) 
+//                        + " not within " + modeTol + " stdDev of 0\n");
+//            }
+            if (stats.histMin <= background) {
+                // ensure we consider a bare minimum of pixels
+                long totalPixels = stats.longPixelCount;
+                if (totalPixels * percentile / 100 < minPixels) {
+                    percentile = (double)minPixels * 100 / totalPixels;
+                }
                 // caluclate +ve / -ve ratio if histogram has negatives
                 double posNegRatio = calcPosNegRatio(
-                		stats, (double)percentile / 100, background);
+                		stats, percentile / 100, background);
                 String statDescription = "C" + c +
-                        " max / min intensity ratio";
+//                        " max-to-min intensity ratio MMR";
+                        " max-to-min intensity ratio";
                 double roundedRatio = (double)((int)(posNegRatio * 10)) / 10;
                 results.addStat(statDescription, 
                         roundedRatio, checkRatio(roundedRatio));
@@ -103,7 +110,7 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
                         + " for channel " + Integer.toString(c), 
                         "unable to calculate +ve/-ve intensity ratio");
             }
-            String plotTitle = "Intensity Histogram, Channel " + c;
+            String plotTitle = "Intensity histogram (log-scale=gray)";
             EhistWindow histW = new EhistWindow(plotTitle, imp2, stats);
             histW.setVisible(false);
             plots[c - 1] = histW.getImagePlus();
@@ -118,19 +125,19 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
         }
         impAllPlots.setDimensions(nc, 1, 1);
         impAllPlots.setOpenAsHyperStack(true);
-        results.addImp("Intensity counts in black (linear) & gray (log-scale).",
+        results.addImp("Intensity counts in black (linear) & gray (log-scale)",
                 impAllPlots);
-        results.addInfo("How to interpret", "Max / Min intensity ratio " +
-                " <3 is inadequate, 3-6 is low, 6-12 is good, >12 excellent." +
-                " For valid results, the data set must contain sufficient" +
-                " background areas (so that the mode reflects background)" +
-                " and should be constrained to z-slices containing features.");
-        results.addInfo("About the Max / min intensity ratio",
-                "the ratio of the averaged " + percentile + "%" +
-                " highest (Max*) and lowest (Min*) intensity pixels in a" +
-                " 32-bit stack, centered at the stack mode (assumed to be" +
-                " the center of the noise distribution)." +
-                " i.e.: Max* - Mode / |Min* - Mode|");
+        results.addInfo("How to interpret", "max-to-min intensity ratio, MMR"
+                + " <3 is inadequate, 3-6 is low, 6-12 is good, >12 excellent."
+                + " For valid results, the data set must contain sufficient"
+                + " background areas (so that the mode reflects background)"
+                + " and should be constrained to z-slices containing features.");
+        results.addInfo("About", "MMR is calculated as"
+                + " the ratio of the averaged 0.001%"
+                + " highest (Max*) and lowest (Min*) intensity pixels in a"
+                + " 32-bit stack, centered at the stack mode (assumed to be"
+                + " the center of the noise distribution),"
+                + " that is,                Max* - Mode / |Min* - Mode|");
         return results;
     }
 
@@ -155,7 +162,7 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
         double negTotal = 0;
         int bin = 0;
         double binValue = stats.histMin;
-        while (negPc < pc && binValue < bg && bin < hist.length) {
+        while (negPc < pc && binValue <= bg && bin < hist.length) {
             negPc += (double)hist[bin] / nPixels;
             negTotal += (binValue - bg) * hist[bin];  // make mode 0
             bin += 1;

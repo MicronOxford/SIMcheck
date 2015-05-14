@@ -20,7 +20,9 @@ package SIMcheck;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
+import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
+import java.util.*;
 
 /** 
  * This plugin carries out ImageJ's 2D FFT on each slice of a stack. 
@@ -31,20 +33,42 @@ public class Util_StackFFT2D implements PlugIn {
     public static final String name = "Stack FFT (2D)";
     public static final String TLA = "FFT";
     
+    public boolean gammaScaling = false;
+    public double gamma = 0.3;
+    public double winFraction = 0.06d;
+    
     @Override 
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
-        IJ.showStatus("FFT stack...");
-        ImagePlus impF = exec(imp);
-        impF.show();
+        GenericDialog gd = new GenericDialog(name);
+        imp.getWidth();
+        gd.addCheckbox("Gamma FFT scaling? (default is log)", gammaScaling);
+        gd.addNumericField("gamma", gamma, 2);
+        gd.addNumericField("gaussian window %", winFraction, 3);
+        gd.showDialog();
+        if (gd.wasOKed()) {
+            gammaScaling = gd.getNextBoolean();
+//            @SuppressWarnings("unchecked")
+//            Vector<Double> num = (Vector<Double>)gd.getNumericFields();
+            this.gamma = gd.getNextNumber();
+            this.winFraction = gd.getNextNumber();
+            IJ.showStatus("FFT stack...");
+            ImagePlus impF = exec(imp);
+            impF.show();
+        }
     }
-    
     /** Execute plugin functionality: 2D FFT each slice.
      * @param imp input format ImagePlus
      * @return ImagePlus after 2D FFT of each slice
      */ 
     public ImagePlus exec(ImagePlus imp) {
-        ImagePlus impF = FFT2D.fftImp(imp, 0.01d);
+        ImagePlus impF = null;
+        if (gammaScaling) {
+            impF = FFT2D.fftImp(imp, winFraction, gamma);
+        } else {
+            IJ.log("win " + winFraction + ", log scaling");
+            impF = FFT2D.fftImp(imp, winFraction, 0.0d);
+        }
         impF.setTitle(I1l.makeTitle(imp, TLA));
         return impF;
     }

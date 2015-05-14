@@ -43,10 +43,9 @@ import java.util.*;
 public final class SIMcheck_ implements PlugIn {
     
     // constants
-    private static final String VERSION = "0.9.6";
+    private static final String VERSION = "0.9.8";
     private static final String none = "[None]";  // no image
     private static final String omx = "OMX (CPZAT)";
-    private static final int TEXTWIDTH = 55;
 
     // options with default values
     private ImagePlus impRaw = null;
@@ -55,12 +54,13 @@ public final class SIMcheck_ implements PlugIn {
     private int angles = 3;
     private boolean doTileAfterRun = true;
     private boolean doIntensityProfiles = true;
-    private boolean doFourierProjections = true;
+    private boolean doFourierProjections = false;
     private boolean doMotionCheck = true;
     private boolean doModContrast = true;
     private ImagePlus impMCNR = null;
     private ImagePlus impRecon = null;
     private boolean doHistograms = true;
+    private boolean doSAMismatch = false;
     private boolean doFourierPlots = true;
     private boolean doModContrastMap = true;
     private boolean doCrop = false;
@@ -115,9 +115,10 @@ public final class SIMcheck_ implements PlugIn {
         gd.addMessage("------------ Reconstructed Data ------------");
         gd.addChoice("Reconstructed_Data:", titles, titles[0]);
         gd.addCheckbox(Rec_IntensityHistogram.name, doHistograms);
+        gd.addCheckbox(Rec_SAMismatch.name, doSAMismatch);
         gd.addCheckbox(Rec_FourierPlots.name, doFourierPlots);
         gd.addCheckbox(Rec_ModContrastMap.name +
-                " (requires Raw Mod Contrast)", doModContrastMap);
+                " (requires raw data)", doModContrastMap);
         gd.addMessage("---------- Select Subregion (XYZ) ----------");
         gd.addCheckbox("Crop data? (use reconstructed data ROI for XY)", doCrop);
         gd.addMessage("To crop in Z, enter slice numbers, 'first' or 'last'");
@@ -148,15 +149,16 @@ public final class SIMcheck_ implements PlugIn {
                 impRecon = WindowManager.getImage(reconTitle);
             }
             doHistograms = gd.getNextBoolean();
+            doSAMismatch = gd.getNextBoolean();
             doFourierPlots = gd.getNextBoolean();
             doModContrastMap = gd.getNextBoolean();
             doCrop = gd.getNextBoolean();
             
             crop.zFirst = encodeSliceNumber(gd.getNextString());
             crop.zLast = encodeSliceNumber(gd.getNextString());
-            IJ.log(titleString("", "="));
-            IJ.log(titleString("SIMcheck (v" + VERSION + ")", " "));
-            IJ.log(titleString("", "="));
+            IJ.log(ResultSet.titleString("", "="));
+            IJ.log(ResultSet.titleString("SIMcheck (v" + VERSION + ")", " "));
+            IJ.log(ResultSet.titleString("", "="));
             IJ.log("   " + J.timestamp());
         } else {
             return;  // bail out upon cancel
@@ -169,6 +171,7 @@ public final class SIMcheck_ implements PlugIn {
                     " to OMX format");
             impRaw = formatConverter.exec(
                     impRaw, phases, angles, formatChoice - 1);
+            impRaw.show();
         }
         if (impRaw != null && !I1l.stackDivisibleBy(impRaw, phases * angles)) {
             IJ.log("  ! invalid raw SI data - raw data checks aborted");
@@ -234,6 +237,7 @@ public final class SIMcheck_ implements PlugIn {
                 impRaw.setRoi(new Roi(crop.x / 2, crop.y / 2,
                         crop.w / 2, crop.h / 2));
                 IJ.run(impRaw, "Crop", "");
+                impRaw.show();
             }
         } else if (doCrop && impRecon != null) {
             IJ.log("! cannot crop: require reconstructed image ROI");
@@ -244,7 +248,7 @@ public final class SIMcheck_ implements PlugIn {
         // run checks, report results
         LinkedList<ResultSet> allResults = new LinkedList<ResultSet>();
         if (impRaw != null) {
-            IJ.log("\n" + titleString("Raw Data Checks", "="));
+            IJ.log("\n" + ResultSet.titleString("Raw Data Checks", "="));
             IJ.log("Using SI stack: " + impRaw.getTitle());
             // do checks on raw SI data
             if (doIntensityProfiles) {
@@ -282,11 +286,17 @@ public final class SIMcheck_ implements PlugIn {
             }
         }
         if (impRecon != null) {
-            IJ.log("\n" + titleString("Reconstructed Data Checks", "="));
+            IJ.log("\n" + ResultSet.titleString("Reconstructed Data Checks", "="));
             IJ.log("Using reconstructed stack: " + impRecon.getTitle());
             if (doHistograms) {
                 Rec_IntensityHistogram rih = new Rec_IntensityHistogram();
                 ResultSet results = rih.exec(impRecon);
+                results.report();
+                allResults.add(results);
+            }
+            if (doSAMismatch) {
+                Rec_SAMismatch sam = new Rec_SAMismatch();
+                ResultSet results = sam.exec(impRecon);
                 results.report();
                 allResults.add(results);
             }
@@ -306,7 +316,7 @@ public final class SIMcheck_ implements PlugIn {
                 allResults.add(results);
             }
         }
-        IJ.log("\n" + titleString("All Checks Finished!", "=") + "\n");
+        IJ.log("\n" + ResultSet.titleString("All Checks Finished!", "=") + "\n");
         if (doTileAfterRun) {
             IJ.run("Tile", "");
         }
@@ -368,20 +378,6 @@ public final class SIMcheck_ implements PlugIn {
         impOut.setPosition(1, centralZ, 1);
         impOut.setOpenAsHyperStack(true);
         return impOut;
-    }
-    
-    /** Return a String containing 'title' centered in a line of charX. */
-    private static String titleString(String title, String charX) {
-        if (!title.equals("")) {
-            title = " " + title + " ";
-        }
-        int nPadChars = (int)(0.5 * (TEXTWIDTH - title.length()));
-        if (charX.equals("=")) {
-            nPadChars = (int)(0.75 * nPadChars);  // correct for wider '='
-        } else if (charX.equals(" ")) {
-            nPadChars = (int)(1.67 * nPadChars);  // correct for narrow ' '
-        }
-        return J.nChars(nPadChars, charX) + title + J.nChars(nPadChars, charX);
     }
     
     /** Take a string containing slice number, 'first' or 'last' and return

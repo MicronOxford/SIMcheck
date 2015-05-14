@@ -36,12 +36,12 @@ public class Cal_PatternFocus implements PlugIn, Executable {
 
     public static final String name = "Illumination Pattern Focus";
     public static final String TLA = "IPF";
-    ResultSet results = new ResultSet(name);
+    ResultSet results = new ResultSet(name, TLA);
 	
 	private int width;
 	private int height;
 	private static final String[] angleMethods = {
-	    "degrees (IJ)", "radians (OMX)", "IJ line selection**"
+	    "IJ line selection**", "degrees (IJ)", "radians (OMX)"
 	};
 	
 	// parameter fields
@@ -74,18 +74,27 @@ public class Cal_PatternFocus implements PlugIn, Executable {
             angles = (int)gd.getNextNumber();
             phases = (int)gd.getNextNumber();
             if (angleMethod.equals(angleMethods[0])) {
-                angle1 = (double)gd.getNextNumber();
+                // line selection
+                try {
+                    angle1 = imp.getRoi().getAngle();
+                } catch (NullPointerException e) {
+                    IJ.error("Error",
+                            "You forgot to draw a line selection!");
+                    return;
+                }
             } else if (angleMethod.equals(angleMethods[1])) {
+                // IJ degrees
+                angle1 = (double)gd.getNextNumber();
+            } else {
+                // OMX radians
                 gd.getNextNumber();  // angle in degrees: discard!
                 angle1 = omx2ij((double)gd.getNextNumber());
-            } else {
-                angle1 = imp.getRoi().getAngle();
             }
             ij.Prefs.set("SIMcheck.angle1", angle1);
             showRotated = gd.getNextBoolean();
         }
         if (!I1l.stackDivisibleBy(imp, phases * angles)) {
-            IJ.showMessage( "Calibrate Pattern Focus", 
+            IJ.error( "Calibrate Pattern Focus", 
                     "Error: stack size not consistent with phases/angles." );
             return;
         }
@@ -106,6 +115,7 @@ public class Cal_PatternFocus implements PlugIn, Executable {
             IJ.showMessage("Error", name + " only works for 1 channel/frame");
             return results;
         }
+        imp.setStack(I1l.normalizeStack(imp.getStack()));
         double angleDegrees = 90.0d - angle1;
         ImagePlus[] phase1imps = phase1eachAngle(imp);
         ImagePlus montage = null;
@@ -138,7 +148,9 @@ public class Cal_PatternFocus implements PlugIn, Executable {
         montage.setTitle(I1l.makeTitle(imp, TLA));
         String description = "Projected side view along the illumination"
                 + " stripes (phase 1 only) for each angle to illustrate"
-                + " alignment of the z-modulation with the focal plane.";
+                + " alignment of the z-modulation with the focal plane."
+                + " Slice intensities are normalized to correct for"
+                + " intensity variations.";
         results.addImp(description, montage);
         results.addInfo("\nHow to interpret",
                 "100 nm bead layer in the focal plane should display distinct"
@@ -177,7 +189,7 @@ public class Cal_PatternFocus implements PlugIn, Executable {
     /** Rotate stripes for each angle to vertical. */
     private void rotateStripes(ImagePlus imp2, double angleDeg) {
         angleDeg = -angleDeg;
-        results.addInfo(imp2.getTitle(), "rotated " + angleDeg + "° CCW");
+        results.addInfo(imp2.getTitle(), "rotated " + J.d2s(angleDeg) + "° CCW");
         IJ.run(imp2, "Rotate... ", "angle=" + angleDeg +
                 " grid=1 interpolation=Bilinear stack");
         // draw central vertical line to visually check angle after rotation 

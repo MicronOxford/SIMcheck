@@ -69,7 +69,7 @@ public class Raw_ModContrast implements PlugIn, Executable {
 
     public static final String name = "Modulation Contrast";
     public static final String TLA = "MCN";
-    private ResultSet results = new ResultSet(name);
+    private ResultSet results = new ResultSet(name, TLA);
     private static final IndexColorModel mcnrLUT = 
             I1l.loadLut("SIMcheck/MCNR.lut");
     
@@ -244,6 +244,7 @@ public class Raw_ModContrast implements PlugIn, Executable {
         impResult.setC(1);
         impResult.setT(1);
         impResult.setOpenAsHyperStack(true);
+        I1l.copyCal(imp, impResult);
         if (!doRawFourier) {
             I1l.applyLUT(impResult, mcnrLUT, displayRange);
             // overlay a LUT "calibration bar" if the image is big enough 
@@ -255,20 +256,20 @@ public class Raw_ModContrast implements PlugIn, Executable {
             results.addImp("Modulation contrast-to-noise ratio (MCNR) image", 
                     impResult);
             results.addInfo("How to interpret",
-                    "color Look-Up Table shows MCNR value:" +
+                    "color LUT indicates MCNR value:" +
                     "  - purple is inadequate (3 or less)" +
                     "  - red is an acceptable value of 6+" +
                     "  - orange is good" +
-                    "  - yellow-white is very good-excellent");
-            results.addInfo("Estimated feature MCNR",
-                    "features selected by Otsu auto-thresholding.");
+                    "  - yellow-white is very good-excellent  -- ");
+            results.addInfo("Average feature MCNR",
+                    "features selected by auto-thresholding (Otsu).");
             results.addInfo("Estimated Wiener filter parameter",
                     "for OMX data reconstruction (SoftWoRx) only.");
             for (int c = 1; c <= nc; c++) {
                 ImagePlus impC = I1l.copyChannel(impResult, c);
                 double featMCNR = I1l.stackFeatMean(impC);
-                results.addStat("C" + c + " estimated feature MCNR", 
-                        featMCNR, checkMCNR(featMCNR));  // FIXME, StatOK
+                results.addStat("C" + c + " average feature MCNR", 
+                        featMCNR, checkMCNR(featMCNR));
                 results.addStat("C" + c + " estimated Wiener filter optimum", 
                         estimWiener(featMCNR), ResultSet.StatOK.NA);
             }

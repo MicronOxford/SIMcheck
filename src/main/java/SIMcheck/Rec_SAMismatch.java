@@ -30,11 +30,11 @@ import ij.process.*;
  * the sample and PSF.
  * @author Graeme Ball <graemeball@gmail.com>
  */
-public class Cal_SAMismatch implements PlugIn, Executable {
+public class Rec_SAMismatch implements PlugIn, Executable {
     
-    public static final String name = "Sperical Aberration Mismatch";
+    public static final String name = "Spherical Aberration Mismatch";
     public static final String TLA = "SAM";
-    private ResultSet results = new ResultSet(name);
+    private ResultSet results = new ResultSet(name, TLA);
     
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
@@ -61,7 +61,9 @@ public class Cal_SAMismatch implements PlugIn, Executable {
             double[] zPlanes = new double[nz];
             double plotMax = stackStats.min;
             double plotMin = stackStats.max;
-            double stackMode = stackStats.dmode;
+            // commented out normalization to mode -- may add back in as option
+//            double stackMode = stackStats.dmode;
+            double stackMode = 0.0d;
             for (int z = 0; z < nz; z++) {
                 zPlanes[z] = z + 1;  // Z value for the plot (x-axis)
                 imp2.setSlice(z + 1);
@@ -85,7 +87,7 @@ public class Cal_SAMismatch implements PlugIn, Executable {
             }
             Plot plot = new Plot(
                     "Reconstructed normalized min variation, C" + c,
-                    "Z plane", "slice feature means (gray) & minima (black)");
+                    "Z-section", "Intensity");
             // display 20% beyond min and max
             plotMin -= 0.2 * Math.abs(plotMin);
             plotMax += 0.2 * Math.abs(plotMax);
@@ -96,28 +98,44 @@ public class Cal_SAMismatch implements PlugIn, Executable {
             plot.setColor(Color.LIGHT_GRAY);
             plot.addPoints(zPlanes, sliceMeans, Plot.LINE);
             plot.setLineWidth(1);
-            plots[c - 1] = plot.getImagePlus();
+            ImagePlus impPlot = plot.getImagePlus();
+            I1l.drawPlotTitle(impPlot, "Reconstructed data intensity profile"
+                    + " (feature mean=gray, z-minimum=black)");
+            plots[c - 1] = impPlot;
             double nstdev = Math.sqrt(J.variance(sliceMinima)) / 
                     J.mean(sliceMeans);
-            results.addStat("C" + c + " normalized StdDev", nstdev,
-                    ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
+            results.addStat("C" + c + " Z-minimum variation", nstdev,
+                    checkZmv(nstdev));  // FIXME, StatOK);
             
         }
         String title = I1l.makeTitle(imps[0], TLA);
         ImagePlus impAllPlots = I1l.mergeChannels(title, plots);
         impAllPlots.setDimensions(nc, 1, 1);
         impAllPlots.setOpenAsHyperStack(true);
-        results.addImp("z-slice minimum (black) and feature mean (gray)",
+        results.addImp("Z-section minimum (black) and mean feature intensity (gray)",
                 impAllPlots);
-        results.addInfo("How to interpret", 
-                "high normalized standard deviation of z-slice minimum"
-                + " intensity with respect to slice average feature"
-                + " intensity indicates sample / PSF Spherical Aberration"
-                + " mismatch. Typically this is seen as a peak / dip in"
-                + " normalized minimum StdDev at the sample boundary, but"
-                + " the absolute value depends on image content.");
+        results.addInfo("How to interpret", "Z-minimum variation (ZMV)"
+                + " is calculated as the"
+                + " standard deviation of z-section minimum intensity"
+                + " normalized to the average feature intensity. High ZMV"
+                + " indicates spherical aberration mismatch between sample"
+                + " and optical transfer function used for the reconstruction."
+                + " Typically this is seen as dip in the minimum intensity"
+                + " plot at the sample boundary. Note, that the absolute value"
+                + " depends on image content.");
         return results;
     }
+     
+     /** Is ZMV value acceptable? */
+     private static ResultSet.StatOK checkZmv(Double statValue) {
+         if (statValue < 0.3) {
+             return ResultSet.StatOK.YES;
+         } else if (statValue < 1.0) {
+             return ResultSet.StatOK.MAYBE;
+         } else {
+             return ResultSet.StatOK.NO;
+         }
+     }
 
     /**  Return a new ImagePlus containing a single channel of the input. */
     private ImagePlus singleChannel(ImagePlus imp, int channel) {
@@ -140,6 +158,6 @@ public class Cal_SAMismatch implements PlugIn, Executable {
     public static void main(String[] args) {
         new ImageJ();
         TestData.recon.show();
-        IJ.runPlugIn(Cal_SAMismatch.class.getName(), "");
+        IJ.runPlugIn(Rec_SAMismatch.class.getName(), "");
     }
 }

@@ -36,7 +36,7 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
 
     public static final String name = "Channel Intensity Profiles";
     public static final String TLA = "CIP";
-    private ResultSet results = new ResultSet(name);
+    private ResultSet results = new ResultSet(name, TLA);
 
     // parameter fields
     public int phases = 5;
@@ -88,8 +88,8 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
         float[] avIntensities = new float[totalPlanes / nc];
         float[] pzat_no = new float[totalPlanes / nc];
         Plot plot = new Plot(I1l.makeTitle(imp, TLA), 
-        		"Slices in order: Phase, Z, Angle, Time (C1=red,C2=grn,C3=blu)",
-        		"Slice Mean Intensity", pzat_no, avIntensities);
+        		"Slices in order: phase, Z, angle, time",
+        		"Mean intensity", pzat_no, avIntensities);
 
         // assess intensities for plot scaling
         double sliceMeanMin = 0;
@@ -137,25 +137,29 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
             }
             plot.addPoints(pzat_no, avIntensities, 1);
             
+            // TODO: refactor the code below, which has grown very messy!
+            
+            // (0) overall stat, influenced by (1), (2) and (3)
             // calc max % intensity fluctuation over slices used to reconstruct
             // 1 slice (e.g. 5P,9Z,3A); for central 9Z window & 1st time-point
             int zFirst = nz / 2 - (int)zwin / 2;
-            int zLast = zFirst + (int)zwin + 1;
+//            int zLast = zFirst + (int)zwin + 1;
+            int zLast = zFirst + (int)zwin;
             int pzMid = (np * nz / 2) + np / 2; // central phase & Z, 1st angle
             // initialize min and max arbitrarily within window before updating
             double intensMin = avIntensities[pzMid];
             double intensMax = avIntensities[pzMid];
-            double intensMean = 0.0d;
-            int nWinSlices = 0;
+//            double intensMean = 0.0d;
+//            int nWinSlices = 0;
             for (int a = 0; a < na; a++) {
                 for (int z = 0; z < nz; z++) {
                     if (z >= zFirst && z < zLast)  {
                         // consider intensities inside central 9Z window
                         for (int p = 0; p < np; p++) {
-                            nWinSlices++;
+//                            nWinSlices++;
                             int slice = (a * nz * np) + (z * np) + p;
                             double intens = avIntensities[slice];
-                            intensMean += intens;
+//                            intensMean += intens;
                             if (intens > intensMax) {
                                 intensMax = intens;
                             }
@@ -166,73 +170,96 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
                     }
                 }
             }  // TODO: test the above calc
-            intensMean /= nWinSlices;
-            double pcDiff = 100.0d * (intensMax - intensMin) / intensMean;
+//            intensMean /= nWinSlices;
+            double pcDiff = 100.0d * (intensMax - intensMin) / intensMax;
             results.addStat(
-                    "C" + Integer.toString(channel) + " max % intensity"
-                        + " fluctuation over reconstruction window",
-                    (double)Math.round(pcDiff), checkPercentDiff(pcDiff));
-            // FIXME: update docs to reflect changes, noting this stat
-            // is not valid for sparse data
+                    "C" + Integer.toString(channel) + " total intensity"
+                    + " variation (%)", pcDiff, checkPercentDiff(pcDiff));
             
+            /// (1) per-channel intensity decay
+            double[] xSlice = J.f2d(pzat_no);
+            double[] yIntens = J.f2d(avIntensities);
+            //  fitting with y=a*exp(bx)  ; fitter returns a, b, R^2
+            //   e.g. x=ln((2/3)/b) for 2/3 original intensity (<33% decay)
+            CurveFitter expFitter = new CurveFitter(xSlice, yIntens);
+            expFitter.doFit(CurveFitter.EXPONENTIAL);
+            double[] fitResults = expFitter.getParams();
+            double channelDecay = (double)100 * (1 - Math.exp(fitResults[1]
+            		* pzat_no.length * (zwin / nz)));
+            results.addStat(
+                    "C" + Integer.toString(channel) + " average intensity"
+                    + " decay per " + (int)zwin + " section window (%)",
+                    channelDecay, ResultSet.StatOK.NA);
             
-//            /// (1) "Channel decay"
-//            double[] xSlice = J.f2d(pzat_no);
-//            double[] yIntens = J.f2d(avIntensities);
-//            //  fitting with y=a*exp(bx)  ; fitter returns a, b, R^2
-//            //   e.g. x=ln((2/3)/b) for 2/3 original intensity (<33% decay)
-//            CurveFitter expFitter = new CurveFitter(xSlice, yIntens);
-//            expFitter.doFit(CurveFitter.EXPONENTIAL);
-//            double[] fitResults = expFitter.getParams();
-//            double channelDecay = (double)100 * (1 - Math.exp(fitResults[1]
-//            		* pzat_no.length * (zwin / nz)));
-//            results.addStat(
-//                    "C" + Integer.toString(channel) + " intensity decay"
-//                        + " per " + (int)zwin + " z-slices (%)",
-//                    (double)Math.round(channelDecay),
-//                    ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
+            /// (2) angle intensity differences
+            float[] angleMeans = new float[na];
+            for (int angle = 1; angle <= na; angle++) {
+                float[] yIntens3 = new float[np*nz];
+                System.arraycopy(avIntensities, (angle - 1) * np * nz, 
+                		yIntens3, 0, np * nz);
+                angleMeans[angle-1] = J.mean(yIntens3);
+            }
+            double largestDiff = 0;
+            for (int angle=1; angle<=na; angle++) {
+                for (int angle2=1; angle2 < na; angle2++) {
+                    double intensityDiff = Math.abs((double)(
+                            angleMeans[angle - 1] - angleMeans[angle2 - 1]));
+                    if (intensityDiff > largestDiff) 
+                    	largestDiff = intensityDiff;
+                }
+            }
+            // normalize largest av intensity diff using max intensity angle
+            float maxAngleIntensity = J.max(angleMeans);
+            largestDiff = (double)100 * largestDiff / (double)maxAngleIntensity;
+            results.addStat("C" + Integer.toString(channel) 
+                    + " maximum intensity difference between angles (%)",
+                    largestDiff, ResultSet.StatOK.NA);
             
-//            /// (2) "Angle differences"
-//            float[] angleMeans = new float[na];
-//            for (int angle = 1; angle <= na; angle++) {
-//                float[] yIntens3 = new float[np*nz];
-//                System.arraycopy(avIntensities, (angle - 1) * np * nz, 
-//                		yIntens3, 0, np * nz);
-//                angleMeans[angle-1] = J.mean(yIntens3);
-//            }
-//            double largestDiff = 0;
-//            for (int angle=1; angle<=na; angle++) {
-//                for (int angle2=1; angle2 < na; angle2++) {
-//                    double intensityDiff = Math.abs((double)(
-//                            angleMeans[angle - 1] - angleMeans[angle2 - 1]));
-//                    if (intensityDiff > largestDiff) 
-//                    	largestDiff = intensityDiff;
-//                }
-//            }
-//            // normalize largest av intensity diff using max intensity angle
-//            float maxAngleIntensity = J.max(angleMeans);
-//            largestDiff = (double)100 * largestDiff / (double)maxAngleIntensity;
-//            results.addStat("C" + Integer.toString(channel) 
-//                    + " max intensity difference between angles (%)",
-//                    (double)Math.round(largestDiff),
-//                    ResultSet.StatOK.MAYBE);  // FIXME, StatOK);
+            // (3) intensity range over central 9Z, averaged over P and A
+            // re-use zFirst and zLast for central 9Z window from (0) above
+            double[][] zSeries = new double[na * np][(int)zwin];
+            for (int a = 0; a < na; a++) {
+                for (int z = 0; z < nz; z++) {
+                    if (z >= zFirst && z < zLast) {
+                        // consider intensities inside central 9Z window
+                        for (int p = 0; p < np; p++) {
+                            int slice = (a * nz * np) + (z * np) + p;
+                            zSeries[a * np + p][z - zFirst] = avIntensities[slice];
+                        }
+                    }
+                }
+            }
+            double avRangeN = 0.0d;  // normalised to max
+            for (int ap = 0; ap < na * np; ap++) {
+                double max = J.max(J.d2f(zSeries[ap]));
+                double min = J.min(J.d2f(zSeries[ap]));
+                avRangeN += (max - min) / max;
+            }
+            avRangeN /= (na * np);
+            avRangeN *= 100.0d;
+            results.addStat("C" + Integer.toString(channel) 
+                    + " relative intensity fluctuations (%)", avRangeN,
+                    ResultSet.StatOK.NA);
+            
         }
         
         ImagePlus impResult = plot.getImagePlus();
-        I1l.drawPlotTitle(impResult, "Per Channel Intensity Profiles");
+        I1l.drawPlotTitle(impResult, "Raw data intensity profile (C1=red,"
+                + " C2=green, C3=blue, C4=black)");
         results.addImp(name, plot.getImagePlus());
         results.addInfo("How to interpret",
-                "intensity differences > ~30% over the 9-z-window used to"
+                "total intensity variation > ~50% over the 9-z-window used to"
                 + " reconstruct each z-section may cause artifacts (threshold"
-                + " depends on signal-to-noise level).");
+                + " depends on signal-to-noise level and the fraction of"
+                + " low-intensity images).");
         return results;
     }
     
     /** Is this percentage difference stat value acceptable? */
     private ResultSet.StatOK checkPercentDiff(double statValue) {
-        if (statValue <= 10) {
+        if (statValue <= 50) {
             return ResultSet.StatOK.YES;
-        } else if (statValue <= 30) {
+        } else if (statValue <= 70) {
             return ResultSet.StatOK.MAYBE;
         } else {
             return ResultSet.StatOK.NO;
