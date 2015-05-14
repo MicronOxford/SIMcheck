@@ -43,7 +43,7 @@ import java.util.*;
 public final class SIMcheck_ implements PlugIn {
     
     // constants
-    private static final String VERSION = "0.9.8-SNAPSHOT";
+    private static final String VERSION = "0.9.8";
     private static final String none = "[None]";  // no image
     private static final String omx = "OMX (CPZAT)";
 

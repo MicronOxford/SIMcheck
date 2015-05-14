@@ -10,7 +10,7 @@
 
   <groupId>uk.ac.ox.micron</groupId>
   <artifactId>SIMcheck</artifactId>
-  <version>0.9.8-SNAPSHOT</version>
+  <version>0.9.8</version>
   <packaging>jar</packaging>
 
   <name>SIMcheck</name>
