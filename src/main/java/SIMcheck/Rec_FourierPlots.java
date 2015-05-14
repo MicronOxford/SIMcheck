@@ -83,7 +83,8 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             if (!applyWinFunc) {
                 winFraction = 0.0d;
             }
-            if (manualCutoff && !noCutoff) {  // skip if noCutoff
+            if (manualCutoff && !noCutoff) {
+                // skip if noCutoff
                 this.channelMinima = new double[imp.getNChannels()];
                 SIMcheck_.specifyBackgrounds(
                         channelMinima, "Set noise cut-off:");
@@ -114,7 +115,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             imp2 = Util_RescaleTo16bit.exec(imps[0].duplicate());
         }
         IJ.showStatus("Fourier transforming z-sections (lateral view)");
-        ImagePlus impF = FFT2D.fftImp(imp2, winFraction);
+        ImagePlus impF = FFT2D.fftImp(imp2, winFraction, 0.0d);
         blurRadius *= (double)impF.getWidth() / 512.0d;
         IJ.showStatus("Blurring & rescaling z-sections (lateral view)");
         autoscaleSlices(impF);
@@ -146,7 +147,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
                 impOrtho = I1l.takeCentralZ(impOrtho);
                 Calibration calOrtho = impOrtho.getCalibration();
                 IJ.showStatus("FFT z-sections (orthogonal view)");
-                ImagePlus impOrthoF = FFT2D.fftImp(impOrtho, winFraction);
+                ImagePlus impOrthoF = FFT2D.fftImp(impOrtho, winFraction, 0.0d);
                 IJ.showStatus("Blur & rescale z-sections (orthogonal view)");
                 autoscaleSlices(impOrthoF);
                 impOrthoF = resizeAndPad(impOrthoF, cal);

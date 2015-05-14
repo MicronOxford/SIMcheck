@@ -33,6 +33,7 @@ public class FFT2D extends FHT {
     // tolerance to check if a double precision float is approx. equal to 0
     private static final double ZERO_TOL = 0.000001d;
     private static final double WIN_FRACTION_DEFAULT = 0.06d;
+    private static final double NO_GAMMA = 0.0d;  // no gamma correction
 
     public FFT2D(ImageProcessor ip){
         super(ip);
@@ -52,7 +53,13 @@ public class FFT2D extends FHT {
 
     /** Return absolute value image of Fourier transform (no log scaling). */
     public ImageProcessor getComplexAbs() {
-        ImageStack complexFourier = super.getComplexTransform();
+        FHT fht = (FHT)this;
+        return getComplexAbs(fht);
+    }
+
+    /** Return absolute value image of Fourier transform (no log scaling). */
+    public static ImageProcessor getComplexAbs(FHT fht) {
+        ImageStack complexFourier = fht.getComplexTransform();
         FloatProcessor fpReal =
             (FloatProcessor)complexFourier.getProcessor(1).convertToFloat();
         float[] realPix = (float[])fpReal.getPixels();
@@ -158,13 +165,15 @@ public class FFT2D extends FHT {
      * @return new ImagePlus after 2D FFT
      **/
     public static ImagePlus fftImp(ImagePlus impIn) {
-        return fftImp(impIn, WIN_FRACTION_DEFAULT);
+        return fftImp(impIn, WIN_FRACTION_DEFAULT, NO_GAMMA);
     }
     
     /**
      * 2D FFT hyperstack, specify window function size as input size fraction.
      */
-    public static ImagePlus fftImp(ImagePlus impIn, double winFraction) {
+    public static ImagePlus fftImp(
+            ImagePlus impIn, double winFraction, double gamma)
+    {
         ImagePlus imp = impIn.duplicate();
         Calibration cal = impIn.getCalibration();
         int width = imp.getWidth();
@@ -198,7 +207,12 @@ public class FFT2D extends FHT {
             }
             ip = FFT2D.pad(ip, paddedSize);  
             fht = FFT2D.fftSlice(ip, imp);
-            ImageProcessor ps = fht.getPowerSpectrum();
+            ImageProcessor ps = null;
+            if (gamma > 0.0d) {
+                ps = gammaScaledPowerSpectrum(fht, gamma);
+            } else {
+                ps = fht.getPowerSpectrum();
+            }
             stackF.addSlice(String.valueOf(slice), ps);  // FFT power spectrum
             progress += (double) slice / (double) slices;
             IJ.showProgress(progress); 
@@ -213,7 +227,25 @@ public class FFT2D extends FHT {
         return impF;
     }
     
-    
+    /** Return a gamma-corrected power spectrum rescaled to fill 8-bit. */
+    public static ImageProcessor gammaScaledPowerSpectrum(
+            FHT fht, double gamma)
+    {
+        ImageProcessor ipAbs = getComplexAbs(fht);
+        float[] psAbsPix = (float[])ipAbs.getPixels();
+        // TODO: decide whether to scale 0-8 and convert to 8-bit
+        // rescale absolute values so min=0, max=8 before gamma scaling
+//        psAbsPix = J.sub(psAbsPix, (float)ipAbs.getMin());
+//        psAbsPix = J.div(psAbsPix, (float)(ipAbs.getMax() / 8.0f));
+        int nPix = psAbsPix.length;
+        for (int i = 0; i < nPix; i++) {
+            psAbsPix[i] = (float)Math.pow((double)psAbsPix[i], gamma);
+        }
+        ipAbs.setPixels(psAbsPix);  // N.B. update min and max after setPixels!
+        ipAbs.setMinAndMax(J.min(psAbsPix), J.max(psAbsPix));
+        return ipAbs;
+//        return ipAbs.convertToByte(true);  // as 8-bit image, filling 0-255
+    }
 
     /** 
      * Calculate the padded width and height for an ImagePlus to be

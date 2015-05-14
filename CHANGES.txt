@@ -68,3 +68,11 @@ other updates and notable new features:
 * increased default FFT window function size
 * raw FPJ and reconstructed SAM checks default off in main dialog
 * change SA mismatch calibration check back to reconstructed
+
+Version 0.9.8
+-------------
+* extensive SIMcheck Manual updates, with figures for visual guide
+* feature: Stack FFT 2D gamma scaling display option (reviewer request)
+* add '_' to jar finalName via pom so plugin appears in IJ Plugins
+* bugfix: si2wf accidental rescale
+* Cal_PatternFocus change default angle def method to line

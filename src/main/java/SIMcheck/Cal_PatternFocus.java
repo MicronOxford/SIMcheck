@@ -41,7 +41,7 @@ public class Cal_PatternFocus implements PlugIn, Executable {
 	private int width;
 	private int height;
 	private static final String[] angleMethods = {
-	    "degrees (IJ)", "radians (OMX)", "IJ line selection**"
+	    "IJ line selection**", "degrees (IJ)", "radians (OMX)"
 	};
 	
 	// parameter fields
@@ -74,18 +74,27 @@ public class Cal_PatternFocus implements PlugIn, Executable {
             angles = (int)gd.getNextNumber();
             phases = (int)gd.getNextNumber();
             if (angleMethod.equals(angleMethods[0])) {
-                angle1 = (double)gd.getNextNumber();
+                // line selection
+                try {
+                    angle1 = imp.getRoi().getAngle();
+                } catch (NullPointerException e) {
+                    IJ.error("Error",
+                            "You forgot to draw a line selection!");
+                    return;
+                }
             } else if (angleMethod.equals(angleMethods[1])) {
+                // IJ degrees
+                angle1 = (double)gd.getNextNumber();
+            } else {
+                // OMX radians
                 gd.getNextNumber();  // angle in degrees: discard!
                 angle1 = omx2ij((double)gd.getNextNumber());
-            } else {
-                angle1 = imp.getRoi().getAngle();
             }
             ij.Prefs.set("SIMcheck.angle1", angle1);
             showRotated = gd.getNextBoolean();
         }
         if (!I1l.stackDivisibleBy(imp, phases * angles)) {
-            IJ.showMessage( "Calibrate Pattern Focus", 
+            IJ.error( "Calibrate Pattern Focus", 
                     "Error: stack size not consistent with phases/angles." );
             return;
         }

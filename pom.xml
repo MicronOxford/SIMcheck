@@ -10,7 +10,7 @@
 
   <groupId>uk.ac.ox.micron</groupId>
   <artifactId>SIMcheck</artifactId>
-  <version>0.9.8-SNAPSHOT</version>
+  <version>0.9.8</version>
   <packaging>jar</packaging>
 
   <name>SIMcheck</name>
@@ -135,6 +135,15 @@
           <source>1.6</source>
           <target>1.6</target>
         </configuration>
+      </plugin>
+
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>2.3.2</version>
+          <configuration>
+              <finalName>SIMcheck_${version}</finalName>
+          </configuration>
       </plugin>
 
       <plugin>
