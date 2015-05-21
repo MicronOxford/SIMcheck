@@ -118,8 +118,10 @@ TODO
         - test data:
           - compact test / example data suite for distribution
           - work out strategy for test data distribution
-        - refactor / test Cal_Phases: unwrap (+test case), stats and structure
-        - more crop utility tests, move to separate utility plugin
+        - refactor / test Cal_Phases:
+          - unwrap (+test case)
+          - stats and structure
+          - choose direction of rotation
       
 * 1.0: final updates & documentation for 1.0 release with publication
 
@@ -162,6 +164,7 @@ TODO
 
       - tests, structure:
         - multi-frame: test / document stats for current time-point only
+        - more crop utility tests, move to separate utility plugin
         - get rid of IJ.run calls & show/hide of intermediate results 
 
       - documentation:
