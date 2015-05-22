@@ -48,7 +48,7 @@ public class Util_RescaleTo16bit implements PlugIn {
                 imp2 = exec(imp);
                 IJ.log(name + ", auto-scaled using per channel mode.");
                 if (exceeds16bit(imp)) {
-                    IJ.log("Data exceeded 16-bit range and has been rescaled!");
+                    IJ.log("Data exceed 16-bit range and have been rescaled!");
                 }
             } else {
                 SIMcheck_.specifyBackgrounds(
@@ -100,6 +100,8 @@ public class Util_RescaleTo16bit implements PlugIn {
         }
         ImagePlus[] imps = ChannelSplitter.split(imp);
         for (int c = 0; c < imps.length; c++) {
+            StackStatistics sstats = new StackStatistics(imps[c]);
+            IJ.setMinAndMax(imps[c], sstats.min, sstats.max);
             IJ.run(imps[c], "16-bit", "");
         }
         imp.setStack(I1l.mergeChannels(imp.getTitle(), imps).getStack());
@@ -107,12 +109,14 @@ public class Util_RescaleTo16bit implements PlugIn {
         return imp;
     }
     
-    /** Subtract per-channel mode value from all slices in a hyperstack. */
+    /** Threshold at per-channel mode value for all slices in a hyperstack. */
     private static void threshMode(ImagePlus imp) {
         ImagePlus[] imps = ChannelSplitter.split(imp);
         for (int c = 0; c < imps.length; c++) {
+            // set minimum to threshold value, then subtract this
             double dmode = new StackStatistics(imps[c]).dmode;
             IJ.run(imps[c], "Min...", "value=" + dmode + " stack");
+            IJ.run(imps[c], "Subtract...", "value=" + dmode + " stack");
         }
         imp.setStack(I1l.mergeChannels(imp.getTitle(), imps).getStack());
     }

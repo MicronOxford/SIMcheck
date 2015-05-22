@@ -110,9 +110,6 @@ TODO
 
 * 0.9.9: post-submission refactoring
 
-      - bugfixes:
-        - THR utility, non-zero minimum
-
       - documentation:
         - javadoc updates
 
