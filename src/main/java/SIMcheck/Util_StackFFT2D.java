@@ -32,14 +32,14 @@ public class Util_StackFFT2D implements PlugIn {
     public static final String name = "Stack FFT (2D)";
     public static final String TLA = "FFT";
     
-    public boolean gammaScaling = false;
-    public boolean logScaling32bit = false;
     public double winFraction = 0.06d;
+    private static double NO_GAMMA = 0.0d;
     public static String[] resultType = {
         "8-bit log(Amplitude^2)",
         "32-bit log(Amplitude^2)",
         "32-bit gamma-scaled Amplitude"};
-    public String resultTypeChoice = resultType[0];  // TODO: enum!
+    // not worth using enum -- does not suit GenericDialog
+    public String resultTypeChoice = resultType[0];
     public double gamma = 0.3;
     
     
@@ -68,13 +68,16 @@ public class Util_StackFFT2D implements PlugIn {
     public ImagePlus exec(ImagePlus imp) {
         ImagePlus impF = null;
         if (resultTypeChoice.equals(resultType[0])) {
-            impF = FFT2D.fftImp(imp, winFraction, 0.0d);
+            // default, log-scaled amplitude^2, converted to 8-bit
+            impF = FFT2D.fftImp(imp, false, winFraction, NO_GAMMA);
             IJ.log(resultTypeChoice + ", gaussian window " + winFraction + "%");
         } else if(resultTypeChoice.equals(resultType[1])) {
-            impF = FFT2D.fftImpLog32bit(imp, winFraction);
+            // log-scaled amplitude^2, as 32-bit float
+            impF = FFT2D.fftImp(imp, true, winFraction, NO_GAMMA);
             IJ.log(resultTypeChoice + ", gaussian window " + winFraction + "%");
         } else {
-            impF = FFT2D.fftImp(imp, winFraction, gamma);
+            // gamma-scaled amplitude (as 32-bit float)
+            impF = FFT2D.fftImp(imp, false, winFraction, gamma);
             IJ.log(resultTypeChoice + ", gaussian window "
                     + winFraction + "%, gamma=" + gamma);
         }

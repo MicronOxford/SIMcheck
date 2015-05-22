@@ -115,7 +115,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             imp2 = Util_RescaleTo16bit.exec(imps[0].duplicate());
         }
         IJ.showStatus("Fourier transforming z-sections (lateral view)");
-        ImagePlus impF = FFT2D.fftImp(imp2, winFraction, 0.0d);
+        ImagePlus impF = FFT2D.fftImp(imp2, winFraction);
         blurRadius *= (double)impF.getWidth() / 512.0d;
         IJ.showStatus("Blurring & rescaling z-sections (lateral view)");
         autoscaleSlices(impF);
@@ -147,7 +147,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
                 impOrtho = I1l.takeCentralZ(impOrtho);
                 Calibration calOrtho = impOrtho.getCalibration();
                 IJ.showStatus("FFT z-sections (orthogonal view)");
-                ImagePlus impOrthoF = FFT2D.fftImp(impOrtho, winFraction, 0.0d);
+                ImagePlus impOrthoF = FFT2D.fftImp(impOrtho, winFraction);
                 IJ.showStatus("Blur & rescale z-sections (orthogonal view)");
                 autoscaleSlices(impOrthoF);
                 impOrthoF = resizeAndPad(impOrthoF, cal);

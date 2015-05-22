@@ -30,21 +30,6 @@ import ij.plugin.filter.GaussianBlur;
  */
 public class FFT2D extends FHT {
     
-    public enum ResultOption {
-        LOG("8-bit log(Amplitude^2)"),
-        LOG_32BIT("32-bit log(Amplitude^2)"),
-        GAMMA("32-bit gamma-scaled Amplitude");
-
-        private String description;
-        ResultOption(String description) {
-            this.description = description;
-        }
-
-        public String str() {
-            return description;
-        }
-    }
-    
     // tolerance to check if a double precision float is approx. equal to 0
     private static final double ZERO_TOL = 0.000001d;
     private static final double WIN_FRACTION_DEFAULT = 0.06d;
@@ -135,8 +120,7 @@ public class FFT2D extends FHT {
      * @param ip for slice to process 
      * @param pc percentile (0 - 1) of image width / height for window
      */
-    public static ImageProcessor gaussWindow(
-            ImageProcessor ip, double pc) {
+    public static ImageProcessor gaussWindow(ImageProcessor ip, double pc) {
         int nx = ip.getWidth();
         int ny = ip.getHeight();
         int winx = (int)(pc * (double)nx);
@@ -181,69 +165,11 @@ public class FFT2D extends FHT {
         return fht;
     }
 
-    /** 
-     * 2D FFT the entire hyperstack for this imp (in the XY plane).
-     * @return new ImagePlus after 2D FFT
-     **/
-    public static ImagePlus fftImp(ImagePlus impIn) {
-        return fftImp(impIn, WIN_FRACTION_DEFAULT, NO_GAMMA);
-    }
-    
-    /** log-scaled amp squared; duplicated code, temporary! */
-    public static ImagePlus fftImpLog32bit(ImagePlus impIn, double wf) {
-        // FIXME -- cull, merge & tidy selection of different scaling methods 
-        ImagePlus imp = impIn.duplicate();
-        Calibration cal = impIn.getCalibration();
-        int width = imp.getWidth();
-        int height = imp.getHeight();
-        int channels = imp.getNChannels();
-        int Zplanes = imp.getNSlices();
-        int frames = imp.getNFrames();
-        int currentSlice = imp.getSlice();
-        ImageStack stack = imp.getStack();
-        int slices = stack.getSize();
-        int paddedSize = calcPadSize(imp);  // padding requirement
-        if (paddedSize != width || paddedSize != height) {
-            width = paddedSize;
-            height = paddedSize;
-            cal.pixelWidth *= (double)width / paddedSize;
-            cal.pixelHeight *= (double)height / paddedSize;
-        }
-        imp.setCalibration(cal);
-        ImageStack stackF = new ImageStack(width, height);
-        double progress = 0;
-        FHT fht = null;
-        for (int slice = 1; slice <= slices; slice++) {
-            // calculate FFT / power spectrum
-            // NB: ImagePlus has code to deal with power spectrum display.
-            //     FFT.java stores FHT transform result *and* original image.
-            // See: ij/plugin/FFT.java & ij/ImagePlus.java (search FHT & FFT)
-            //      ij/process/FHT.java
-            ImageProcessor ip = stack.getProcessor(slice);
-            ip = FFT2D.gaussWindow(ip, wf);
-            ip = FFT2D.pad(ip, paddedSize);  
-            fht = FFT2D.fftSlice(ip, imp);
-            ImageProcessor ps = logScaledPowerSpectrum(fht);
-            stackF.addSlice(String.valueOf(slice), ps);  // FFT power spectrum
-            progress += (double) slice / (double) slices;
-            IJ.showProgress(progress); 
-        }
-        String title = "FFT2D_" + impIn.getTitle();
-        ImagePlus impF = new ImagePlus(title, stackF);
-        impF.copyScale(imp);
-        impF.setProperty("FHT", fht);
-        impF.setDimensions(channels, Zplanes, frames);
-        impF.setSlice(currentSlice);
-        impF.setOpenAsHyperStack(true);
-        return impF;
-        
-    }
-    
     /**
      * 2D FFT hyperstack, specify window function size as input size fraction.
      */
-    public static ImagePlus fftImp(
-            ImagePlus impIn, double winFraction, double gamma)
+    public static ImagePlus fftImp(ImagePlus impIn, boolean floatResult,
+            double winFraction, double gamma)
     {
         ImagePlus imp = impIn.duplicate();
         Calibration cal = impIn.getCalibration();
@@ -282,7 +208,11 @@ public class FFT2D extends FHT {
             if (gamma > 0.0d) {
                 ps = gammaScaledAmplitude(fht, gamma);
             } else {
-                ps = fht.getPowerSpectrum();
+                if (floatResult) {
+                    ps = logScaledPowerSpectrum(fht);
+                } else {
+                    ps = fht.getPowerSpectrum();
+                }
             }
             stackF.addSlice(String.valueOf(slice), ps);  // FFT power spectrum
             progress += (double) slice / (double) slices;
@@ -298,6 +228,19 @@ public class FFT2D extends FHT {
         return impF;
     }
     
+    /** fftImp with default options: log-scaled Amp^2, 8-bit result. */
+    public static ImagePlus fftImp(ImagePlus impIn) {
+        return fftImp(impIn, false, WIN_FRACTION_DEFAULT, NO_GAMMA);
+    }
+    
+    /**
+     * fftImp with default options: log-scaled Amp^2, 8-bit result,
+     * but specified window function winFraction.
+     */
+    public static ImagePlus fftImp(ImagePlus impIn, double winFraction) {
+        return fftImp(impIn, false, winFraction, NO_GAMMA);
+    }
+
     /** Return power spectrum: amplitude squared, scaled by 10log10. */ 
     public static ImageProcessor logScaledPowerSpectrum(FHT fht)
     {
