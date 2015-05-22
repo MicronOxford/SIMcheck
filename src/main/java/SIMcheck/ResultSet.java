@@ -1,17 +1,17 @@
-/* Copyright (c) 2013, Graeme Ball.                          
- *                                                                               
- * This program is free software: you can redistribute it and/or modify         
- * it under the terms of the GNU General Public License as published by         
- * the Free Software Foundation, either version 3 of the License, or            
- * (at your option) any later version.                                          
- *                                                                               
- * This program is distributed in the hope that it will be useful,              
- * but WITHOUT ANY WARRANTY; without even the implied warranty of               
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
- * GNU General Public License for more details.                                 
- *                                                                               
- * You should have received a copy of the GNU General Public License            
- * along with this program. If not, see http://www.gnu.org/licenses/ .         
+/* Copyright (c) 2015, Graeme Ball.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see http://www.gnu.org/licenses/ .
  */
 
 package SIMcheck;
@@ -23,7 +23,7 @@ import ij.ImageJ;
 import ij.ImagePlus;
 import ij.measure.ResultsTable;
 
-/** ImageJ1 plugin result container using HashMaps: items must have 
+/** ImageJ1 plugin result container using HashMaps: items must have
  * unique names within result types.
  * @author Graeme Ball <graemeball@gmail.com>
  */
@@ -36,7 +36,7 @@ public class ResultSet {
 
     /** Interpretation of a statistic: is it OK? yes, no, maybe. */
     public enum StatOK {
-        
+
         YES("Yes"),
         NO("No"),
         MAYBE("?"),
@@ -51,8 +51,8 @@ public class ResultSet {
             return desc;
         }
     }
-    
-    /** Store a numerical statistic & its interpretation. */
+
+    /** Store a numerical statistic and its interpretation. */
     private class Stat {
         Double value;
         StatOK statOK;
@@ -61,16 +61,16 @@ public class ResultSet {
             this.statOK = statOK;
         }
     }
-    
+
     String resultSetName = "";
     String resultSetTLA = "";
-    private LinkedHashMap<String, ImagePlus> imps = 
+    private LinkedHashMap<String, ImagePlus> imps =
             new LinkedHashMap<String, ImagePlus>();
     private LinkedHashMap<String, Stat> stats =
             new LinkedHashMap<String, Stat>();
-    private LinkedHashMap<String, String> infos = 
+    private LinkedHashMap<String, String> infos =
             new  LinkedHashMap<String, String>();
-    
+
     ResultSet(String name, String tla) {
         resultSetName = name;
         resultSetTLA = tla;  // TODO: store ref to ePlugin class instead
@@ -85,7 +85,7 @@ public class ResultSet {
         }
         imps.put(description, imp);
     }
-    
+
     /** Return Imp number nImp (insert order, 0+) in imps hashmap, else null */
     public ImagePlus getImp(int nImp) {
         Iterator<ImagePlus> it = imps.values().iterator();
@@ -97,7 +97,7 @@ public class ResultSet {
         }
         return null;  // did not reach desired nImp
     }
-    
+
     /**
      * Add a named Double statistic result: statName MUST be unique.
      * NB: it is the plugin's responsibility to decide whether stat is OK.
@@ -108,7 +108,7 @@ public class ResultSet {
         }
         stats.put(statName, new Stat(value, statOK));
     }
-    
+
     /** Add an information string with title: title MUST be unique. */
     public void addInfo(String title, String info) {
         if (infos.containsKey(title)) {
@@ -116,8 +116,8 @@ public class ResultSet {
         }
         infos.put(title, info);
     }
-    
-    /** Report all results */
+
+    /** Report all results to ImageJ log window. */
     public void report() {
         StringBuilder sb = new StringBuilder(CHECK_MAX_CHARS);
         sb.append("\n");
@@ -166,9 +166,9 @@ public class ResultSet {
         }
         IJ.log(stripMultipleBlankLines(sb.toString()));
     }
-    
+
     /**
-     * Display summary table of numerical stats and interpretation
+     * Display summary Result table of numerical stats and interpretation
      * for all results in a list of ResultSets.
      */
     public static void summary(List<ResultSet> resultSets, String title) {
@@ -187,7 +187,7 @@ public class ResultSet {
         }
         rt.show(title);
     }
-    
+
     /**
      * Automatically add line-breaks, returning text String of fixed width.
      * titleLen shortens the first line, adjusting for length of item title.
@@ -207,8 +207,6 @@ public class ResultSet {
         while (thisSpace != -1 && iter < maxIter) {
             lastSpace = thisSpace;
             thisSpace = text.indexOf(" ", lastSpace + 1);
-//            if (thisSpace >= 0 && thisSpace + 4 < text.length())
-//                J.out(text.substring(thisSpace, thisSpace + 4));
             if (thisSpace == -1) {
                 sb.append(text.substring(lineStart, text.length()));
             } else if (thisSpace + 4 < text.length() - 1 &&
@@ -221,7 +219,6 @@ public class ResultSet {
                 thisSpace += 4;
             } else if (thisSpace + 4 < text.length() &&
                     text.substring(thisSpace, thisSpace + 4).equals("  --")) {
-//                J.out("found double-dash");
                 // end multi-line lists upon ' --'
                 hasItemList = true;
                 insideList = false;
@@ -257,7 +254,7 @@ public class ResultSet {
             return sb.toString();
         }
     }
-    
+
     /** Return an Object[] representation of the results. */
     public Object[] objects() {
         List<Object> objList = new ArrayList<Object>();
@@ -271,7 +268,7 @@ public class ResultSet {
         Object[] objArray = objList.toArray();
         return objArray;
     }
-    
+
     /** Return a String containing 'title' centered in a line of charX. */
     static String titleString(String title, String charX) {
         // trial & error formatting tweaks due to non-fixed-width font :-(
@@ -293,7 +290,7 @@ public class ResultSet {
         }
         return J.nChars(nPadChars, charX) + title + J.nChars(nPadChars, charX);
     }
-    
+
     /** Replace occurrences of multiple blank lines with 1 blank line. */
     private static String stripMultipleBlankLines(String s) {
         return s.replaceAll("\n{3,}", "\n\n");
@@ -301,7 +298,7 @@ public class ResultSet {
 
     /** test method */
     public static void main(String[] args) {
-        
+
         ResultSet results = new ResultSet("ResultSet Test", "TST");
         new ImageJ();
         ImagePlus blimp = TestData.lawn;
@@ -310,7 +307,7 @@ public class ResultSet {
                 (double)blimp.getWidth(), StatOK.YES);
         results.addStat("stat2, imHeight",
                 (double)blimp.getHeight(), StatOK.YES);
-        results.addStat("stat3, imBytesPerPix", 
+        results.addStat("stat3, imBytesPerPix",
                 (double)blimp.getBytesPerPixel(), StatOK.YES);
         results.addInfo("about", "this is raw SIM data for a bead lawn");
         results.addInfo("info list", "list items auto-formatted:"
@@ -322,31 +319,31 @@ public class ResultSet {
         IJ.log("report()  - should show all images and log"
                 + " all stats, info. Check stats appear in order.");
         results.report();
-        
-        IJ.log("\nchecking identity of " + results.objects().length 
+
+        IJ.log("\nchecking identity of " + results.objects().length
                 + " (expected " + 11 + ") returned objects...");
         Object[] objs = results.objects();
-        IJ.log("resultSetName, objs[0] instanceof String? " 
+        IJ.log("resultSetName, objs[0] instanceof String? "
                 + new Boolean(objs[0] instanceof String).toString());
-        IJ.log("imps key 1, objs[1] instanceof String? " 
+        IJ.log("imps key 1, objs[1] instanceof String? "
                 + new Boolean(objs[1] instanceof String).toString());
-        IJ.log("imps value 1, objs[2] instanceof ImagePlus? " 
+        IJ.log("imps value 1, objs[2] instanceof ImagePlus? "
                 + new Boolean(objs[2] instanceof ImagePlus).toString());
-        IJ.log("stats key 1, objs[3] instanceof String? " 
+        IJ.log("stats key 1, objs[3] instanceof String? "
                 + new Boolean(objs[3] instanceof String).toString());
-        IJ.log("stats key 2, objs[4] instanceof String? " 
+        IJ.log("stats key 2, objs[4] instanceof String? "
                 + new Boolean(objs[4] instanceof String).toString());
-        IJ.log("stats key 3, objs[5] instanceof String? " 
+        IJ.log("stats key 3, objs[5] instanceof String? "
                 + new Boolean(objs[5] instanceof String).toString());
-        IJ.log("stats value 1, objs[6] instanceof Double? " 
+        IJ.log("stats value 1, objs[6] instanceof Double? "
                 + new Boolean(((Stat)objs[6]).value instanceof Double).toString());
-        IJ.log("stats value 2, objs[7] instanceof Double? " 
+        IJ.log("stats value 2, objs[7] instanceof Double? "
                 + new Boolean(((Stat)objs[7]).value instanceof Double).toString());
-        IJ.log("stats value 3, objs[8] instanceof Double? " 
+        IJ.log("stats value 3, objs[8] instanceof Double? "
                 + new Boolean(((Stat)objs[8]).value instanceof Double).toString());
-        IJ.log("infos key 1, objs[9] instanceof String? " 
+        IJ.log("infos key 1, objs[9] instanceof String? "
                 + new Boolean(objs[9] instanceof String).toString());
-        IJ.log("infos value 1, objs[10] instanceof String? " 
+        IJ.log("infos value 1, objs[10] instanceof String? "
                 + new Boolean(objs[10] instanceof String).toString());
 
         IJ.log("addStat() duplicate throws IllegalArgument exception?");
