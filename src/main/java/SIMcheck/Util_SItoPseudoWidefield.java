@@ -1,70 +1,75 @@
-/*  Copyright (c) 2013, Graeme Ball and Micron Oxford,                          
- *  University of Oxford, Department of Biochemistry.                           
- *                                                                               
- *  This program is free software: you can redistribute it and/or modify         
- *  it under the terms of the GNU General Public License as published by         
- *  the Free Software Foundation, either version 3 of the License, or            
- *  (at your option) any later version.                                          
- *                                                                               
- *  This program is distributed in the hope that it will be useful,              
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of               
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
- *  GNU General Public License for more details.                                 
- *                                                                               
- *  You should have received a copy of the GNU General Public License            
- *  along with this program.  If not, see http://www.gnu.org/licenses/ .         
- */ 
+/*  Copyright (c) 2015, Graeme Ball and Micron Oxford,
+ *  University of Oxford, Department of Biochemistry.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see http://www.gnu.org/licenses/ .
+ */
 
 package SIMcheck;
 import ij.*;
 import ij.measure.Calibration;
 import ij.plugin.*;
 import ij.process.*;
-import ij.gui.GenericDialog; 
+import ij.gui.GenericDialog;
 
 /** This plugin converts a SIM image to a pseudo-wide-field image by averaging
  * phases and angles. Assumes OMX V2 CPZAT input channel order.
+ *
+ * Note: this plugin has a totally unrelated functionality in that also
+ * allows a max projection, which is used by the Rec_ModContrastMap to assess
+ * whether *any* angle is saturated in the raw data (should probably be
+ * refactored!)
+ *
  * @author Graeme Ball <graemeball@gmail.com>
- **/ 
+ **/
 public class Util_SItoPseudoWidefield implements PlugIn {
-    
+
     public static final String name = "Raw SI to Pseudo-Widefield";
     public static final String TLA = "PWF";
-    
+
     // parameter fields
-    public int phases = 5;                                                         
-    public int angles = 3;                                                         
-    public boolean doNormalize = true;                                                         
-    
+    public int phases = 5;
+    public int angles = 3;
+    public boolean doNormalize = true;
+
     private static ImagePlus projImg = null;  // intermediate & final results
-    
     public enum ProjMode { AVG, MAX }  // can do average or max projection
     // TODO: refactor -- AVG and MAX projection details different / unexpected
 
-    @Override 
+    @Override
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
         // TODO: option for padding to reconstructed result size for comparison
-        GenericDialog gd = new GenericDialog(name);                   
-        gd.addMessage("Requires SI raw data in OMX (CPZAT) order.");        
-        gd.addNumericField("Angles", angles, 0);                               
+        GenericDialog gd = new GenericDialog(name);
+        gd.addMessage("Requires SI raw data in OMX (CPZAT) order.");
+        gd.addNumericField("Angles", angles, 0);
         gd.addNumericField("Phases", phases, 0);
         gd.addCheckbox("Intensity normalisation (simple ratio correction)",
                 doNormalize);
-        gd.showDialog();                                                        
-        if (gd.wasCanceled()) return;                                           
-        if(gd.wasOKed()){                                                     
-            angles = (int)gd.getNextNumber();                                   
-            phases = (int)gd.getNextNumber();  
+        gd.showDialog();
+        if (gd.wasCanceled()) return;
+        if(gd.wasOKed()){
+            angles = (int)gd.getNextNumber();
+            phases = (int)gd.getNextNumber();
             doNormalize = gd.getNextBoolean();
-        }                                                                       
-        if (!I1l.stackDivisibleBy(imp, phases * angles)) {                                                 
-            IJ.showMessage( "SI to Pseudo-Wide-Field", 
+        }
+        if (!I1l.stackDivisibleBy(imp, phases * angles)) {
+            IJ.showMessage( "SI to Pseudo-Wide-Field",
                     "Error: stack size not consistent with phases/angles.");
-            return;                                                             
+            return;
         }
         if (doNormalize) {
-            projImg = exec(I1l.normalizeImp(imp), phases, angles, ProjMode.AVG);  
+            projImg = exec(I1l.normalizeImp(imp), phases, angles, ProjMode.AVG);
         } else {
             projImg = exec(imp, phases, angles, ProjMode.AVG);
         }
@@ -72,12 +77,13 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         projImg.show();
     }
 
-    /** Execute plugin functionality: raw SI data to pseudo-widefield. 
-     * @param imp input raw SI data ImagePlus                                   
-     * @param phases number of phases                                   
-     * @param angles number of angles                                   
+    /** Execute plugin functionality: raw SI data to pseudo-widefield.
+     * @param imp input raw SI data ImagePlus
+     * @param phases number of phases
+     * @param angles number of angles
+     * @param m projection mode: AVG or MAX
      * @return ImagePlus with all phases and angles averaged
-     */ 
+     */
     public ImagePlus exec(ImagePlus imp, int phases, int angles, ProjMode m) {
         ImagePlus impCopy = imp.duplicate();
         this.angles = angles;
@@ -87,7 +93,7 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         int frames = imp.getNFrames();
         Zplanes = Zplanes/(phases*angles);  // take phase & angle out of Z
         IJ.run("Conversions...", " ");  // TODO: reset option state when done..
-        new StackConverter(impCopy).convertToGray32(); 
+        new StackConverter(impCopy).convertToGray32();
         projImg = projectPandA(impCopy, channels, Zplanes, frames, m);
         // projectPandA result in projImg; Zplanes reduced by phases*angles
         if (m == ProjMode.AVG) {
@@ -130,7 +136,7 @@ public class Util_SItoPseudoWidefield implements PlugIn {
 
     /** Projection e.g. 5 phases, 3 angles for each CZT. **/
     private ImagePlus projectPandA(ImagePlus imp, int nc, int nz, int nt, ProjMode m) {
-        ImageStack stack = imp.getStack(); 
+        ImageStack stack = imp.getStack();
         ImageStack PAset = new ImageStack(imp.getWidth(), imp.getHeight());
         ImageStack avStack = new ImageStack(imp.getWidth(), imp.getHeight());
         int sliceIn = 0;
@@ -161,7 +167,7 @@ public class Util_SItoPseudoWidefield implements PlugIn {
                                   case MAX:
                                       ip = maxSlices(imp, PAset, PAsetSize);
                                       break;
-                                  default: 
+                                  default:
                                       ip = avSlices(imp, PAset, PAsetSize);
                                 }
                                 for (int slice = PAsetSize; slice >= 1; slice--) {
@@ -185,39 +191,39 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         return projImg;
     }
 
-    /** Average slices (32-bit floats). */
+    /** Return FloatProcessor with average of slices in stack. */
     private static ImageProcessor avSlices(
             ImagePlus imp, ImageStack stack, int slices) {
-        int width = imp.getWidth();                                             
+        int width = imp.getWidth();
         int height = imp.getHeight();
         int len = width * height;
         FloatProcessor oip = new FloatProcessor(width, height);
         float[] avpixels = (float[])oip.getPixels();
         for (int slice = 1; slice <= slices; slice++){
-            FloatProcessor fp = (FloatProcessor)stack.getProcessor(slice).convertToFloat();  
+            FloatProcessor fp = (FloatProcessor)stack.getProcessor(slice).convertToFloat();
             float[] fpixels = (float[])fp.getPixels();
             for (int i = 0; i < len; i++) {
                 avpixels[i] += fpixels[i];
             }
         }
-        float fslices = (float)slices;                                                   
-        for (int i = 0; i < len; i++) {                                            
+        float fslices = (float)slices;
+        for (int i = 0; i < len; i++) {
             avpixels[i] /= fslices;
         }
         oip = new FloatProcessor(width, height, avpixels, null);
         return oip;
     }
 
-    /** Max of slices (32-bit floats). */
+    /** Return (ImageProcessor)FloatProcessor with max of slices in stack. */
     private static ImageProcessor maxSlices(
             ImagePlus imp, ImageStack stack, int slices) {
-        int width = imp.getWidth();                                             
+        int width = imp.getWidth();
         int height = imp.getHeight();
         int len = width * height;
         FloatProcessor fpOut = new FloatProcessor(width, height);
         float[] maxPixels = null;
         for (int slice = 1; slice <= slices; slice++){
-            FloatProcessor fp = (FloatProcessor)stack.getProcessor(slice).convertToFloat();  
+            FloatProcessor fp = (FloatProcessor)stack.getProcessor(slice).convertToFloat();
             float[] fpixels = (float[])fp.getPixels();
             if (slice == 1) {
                 maxPixels = fpixels;
@@ -231,7 +237,7 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         fpOut = new FloatProcessor(width, height, maxPixels, null);
         return fpOut;
     }
-    
+
     /** Interactive test method. */
     public static void main(String[] args) {
         // TODO: automatic tests for private methods

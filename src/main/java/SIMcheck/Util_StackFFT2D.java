@@ -1,18 +1,18 @@
-/*  Copyright (c) 2013, Graeme Ball and Micron Oxford,                          
- *  University of Oxford, Department of Biochemistry.                           
- *                                                                               
- *  This program is free software: you can redistribute it and/or modify         
- *  it under the terms of the GNU General Public License as published by         
- *  the Free Software Foundation, either version 3 of the License, or            
- *  (at your option) any later version.                                          
- *                                                                               
- *  This program is distributed in the hope that it will be useful,              
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of               
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
- *  GNU General Public License for more details.                                 
- *                                                                               
- *  You should have received a copy of the GNU General Public License            
- *  along with this program.  If not, see http://www.gnu.org/licenses/ .         
+/*  Copyright (c) 2015, Graeme Ball and Micron Oxford,
+ *  University of Oxford, Department of Biochemistry.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see http://www.gnu.org/licenses/ .
  */
 
 package SIMcheck;
@@ -23,27 +23,27 @@ import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 
-/** 
- * This plugin carries out ImageJ's 2D FFT on each slice of a stack. 
+/**
+ * This plugin carries out ImageJ's 2D FFT on each slice of a stack.
+ * Allows choice of result scaling / format.
  * @author Graeme Ball <graemeball@gmail.com>
- */ 
+ */
 public class Util_StackFFT2D implements PlugIn {
-    
+
     public static final String name = "Stack FFT (2D)";
     public static final String TLA = "FFT";
-    
-    public double winFraction = 0.06d;
-    private static double NO_GAMMA = 0.0d;
     public static String[] resultType = {
         "8-bit log(Amplitude^2)",
         "32-bit log(Amplitude^2)",
         "32-bit gamma-scaled Amplitude"};
-    // not worth using enum -- does not suit GenericDialog
+    private static double NO_GAMMA = 0.0d;
+
+    // parameter fields
     public String resultTypeChoice = resultType[0];
+    public double winFraction = 0.06d;
     public double gamma = 0.3;
-    
-    
-    @Override 
+
+    @Override
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);
@@ -64,7 +64,7 @@ public class Util_StackFFT2D implements PlugIn {
     /** Execute plugin functionality: 2D FFT each slice.
      * @param imp input format ImagePlus
      * @return ImagePlus after 2D FFT of each slice
-     */ 
+     */
     public ImagePlus exec(ImagePlus imp) {
         ImagePlus impF = null;
         if (resultTypeChoice.equals(resultType[0])) {
@@ -84,7 +84,7 @@ public class Util_StackFFT2D implements PlugIn {
         impF.setTitle(I1l.makeTitle(imp, TLA));
         return impF;
     }
-    
+
     /** Interactive test method. */
     public static void main(String[] args) {
         new ImageJ();

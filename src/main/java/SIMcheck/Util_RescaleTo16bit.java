@@ -1,4 +1,4 @@
-/*  Copyright (c) 2013, Graeme Ball and Micron Oxford,
+/*  Copyright (c) 2015, Graeme Ball and Micron Oxford,
  *  University of Oxford, Department of Biochemistry.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,8 @@ import ij.plugin.PlugIn;
 import ij.process.StackStatistics;
 
 /**
- * This plugin discards values below zero-point and converts to 16-bit.
+ * This plugin discards values below a chosen zero-point (by default the stack
+ * modal intensity for each channel), and converts to 16-bit.
  * @author Graeme Ball <graemeball@gmail.com>
  */
 public class Util_RescaleTo16bit implements PlugIn {
@@ -34,7 +35,7 @@ public class Util_RescaleTo16bit implements PlugIn {
     public static final String name = "Threshold and 16-bit Conversion";
     public static final String TLA = "THR";
     private static final int MAX_16_BIT = 65535;
-    
+
     @Override
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
@@ -63,10 +64,10 @@ public class Util_RescaleTo16bit implements PlugIn {
             imp2.show();
         }
     }
-    
+
     /** Execute plugin functionality: discard <mode and convert to 16-bit.
-     * For each channel, old mode is new zero, and values are rescaled to
-     * fit 0-65535 if channel max exceeds 65535.
+     * For each channel, old mode is the new zero, and values are rescaled
+     * to fit 0-65535 if channel max exceeds 65535.
      * @param imp input ImagePlus, i.e. 32-bit reconstructed SIM data
      * @return ImagePlus (16-bit) after discarding below channel mode
      */
@@ -80,7 +81,7 @@ public class Util_RescaleTo16bit implements PlugIn {
 
     /** Alternative exec(): discard below specified channel minima, to 16-bit.
      * @param imp input ImagePlus, i.e. 32-bit reconstructed SIM data
-     * @param channelMinima array of minimum cut-offs for each channel
+     * @param channelMinima array of threshold cut-offs for each channel
      * @return ImagePlus (16-bit) after discarding below channel minimum
      */
     public static ImagePlus exec(ImagePlus imp, double[] channelMinima) {
@@ -90,7 +91,7 @@ public class Util_RescaleTo16bit implements PlugIn {
         imp2.setTitle(I1l.makeTitle(imp, TLA));
         return imp2;
     }
-    
+
     /** Convert to 16-bit, rescaling to 16-bit range if input exceeds it. */
     private static ImagePlus convertTo16bit(ImagePlus imp) {
         if (exceeds16bit(imp)) {
@@ -108,7 +109,7 @@ public class Util_RescaleTo16bit implements PlugIn {
         IJ.run("Conversions...", " ");  // assume default no rescaling
         return imp;
     }
-    
+
     /** Threshold at per-channel mode value for all slices in a hyperstack. */
     private static void threshMode(ImagePlus imp) {
         ImagePlus[] imps = ChannelSplitter.split(imp);
@@ -120,7 +121,7 @@ public class Util_RescaleTo16bit implements PlugIn {
         }
         imp.setStack(I1l.mergeChannels(imp.getTitle(), imps).getStack());
     }
-    
+
     /** Subtract specified minimum from each channel. */
     private static void threshChannelMinima(ImagePlus imp, double[] minima) {
         ImagePlus[] imps = ChannelSplitter.split(imp);
@@ -136,7 +137,7 @@ public class Util_RescaleTo16bit implements PlugIn {
         StackStatistics sstats = new StackStatistics(imp);
         return sstats.histMax > (double)MAX_16_BIT;
     }
-    
+
     /** Interactive test method. */
     public static void main(String[] args) {
         new ImageJ();
