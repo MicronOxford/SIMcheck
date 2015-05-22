@@ -30,6 +30,21 @@ import ij.plugin.filter.GaussianBlur;
  */
 public class FFT2D extends FHT {
     
+    public enum ResultOption {
+        LOG("8-bit log(Amplitude^2)"),
+        LOG_32BIT("32-bit log(Amplitude^2)"),
+        GAMMA("32-bit gamma-scaled Amplitude");
+
+        private String description;
+        ResultOption(String description) {
+            this.description = description;
+        }
+
+        public String str() {
+            return description;
+        }
+    }
+    
     // tolerance to check if a double precision float is approx. equal to 0
     private static final double ZERO_TOL = 0.000001d;
     private static final double WIN_FRACTION_DEFAULT = 0.06d;
@@ -54,11 +69,11 @@ public class FFT2D extends FHT {
     /** Return absolute value image of Fourier transform (no log scaling). */
     public ImageProcessor getComplexAbs() {
         FHT fht = (FHT)this;
-        return getComplexAbs(fht);
+        return getComplexAbs(fht, false);
     }
 
     /** Return absolute value image of Fourier transform (no log scaling). */
-    public static ImageProcessor getComplexAbs(FHT fht) {
+    public static ImageProcessor getComplexAbs(FHT fht, boolean squared) {
         ImageStack complexFourier = fht.getComplexTransform();
         FloatProcessor fpReal =
             (FloatProcessor)complexFourier.getProcessor(1).convertToFloat();
@@ -67,9 +82,15 @@ public class FFT2D extends FHT {
             (FloatProcessor)complexFourier.getProcessor(2).convertToFloat();
         float[] imagPix = (float[])fpImag.getPixels();
         float[] absPix = new float[realPix.length];
-        for(int i=0; i<realPix.length; i++) {
-            absPix[i] = (float)Math.sqrt((double)(realPix[i] * realPix[i] + 
-                                            imagPix[i] * imagPix[i]));
+        if (squared) {
+            for(int i=0; i<realPix.length; i++) {
+                absPix[i] = realPix[i] * realPix[i] + imagPix[i] * imagPix[i];
+            }
+        } else {
+            for(int i=0; i<realPix.length; i++) {
+                absPix[i] = (float)Math.sqrt((double)(realPix[i] * realPix[i] 
+                                             + imagPix[i] * imagPix[i]));
+            }
         }
         int w = fpReal.getWidth();
         int h = fpReal.getHeight();
@@ -168,7 +189,7 @@ public class FFT2D extends FHT {
         return fftImp(impIn, WIN_FRACTION_DEFAULT, NO_GAMMA);
     }
     
-    /** 10log10 scaled amp squared; duplicated code, temporary! */
+    /** log-scaled amp squared; duplicated code, temporary! */
     public static ImagePlus fftImpLog32bit(ImagePlus impIn, double wf) {
         // FIXME -- cull, merge & tidy selection of different scaling methods 
         ImagePlus imp = impIn.duplicate();
@@ -280,12 +301,12 @@ public class FFT2D extends FHT {
     /** Return power spectrum: amplitude squared, scaled by 10log10. */ 
     public static ImageProcessor logScaledPowerSpectrum(FHT fht)
     {
-        FloatProcessor fp = (FloatProcessor)getComplexAbs(fht);
+        FloatProcessor fp = (FloatProcessor)getComplexAbs(fht, true);
         float[] absPix = (float[])fp.getPixels();
         int nPix = absPix.length;
         float[] psPix = new float[nPix];
         for (int i = 0; i < nPix; i++) {
-            double pwr = Math.log(absPix[i] * absPix[i]);
+            double pwr = Math.log(absPix[i]);
             psPix[i] = (float)pwr;
         }
         fp.setPixels(psPix);  // N.B. update min and max after setPixels!
@@ -297,7 +318,7 @@ public class FFT2D extends FHT {
     public static ImageProcessor gammaScaledAmplitude(
             FHT fht, double gamma)
     {
-        ImageProcessor ipAbs = getComplexAbs(fht);
+        ImageProcessor ipAbs = getComplexAbs(fht, false);
         float[] psAbsPix = (float[])ipAbs.getPixels();
         int nPix = psAbsPix.length;
         for (int i = 0; i < nPix; i++) {
