@@ -110,6 +110,9 @@ TODO
 
 * 0.9.9: post-submission refactoring
 
+      - bugfixes:
+        - THR utility, non-zero minimum
+
       - documentation:
         - javadoc updates
 
@@ -122,6 +125,7 @@ TODO
           - unwrap (+test case)
           - stats and structure
           - choose direction of rotation
+        - refactor Stack FFT utility and FFT2D
       
 * 1.0: final updates & documentation for 1.0 release with publication
 

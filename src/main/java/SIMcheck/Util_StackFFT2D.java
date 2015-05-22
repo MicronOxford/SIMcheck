@@ -22,7 +22,6 @@ import ij.ImageJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
-import java.util.*;
 
 /** 
  * This plugin carries out ImageJ's 2D FFT on each slice of a stack. 
@@ -34,24 +33,29 @@ public class Util_StackFFT2D implements PlugIn {
     public static final String TLA = "FFT";
     
     public boolean gammaScaling = false;
-    public double gamma = 0.3;
+    public boolean logScaling32bit = false;
     public double winFraction = 0.06d;
+    public static String[] resultType = {
+        "8-bit log(Amplitude^2)",
+        "32-bit log(Amplitude^2)",
+        "32-bit gamma-scaled Amplitude"};
+    public String resultTypeChoice = resultType[0];  // TODO: enum!
+    public double gamma = 0.3;
+    
     
     @Override 
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);
         imp.getWidth();
-        gd.addCheckbox("Gamma FFT scaling? (default is log)", gammaScaling);
-        gd.addNumericField("gamma", gamma, 2);
         gd.addNumericField("gaussian window %", winFraction, 3);
+        gd.addRadioButtonGroup("Result type", resultType, 3, 1, resultType[0]);
+        gd.addNumericField("gamma", gamma, 2);
         gd.showDialog();
         if (gd.wasOKed()) {
-            gammaScaling = gd.getNextBoolean();
-//            @SuppressWarnings("unchecked")
-//            Vector<Double> num = (Vector<Double>)gd.getNumericFields();
-            this.gamma = gd.getNextNumber();
+            this.resultTypeChoice = gd.getNextRadioButton();
             this.winFraction = gd.getNextNumber();
+            this.gamma = gd.getNextNumber();
             IJ.showStatus("FFT stack...");
             ImagePlus impF = exec(imp);
             impF.show();
@@ -63,11 +67,16 @@ public class Util_StackFFT2D implements PlugIn {
      */ 
     public ImagePlus exec(ImagePlus imp) {
         ImagePlus impF = null;
-        if (gammaScaling) {
-            impF = FFT2D.fftImp(imp, winFraction, gamma);
-        } else {
-            IJ.log("win " + winFraction + ", log scaling");
+        if (resultTypeChoice.equals(resultType[0])) {
             impF = FFT2D.fftImp(imp, winFraction, 0.0d);
+            IJ.log(resultTypeChoice + ", gaussian window " + winFraction + "%");
+        } else if(resultTypeChoice.equals(resultType[1])) {
+            impF = FFT2D.fftImpLog32bit(imp, winFraction);
+            IJ.log(resultTypeChoice + ", gaussian window " + winFraction + "%");
+        } else {
+            impF = FFT2D.fftImp(imp, winFraction, gamma);
+            IJ.log(resultTypeChoice + ", gaussian window "
+                    + winFraction + "%, gamma=" + gamma);
         }
         impF.setTitle(I1l.makeTitle(imp, TLA));
         return impF;
