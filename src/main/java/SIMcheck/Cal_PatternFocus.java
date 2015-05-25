@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2013, Graeme Ball and Micron Oxford,
+ *  Copyright (c) 2015, Graeme Ball and Micron Oxford,
  *  University of Oxford, Department of Biochemistry.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -28,7 +28,7 @@ import java.awt.Color;
 
 import ij.plugin.StackCombiner;
 
-/** This plugin takes raw SI data (1C, 1T) for a bead lawn and shows
+/** This plugin takes raw SIM data (1C, 1T) for a bead lawn and shows
  * an axial side-view of the illumination pattern for the first phase.
  * @author Graeme Ball <graemeball@gmail.com>
  **/
@@ -104,8 +104,8 @@ public class Cal_PatternFocus implements PlugIn, Executable {
 
     /** Execute plugin functionality: split out phase1 for 3 angles
      * and show max-intensity-projected axial view.
-     * @param imps input raw SI data ImagePlus should be first imp
-     * @return ResultSet containing 3 projections
+     * @param imps input raw SIM data ImagePlus should be first imp
+     * @return ResultSet containing montage of 3 projections
      */
     public ResultSet exec(ImagePlus... imps) {
         ImagePlus imp = imps[0];
@@ -217,12 +217,12 @@ public class Cal_PatternFocus implements PlugIn, Executable {
     }
 
     /** Convert ImageJ angle (degrees CCW from E) to OMX (rad CCW from N). */
-    private static double ij2omx(double angle) {
+    static double ij2omx(double angle) {
         return Math.toRadians(angle - 90.0d);
     }
     
     /** Convert OMX angle (radians CCW from N) to IJ (deg CCW from E). */
-    private static double omx2ij(double angle) {
+    static double omx2ij(double angle) {
         double angleDeg = Math.toDegrees(angle) + 90.0d;
         if (angleDeg < 0.0d) {
             return 180.0d + angleDeg;

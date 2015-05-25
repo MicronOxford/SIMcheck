@@ -133,7 +133,6 @@ TODO
         - make compatible with running from a macro and document batch run
         - spherical aberration mismatch check: axis always symmetrical about 0?
         - thresh / 16-bit: explain steps in log file (& per. channel thresh)
-        - choose direction of rotation
 
 * 1.1: post-release updates, bugfixes & suggestions from feedback
 
@@ -144,6 +143,7 @@ TODO
         - turn FTR profile into multi-color and/or plot
 
       - updates:
+        - choose direction of rotation
         - si2wf: add option without 2x size scaling
         - si2wf: option to select only one angle
         - MCN: auto-threshold using pseudo-widefield, report per. angle MCNR
