@@ -1,5 +1,5 @@
 /*                                                                              
- *  Copyright (c) 2013, Graeme Ball and Micron Oxford,                          
+ *  Copyright (c) 2015, Graeme Ball and Micron Oxford,                          
  *  University of Oxford, Department of Biochemistry.                           
  *                                                                               
  *  This program is free software: you can redistribute it and/or modify         
@@ -70,7 +70,7 @@ public class Rec_SAMismatch implements PlugIn, Executable {
                 ImageProcessor ip = imp2.getProcessor();
                 ImageStatistics stats = ip.getStatistics();
                 ImageStatistics featStats = I1l.featStats(ip);
-                // normalize all statistics to stack mode as 0 point
+                // normalize all statistics to stack mode (not!) as 0 point
                 double nmin = stats.min - stackMode;
                 double nmean = featStats.mean - stackMode;
                 sliceMinima[z] = nmin;

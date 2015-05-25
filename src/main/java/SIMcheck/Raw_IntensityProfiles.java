@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2013, Graeme Ball and Micron Oxford,
+ *  Copyright (c) 2015, Graeme Ball and Micron Oxford,
  *  University of Oxford, Department of Biochemistry.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -67,7 +67,7 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
 
     /** Execute plugin functionality: create a plot of intensity profile per 
      * channel. Assumes OMX CPZAT dimension order.
-     * @param imps input raw SI data ImagePlus should be first imp
+     * @param imps input raw SIM data ImagePlus should be first imp
      * @return ResultSet containing intensity profile plots
      */
     public ResultSet exec(ImagePlus... imps) {

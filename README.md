@@ -108,25 +108,21 @@ Style Notes
 TODO
 ====
 
-* 0.9.9: post-submission refactoring
-
-      - documentation:
-        - javadoc updates
-
-      - tests, structure:
-        - make sure all parameters chosen are logged
-        - test data:
-          - compact test / example data suite for distribution
-          - work out strategy for test data distribution
-        - refactor / test Cal_Phases: unwrap (+test case), stats and structure
-        - more crop utility tests, move to separate utility plugin
-      
 * 1.0: final updates & documentation for 1.0 release with publication
 
       - documentation:
         - SIMcheck manual revision & additions
         - citable code:
               https://github.com/blog/1840-improving-github-for-science
+
+      - tests, structure:
+        - make sure all parameters chosen are logged
+        - test data:
+          - compact test / example data suite for distribution
+          - work out strategy for test data distribution
+        - update, refactor & test Cal_Phases:
+          - stats and structure
+          - unwrap test case
 
       - updates:
         - make compatible with running from a macro and document batch run
@@ -142,9 +138,11 @@ TODO
         - turn FTR profile into multi-color and/or plot
 
       - updates:
+        - choose direction of rotation
         - si2wf: add option without 2x size scaling
         - si2wf: option to select only one angle
         - MCN: auto-threshold using pseudo-widefield, report per. angle MCNR
+        - Rec Fourier: rename ortho to axial?
         - SIR checks: exclude 0s from mode finding
         - improve "Fourier Transform Phases" info / log output
         - turn CIP into plot (to be able to save raw data) and/or normalize
@@ -152,7 +150,6 @@ TODO
         - channel order: RGB vs. BGR
         - for ELYRA reconstructed .czi, discard WF and decon-WF?
         - progress bar for FPJ plugin (& others?)
-        - for Rec data, auto-scale if data has >16-bit values
         - tidy raw FPJ & add target overlay & hide by default
         - try to find a more robust bleach estimation procedure (CIP)
         - MCM: add note to overlay where saturated pixels present?
@@ -162,6 +159,7 @@ TODO
 
       - tests, structure:
         - multi-frame: test / document stats for current time-point only
+        - more crop utility tests, move to separate utility plugin
         - get rid of IJ.run calls & show/hide of intermediate results 
 
       - documentation:

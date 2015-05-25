@@ -1,5 +1,5 @@
 /*  
- *  Copyright (c) 2013, Graeme Ball and Micron Oxford,                          
+ *  Copyright (c) 2015, Graeme Ball and Micron Oxford,                          
  *  University of Oxford, Department of Biochemistry.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -20,10 +20,16 @@ package SIMcheck;
 
 import ij.IJ;
 
-/** 1D Discrete Fourier Transform for multithreaded processing. NB: no
- * log scaling, lowest freq at point 0, symmetric about point (n-1)/2 based on:
+/** 1D Discrete Fourier Transform for multithreaded processing of the outer
+ * dimension of a 2D array.
+ * <ul>
+ *   <li>use by calling dftOuter static method</li>
+ *   <li>returns amplitude without any scaling (such as log, gamma)</li>
+ *   <li>lowest freq at point 0, symmetric about point (n-1)/2</li>
+ *   <li>based on:
  * <a href="http://nayuki.eigenstate.org/res/how-to-implement-the-discrete-fourier-transform/Dft.java"> Dft.java</a>,
- *  Nayuki Minase.
+ *  Nayuki Minase.</li>
+ *  </ul>
  */
 public class DFT1D implements Runnable {
     // TODO: change the runnable to a separate inner class?
@@ -57,7 +63,7 @@ public class DFT1D implements Runnable {
         this.pend = pend;
     }
     
-    /** Run 1D DFT - NOT NORMALLY USED, but called by dftOuter method. */
+    /** Run 1D DFT: only intended to be called by dftOuter method. */
     @Override
     public void run() {
         double[] re = new double[vlen];
@@ -79,7 +85,7 @@ public class DFT1D implements Runnable {
                 dftRe[j] = sumreal;
                 dftIm[j] = sumimag;
             }
-            // return power spectrum (NB. no logarithmic scaling)
+            // return amplitude (NB. no logarithmic scaling)
             for (int j = 0; j < vlen; j++) {
                 outPix[j][p] = (float)Math.sqrt(
                         Math.pow(dftRe[j], 2) + Math.pow(dftIm[j], 2));
@@ -88,7 +94,7 @@ public class DFT1D implements Runnable {
     }
 
     /** 
-     * Calculate the power spectrum using multithreaded 1D DFT, where outer 
+     * Calculate the Fourier amplitudes using multithreaded 1D DFT, where outer 
      * dim is vector to be transformed, inner dim is intensity (XY pixels).
      * @param  vPix 2D array of floats (1st dim = vector, 2nd dim = pixels)
      * @return ftPix 2D array holding non-log-scaled power spectrum

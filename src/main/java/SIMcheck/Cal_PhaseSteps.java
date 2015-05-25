@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2013, Graeme Ball and Micron Oxford,
+ *  Copyright (c) 2015, Graeme Ball and Micron Oxford,
  *  University of Oxford, Department of Biochemistry.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -35,7 +35,7 @@ import ij.gui.*;
 
 /**
  * This plugin takes raw SI data for an even field of fluorescence and
- * calculates illumination pattern phase-step and offset stability.
+ * evaluates illumination pattern phase stability.
  * 
  * @author Graeme Ball <graemeball@gmail.com>
  **/
@@ -63,6 +63,7 @@ public class Cal_PhaseSteps implements PlugIn {
     private int pltW = 528;
     private int pltH = 255;
 
+    @Override
     public void run(String arg) {
         imp = IJ.getImage();
         int nz = imp.getNSlices() / (phases * angles);
@@ -100,12 +101,12 @@ public class Cal_PhaseSteps implements PlugIn {
     }
 
     /**
-     * Execute plugin functionality: split the angles into separate stacks and
-     * perform a 2D FFT on each slice.
+     * Execute plugin functionality: split the angles into separate stacks,
+     * perform a 2D FFT on each slice and find 1st order peaks. Quantify
+     * frequency stability and phase step and offset stability.
      * 
-     * @param imps
-     *            input raw SI data ImagePlus should be first imp
-     * @return ResultSet containing FFT with detected peaks
+     * @param imps input raw SIM data ImagePlus should be first ImagePlus
+     * @return ResultSet containing FFT results, phase plots and stats
      */
     public ResultSet exec(ImagePlus... imps) {
         // TODO, check we have micron calibration
@@ -301,7 +302,7 @@ public class Cal_PhaseSteps implements PlugIn {
     }
 
     /** Find structured illumination pattern peak pair for specified order. */
-    Polygon findSIpeakPair(FloatProcessor fp, int order) {
+    private Polygon findSIpeakPair(FloatProcessor fp, int order) {
         double tolerance = fp.getStatistics().stdDev * peakStdev;
         MaximumFinder maxfind = new MaximumFinder();
         Polygon maxima = maxfind.getMaxima(fp, tolerance, true);
@@ -332,7 +333,7 @@ public class Cal_PhaseSteps implements PlugIn {
     // }
 
     /** Peak pair? i.e. on line through center at equal distance? */
-    private static boolean isPeakPair(Polygon peaks, int w, int h, int tol) {
+    static boolean isPeakPair(Polygon peaks, int w, int h, int tol) {
         boolean ispeakPair = true;
         int[] x = { peaks.xpoints[0], w / 2, peaks.xpoints[1] };
         int[] y = { peaks.ypoints[0], h / 2, peaks.ypoints[1] };
@@ -352,8 +353,8 @@ public class Cal_PhaseSteps implements PlugIn {
     }
 
     /** Calculate angle between peak pair and x-axis (radians) */
-    // TODO, test
-    private static double calcKangle(Polygon peakPlus, int w, int h) {
+    static double calcKangle(Polygon peakPlus, int w, int h) {
+        // TODO, test
         if (peakPlus == null) {
             return Double.NaN;
         }
@@ -364,7 +365,7 @@ public class Cal_PhaseSteps implements PlugIn {
     }
 
     /** Calculate SI line spacing based on 1st or 2nd order peak positions */
-    private static double calcLineSpacing(Polygon peakPair, int w, int h,
+    static double calcLineSpacing(Polygon peakPair, int w, int h,
             Calibration cal, int order) {
         if (peakPair == null) {
             return Double.NaN;
@@ -387,7 +388,7 @@ public class Cal_PhaseSteps implements PlugIn {
     }
 
     /** Select k+, i.e. x > 0, from a pair of peaks and return as new Polygon */
-    private static Polygon selectPeakPlus(Polygon peakPair, int w) {
+    static Polygon selectPeakPlus(Polygon peakPair, int w) {
         if (peakPair == null)
             return null;
         Polygon peakPlus;
@@ -405,7 +406,7 @@ public class Cal_PhaseSteps implements PlugIn {
     }
 
     /** Return standard deviation of array of single point Polygon coords */
-    double[] peakPositionStdevs(Polygon[] peakSets) {
+    private double[] peakPositionStdevs(Polygon[] peakSets) {
         // TODO, test me
         // String debug = "  filtered peak+ position ";
         Polygon medCoord = medianCoords(peakSets);
@@ -452,7 +453,6 @@ public class Cal_PhaseSteps implements PlugIn {
     }
 
     /** Filter out null Polygons from an array of Polygons */
-    // TODO: move to util class
     static Polygon[] filterNull(Polygon[] coordSetRaw) {
         int rawLen = coordSetRaw.length;
         int flen = 0;
@@ -667,8 +667,7 @@ public class Cal_PhaseSteps implements PlugIn {
      * image center within tol. Returns Polygon containing peak pair x,y coords
      * or null if failed.
      */
-    private static Polygon filterPeakPair(Polygon peaks, FloatProcessor fp,
-            int tol) {
+    static Polygon filterPeakPair(Polygon peaks, FloatProcessor fp, int tol) {
         int npeaks = peaks.npoints;
         if (npeaks < 2) {
             return null; // RETURN EARLY IF INSUFFICIENT PEAKS

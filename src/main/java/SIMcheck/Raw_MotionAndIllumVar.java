@@ -1,4 +1,4 @@
-/*  Copyright (c) 2013, Graeme Ball and Micron Oxford,
+/*  Copyright (c) 2015, Graeme Ball and Micron Oxford,
  *  University of Oxford, Department of Biochemistry.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -63,7 +63,7 @@ public class Raw_MotionAndIllumVar implements PlugIn, Executable {
     }
 
     /** Execute plugin functionality: false-color angles to show disparities.
-     * @param imps raw SI data ImagePlus should be first imp
+     * @param imps raw SIM data ImagePlus should be first imp
      * @return ResultSet containing merge of false-colored angles
      */
     public ResultSet exec(ImagePlus... imps) {

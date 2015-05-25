@@ -22,7 +22,7 @@ class OrthoReslicer implements PlugIn {
     private ImagePlus imp;
     boolean interpolate = true;
 
-    /** OrthoReslicer can be run as an IJ plugin for testing - see exec */
+    /** Can be run from main() to test, but SIMcheck calls via exec() */
     public void run(String arg) {
         imp = WindowManager.getCurrentImage();
         ImagePlus impOrtho = exec(imp, true);

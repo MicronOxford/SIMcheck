@@ -1,5 +1,5 @@
-/*  
- *  Copyright (c) 2014, Graeme Ball.
+/*
+ *  Copyright (c) 2015, Graeme Ball.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,27 +21,27 @@ import ij.IJ;
 import ij.ImagePlus;
 
 /**
- * Access test data: for use in main() interactive test methods.
+ * Define paths to test data: for use in main() interactive test methods.
  * @author Graeme Ball <graemeball@gmail.com>
  */
 class TestData {
-    
+
     /** Utility class should not be instantiated. */
     private TestData() {}
-    
-    public static final ImagePlus raw = 
+
+    public static final ImagePlus raw =
             IJ.openImage("src/test/resources/TestRaw.tif");
-    
-    public static final ImagePlus recon = 
+
+    public static final ImagePlus recon =
             IJ.openImage("src/test/resources/TestRecon.tif");
-    
-    public static final ImagePlus lawn = 
+
+    public static final ImagePlus lawn =
             IJ.openImage("src/test/resources/BeadLawn.tif");
 
-    public static final ImagePlus asymm = 
+    public static final ImagePlus asymm =
             IJ.openImage("src/test/resources/TestAsymm.tif");
 
-    public static final ImagePlus elyra = 
+    public static final ImagePlus elyra =
             IJ.openImage("src/test/resources/TestElyra.tif");
-    
+
 }

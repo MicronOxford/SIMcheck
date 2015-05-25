@@ -1,5 +1,5 @@
 /*  
- *  Copyright (c) 2014, Graeme Ball.
+ *  Copyright (c) 2015, Graeme Ball.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ public class J {
      * Add two 1D float arrays of the same length, element by element.
      * @param f1 first input array
      * @param f2 second input array
-     * @return float[] array of same length as first input
+     * @return new float[] array of same length as first input
      */
     public static float[] add(float[] f1, float[] f2) {
         int len = f1.length;
@@ -53,7 +53,7 @@ public class J {
      * Apply an Anscombe variance stabilizing transform to a 2D float array:
      * <pre>x-&gt;[2*sqrt(x)]+3/8</pre>
      * @param ab 2D array of floats 
-     * @return Anscome-transformed 2D array same shape as input
+     * @return new Anscome-transformed 2D array same shape as input
      */
     public static float[][] anscombe(float[][] ab) {
         int nb = ab[0].length;
@@ -73,7 +73,7 @@ public class J {
         return Math.abs((d1 - d2) * 2 / (d1 + d2)) < APPROX_EQ_TOL;
     }
 
-    /** Concatenate arr2 to the end of arr1. */
+    /** Return new array of arr2 concatenated onto the end of arr1. */
     public static int[] cat(int[] arr1, int[] arr2) {
         int[] result = new int[arr1.length + arr2.length];
         System.arraycopy(arr1, 0, result, 0, arr1.length);
@@ -81,7 +81,7 @@ public class J {
         return result;
     }
 
-    /** Concatenate arr2 to the end of arr1. */
+    /** Return new array of arr2 concatenated onto the end of arr1. */
     public static String[] cat(String[] arr1, String[] arr2) {
         String[] result = new String[arr1.length + arr2.length];
         System.arraycopy(arr1, 0, result, 0, arr1.length);
@@ -106,7 +106,7 @@ public class J {
         return output;
     }
     
-    /** Convert double to string (2 sig figs). */
+    /** Convert double to string (2 sig figs, round up). */
     public static String d2s(double dStat) {
         BigDecimal bd = new BigDecimal(dStat);
         if (Math.abs(dStat) >= 100.0d) {
@@ -118,12 +118,12 @@ public class J {
         return bd.toString();
     }
     
-    /** Euclidean distance */
+    /** Return Euclidean distance between (x1, y1) and (x2, y2). */
     public static double dist(double x1, double y1, double x2, double y2) {
         return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2) / 2);
     }
 
-    /** Divide each element of a float array by a float. */
+    /** Divide each element of a float array by a float (return new array). */
     public static float[] div(float[] f, float div) {
         int len = f.length;
         float[] result = new float[len];
@@ -144,7 +144,7 @@ public class J {
         return result;
     }
 
-    /** Convert primitive Float array to primitive Double array. */
+    /** Convert primitive float array to primitive double array. */
     public static double[] f2d(float[] f) {
         if (f == null)
         {
@@ -181,7 +181,7 @@ public class J {
         return maxIndex;
     }
 
-    /** Average an array of doubles, ignoring NaN entries */
+    /** Average an array of doubles, ignoring NaN entries. */
     public static double mean(double[] d) {
         int len = d.length;
         double total = 0.0d;
@@ -226,7 +226,7 @@ public class J {
         return min;
     }
 
-    /** Multiply each element of a float array by a float. */
+    /** Multiply each element of a float array by a float (return new arr). */
     public static float[] mult(float[] f, float factor) {
         int len = f.length;
         float[] result = new float[len];
@@ -246,7 +246,7 @@ public class J {
         System.out.println(o.toString());
     }
 
-    /** Square each element of a float array. */                                
+    /** Square each element of a float array (return new array). */                                
     public static float[] sq(float[] f) {                                       
         int len = f.length;                                                     
         float[] sq = new float[len];                                           
@@ -256,7 +256,7 @@ public class J {
         return sq;                                                             
     }
 
-    /** Take the square root of each element of a float array. */               
+    /** Take square root of each element of a float array (return new arr). */               
     public static float[] sqrt(float[] f) {                                     
         int len = f.length;                                                     
         float[] sqrt = new float[len];                                         
@@ -266,15 +266,7 @@ public class J {
         return sqrt;                                                           
     }
 
-    /** Subtract value from each element of a float array. */
-    public static float[] sub(float[] f, float val) {
-        for (int i = 0; i < f.length; i++) {
-            f[i] = f[i] - val;
-        }
-        return f;
-    }
-    
-    /** Return a timestamp String. */
+    /** Return a timestamp String: yyyy/MM/dd HH:mm:ss */
     public static String timestamp() {
         Date date = Calendar.getInstance().getTime();
         return new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(date);

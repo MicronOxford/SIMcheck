@@ -13,7 +13,7 @@ import ij.measure.Calibration;
 
 import java.util.Properties;
 
-class Radial_Profile implements PlugIn {
+class RadialProfile implements PlugIn {
 
     // parameter fields
     public int nBins=100;
@@ -22,7 +22,8 @@ class Radial_Profile implements PlugIn {
     private double X0;
     private double Y0;
     private double mR;
-
+    
+    /** Can be run from main() to test, but SIMcheck calls via exec() */
     public void run(String arg) {
         ImagePlus plotImp = exec(IJ.getImage());
         plotImp.show();
@@ -99,12 +100,12 @@ class Radial_Profile implements PlugIn {
 
     /** main() method for testing. */
     public static void main(String[] args) {
-        System.out.println("Testing Radial_Profile.java");
+        System.out.println("Testing RadialProfile.java");
         new ImageJ();
         ImagePlus impTest = TestData.recon;
         impTest = FFT2D.fftImp(impTest);
         impTest.show();
-        Radial_Profile radialProfiler = new Radial_Profile();
+        RadialProfile radialProfiler = new RadialProfile();
         ImagePlus radialProfile = radialProfiler.exec(impTest);
         radialProfile.show();
     }

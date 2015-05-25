@@ -1,5 +1,5 @@
 /*                                                                              
- *  Copyright (c) 2013, Graeme Ball and Micron Oxford,                          
+ *  Copyright (c) 2015, Graeme Ball and Micron Oxford,                          
  *  University of Oxford, Department of Biochemistry.                           
  *                                                                               
  *  This program is free software: you can redistribute it and/or modify         
@@ -66,8 +66,8 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
         }
     }
 
-    /** Execute plugin functionality: plot histogram and calculate +ve/-ve
-     * ratio. 
+    /** Execute plugin functionality: plot histogram and calculate
+     * 'max-to-min' intensity ratio. 
      * @param imps reconstructed data ImagePlus should be first imp
      * @return ResultSet containing histogram plots                                  
      */

@@ -1,5 +1,5 @@
-/*  
- *  Copyright (c) 2013, Graeme Ball,                          
+/*
+ *  Copyright (c) 2015, Graeme Ball,
  *  University of Oxford, Department of Biochemistry.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -19,11 +19,11 @@
 package SIMcheck;
 import ij.ImagePlus;
 
-/** 
+/**
  * Executable interface for a pre-configured image processor.
  */
 public interface Executable {
-   
+
     /**
      * Execution method containing processor functionality.
      * @param imps one or more ImagePlus inputs

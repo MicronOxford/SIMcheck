@@ -1,5 +1,5 @@
 /*  
- *  Copyright (c) 2013, Graeme Ball and Micron Oxford, 
+ *  Copyright (c) 2015, Graeme Ball and Micron Oxford, 
  *  University of Oxford, Department of Biochemistry.             
  *                                                                               
  *  This program is free software: you can redistribute it and/or modify         
@@ -25,7 +25,7 @@ import ij.gui.GenericDialog;
 
 import java.awt.image.IndexColorModel;
 
-/** This plugin displays a modulation contrast map for raw SI data. 
+/** This plugin displays a modulation contrast map for raw SIM data. 
  * For each channel, displaying the result with a LUT which is also shown. 
  * Started as an ImageJ implementation of Rainer Kaufmann's original idea and 
  * MATLAB code, modified to calculate Modulation Contrast-to-Noise Ratio.
@@ -61,8 +61,10 @@ import java.awt.image.IndexColorModel;
  * ***** My modifications *****
  * 
  *  I have calculated a Modulation Contrast-to-Noise Ratio (MCNR), which is: 
- *        1st order freq mod amplitude / av noise amplitude 
- *    where noise amplitude approximated to be equal to highest freq component.
+ *      modulation amplitude / av noise amplitude 
+ *  where modulation amplitude is quadratic mean of 1st and 2nd order
+ *  amplitudes, and the highest freq component is taken to be a measure
+ *  of the noise amplitude.
  * </pre>
  */
 public class Raw_ModContrast implements PlugIn, Executable {
@@ -286,7 +288,7 @@ public class Raw_ModContrast implements PlugIn, Executable {
     }
     
     /** Estimate optimum Wiener filter setting for reconstruction using MCNR. */
-    private double estimWiener(double mcnr) {
+    static double estimWiener(double mcnr) {
         /* Wiener filter parameter inversely proportional to noise variance
          * using dataset where MCNR = 4.6 sigma^2 has optimal Wiener = 0.04
          *   x / 4.6^2  = 0.004, => x = 0.085 and Wiener = 0.085 / (MCNR^2)
@@ -294,7 +296,7 @@ public class Raw_ModContrast implements PlugIn, Executable {
         return 0.170d / (mcnr * mcnr);  // 0.0085 doubled based on Wiener series
     }
     
-    /** Calculate DFT for window orthogonal to an XY slice. */
+    /** Calculate DFT for window orthogonal to an XY slice (i.e. phase). */
     private float[][] dftSliceWindow(
             int vlen, int nc, int c, int phStart, int phEnd,
             int nz, int zStart, int zEnd,
@@ -322,13 +324,17 @@ public class Raw_ModContrast implements PlugIn, Executable {
      */
     private FloatProcessor calcModContrast(
             float[][] freqPix, FloatProcessor fp) {
-        /* SI illumination 1st order Contrast-to-Noise Ratio (CNR1):- 
-         * CNR12 = (k1/k0) / (N0/k0) = k1/N0 
+        /* SIM illumination 1st order Contrast-to-Noise Ratio (CNR1):- 
+         *   CNR1 = (k1/k0) / (N0/k0) = k1/N0 
          * where k1 is the amplitude of the 1st order modulation 
          * k0 is the amplitude of the zero order (constant) signal 
          * N0 is the amplitude of the noise in the zero order signal 
          * & using the approximation that N0 and the highest frequency 
-         * amplitude are equivalent
+         * amplitude are equivalent.
+         * The calculation was updated to include the second order illumination
+         * frequency, and now returns
+         *   CNR12 = k12/N0
+         * where k12 is root mean square (quadratic mean) of 1st & 2nd order 
          */
         int vlen = freqPix.length;
         int npix = freqPix[0].length;
@@ -369,7 +375,7 @@ public class Raw_ModContrast implements PlugIn, Executable {
     }
     
     /** Is feature MCNR stat value acceptable? */
-    private static ResultSet.StatOK checkMCNR(Double statValue) {
+    static ResultSet.StatOK checkMCNR(Double statValue) {
         if (statValue >= 6.0) {
             return ResultSet.StatOK.YES;
         } else if (statValue >= 3.0) {

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2013, Graeme Ball,
+ *  Copyright (c) 2015, Graeme Ball,
  *  University of Oxford, Department of Biochemistry.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -25,15 +25,16 @@ import ij.gui.OvalRoi;
 import ij.plugin.filter.GaussianBlur;
 
 /** Improved FFT extends the ImageJ 2D FHT class, adding extra methods for:
- * calculation of phase image, suppression of low frequencies.
+ * calculation of phase image, suppression of low frequencies, and different
+ * result scaling options.
  * @author Graeme Ball <graemeball@gmail.com>
  */
 public class FFT2D extends FHT {
     
-    // tolerance to check if a double precision float is approx. equal to 0
-    private static final double ZERO_TOL = 0.000001d;
     private static final double WIN_FRACTION_DEFAULT = 0.06d;
     private static final double NO_GAMMA = 0.0d;  // no gamma correction
+    // tolerance to check if a double precision float is approx. equal to 0
+    private static final double ZERO_TOL = 0.000001d;
 
     public FFT2D(ImageProcessor ip){
         super(ip);
@@ -51,14 +52,20 @@ public class FFT2D extends FHT {
         return complexFourier.getProcessor(2);
     }
 
-    /** Return absolute value image of Fourier transform (no log scaling). */
+    /** 
+     * Return absolute value image of Fourier transform (32-bit,
+     * no log scaling) for this object's FHT.
+     */
     public ImageProcessor getComplexAbs() {
         FHT fht = (FHT)this;
-        return getComplexAbs(fht);
+        return getComplexAbs(fht, false);
     }
 
-    /** Return absolute value image of Fourier transform (no log scaling). */
-    public static ImageProcessor getComplexAbs(FHT fht) {
+    /** 
+     * Static method returning absolute value image of Fourier transform 'fht'
+     * passed as a parameter (result is 32-bit, no log scaling, optional ^2). 
+     */
+    public static ImageProcessor getComplexAbs(FHT fht, boolean squared) {
         ImageStack complexFourier = fht.getComplexTransform();
         FloatProcessor fpReal =
             (FloatProcessor)complexFourier.getProcessor(1).convertToFloat();
@@ -67,9 +74,16 @@ public class FFT2D extends FHT {
             (FloatProcessor)complexFourier.getProcessor(2).convertToFloat();
         float[] imagPix = (float[])fpImag.getPixels();
         float[] absPix = new float[realPix.length];
-        for(int i=0; i<realPix.length; i++) {
-            absPix[i] = (float)Math.sqrt((double)(realPix[i] * realPix[i] + 
-                                            imagPix[i] * imagPix[i]));
+        if (squared) {
+            for(int i=0; i<realPix.length; i++) {
+                absPix[i] = realPix[i] * realPix[i] + imagPix[i] * imagPix[i];
+            }
+        } else {
+            // duplication of code above to prevent 'i' if tests...
+            for(int i=0; i<realPix.length; i++) {
+                absPix[i] = (float)Math.sqrt((double)(realPix[i] * realPix[i] 
+                                             + imagPix[i] * imagPix[i]));
+            }
         }
         int w = fpReal.getWidth();
         int h = fpReal.getHeight();
@@ -114,8 +128,7 @@ public class FFT2D extends FHT {
      * @param ip for slice to process 
      * @param pc percentile (0 - 1) of image width / height for window
      */
-    public static ImageProcessor gaussWindow(
-            ImageProcessor ip, double pc) {
+    public static ImageProcessor gaussWindow(ImageProcessor ip, double pc) {
         int nx = ip.getWidth();
         int ny = ip.getHeight();
         int winx = (int)(pc * (double)nx);
@@ -160,19 +173,17 @@ public class FFT2D extends FHT {
         return fht;
     }
 
-    /** 
-     * 2D FFT the entire hyperstack for this imp (in the XY plane).
-     * @return new ImagePlus after 2D FFT
-     **/
-    public static ImagePlus fftImp(ImagePlus impIn) {
-        return fftImp(impIn, WIN_FRACTION_DEFAULT, NO_GAMMA);
-    }
-    
     /**
-     * 2D FFT hyperstack, specify window function size as input size fraction.
+     * 2D Fourier Transform each slice in a hyperstack using ImageJ's FHT class,
+     * with options to control window function, result type and scaling.
+     * @param impIn ImagePlus to be Fourier-transformed
+     * @param floatResult result type: true=float, false=8-bit 
+     * @param winFraction window function size as a fraction 0-1 of input size
+     * @param gamma result gamma scaling (gamma=0.0d gives log-scaled result)
+     * @return ImagePlus where each 2D slice has been Fourier transformed
      */
-    public static ImagePlus fftImp(
-            ImagePlus impIn, double winFraction, double gamma)
+    public static ImagePlus fftImp(ImagePlus impIn, boolean floatResult,
+            double winFraction, double gamma)
     {
         ImagePlus imp = impIn.duplicate();
         Calibration cal = impIn.getCalibration();
@@ -209,9 +220,13 @@ public class FFT2D extends FHT {
             fht = FFT2D.fftSlice(ip, imp);
             ImageProcessor ps = null;
             if (gamma > 0.0d) {
-                ps = gammaScaledPowerSpectrum(fht, gamma);
+                ps = gammaScaledAmplitude(fht, gamma);
             } else {
-                ps = fht.getPowerSpectrum();
+                if (floatResult) {
+                    ps = logScaledPowerSpectrum(fht);
+                } else {
+                    ps = fht.getPowerSpectrum();
+                }
             }
             stackF.addSlice(String.valueOf(slice), ps);  // FFT power spectrum
             progress += (double) slice / (double) slices;
@@ -227,16 +242,41 @@ public class FFT2D extends FHT {
         return impF;
     }
     
-    /** Return a gamma-corrected power spectrum rescaled to fill 8-bit. */
-    public static ImageProcessor gammaScaledPowerSpectrum(
+    /** fftImp with default IJ options: log-scaled Amp^2, 8-bit result. */
+    public static ImagePlus fftImp(ImagePlus impIn) {
+        return fftImp(impIn, false, WIN_FRACTION_DEFAULT, NO_GAMMA);
+    }
+    
+    /**
+     * fftImp with default IJ options: log-scaled Amp^2, 8-bit result,
+     * but specified window function winFraction.
+     */
+    public static ImagePlus fftImp(ImagePlus impIn, double winFraction) {
+        return fftImp(impIn, false, winFraction, NO_GAMMA);
+    }
+
+    /** Return power spectrum: amplitude squared, scaled by 10log10. */ 
+    public static ImageProcessor logScaledPowerSpectrum(FHT fht)
+    {
+        FloatProcessor fp = (FloatProcessor)getComplexAbs(fht, true);
+        float[] absPix = (float[])fp.getPixels();
+        int nPix = absPix.length;
+        float[] psPix = new float[nPix];
+        for (int i = 0; i < nPix; i++) {
+            double pwr = Math.log(absPix[i]);
+            psPix[i] = (float)pwr;
+        }
+        fp.setPixels(psPix);  // N.B. update min and max after setPixels!
+        fp.setMinAndMax(J.min(psPix), J.max(psPix));
+        return fp;
+    }
+
+    /** Return gamma-scaled FFT absolute values. */
+    public static ImageProcessor gammaScaledAmplitude(
             FHT fht, double gamma)
     {
-        ImageProcessor ipAbs = getComplexAbs(fht);
+        ImageProcessor ipAbs = getComplexAbs(fht, false);
         float[] psAbsPix = (float[])ipAbs.getPixels();
-        // TODO: decide whether to scale 0-8 and convert to 8-bit
-        // rescale absolute values so min=0, max=8 before gamma scaling
-//        psAbsPix = J.sub(psAbsPix, (float)ipAbs.getMin());
-//        psAbsPix = J.div(psAbsPix, (float)(ipAbs.getMax() / 8.0f));
         int nPix = psAbsPix.length;
         for (int i = 0; i < nPix; i++) {
             psAbsPix[i] = (float)Math.pow((double)psAbsPix[i], gamma);
@@ -244,7 +284,6 @@ public class FFT2D extends FHT {
         ipAbs.setPixels(psAbsPix);  // N.B. update min and max after setPixels!
         ipAbs.setMinAndMax(J.min(psAbsPix), J.max(psAbsPix));
         return ipAbs;
-//        return ipAbs.convertToByte(true);  // as 8-bit image, filling 0-255
     }
 
     /** 
@@ -275,7 +314,13 @@ public class FFT2D extends FHT {
         return padSize;
     }
 
-    /** Filter low/offset frequencies from the Fourier transform result. */
+    /**
+     * Filter low/offset frequencies from a Fourier transform result.
+     * @param fp input FloatProcessor containig FFT amplitudes
+     * @param centralRadius radius (pixels) of central Gaussian attenuation
+     * @param lineHalfWidth in pixels, to suppress kx~0, ky~0
+     * @return filtered result
+     */
     public static ImageProcessor filterLow(FloatProcessor fp,
                                     double centralRadius,
                                     double lineHalfWidth) {
@@ -317,7 +362,7 @@ public class FFT2D extends FHT {
         return (ImageProcessor)fp;
     }
 
-    /** Calculate phase using real + imaginary components. **/
+    /** Calculate phase (radians) using real + imaginary components. **/
     private static float calcPhase(float re, float im) {
         if (re > 0) {
             return (float)Math.atan((double)im/re);
@@ -334,7 +379,7 @@ public class FFT2D extends FHT {
         }
     }
     
-    /** Test method. */
+    /** Manual test method. */
     public static void main(String[] args) {
         System.out.println("Testing FFT2D.java");
         new ImageJ();
