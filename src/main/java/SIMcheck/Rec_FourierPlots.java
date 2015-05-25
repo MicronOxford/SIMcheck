@@ -285,7 +285,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         int nc = imp.getNChannels();
         int nz = imp.getNSlices();
         ImagePlus[] profiles = new ImagePlus[nc];
-        Radial_Profile radialProfiler = new Radial_Profile();
+        RadialProfile radialProfiler = new RadialProfile();
         for (int c = 1; c <= nc; c++) {
             imp.setPosition(c, nz / 2, 1);
             ImageProcessor ip = imp.getProcessor();
