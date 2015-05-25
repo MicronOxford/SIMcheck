@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2013, Graeme Ball and Micron Oxford,
+ * Copyright (c) 2015, Graeme Ball and Micron Oxford,
  * University of Oxford, Department of Biochemistry.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -347,7 +347,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         return Fimp;
     }
     
-    /** main method for testing */
+    /** main method for manual testing */
     public static void main(String[] args) {
         new ImageJ();
         ImagePlus impTest = TestData.recon;
