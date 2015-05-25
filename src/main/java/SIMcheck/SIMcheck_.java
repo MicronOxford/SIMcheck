@@ -35,7 +35,6 @@ import java.util.*;
  * <li>enables selection of images and checks</li>
  * <li>collects important parameters (data type, number of angles etc.)</li>
  * <li>displays instructions and has help button pointing to website</li>
- * <li>is blocking and has no exec method</li>
  * <li>contains some static utility methods only relevant to SIM data</li>
  * </ul>
  * @author Graeme Ball <graemeball@gmail.com>
