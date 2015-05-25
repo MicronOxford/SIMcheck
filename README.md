@@ -112,17 +112,6 @@ TODO
 
       - documentation:
         - javadoc updates
-
-      - tests, structure:
-        - make sure all parameters chosen are logged
-        - test data:
-          - compact test / example data suite for distribution
-          - work out strategy for test data distribution
-        - refactor / test Cal_Phases:
-          - unwrap (+test case)
-          - stats and structure
-          - choose direction of rotation
-        - refactor Stack FFT utility and FFT2D
       
 * 1.0: final updates & documentation for 1.0 release with publication
 
@@ -131,10 +120,20 @@ TODO
         - citable code:
               https://github.com/blog/1840-improving-github-for-science
 
+      - tests, structure:
+        - make sure all parameters chosen are logged
+        - test data:
+          - compact test / example data suite for distribution
+          - work out strategy for test data distribution
+        - update, refactor & test Cal_Phases:
+          - stats and structure
+          - unwrap test case
+
       - updates:
         - make compatible with running from a macro and document batch run
         - spherical aberration mismatch check: axis always symmetrical about 0?
         - thresh / 16-bit: explain steps in log file (& per. channel thresh)
+        - choose direction of rotation
 
 * 1.1: post-release updates, bugfixes & suggestions from feedback
 
