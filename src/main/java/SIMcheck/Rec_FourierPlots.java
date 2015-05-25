@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2013, Graeme Ball and Micron Oxford,
+ * Copyright (c) 2015, Graeme Ball and Micron Oxford,
  * University of Oxford, Department of Biochemistry.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -115,7 +115,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             imp2 = Util_RescaleTo16bit.exec(imps[0].duplicate());
         }
         IJ.showStatus("Fourier transforming z-sections (lateral view)");
-        ImagePlus impF = FFT2D.fftImp(imp2, winFraction, 0.0d);
+        ImagePlus impF = FFT2D.fftImp(imp2, winFraction);
         blurRadius *= (double)impF.getWidth() / 512.0d;
         IJ.showStatus("Blurring & rescaling z-sections (lateral view)");
         autoscaleSlices(impF);
@@ -147,7 +147,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
                 impOrtho = I1l.takeCentralZ(impOrtho);
                 Calibration calOrtho = impOrtho.getCalibration();
                 IJ.showStatus("FFT z-sections (orthogonal view)");
-                ImagePlus impOrthoF = FFT2D.fftImp(impOrtho, winFraction, 0.0d);
+                ImagePlus impOrthoF = FFT2D.fftImp(impOrtho, winFraction);
                 IJ.showStatus("Blur & rescale z-sections (orthogonal view)");
                 autoscaleSlices(impOrthoF);
                 impOrthoF = resizeAndPad(impOrthoF, cal);
@@ -285,7 +285,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         int nc = imp.getNChannels();
         int nz = imp.getNSlices();
         ImagePlus[] profiles = new ImagePlus[nc];
-        Radial_Profile radialProfiler = new Radial_Profile();
+        RadialProfile radialProfiler = new RadialProfile();
         for (int c = 1; c <= nc; c++) {
             imp.setPosition(c, nz / 2, 1);
             ImageProcessor ip = imp.getProcessor();
@@ -347,7 +347,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         return Fimp;
     }
     
-    /** main method for testing */
+    /** main method for manual testing */
     public static void main(String[] args) {
         new ImageJ();
         ImagePlus impTest = TestData.recon;

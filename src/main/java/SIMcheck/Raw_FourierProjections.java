@@ -1,5 +1,5 @@
 /*  
- *  Copyright (c) 2013, Graeme Ball and Micron Oxford,                          
+ *  Copyright (c) 2015, Graeme Ball and Micron Oxford,                          
  *  University of Oxford, Department of Biochemistry.                           
  *                                                                               
  *  This program is free software: you can redistribute it and/or modify         
@@ -24,8 +24,9 @@ import ij.process.*;
 import ij.gui.GenericDialog; 
 import ij.IJ;
 
-/** This plugin takes raw SI data and splits each angle into a separate stack     
- * to which a 2D FFT is applied to each slice.
+/** This plugin takes raw SIM data and splits each angle into a separate stack     
+ * to which a 2D FFT is applied to each slice. The result shows, for each
+ * channel, a maximum intensity projection over all phases, angles and Z.
  * @author Graeme Ball <graemeball@gmail.com>
  */ 
 public class Raw_FourierProjections implements PlugIn, Executable {
@@ -87,7 +88,8 @@ public class Raw_FourierProjections implements PlugIn, Executable {
     }
     
     /** Rescale 8-bit imp 0-255 for input mode to max. */
-    private void autoscaleSlices(ImagePlus imp) {  // FIXME, duplicated in Rec_fourier
+    private void autoscaleSlices(ImagePlus imp) {
+        // FIXME, duplicated in Rec_fourier
         int ns = imp.getStackSize();
         for (int s = 1; s <= ns; s++) {
             imp.setSlice(s);
@@ -101,7 +103,7 @@ public class Raw_FourierProjections implements PlugIn, Executable {
         }
     }
     
-    /** Execute plugin functionality: apply stack FFT with win func,
+    /** Execute old plugin functionality: apply stack FFT with win func,
      * bleach correction "simple ratio", subtract 50, max-intensity
      * project, auto-contrast mode-max.
      */
@@ -133,7 +135,7 @@ public class Raw_FourierProjections implements PlugIn, Executable {
         return results;
     }        
 
-    /** Execute plugin functionality (old version): split angles into separate
+    /** Execute even older plugin functionality: split angles into separate
      * stacks and perform 2D FFT on each slice for V2 OMX CPZAT dimension order.
      * @param imps first imp should be input raw SI data ImagePlus
      * @return ResultSet containing FFTs for each angle

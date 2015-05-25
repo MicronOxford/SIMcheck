@@ -76,3 +76,9 @@ Version 0.9.8
 * add '_' to jar finalName via pom so plugin appears in IJ Plugins
 * bugfix: si2wf accidental rescale
 * Cal_PatternFocus change default angle def method to line
+
+Version 0.9.9
+-------------
+* bugfix: Util_RescaleTo16bit incorrect minimum
+* add new FFT2D display option (log-scaled, float) and refactor
+* update all javadocs
