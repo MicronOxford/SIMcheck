@@ -1,5 +1,5 @@
 /*  
- *  Copyright (c) 2014, Graeme Ball.
+ *  Copyright (c) 2015, Graeme Ball.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -111,7 +111,7 @@ public final class I1l {
         return tempImp.getStack().getProcessor(1);                                  
     }
 
-    /** Calculate angle in radians CCW from E using given x, y coords. */
+    /** Calculate angle in radians CCW from East using given x, y coords. */
     public static double calcAngle(double x, double y) {
         if (x > 0) {
             return Math.atan(y / x);
@@ -139,7 +139,7 @@ public final class I1l {
         return r;
     }
     
-    /** Concatenate stack2 onto the end of stack 1. */
+    /** Concatenate stack2 onto the end of stack 1 (return new Stack). */
     public static ImageStack cat(ImageStack stack1, ImageStack stack2) {
         int width = stack1.getWidth();
         int height = stack1.getHeight();
@@ -380,7 +380,10 @@ public final class I1l {
         }
     }
     
-    /** Simple Ratio Intensity Normalization (RIN) of ImagePlus slices. */
+    /** 
+     * Simple Ratio Intensity Normalization (RIN) of ImagePlus slices.
+     * Intensity normalization is applied per channel.
+     */
     public static ImagePlus normalizeImp(ImagePlus imp) {
         int nc = imp.getNChannels();
         ImagePlus[] impsNorm = new ImagePlus[nc];
