@@ -1,4 +1,4 @@
-/*  Copyright (c) 2013, Graeme Ball and Micron Oxford,                          
+/*  Copyright (c) 2015, Graeme Ball and Micron Oxford,                          
  *  University of Oxford, Department of Biochemistry.                           
  *                                                                               
  *  This program is free software: you can redistribute it and/or modify         
@@ -42,7 +42,7 @@ import java.util.*;
 public final class SIMcheck_ implements PlugIn {
     
     // constants
-    private static final String VERSION = "0.9.9-SNAPSHOT";
+    private static final String VERSION = "0.9.9";
     private static final String none = "[None]";  // no image
     private static final String omx = "OMX (CPZAT)";
 
