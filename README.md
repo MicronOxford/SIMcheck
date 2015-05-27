@@ -8,7 +8,7 @@ reliability of Structured Illumination Microscopy (SIM) data.
 * More information can be found on the 
 [Micron Oxford Website](http://www.micron.ox.ac.uk/software/SIMCheck.php)
 * **The .jar for the latest release can be downloaded from
-[here](http://downloads.micron.ox.ac.uk/fiji_update/SIMcheck/plugins/)**
+[here](http://downloads.micron.ox.ac.uk/cgi-bin/ImageJ-plugin-latest.cgi?site=SIMcheck&plugin=plugins/SIMcheck_)**
 * Further help is available
 [here](http://www.micron.ox.ac.uk/microngroup/software/SIMcheck.html)
 
