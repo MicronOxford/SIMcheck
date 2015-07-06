@@ -128,6 +128,7 @@ public class Util_RescaleTo16bit implements PlugIn {
         for (int c = 0; c < imps.length; c++) {
             double minimum = minima[c];
             IJ.run(imps[c], "Min...", "value=" + minimum + " stack");
+            IJ.run(imps[c], "Subtract...", "value=" + minimum + " stack");
         }
         imp.setStack(I1l.mergeChannels(imp.getTitle(), imps).getStack());
     }
