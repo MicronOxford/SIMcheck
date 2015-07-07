@@ -1,4 +1,3 @@
-========
 SIMcheck
 ========
 
@@ -7,18 +6,8 @@ reliability of Structured Illumination Microscopy (SIM) data.
 
 * More information can be found on the 
 [Micron Oxford Website](http://www.micron.ox.ac.uk/software/SIMCheck.php)
-* **The .jar for the latest release can be downloaded from
-[here](http://downloads.micron.ox.ac.uk/cgi-bin/ImageJ-plugin-latest.cgi?site=SIMcheck&plugin=plugins/SIMcheck_)**
 * Further help is available
 [here](http://www.micron.ox.ac.uk/microngroup/software/SIMcheck.html)
-
-The project uses the maven build and dependency management tool, so to
-build run the following command (.jar file appears in ./target/):-
-
-    mvn package
-
-There is currently no Fiji update site, but we plan to create one for
-versions 1.0 and above.
 
 Copyright Graeme Ball and Lothar Schermelleh, Micron Oxford, Department of
 Biochemistry, University of Oxford. License GPL unless stated otherwise in
@@ -26,10 +15,48 @@ a given file (in particular, SIMcheck uses modified versions of ImageJ's
 Slicer plugin and Paul Baggethun's Radial Profile Plot plugin).
 
 
+Installation
+============
+
+ImageJ updater
+--------------
+
+The simplest way to install SIMcheck and keep it up to date on your system is
+using the ImageJ updater.  SIMcheck is available via an ImageJ update site so
+you only need to activate it from the list of sites.  See
+["How to follow an update site"](http://fiji.sc/How_to_follow_a_3rd_party_update_site)
+for more details
+
+Manual install
+--------------
+
+The jar file for the latest release can also be
+[downloaded manually](http://downloads.micron.ox.ac.uk/fiji_update/SIMcheck/plugins/)
+for cases where the IMageJ updater is not available.  Older versions of
+SIMcheck can be obtained by navigating the
+[SIMcheck update site](http://downloads.micron.ox.ac.uk/fiji_update/SIMcheck/).
+
+Building from source
+--------------------
+
+The project uses the maven build and dependency management tool, so to
+build it, run the following command (.jar file appears in `target/`):
+
+    mvn package
+
+In addition, SIMcheck is also released via Sonatype to ease its use by
+other projects:
+
+    <dependency>
+      <groupId>uk.ac.ox.micron</groupId>
+      <artifactId>SIMcheck</artifactId>
+      <version></version>
+    </dependency>
+
+
 Features
 ========
 
------------------------
 0: SIMcheck main dialog
 -----------------------
 
@@ -38,36 +65,33 @@ Features
 - results: images will appear and key statistics will be logged
 - help button: link to instructions, help, documentation
 
-----------------------------------
 1: Pre-processing, Raw Data Checks
 ----------------------------------
 
-    Check            |        Statistic(s)                 |      Comments   
+    Check            |        Statistic(s)                 |      Comments
 -------------------- | ----------------------------------- | ------------------
- Intensity Profiles  | bleaching, flicker, angle intensity | 
- Motion / Illum Var  | angle difference (motion, illum.)   | 
- Fourier Projections | None: check pattern / spots OK      | 
- Modulation Contrast | feature MCNR acceptable?            | Wiener estimate   
+ Intensity Profiles  | bleaching, flicker, angle intensity |
+ Motion / Illum Var  | angle difference (motion, illum.)   |
+ Fourier Projections | None: check pattern / spots OK      |
+ Modulation Contrast | feature MCNR acceptable?            | Wiener estimate
 
------------------------------
 2: Post-reconstruction Checks
 -----------------------------
 
     Check            |        Statistic(s)                 |      Comments
 -------------------- | ----------------------------------- | ------------------
- Intensity Histogram | +ve/-ve ratio acceptable?           | top/bottom 0.01%  
+ Intensity Histogram | +ve/-ve ratio acceptable?           | top/bottom 0.01%
  SA Mismatch         | stdDev of miniumum vs. mean         | shows OTF mismatch
- Fourier Plots       | None: symmetry+profile OK?          | 
+ Fourier Plots       | None: symmetry+profile OK?          |
  Mod Contrast Map    | None: inspect MCNR of features      | green=saturated
 
----------------------
 3: Calibration Checks
 ---------------------
 
     Check            |        Statistic(s)                 |      Comments
 -------------------- | ----------------------------------- | ------------------
- Illum. Phase Steps  | phase step & range stable?          | +k0, linespacing  
- Pattern Focus       | None: check for "zipper" pattern    |                   
+ Illum. Phase Steps  | phase step & range stable?          | +k0, linespacing
+ Pattern Focus       | None: check for "zipper" pattern    |
 
 4: Utilities
 ------------
