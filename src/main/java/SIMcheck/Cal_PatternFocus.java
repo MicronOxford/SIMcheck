@@ -41,7 +41,7 @@ public class Cal_PatternFocus implements PlugIn, Executable {
 	private int width;
 	private int height;
 	private static final String[] angleMethods = {
-	    "IJ line selection**", "degrees (IJ)", "radians (OMX)"
+	    "degrees (IJ)", "IJ line selection**", "radians (OMX)"
 	};
 	
 	// parameter fields
@@ -74,6 +74,9 @@ public class Cal_PatternFocus implements PlugIn, Executable {
             angles = (int)gd.getNextNumber();
             phases = (int)gd.getNextNumber();
             if (angleMethod.equals(angleMethods[0])) {
+                // IJ degrees
+                angle1 = (double)gd.getNextNumber();
+            } else if (angleMethod.equals(angleMethods[1])) {
                 // line selection
                 try {
                     angle1 = imp.getRoi().getAngle();
@@ -82,9 +85,6 @@ public class Cal_PatternFocus implements PlugIn, Executable {
                             "You forgot to draw a line selection!");
                     return;
                 }
-            } else if (angleMethod.equals(angleMethods[1])) {
-                // IJ degrees
-                angle1 = (double)gd.getNextNumber();
             } else {
                 // OMX radians
                 gd.getNextNumber();  // angle in degrees: discard!
