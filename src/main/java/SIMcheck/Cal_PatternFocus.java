@@ -49,6 +49,7 @@ public class Cal_PatternFocus implements PlugIn, Executable {
 	public int angles = 3;
 	public double angle1 = 0.00d;  // 1st pattern angle (IJ: deg CCW from E)
 	public String angleMethod = angleMethods[0];
+	public boolean rotateCCW = false;
 	public boolean showRotated = false;
 	
     @Override
@@ -64,9 +65,10 @@ public class Cal_PatternFocus implements PlugIn, Executable {
         gd.addNumericField("Angle 1 (rad, OMX)", ij2omx(angle1), 3);
         gd.addRadioButtonGroup("Method to specify angle", angleMethods,
                 1, angleMethods.length, angleMethods[0]);
-        gd.addCheckbox("Show rotated illumination patterns?", showRotated);
         gd.addMessage("** Select focal plane in angle 1 & draw line from" +
                       " bottom to top end of an arbitrary stripe.");
+        gd.addCheckbox("Counter-clockwise stripe rotation?", rotateCCW);
+        gd.addCheckbox("Show rotated illumination patterns?", showRotated);
         gd.showDialog();
         if (gd.wasCanceled()) return;
         if (gd.wasOKed()) {
@@ -91,6 +93,7 @@ public class Cal_PatternFocus implements PlugIn, Executable {
                 angle1 = omx2ij((double)gd.getNextNumber());
             }
             ij.Prefs.set("SIMcheck.angle1", angle1);
+            rotateCCW = gd.getNextBoolean();
             showRotated = gd.getNextBoolean();
         }
         if (!I1l.stackDivisibleBy(imp, phases * angles)) {
@@ -140,7 +143,11 @@ public class Cal_PatternFocus implements PlugIn, Executable {
                         montage.getStack(), phase1imps[a].getStack());
                 montage.setStack(montageStack);
             }
-            angleDegrees += 180.0d / angles;  // angles cover 180 deg
+            if (rotateCCW) {
+                angleDegrees -= 180.0d / angles;  // angles cover 180 deg
+            } else {
+                angleDegrees += 180.0d / angles;  // default rotation clockwise
+            }
         }
         for (int a = 0; a < angles; a++) {
             phase1imps[a].close();
