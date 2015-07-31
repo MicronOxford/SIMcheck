@@ -26,6 +26,7 @@ import ij.gui.*;
 import ij.IJ;
 
 import java.awt.Color;
+import java.util.Arrays;
 
 /** This plugin plots slice average intensity for each channel of raw SI data
  * to evaluate intensity stability as phase, Z, angle and time are incremented.
@@ -135,7 +136,8 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
                 Color color = Color.BLACK;  // channels beyond 3rd BLACK 
                 plot.setColor(color);
             }
-            plot.addPoints(pzat_no, avIntensities, 1);
+            float[] channelItens = Arrays.copyOf(avIntensities, pzat);
+            plot.addPoints(pzat_no, channelItens, Plot.LINE);
             
             // TODO: refactor the code below, which has grown very messy!
             
@@ -242,7 +244,6 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
                     ResultSet.StatOK.NA);
             
         }
-        
         ImagePlus impResult = plot.getImagePlus();
         I1l.drawPlotTitle(impResult, "Raw data intensity profile (C1=red,"
                 + " C2=green, C3=blue, C4=black)");

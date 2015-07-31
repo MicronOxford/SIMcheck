@@ -60,8 +60,8 @@ public class Cal_PhaseSteps implements PlugIn {
     private int width = 0;
     private int height = 0;
     private boolean doPadding = false;
-    private int pltW = 528;
-    private int pltH = 255;
+    private int pltW = 530;
+    private int pltH = 250;
 
     @Override
     public void run(String arg) {
@@ -80,8 +80,8 @@ public class Cal_PhaseSteps implements PlugIn {
         gd.addMessage("Requires SI raw data in OMX (CPZAT) order.");
         gd.addNumericField("Angles", angles, 0);
         gd.addNumericField("Phases", phases, 0);
-        gd.addNumericField("first Z slice to analyze", zFirst, 0);
-        gd.addNumericField("last Z slice to analyze", zLast, 0);
+        gd.addNumericField("first_Z_slice_to_analyze", zFirst, 0);
+        gd.addNumericField("last_Z_slice_to_analyze", zLast, 0);
         gd.showDialog();
         if (gd.wasCanceled())
             return;
@@ -526,6 +526,7 @@ public class Cal_PhaseSteps implements PlugIn {
         double[] phaseStats = analyzePhases(phaseSet);
         Plot plot = new Plot("Phase plot", "Slices in order: Z, phase",
                 "Phase [radians]");
+        plot.setSize(pltW, pltH);
         plot.setLineWidth(1);
         plot.setColor(Color.BLACK);
         plot.setLimits(1.0d, (double) phaseSet.length, plotMin, plotMax);
