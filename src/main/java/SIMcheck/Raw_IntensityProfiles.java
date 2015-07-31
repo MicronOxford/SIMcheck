@@ -244,7 +244,6 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
                     ResultSet.StatOK.NA);
             
         }
-        IJ.log("each color with a different symbol???");
         ImagePlus impResult = plot.getImagePlus();
         I1l.drawPlotTitle(impResult, "Raw data intensity profile (C1=red,"
                 + " C2=green, C3=blue, C4=black)");
