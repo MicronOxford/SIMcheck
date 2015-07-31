@@ -31,7 +31,7 @@ public class ResultSet {
 
     // for automatic formatting of result log / output
     private static final int TEXTWIDTH = 52;
-    static final int STAT_SIG_FIGS = 2;
+    static final int STAT_SIG_FIGS = 3;
     private static final int CHECK_MAX_CHARS = TEXTWIDTH * 100;
 
     /** Interpretation of a statistic: is it OK? yes, no, maybe. */

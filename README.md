@@ -162,7 +162,7 @@ TODO
         - turn FTR profile into multi-color and/or plot
 
       - updates:
-        - choose direction of rotation
+        - auto-scale display settings for all images per channel
         - si2wf: add option without 2x size scaling
         - si2wf: option to select only one angle
         - MCN: auto-threshold using pseudo-widefield, report per. angle MCNR

@@ -82,3 +82,12 @@ Version 0.9.9
 * bugfix: Util_RescaleTo16bit incorrect minimum
 * add new FFT2D display option (log-scaled, float) and refactor
 * update all javadocs
+
+Version 0.9.10
+--------------
+* IPS, set plot width to ensure it fits stack of plots
+* report all stats to 3 sig fig, previously 2
+* pattern focus, add CCW stripe rotation checkbox
+* change default pattern focus angle method back to IJ degrees
+* CIP bugfix: was overwriting intens array for each C (pass ref to Plot)
+* 16-bit util: fix for missing subtraction of specified min

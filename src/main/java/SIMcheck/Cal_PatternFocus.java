@@ -41,7 +41,7 @@ public class Cal_PatternFocus implements PlugIn, Executable {
 	private int width;
 	private int height;
 	private static final String[] angleMethods = {
-	    "IJ line selection**", "degrees (IJ)", "radians (OMX)"
+	    "degrees (IJ)", "IJ line selection**", "radians (OMX)"
 	};
 	
 	// parameter fields
@@ -49,6 +49,7 @@ public class Cal_PatternFocus implements PlugIn, Executable {
 	public int angles = 3;
 	public double angle1 = 0.00d;  // 1st pattern angle (IJ: deg CCW from E)
 	public String angleMethod = angleMethods[0];
+	public boolean rotateCCW = false;
 	public boolean showRotated = false;
 	
     @Override
@@ -60,13 +61,14 @@ public class Cal_PatternFocus implements PlugIn, Executable {
         gd.addNumericField("Phases", phases, 0);
         // NB. in IJ, East is 0, in worx North is 0 (CCW is +ve in both cases)
         angle1 = ij.Prefs.get("SIMcheck.angle1", angle1);
-        gd.addNumericField("Angle 1 (deg, IJ)", angle1, 1);
-        gd.addNumericField("Angle 1 (rad, OMX)", ij2omx(angle1), 3);
-        gd.addRadioButtonGroup("Method to specify angle", angleMethods,
+        gd.addNumericField("Angle_1_(deg,_IJ)", angle1, 1);
+        gd.addNumericField("Angle_1_(rad,_OMX)", ij2omx(angle1), 3);
+        gd.addRadioButtonGroup("Method_to_specify_angle", angleMethods,
                 1, angleMethods.length, angleMethods[0]);
-        gd.addCheckbox("Show rotated illumination patterns?", showRotated);
         gd.addMessage("** Select focal plane in angle 1 & draw line from" +
                       " bottom to top end of an arbitrary stripe.");
+        gd.addCheckbox("Counter-clockwise_stripe_rotation?", rotateCCW);
+        gd.addCheckbox("Show_rotated_illumination_patterns?", showRotated);
         gd.showDialog();
         if (gd.wasCanceled()) return;
         if (gd.wasOKed()) {
@@ -74,6 +76,9 @@ public class Cal_PatternFocus implements PlugIn, Executable {
             angles = (int)gd.getNextNumber();
             phases = (int)gd.getNextNumber();
             if (angleMethod.equals(angleMethods[0])) {
+                // IJ degrees
+                angle1 = (double)gd.getNextNumber();
+            } else if (angleMethod.equals(angleMethods[1])) {
                 // line selection
                 try {
                     angle1 = imp.getRoi().getAngle();
@@ -82,15 +87,13 @@ public class Cal_PatternFocus implements PlugIn, Executable {
                             "You forgot to draw a line selection!");
                     return;
                 }
-            } else if (angleMethod.equals(angleMethods[1])) {
-                // IJ degrees
-                angle1 = (double)gd.getNextNumber();
             } else {
                 // OMX radians
                 gd.getNextNumber();  // angle in degrees: discard!
                 angle1 = omx2ij((double)gd.getNextNumber());
             }
             ij.Prefs.set("SIMcheck.angle1", angle1);
+            rotateCCW = gd.getNextBoolean();
             showRotated = gd.getNextBoolean();
         }
         if (!I1l.stackDivisibleBy(imp, phases * angles)) {
@@ -140,7 +143,11 @@ public class Cal_PatternFocus implements PlugIn, Executable {
                         montage.getStack(), phase1imps[a].getStack());
                 montage.setStack(montageStack);
             }
-            angleDegrees += 180.0d / angles;  // angles cover 180 deg
+            if (rotateCCW) {
+                angleDegrees -= 180.0d / angles;  // angles cover 180 deg
+            } else {
+                angleDegrees += 180.0d / angles;  // default rotation clockwise
+            }
         }
         for (int a = 0; a < angles; a++) {
             phase1imps[a].close();
