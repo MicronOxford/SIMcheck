@@ -50,12 +50,13 @@ public class Rec_FourierPlots implements PlugIn, Executable {
     // TODO: refactor & remove default winFraction from here
     
     // options
+    public boolean autoCutoff = false;    // no noise cut-off?
     public boolean manualCutoff = false;  // manual noise cut-off?
-    public boolean noCutoff = false;  // no noise cut-off?
-    public boolean applyWinFunc = true;  // apply window function?
-    public boolean autoScale = true;  // re-scale FFT to mode->max?
-    public boolean showAxial = true;  // show axial FFT?
-    public boolean blurAndLUT = false;  // blur & apply false color LUT?
+    public boolean applyWinFunc = false;  // apply window function?
+    public boolean logDisplay = false;    // show 8-bit log(Amp^2)?
+    public boolean autoScale = false;     // re-scale FFT to mode->max?
+    public boolean showAxial = false;     // show axial FFT?
+    public boolean blurAndLUT = false;    // blur & apply false color LUT?
     
     private double[] channelMinima = null;
     
@@ -64,26 +65,28 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);
         imp.getWidth();
-        gd.addCheckbox("No noise cut-off", noCutoff);
-        gd.addCheckbox("Manual noise cut-off...", manualCutoff);
+        gd.addCheckbox("Auto cut-off (stack mode)", autoCutoff);
+        gd.addCheckbox("Manual cut-off...", manualCutoff);
         gd.addCheckbox("Window function**", applyWinFunc);
+        gd.addCheckbox("Display 8-bit log(Amp^2)", logDisplay);
         gd.addCheckbox("Auto-scale FFT (mode-max)", autoScale);
-        gd.addCheckbox("Show axial FFT", showAxial);
         gd.addCheckbox("Blur & false-color LUT", blurAndLUT);
+        gd.addCheckbox("Show axial FFT", showAxial);
         gd.addMessage("** suppress edge artifacts");
         gd.showDialog();
         if (gd.wasOKed()) {
             // TODO: notCutoff, manualCutoff and autoScale radioButton group
-            this.noCutoff = gd.getNextBoolean();
+            this.autoCutoff = gd.getNextBoolean();
             this.manualCutoff = gd.getNextBoolean();
             this.applyWinFunc = gd.getNextBoolean();
+            this.logDisplay = gd.getNextBoolean();
             this.autoScale = gd.getNextBoolean();
-            this.showAxial = gd.getNextBoolean();
             this.blurAndLUT = gd.getNextBoolean();
+            this.showAxial = gd.getNextBoolean();
             if (!applyWinFunc) {
                 winFraction = 0.0d;
             }
-            if (manualCutoff && !noCutoff) {
+            if (manualCutoff) {
                 // skip if noCutoff
                 this.channelMinima = new double[imp.getNChannels()];
                 SIMcheck_.specifyBackgrounds(
@@ -104,29 +107,36 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         // TODO: check we have micron calibrations before continuing..
         Calibration cal = imps[0].getCalibration();
         ImagePlus imp2 = null;
-        if (noCutoff) {
+        if (manualCutoff) {
+            imp2 = Util_RescaleTo16bit.exec(imps[0].duplicate(), channelMinima);
+        } else if (autoCutoff) {
+            imp2 = Util_RescaleTo16bit.exec(imps[0].duplicate());
+        } else {
             imp2 = imps[0].duplicate();
             IJ.run("Conversions...", "scale");
             IJ.run(imp2, "16-bit", "");
             IJ.run("Conversions...", " ");
-        } else if (manualCutoff) {
-            imp2 = Util_RescaleTo16bit.exec(imps[0].duplicate(), channelMinima);
-        } else {
-            imp2 = Util_RescaleTo16bit.exec(imps[0].duplicate());
         }
         IJ.showStatus("Fourier transforming z-sections (lateral view)");
-        ImagePlus impF = FFT2D.fftImp(imp2, winFraction);
-        blurRadius *= (double)impF.getWidth() / 512.0d;
-        IJ.showStatus("Blurring & rescaling z-sections (lateral view)");
-        autoscaleSlices(impF);
-        impF = gaussBlur(impF);
-        if (imps[0].isComposite()) {
-            impF = new CompositeImage(impF);
+        ImagePlus impF = null;
+        if (logDisplay) {
+            impF = FFT2D.fftImp(imp2, winFraction);
+            blurRadius *= (double)impF.getWidth() / 512.0d;
+            IJ.showStatus("Blurring & rescaling z-sections (lateral view)");
+            autoscaleSlices(impF);
+            impF = gaussBlur(impF);
+            if (imps[0].isComposite()) {
+                impF = new CompositeImage(impF);
+            }
+            rescaleToStackMax(impF);
+            setLUT(impF);
+        } else {
+            impF = FFT2D.fftImp(imp2, true, winFraction, 0.2d);
+            IJ.setMinAndMax(impF, 2, 40);
         }
-        rescaleToStackMax(impF);
-        setLUT(impF);
         impF = overlayResRings(impF, cal);
         I1l.copyStackDims(imps[0], impF);
+        impF.setPosition(1, impF.getNSlices() / 2, 1);
         impF.setTitle(I1l.makeTitle(imps[0], TLA));
         results.addImp("Fourier Transform Lateral (XY; resolution rings" +
                 " in microns)", impF);
@@ -147,14 +157,20 @@ public class Rec_FourierPlots implements PlugIn, Executable {
                 impOrtho = I1l.takeCentralZ(impOrtho);
                 Calibration calOrtho = impOrtho.getCalibration();
                 IJ.showStatus("FFT z-sections (orthogonal view)");
-                ImagePlus impOrthoF = FFT2D.fftImp(impOrtho, winFraction);
-                IJ.showStatus("Blur & rescale z-sections (orthogonal view)");
-                autoscaleSlices(impOrthoF);
-                impOrthoF = resizeAndPad(impOrthoF, cal);
-                impOrthoF = gaussBlur(impOrthoF);
-                // TODO, for multi-frame images, ensure impOrthoF is composite
-                rescaleToStackMax(impOrthoF);
-                setLUT(impOrthoF);
+                ImagePlus impOrthoF = null;
+                if (logDisplay) {
+                    impOrthoF = FFT2D.fftImp(impOrtho, winFraction);
+                    IJ.showStatus("Blur & rescale z-sections (orthogonal view)");
+                    autoscaleSlices(impOrthoF);
+                    impOrthoF = resizeAndPad(impOrthoF, cal);
+                    impOrthoF = gaussBlur(impOrthoF);
+                    // TODO, for multi-frame images, ensure impOrthoF is composite
+                    rescaleToStackMax(impOrthoF);
+                    setLUT(impOrthoF);
+                } else {
+                    impOrthoF = FFT2D.fftImp(impOrtho, true, winFraction, 0.2d);
+                    IJ.setMinAndMax(impOrthoF, 2, 40);
+                }
                 calOrtho.pixelHeight = calOrtho.pixelWidth;  // after resizeAndPad
                 impOrthoF = overlayResRings(impOrthoF, calOrtho);
                 I1l.copyStackDims(imps[0], impOrthoF);
