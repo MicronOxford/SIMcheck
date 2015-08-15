@@ -50,7 +50,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
     // TODO: refactor & remove default winFraction from here
     
     // options
-    public boolean autoCutoff = false;    // no noise cut-off?
+    public boolean autoCutoff = true;     // no noise cut-off?
     public boolean manualCutoff = false;  // manual noise cut-off?
     public boolean applyWinFunc = false;  // apply window function?
     public boolean logDisplay = false;    // show 8-bit log(Amp^2)?
@@ -83,9 +83,6 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             this.autoScale = gd.getNextBoolean();
             this.blurAndLUT = gd.getNextBoolean();
             this.showAxial = gd.getNextBoolean();
-            if (!applyWinFunc) {
-                winFraction = 0.0d;
-            }
             if (manualCutoff) {
                 // skip if noCutoff
                 this.channelMinima = new double[imp.getNChannels()];
@@ -118,6 +115,9 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             IJ.run("Conversions...", " ");
         }
         IJ.showStatus("Fourier transforming z-sections (lateral view)");
+        if (!applyWinFunc) {
+            winFraction = 0.0d;
+        }
         ImagePlus impF = null;
         if (logDisplay) {
             impF = FFT2D.fftImp(imp2, winFraction);
