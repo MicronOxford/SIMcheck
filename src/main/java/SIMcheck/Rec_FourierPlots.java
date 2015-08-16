@@ -129,10 +129,15 @@ public class Rec_FourierPlots implements PlugIn, Executable {
                 impF = new CompositeImage(impF);
             }
             rescaleToStackMax(impF);
-            setLUT(impF);
+            setLUT(impF, 0.0d, 255.0d);
         } else {
             impF = FFT2D.fftImp(imp2, true, winFraction, 0.2d);
+            impF = gaussBlur(impF);
+            if (imps[0].isComposite()) {
+                impF = new CompositeImage(impF);
+            }
             IJ.setMinAndMax(impF, 2, 40);
+            setLUT(impF, 2.0d, 40.0d);
         }
         impF = overlayResRings(impF, cal);
         I1l.copyStackDims(imps[0], impF);
@@ -166,10 +171,12 @@ public class Rec_FourierPlots implements PlugIn, Executable {
                     impOrthoF = gaussBlur(impOrthoF);
                     // TODO, for multi-frame images, ensure impOrthoF is composite
                     rescaleToStackMax(impOrthoF);
-                    setLUT(impOrthoF);
+                    setLUT(impOrthoF, 0.0d, 255.0d);
                 } else {
                     impOrthoF = FFT2D.fftImp(impOrtho, true, winFraction, 0.2d);
+                    impOrthoF = gaussBlur(impOrthoF);
                     IJ.setMinAndMax(impOrthoF, 2, 40);
+                    setLUT(impOrthoF, 2.0d, 40.0d);
                 }
                 calOrtho.pixelHeight = calOrtho.pixelWidth;  // after resizeAndPad
                 impOrthoF = overlayResRings(impOrthoF, calOrtho);
@@ -191,13 +198,16 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             + " angle-specific illumination pattern ('k0') fit error, or"
             + " angle-specific z-modulation issues.  -- ");
         results.addInfo("About",
+//                "by default the reconstructed data are (1) cropped to mode;"
+//                        + " (2) a window function applied to reduce edge artifacts prior"
+//                        + " to FFT; (3) FFT slices are normalized (mode-max); (4) target"
+//                        + " rings (overlay) are added to translate frequency to"
+//                        + " spatial resolution. (5) Optionally, results may be blurred"
+//                        + " and a 16-color LUT applied to highlight slope or "
+//                        + " flatness of the Fourier spectrum.");
                 "by default the reconstructed data are (1) cropped to mode;"
-                + " (2) a window function applied to reduce edge artifacts prior"
-                + " to FFT; (3) FFT slices are normalized (mode-max); (4) target"
-                + " rings (overlay) are added to translate frequency to"
-                + " spatial resolution. (5) Optionally, results may be blurred"
-                + " and a 16-color LUT applied to highlight slope or "
-                + " flatness of the Fourier spectrum.");
+                + " (2) Fourier transformed and scaled by a gamma function"
+                + " (gamma=0.2).");
         return results;
     }
     
@@ -246,9 +256,9 @@ public class Rec_FourierPlots implements PlugIn, Executable {
     }
     
     /** Use color LUT, or not, according to blurAndLUT option field. */
-    private void setLUT(ImagePlus imp) {
+    private void setLUT(ImagePlus imp, double min, double max) {
         if (blurAndLUT) {
-            double[] displayRange = {0.0d, 255.0d};  // show all
+            double[] displayRange = {min, max};
             I1l.applyLUT(imp, fourierLUT, displayRange);
         } else {
             if (imp.isComposite()) {
