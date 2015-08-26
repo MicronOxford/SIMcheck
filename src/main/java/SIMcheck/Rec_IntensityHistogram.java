@@ -131,7 +131,10 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
                 + " <3 is inadequate, 3-6 is low, 6-12 is good, >12 excellent."
                 + " For valid results, the data set must contain sufficient"
                 + " background areas (so that the mode reflects background)"
-                + " and should be constrained to z-slices containing features.");
+                + " and should be constrained to z-slices containing features."
+                + " N.B. MMR statistic is only valid for unclipped data"
+                + " (reconstruction option 'discard negatives' or 'baseline"
+                + " cut mode' deactivated!)");
         results.addInfo("About", "MMR is calculated as"
                 + " the ratio of the averaged 0.001%"
                 + " highest (Max*) and lowest (Min*) intensity pixels in a"

@@ -122,7 +122,10 @@ public class Rec_SAMismatch implements PlugIn, Executable {
                 + " and optical transfer function used for the reconstruction."
                 + " Typically this is seen as dip in the minimum intensity"
                 + " plot at the sample boundary. Note, that the absolute value"
-                + " depends on image content.");
+                + " depends on image content."
+                + " N.B. ZMV statistic is only valid for unclipped data"
+                + " (reconstruction option 'discard negatives' or 'baseline"
+                + " cut mode' deactivated!)");
         return results;
     }
      
