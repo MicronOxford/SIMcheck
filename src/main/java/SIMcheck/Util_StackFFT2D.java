@@ -41,7 +41,7 @@ public class Util_StackFFT2D implements PlugIn {
     // parameter fields
     public String resultTypeChoice = resultType[0];
     public double winFraction = 0.06d;
-    public double gamma = 0.3;
+    public double gamma = 0.2;
 
     @Override
     public void run(String arg) {
