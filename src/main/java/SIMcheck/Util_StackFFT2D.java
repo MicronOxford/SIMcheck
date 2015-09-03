@@ -48,13 +48,13 @@ public class Util_StackFFT2D implements PlugIn {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);
         imp.getWidth();
-        gd.addNumericField("gaussian window %", winFraction, 3);
+        gd.addNumericField("Gaussian window %", winFraction * 100, 1);
         gd.addRadioButtonGroup("Result type", resultType, 3, 1, resultType[0]);
         gd.addNumericField("gamma", gamma, 2);
         gd.showDialog();
         if (gd.wasOKed()) {
             this.resultTypeChoice = gd.getNextRadioButton();
-            this.winFraction = gd.getNextNumber();
+            this.winFraction = gd.getNextNumber() / 100;
             this.gamma = gd.getNextNumber();
             IJ.showStatus("FFT stack...");
             ImagePlus impF = exec(imp);
