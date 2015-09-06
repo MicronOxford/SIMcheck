@@ -66,18 +66,22 @@ public class Util_StackFFT2D implements PlugIn {
      * @return ImagePlus after 2D FFT of each slice
      */
     public ImagePlus exec(ImagePlus imp) {
+        ImagePlus imp2 = imp.duplicate();
+        IJ.run("Conversions...", "scale");
+        IJ.run(imp2, "16-bit", "");
+        IJ.run("Conversions...", " ");
         ImagePlus impF = null;
         if (resultTypeChoice.equals(resultType[0])) {
             // default, log-scaled amplitude^2, converted to 8-bit
-            impF = FFT2D.fftImp(imp, false, winFraction, NO_GAMMA);
+            impF = FFT2D.fftImp(imp2, false, winFraction, NO_GAMMA);
             IJ.log(resultTypeChoice + ", gaussian window " + winFraction + "%");
         } else if(resultTypeChoice.equals(resultType[1])) {
             // log-scaled amplitude^2, as 32-bit float
-            impF = FFT2D.fftImp(imp, true, winFraction, NO_GAMMA);
+            impF = FFT2D.fftImp(imp2, true, winFraction, NO_GAMMA);
             IJ.log(resultTypeChoice + ", gaussian window " + winFraction + "%");
         } else {
             // gamma-scaled amplitude (as 32-bit float)
-            impF = FFT2D.fftImp(imp, false, winFraction, gamma);
+            impF = FFT2D.fftImp(imp2, false, winFraction, gamma);
             IJ.log(resultTypeChoice + ", gaussian window "
                     + winFraction + "%, gamma=" + gamma);
         }
