@@ -247,7 +247,10 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
         ImagePlus impResult = plot.getImagePlus();
         I1l.drawPlotTitle(impResult, "Raw data intensity profile (C1=red,"
                 + " C2=green, C3=blue, C4=black)");
-        results.addImp(name, plot.getImagePlus());
+        String shortInfo = "Average absolute intensity for each plane of the"
+                + " raw data stack plotted (C1 red, C2 green, C3 blue,"
+                + " C4 black).";
+        results.addImp(shortInfo, plot.getImagePlus());
         results.addInfo("How to interpret",
                 "total intensity variation > ~50% over the 9-z-window used to"
                 + " reconstruct each z-section may cause artifacts (threshold"
