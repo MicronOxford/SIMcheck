@@ -114,10 +114,10 @@ public class Rec_SAMismatch implements PlugIn, Executable {
         impAllPlots.setOpenAsHyperStack(true);
         results.addImp("Z-section minimum (black) and mean feature intensity (gray)",
                 impAllPlots);
-        results.addInfo("How to interpret", "Z-minimum variation (ZMV)"
-                + " is calculated as the"
-                + " standard deviation of z-section minimum intensity"
-                + " normalized to the average feature intensity. High ZMV"
+        results.addInfo("About", "Z-minimum variation (ZMV) is calculated as"
+                + " the standard deviation of z-section minimum intensity"
+                + " normalized to the average feature intensity.");
+        results.addInfo("How to interpret", "high ZMV"
                 + " indicates spherical aberration mismatch between sample"
                 + " and optical transfer function used for the reconstruction."
                 + " Typically this is seen as dip in the minimum intensity"

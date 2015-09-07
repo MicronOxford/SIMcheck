@@ -103,7 +103,7 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
                 results.addStat(statDescription, 
                         roundedRatio, checkRatio(roundedRatio));
                 results.addInfo("C" + c + " number of max / min" +
-                        " pixels", nNegPixels + "/" + nPosPixels);
+                        " pixels averaged", nNegPixels + "/" + nPosPixels);
                 
             } else {
                 results.addInfo("! histogram minimum above background for"
@@ -127,6 +127,13 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
         impAllPlots.setOpenAsHyperStack(true);
         results.addImp("Intensity counts in black (linear) & gray (log-scale)",
                 impAllPlots);
+        results.addInfo("About", "Max-to-Min intensity Ratio (MMR) is"
+                + " calculated as the ratio of the averaged 0.001%"
+                + " highest (Max*) and lowest (Min*) intensity pixels in a"
+                + " 32-bit stack, centered at the stack mode (assumed to be"
+                + " the center of the noise distribution),"
+                + " that is,\n"
+                + "  Max* - Mode / |Min* - Mode|");
         results.addInfo("How to interpret", "max-to-min intensity ratio, MMR"
                 + " <3 is inadequate, 3-6 is low, 6-12 is good, >12 excellent."
                 + " For valid results, the data set must contain sufficient"
@@ -135,12 +142,6 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
                 + " N.B. MMR statistic is only valid for unclipped data"
                 + " (reconstruction option 'discard negatives' or 'baseline"
                 + " cut mode' deactivated!)");
-        results.addInfo("About", "MMR is calculated as"
-                + " the ratio of the averaged 0.001%"
-                + " highest (Max*) and lowest (Min*) intensity pixels in a"
-                + " 32-bit stack, centered at the stack mode (assumed to be"
-                + " the center of the noise distribution),"
-                + " that is,                Max* - Mode / |Min* - Mode|");
         return results;
     }
 

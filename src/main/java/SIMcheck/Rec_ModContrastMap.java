@@ -197,12 +197,13 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
                 + " variations in reconstruction quality, e.g. due to"
                 + " variations in out-of-focus blur contribution due to"
                 + " feature density, or due to uneven SI illumination.");
-        results.addInfo("MCNR values", "0-3 purple (inadequate),"
-                + " to 6 red (acceptable), to 12 orange (good),"
+        results.addInfo("MCNR values", "0-4 purple (inadequate),"
+                + " to 8 red (acceptable), to 12 orange (good),"
                 + " to 18 yellow (very good), to 24 white (excellent).");
         if (saturatedPixelsDetected) {
-            results.addInfo("Saturated pixels!", "Saturated pixels detected"
-                    + " in the raw data and false-colored green.");
+            results.addInfo("Saturated pixels!", "saturated pixels detected"
+                    + " in the raw data (according to selected bit-depth)"
+                    + " have been false-colored green.");
         }
         return results;
     }

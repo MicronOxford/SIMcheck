@@ -191,7 +191,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             "Fourier plots highlight potential artifacts and indicate"
             + " effective resolution:"
             + "  - Spots in Fourier spectrum indicate periodic patterns."
-            + "  - Flat Fourier spectrum (plateau in radial profile) indicates"
+            + "  - Flatter Fourier spectrum (plateau in radial profile) indicates"
             + " lack of real high frequency signal and poor resolution."
             + "  - Asymmetric FFT indicates angle-specific decrease in"
             + " resolution due to: angle-to-angle intensity variations,"
