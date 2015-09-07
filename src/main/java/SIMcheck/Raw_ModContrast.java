@@ -78,7 +78,7 @@ public class Raw_ModContrast implements PlugIn, Executable {
     // parameter fields
     public int phases = 5;
     public int angles = 3;
-    public double[] displayRange = {0.0, 24.0};
+    public double[] displayRange = {0.0, 32.0};
     public int zw = 1;  // combine (2*zw)+1 Z-planes for FFT (noise reduction)
     public boolean doRawFourier = false;  // raw phase Fourier instead of mcnr
     
