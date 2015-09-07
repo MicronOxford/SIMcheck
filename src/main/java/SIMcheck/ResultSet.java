@@ -135,7 +135,9 @@ public class ResultSet {
             sb.append("\n");
             imp.show();
         }
-        sb.append("\nResult:\n");
+        if (!stats.isEmpty()){
+            sb.append("\nStatistics:\n");
+        }
         // loop over stats twice: log checked (non-NA) stats first, rest after
         boolean hasCheckedStats = false;
         for (Map.Entry<String, Stat> entry : stats.entrySet()) {
