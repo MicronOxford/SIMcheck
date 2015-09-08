@@ -174,6 +174,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
                     setLUT(impOrthoF, 0.0d, 255.0d);
                 } else {
                     impOrthoF = FFT2D.fftImp(impOrtho, true, winFraction, 0.2d);
+                    impOrthoF = resizeAndPad(impOrthoF, cal);
                     impOrthoF = gaussBlur(impOrthoF);
                     IJ.setMinAndMax(impOrthoF, 2, 40);
                     setLUT(impOrthoF, 2.0d, 40.0d);
@@ -291,14 +292,25 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             ImageProcessor ip = stack.getProcessor(s);
             int insertStart = width * (((height - rescaledHeight) / 2) + 1);
             int insertEnd = insertStart + width * rescaledHeight;
-            ImageProcessor pip = new ByteProcessor(width, height);  // to pad
-            byte[] pix = (byte[])((ByteProcessor)ip).getPixels();
-            byte[] padpix = new byte[width * height];
-            for (int i = insertStart; i < insertEnd; i++) {
-                padpix[i] = pix[i - insertStart];
+            if (ip instanceof ByteProcessor) {
+                ImageProcessor pip = new ByteProcessor(width, height); // to pad
+                byte[] pix = (byte[])((ByteProcessor)ip).getPixels();
+                byte[] padpix = new byte[width * height];
+                for (int i = insertStart; i < insertEnd; i++) {
+                    padpix[i] = pix[i - insertStart];
+                }
+                pip.setPixels(padpix);
+                padStack.setProcessor(pip, s);
+            } else {
+                ImageProcessor pip = new FloatProcessor(width, height); // to pad
+                float[] pix = (float[])((FloatProcessor)ip).getPixels();
+                float[] padpix = new float[width * height];
+                for (int i = insertStart; i < insertEnd; i++) {
+                    padpix[i] = pix[i - insertStart];
+                }
+                pip.setPixels(padpix);
+                padStack.setProcessor(pip, s);
             }
-            pip.setPixels(padpix);
-            padStack.setProcessor(pip, s);
         }
         imp2.setStack(padStack);
         I1l.copyCal(imp, imp2);
