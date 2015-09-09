@@ -330,7 +330,12 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             ImagePlus impC = new ImagePlus("impC" + c, ip);
             impC.setProperty("FHT", "F");  // tell radialProfiler it's Fourier
             I1l.copyCal(imp, impC);
-            profiles[c - 1] = radialProfiler.exec(impC);
+            if (logDisplay) {
+                profiles[c - 1] = radialProfiler.exec(impC,
+                        "Integrated Fourier amplitude (a.u.)");
+            } else {
+                profiles[c - 1] = radialProfiler.exec(impC);
+            }
         }
         ImagePlus impProfiles = I1l.mergeChannels(
                 "radial profiles", profiles);
