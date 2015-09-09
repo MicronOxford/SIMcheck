@@ -80,7 +80,10 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
                 Raw_ModContrast plugin = new Raw_ModContrast();
                 plugin.phases = phases;
                 plugin.angles = angles;
-                impMCNR = plugin.exec(rawImp).getImp(0);
+                ResultSet mcnrResults = plugin.exec(rawImp);
+                impMCNR = mcnrResults.getImp(0);
+                impMCNR.show();
+                mcnrResults.report();
             } else {
                 impMCNR = ij.WindowManager.getImage(mcnrStackChoice);
             }
