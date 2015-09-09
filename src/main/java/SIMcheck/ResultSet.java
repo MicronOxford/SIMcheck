@@ -161,7 +161,9 @@ public class ResultSet {
         for (Map.Entry<String, String> entry : infos.entrySet()) {
             String infoTitle = entry.getKey();
             String info = entry.getValue();
-            sb.append("\n");
+            if (info.length() > 20) {
+                sb.append("\n");  // blank line between infos unless very short
+            }
             sb.append(infoTitle + ": " + autoFormat(info, (int)(TEXTWIDTH * 1.15),
                     infoTitle.length() + 2));
             sb.append("\n");
