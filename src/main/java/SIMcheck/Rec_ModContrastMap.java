@@ -207,9 +207,9 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
                 + " to 8 red (acceptable), to 12 orange (good),"
                 + " to 18 yellow (very good), to 24 white (excellent).");
         if (saturatedPixelsDetected) {
-            results.addInfo("Saturated pixels", "saturated pixels detected"
-                    + " in the raw data (according to selected bit-depth)"
-                    + " have been false-colored green!");
+            results.addInfo("Warning!!!", "Saturated pixels detected"
+                    + " in the raw data according to selected bit-depth"
+                    + " (false-colored green).");
         }
         return results;
     }

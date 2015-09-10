@@ -164,7 +164,11 @@ public class ResultSet {
             if (info.length() > 20) {
                 sb.append("\n");  // blank line between infos unless very short
             }
-            sb.append(infoTitle + ": " + autoFormat(info, (int)(TEXTWIDTH * 1.15),
+            String sep = ": ";
+            if (infoTitle.charAt(infoTitle.length() - 1) == '!') {
+                sep = " ";  // don't add a colon if title ends on exclam mark!
+            }
+            sb.append(infoTitle + sep + autoFormat(info, (int)(TEXTWIDTH * 1.15),
                     infoTitle.length() + 2));
             sb.append("\n");
         }
