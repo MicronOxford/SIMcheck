@@ -68,10 +68,10 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         GenericDialog gd = new GenericDialog(name);
         imp.getWidth();
         gd.addCheckbox("(1) Cut-off: auto (stack mode)", autoCutoff);
-        gd.addCheckbox("(1) Cut-off: manual (default=0)", manualCutoff);
+        gd.addCheckbox("     Cut-off: manual (default=0)", manualCutoff);
         gd.addCheckbox("(2) Window function*", applyWinFunc);
         gd.addCheckbox("(3) 32-bit Amp, gamma 0.2, display min-max", gammaMinMax);
-        gd.addCheckbox("(3) 8-bit log(Amp^2), display mode-max", logDisplay);
+        gd.addCheckbox("     8-bit log(Amp^2), display mode-max", logDisplay);
 //        gd.addCheckbox("Auto-scale FFT (mode-max)", autoScale);
         gd.addCheckbox("(4) Blur & false-color LUT", blurAndLUT);
         gd.addCheckbox("(5) Show axial FFT", showAxial);
