@@ -125,7 +125,7 @@ public class Rec_SAMismatch implements PlugIn, Executable {
                 + " depends on image content."
                 + " N.B. ZMV statistic is only valid for unclipped data"
                 + " (reconstruction option 'discard negatives' or 'baseline"
-                + " cut mode' deactivated!)");
+                + " cut mode' deactivated).");
         return results;
     }
      

@@ -89,12 +89,12 @@ public class Raw_FourierProjections implements PlugIn, Executable {
         }
         displayMinToMax(impProjF);
         impProjF.setTitle(I1l.makeTitle(imps[0], TLA));
-        String shortInfo = "Max-intensity projection of 2D FFT"
-                + " 32-bit log(Amp^2), rescaled (min-max)" 
+        String shortInfo = "Max-intensity projection of of log-scaled"
+                + " (amplitude^2) 2D FFT stack, rescaled (min-max)" 
                 + " to improve contrast of the relevant frequency range.";
         results.addImp(shortInfo, impProjF);
         results.addInfo("How to interpret", "look for clean 1st & 2nd"
-                + " order spots, similar across angles. Note that Spot"
+                + " order spots, similar across angles. Note that spot"
                 + " intensity depends on image content.");
         return results;
     }

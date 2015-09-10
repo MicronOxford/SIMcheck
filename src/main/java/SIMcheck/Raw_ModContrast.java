@@ -260,7 +260,7 @@ public class Raw_ModContrast implements PlugIn, Executable {
             results.addInfo("How to interpret",
                     "color LUT indicates MCNR value:" +
                     "  - purple is inadequate (<4)" +
-                    "  - red is low to moderate 4-8" +
+                    "  - red is low to moderate (4-8)" +
                     "  - orange is good (8-12)" +
                     "  - yellow-white is very good-excellent (>12)  -- ");
             results.addInfo("Average feature MCNR",

@@ -141,7 +141,7 @@ public class Rec_IntensityHistogram implements PlugIn, Executable {
                 + " and should be constrained to z-slices containing features."
                 + " N.B. MMR statistic is only valid for unclipped data"
                 + " (reconstruction option 'discard negatives' or 'baseline"
-                + " cut mode' deactivated!)");
+                + " cut mode' deactivated).");
         return results;
     }
 
