@@ -193,7 +193,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
                     impOrthoF = gaussBlur(impOrthoF);
                     if (gammaMinMax) {
                         if (blurAndLUT) {
-                            displayModeToMax(impOrthoF);
+                            displayCentralModeToMax(impOrthoF);
                         } else {
                             displayMinToMax(impOrthoF);
                         }
@@ -235,6 +235,23 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         for (int c = 1; c <= imp.getNChannels(); c++) {
             mode = I1l.getStatsForChannel(imp, c).dmode;
             max = I1l.getStatsForChannel(imp, c).max;
+            imp.setC(c);
+            IJ.setMinAndMax(imp, mode, max);
+        }
+        imp.setC(1);
+    }
+
+    /** Set display each channel mode-max of central 1/3 horizontal stripe. */
+    private void displayCentralModeToMax(ImagePlus imp) {
+        int yThird = imp.getHeight() / 3;
+        Roi centralRoi = new Roi(0, yThird, imp.getWidth(), yThird);
+        imp.setRoi(centralRoi);
+        ImagePlus impCentral = new Duplicator().run(imp, 2, 2, 1, 1, 1, 1);
+        imp.deleteRoi();
+        double mode, max;
+        for (int c = 1; c <= imp.getNChannels(); c++) {
+            mode = I1l.getStatsForChannel(impCentral, c).dmode;
+            max = I1l.getStatsForChannel(impCentral, c).max;
             imp.setC(c);
             IJ.setMinAndMax(imp, mode, max);
         }
