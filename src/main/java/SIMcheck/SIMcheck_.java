@@ -102,7 +102,7 @@ public final class SIMcheck_ implements PlugIn {
         // present options
         gd.addCheckbox("Tile result windows after running?", doTileAfterRun);
         gd.addMessage("---------------- Raw Data -----------------");
-        gd.addChoice("Raw_Data:", titles, titles[1]);
+        gd.addChoice("Raw_data:", titles, titles[1]);
         gd.addChoice("Data format:", formats, omx);
         gd.addNumericField("Angles", angles, 0);
         gd.addNumericField("Phases", phases, 0);
@@ -112,7 +112,7 @@ public final class SIMcheck_ implements PlugIn {
         gd.addCheckbox(Raw_ModContrast.name, doModContrast);
         gd.addNumericField("    Camera Bit Depth", camBitDepth, 0);
         gd.addMessage("------------ Reconstructed Data ------------");
-        gd.addChoice("Reconstructed_Data:", titles, titles[0]);
+        gd.addChoice("Reconstructed_data:", titles, titles[0]);
         gd.addCheckbox(Rec_IntensityHistogram.name, doHistograms);
         gd.addCheckbox(Rec_SAMismatch.name, doSAMismatch);
         gd.addCheckbox(Rec_FourierPlots.name, doFourierPlots);
