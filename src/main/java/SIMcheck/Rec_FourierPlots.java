@@ -145,6 +145,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             }
             if (gammaMinMax) {
                 displayMinToMax(impF);
+                setLUT(impF);
             } else {
                 IJ.setMinAndMax(impF, 2, 40);
                 setLUT(impF, 2.0d, 40.0d);
@@ -189,6 +190,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
                     impOrthoF = gaussBlur(impOrthoF);
                     if (gammaMinMax) {
                         displayMinToMax(impOrthoF);
+                        setLUT(impOrthoF);
                     } else {
                         IJ.setMinAndMax(impOrthoF, 2, 40);
                         setLUT(impOrthoF, 2.0d, 40.0d);
@@ -228,13 +230,14 @@ public class Rec_FourierPlots implements PlugIn, Executable {
     }
     
     /** Set display range for each channel to min-max. */
-    private void displayMinToMax(ImagePlus imp) {
+    private double[] displayMinToMax(ImagePlus imp) {
+        double min, max;
         double minMin = 0.0d;
         double maxMax = 0.0d;
         if (imp.isComposite()) {
             for (int c = 1; c <= imp.getNChannels(); c++) {
-                double min = I1l.getStatsForChannel(imp, c).min;
-                double max = I1l.getStatsForChannel(imp, c).max;
+                min = I1l.getStatsForChannel(imp, c).min;
+                max = I1l.getStatsForChannel(imp, c).max;
                 imp.setC(c);
                 IJ.setMinAndMax(imp, min, max);
                 if (c == 1) {
@@ -250,13 +253,17 @@ public class Rec_FourierPlots implements PlugIn, Executable {
                 }
             }
             imp.setC(1);
-            setLUT(imp, minMin, maxMax);
+//            setLUT(imp, minMin, maxMax);
+            min = minMin;
+            max = maxMax;
         } else {
-            double min = imp.getStatistics().min;
-            double max = imp.getStatistics().max;
+            min = imp.getStatistics().min;
+            max = imp.getStatistics().max;
             IJ.setMinAndMax(imp, min, max);
             setLUT(imp, min, max);
         }
+        double[] minMax = {min, max};
+        return minMax;
     }
     
     /** Gaussian-blur result, or not, based on blurAndLUT option field. */
@@ -303,7 +310,21 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         imp.setStack(I1l.mergeChannels("impsMerged", imps).getStack());
     }
     
+    
+    
     /** Use color LUT, or not, according to blurAndLUT option field. */
+    private void setLUT(ImagePlus imp) {
+        if (blurAndLUT) {
+            I1l.applyLUT(imp, fourierLUT);
+        } else {
+            if (imp.isComposite()) {
+                CompositeImage ci = (CompositeImage)imp;
+                ci.setMode(IJ.GRAYSCALE);
+            }
+        }
+    }
+
+    /** Use color LUT, or not; and update display range. */
     private void setLUT(ImagePlus imp, double min, double max) {
         if (blurAndLUT) {
             double[] displayRange = {min, max};
