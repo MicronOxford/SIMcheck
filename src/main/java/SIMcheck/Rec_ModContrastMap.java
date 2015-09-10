@@ -58,12 +58,14 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
             return;
         }
         camBitDepth = (int)ij.Prefs.get("SIMcheck.camBitDepth", camBitDepth);
-        gd.addMessage("---------------- Raw Data -----------------");
+        gd.addMessage(" ---------- Modulation Contrast Data --------- ");
         gd.addChoice("Calculate MCNR from raw data:", titles, titles[0]);
         gd.addNumericField("       Camera Bit Depth:", camBitDepth, 0);
-        gd.addMessage(" ---------- Modulation Contrast Data --------- ");
-        gd.addCheckbox("Calculate MCNR stack from raw data?", true);
-        gd.addChoice("or, specify MCNR stack:", titles, titles[0]);
+        String[] titlesWithNone = new String[titles.length + 1];
+        System.arraycopy(titles, 0, titlesWithNone, 0, titles.length);
+        titlesWithNone[titlesWithNone.length - 1] = "None";
+        gd.addChoice("or, specify MCNR stack:", titlesWithNone, "None");
+        
         gd.addMessage(" ------------- Reconstructed Data ----------- ");
         gd.addChoice("Reconstructed data stack:", titles, titles[0]);
         
@@ -76,7 +78,8 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
             String recStackChoice = gd.getNextChoice();
             ImagePlus rawImp = ij.WindowManager.getImage(rawStackChoice);
             ImagePlus impMCNR = null;
-            if (gd.getNextBoolean()) {
+            if (mcnrStackChoice.equals("None")) {
+                // let's hope there's no image window called "None" :-o
                 Raw_ModContrast plugin = new Raw_ModContrast();
                 plugin.phases = phases;
                 plugin.angles = angles;
