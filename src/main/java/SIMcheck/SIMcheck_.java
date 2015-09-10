@@ -110,7 +110,7 @@ public final class SIMcheck_ implements PlugIn {
         gd.addCheckbox(Raw_FourierProjections.name, doFourierProjections);
         gd.addCheckbox(Raw_MotionAndIllumVar.name, doMotionCheck);
         gd.addCheckbox(Raw_ModContrast.name, doModContrast);
-        gd.addNumericField("    Camera Bit Depth", camBitDepth, 0);
+        gd.addNumericField("    Camera bit depth", camBitDepth, 0);
         gd.addMessage("------------ Reconstructed Data ------------");
         gd.addChoice("Reconstructed_data:", titles, titles[0]);
         gd.addCheckbox(Rec_IntensityHistogram.name, doHistograms);
