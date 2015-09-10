@@ -305,7 +305,7 @@ public final class I1l {
     public static ImageStatistics getStatsForChannel(
             ImagePlus imp, int channel) {
         ImagePlus impC = I1l.copyChannel(imp, channel);
-        return impC.getStatistics();
+        return (ImageStatistics)(new StackStatistics(impC));
     }
     
     /** Filter peaks based on Fourier radial position (freq) rMin to rMax */
