@@ -73,7 +73,7 @@ public class Raw_FourierProjections implements PlugIn, Executable {
     public ResultSet exec(ImagePlus... imps) {
         ImagePlus imp = imps[0];
         Util_StackFFT2D stackFFT2D = new Util_StackFFT2D();
-        stackFFT2D.resultTypeChoice = Util_StackFFT2D.resultType[2];
+        stackFFT2D.resultTypeChoice = Util_StackFFT2D.resultType[1];
         ImagePlus impF = stackFFT2D.exec(imp);
         IJ.run(impF, "Z Project...", "projection=[Max Intensity]");
         ImagePlus impProjF = ij.WindowManager.getCurrentImage();
@@ -89,8 +89,8 @@ public class Raw_FourierProjections implements PlugIn, Executable {
         }
         displayMinToMax(impProjF);
         impProjF.setTitle(I1l.makeTitle(imps[0], TLA));
-        String shortInfo = "Max-intensity projection of gamma-scaled (0.2)"
-                + " 2D FFT amplitude stack, rescaled (min-max)" 
+        String shortInfo = "Max-intensity projection of 2D FFT"
+                + " 32-bit log(Amp^2), rescaled (min-max)" 
                 + " to improve contrast of the relevant frequency range.";
         results.addImp(shortInfo, impProjF);
         results.addInfo("How to interpret", "look for clean 1st & 2nd"
