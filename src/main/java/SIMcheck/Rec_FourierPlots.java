@@ -143,7 +143,11 @@ public class Rec_FourierPlots implements PlugIn, Executable {
                 impF = new CompositeImage(impF);
             }
             if (gammaMinMax) {
-                displayMinToMax(impF);
+                if (blurAndLUT) {
+                    displayModeToMax(impF);
+                } else {
+                    displayMinToMax(impF);
+                }
                 setLUT(impF);
             } else {
                 IJ.setMinAndMax(impF, 2, 40);
@@ -188,7 +192,11 @@ public class Rec_FourierPlots implements PlugIn, Executable {
                     impOrthoF = resizeAndPad(impOrthoF, cal);
                     impOrthoF = gaussBlur(impOrthoF);
                     if (gammaMinMax) {
-                        displayMinToMax(impOrthoF);
+                        if (blurAndLUT) {
+                            displayModeToMax(impOrthoF);
+                        } else {
+                            displayMinToMax(impOrthoF);
+                        }
                         setLUT(impOrthoF);
                     } else {
                         IJ.setMinAndMax(impOrthoF, 2, 40);
@@ -219,6 +227,18 @@ public class Rec_FourierPlots implements PlugIn, Executable {
                 + " (2) Fourier transformed and scaled by a gamma function"
                 + " (gamma=0.2).");
         return results;
+    }
+    
+    /** Set display range for each channel to mode-max. */
+    private void displayModeToMax(ImagePlus imp) {
+        double mode, max;
+        for (int c = 1; c <= imp.getNChannels(); c++) {
+            mode = I1l.getStatsForChannel(imp, c).dmode;
+            max = I1l.getStatsForChannel(imp, c).max;
+            imp.setC(c);
+            IJ.setMinAndMax(imp, mode, max);
+        }
+        imp.setC(1);
     }
     
     /** Set display range for each channel to min-max. */
