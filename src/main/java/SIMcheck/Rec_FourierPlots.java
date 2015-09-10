@@ -53,10 +53,12 @@ public class Rec_FourierPlots implements PlugIn, Executable {
     public boolean autoCutoff = true;     // no noise cut-off?
     public boolean manualCutoff = false;  // manual noise cut-off?
     public boolean applyWinFunc = false;  // apply window function?
+    public boolean gammaMinMax = false;   // show 32-bit gamma 0.2, min-max?
     public boolean logDisplay = false;    // show 8-bit log(Amp^2)?
     public boolean autoScale = false;     // re-scale FFT to mode->max?
-    public boolean showAxial = false;     // show axial FFT?
+      // N.B. autoScale now *always*/only happens for log(Amp^2): TODO, tidy! 
     public boolean blurAndLUT = false;    // blur & apply false color LUT?
+    public boolean showAxial = false;     // show axial FFT?
     
     private double[] channelMinima = null;
     
@@ -65,22 +67,27 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);
         imp.getWidth();
-        gd.addCheckbox("Auto cut-off (stack mode)", autoCutoff);
-        gd.addCheckbox("Manual cut-off...", manualCutoff);
-        gd.addCheckbox("Window function**", applyWinFunc);
-        gd.addCheckbox("Display 8-bit log(Amp^2)", logDisplay);
-        gd.addCheckbox("Auto-scale FFT (mode-max)", autoScale);
-        gd.addCheckbox("Blur & false-color LUT", blurAndLUT);
-        gd.addCheckbox("Show axial FFT", showAxial);
-        gd.addMessage("** suppress edge artifacts");
+        gd.addCheckbox("(1) Cut-off: auto (stack mode)", autoCutoff);
+        gd.addCheckbox("(1) Cut-off: manual (default=0)", manualCutoff);
+        gd.addCheckbox("(2) Window function*", applyWinFunc);
+        gd.addCheckbox("(3) 32-bit Amp, gamma 0.2, display min-max", gammaMinMax);
+        gd.addCheckbox("(3) 8-bit log(Amp^2), display mode-max", logDisplay);
+//        gd.addCheckbox("Auto-scale FFT (mode-max)", autoScale);
+        gd.addCheckbox("(4) Blur & false-color LUT", blurAndLUT);
+        gd.addCheckbox("(5) Show axial FFT", showAxial);
+        gd.addMessage("* suppresses edge artifacts");
+        gd.addMessage("** default: 32-bit Amplitude, gamma 0.2 (display 2-40)");
         gd.showDialog();
         if (gd.wasOKed()) {
             // TODO: notCutoff, manualCutoff and autoScale radioButton group
             this.autoCutoff = gd.getNextBoolean();
             this.manualCutoff = gd.getNextBoolean();
             this.applyWinFunc = gd.getNextBoolean();
+            this.gammaMinMax = gd.getNextBoolean();
             this.logDisplay = gd.getNextBoolean();
-            this.autoScale = gd.getNextBoolean();
+            if (this.logDisplay) {
+                this.autoScale = true;
+            }
             this.blurAndLUT = gd.getNextBoolean();
             this.showAxial = gd.getNextBoolean();
             if (manualCutoff) {
@@ -136,8 +143,12 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             if (imps[0].isComposite()) {
                 impF = new CompositeImage(impF);
             }
-            IJ.setMinAndMax(impF, 2, 40);
-            setLUT(impF, 2.0d, 40.0d);
+            if (gammaMinMax) {
+                displayMinToMax(impF);
+            } else {
+                IJ.setMinAndMax(impF, 2, 40);
+                setLUT(impF, 2.0d, 40.0d);
+            }
         }
         impF = overlayResRings(impF, cal);
         I1l.copyStackDims(imps[0], impF);
@@ -176,8 +187,12 @@ public class Rec_FourierPlots implements PlugIn, Executable {
                     impOrthoF = FFT2D.fftImp(impOrtho, true, winFraction, 0.2d);
                     impOrthoF = resizeAndPad(impOrthoF, cal);
                     impOrthoF = gaussBlur(impOrthoF);
-                    IJ.setMinAndMax(impOrthoF, 2, 40);
-                    setLUT(impOrthoF, 2.0d, 40.0d);
+                    if (gammaMinMax) {
+                        displayMinToMax(impOrthoF);
+                    } else {
+                        IJ.setMinAndMax(impOrthoF, 2, 40);
+                        setLUT(impOrthoF, 2.0d, 40.0d);
+                    }
                 }
                 calOrtho.pixelHeight = calOrtho.pixelWidth;  // after resizeAndPad
                 impOrthoF = overlayResRings(impOrthoF, calOrtho);
@@ -210,6 +225,38 @@ public class Rec_FourierPlots implements PlugIn, Executable {
                 + " (2) Fourier transformed and scaled by a gamma function"
                 + " (gamma=0.2).");
         return results;
+    }
+    
+    /** Set display range for each channel to min-max. */
+    private void displayMinToMax(ImagePlus imp) {
+        double minMin = 0.0d;
+        double maxMax = 0.0d;
+        if (imp.isComposite()) {
+            for (int c = 1; c <= imp.getNChannels(); c++) {
+                double min = I1l.getStatsForChannel(imp, c).min;
+                double max = I1l.getStatsForChannel(imp, c).max;
+                imp.setC(c);
+                IJ.setMinAndMax(imp, min, max);
+                if (c == 1) {
+                    minMin = min;
+                    maxMax = max;
+                } else {
+                    if (min < minMin) {
+                        minMin = min;
+                    }
+                    if (max > maxMax) {
+                        maxMax = max;
+                    }
+                }
+            }
+            imp.setC(1);
+            setLUT(imp, minMin, maxMax);
+        } else {
+            double min = imp.getStatistics().min;
+            double max = imp.getStatistics().max;
+            IJ.setMinAndMax(imp, min, max);
+            setLUT(imp, min, max);
+        }
     }
     
     /** Gaussian-blur result, or not, based on blurAndLUT option field. */
