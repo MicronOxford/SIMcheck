@@ -21,12 +21,15 @@ import ij.*;
 import ij.plugin.*;
 import ij.plugin.filter.*;
 import ij.process.*;
+import ij.util.ArrayUtil;
 import ij.measure.*;
 import ij.gui.*;
 import ij.IJ;
 
 import java.awt.Color;
 import java.util.Arrays;
+
+import com.sun.tools.javac.code.Attribute.Array;
 
 /** This plugin plots slice average intensity for each channel of raw SI data
  * to evaluate intensity stability as phase, Z, angle and time are incremented.
@@ -140,7 +143,6 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
             // calc max % intensity fluctuation over slices used to reconstruct
             // 1 slice (e.g. 5P,9Z,3A); for central 9Z window & 1st time-point
             int zFirst = nz / 2 - (int)zwin / 2;
-//            int zLast = zFirst + (int)zwin + 1;
             int zLast = zFirst + (int)zwin;
             int pzMid = (np * nz / 2) + np / 2; // central phase & Z, 1st angle
             // initialize min and max arbitrarily within window before updating
@@ -178,14 +180,39 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
             double[] yIntens = J.f2d(avIntensities);
             //  fitting with y=a*exp(bx)  ; fitter returns a, b, R^2
             //   e.g. x=ln((2/3)/b) for 2/3 original intensity (<33% decay)
-            CurveFitter expFitter = new CurveFitter(xSlice, yIntens);
-            expFitter.doFit(CurveFitter.EXPONENTIAL);
-            double[] fitResults = expFitter.getParams();
-            double channelDecay = (double)100 * (1 - Math.exp(fitResults[1]
-            		* pzat_no.length * (zwin / nz)));
+//            CurveFitter expFitter = new CurveFitter(xSlice, yIntens);
+//            expFitter.doFit(CurveFitter.EXPONENTIAL);
+//            double[] fitResults = expFitter.getParams();
+//            double channelDecay = (double)100 * (1 - Math.exp(fitResults[1]
+//            		* pzat_no.length * (zwin / nz)));
+            
+            // estimate % decay over each angle via simple straight line fit
+//            IJ.log("Channel " + channel + " xSlice:");
+//            IJ.log(Arrays.toString(xSlice));
+//            IJ.log("Channel " + channel + " yIntens:");
+//            IJ.log(Arrays.toString(yIntens));
+            double angleDecays[] = new double[na];
+            for (int a = 0; a < na; a++) {
+                int nzp = nz * np;
+                double[] xa = Arrays.copyOfRange(xSlice, a * nzp, (a + 1) * nzp);
+                double[] ya = Arrays.copyOfRange(yIntens, a * nzp, (a + 1) * nzp);
+                CurveFitter fitter = new CurveFitter(xa, ya);
+                fitter.doFit(CurveFitter.STRAIGHT_LINE);
+                double[] fitParams = fitter.getParams();
+                angleDecays[a] = (fitParams[1] * nzp * -100.0d) / fitParams[0];
+//                IJ.log("C" + channel + "A" + (a+1) + " x:");
+//                IJ.log(Arrays.toString(xa));
+//                IJ.log("C" + channel + "A" + (a+1) + " y:");
+//                IJ.log(Arrays.toString(ya));
+            }
+            double channelDecay = J.mean(angleDecays);
+            // negative bleaching does not make sense, so report 0
+            if (channelDecay < 0) {
+                channelDecay = 0.0d;
+            }
             results.addStat(
-                    "C" + Integer.toString(channel) + " average intensity"
-                    + " decay per " + (int)zwin + " section window (%)",
+                    "C" + Integer.toString(channel) + " estimated intensity"
+                    + " decay (%)",
                     channelDecay, ResultSet.StatOK.NA);
             
             /// (2) angle intensity differences
