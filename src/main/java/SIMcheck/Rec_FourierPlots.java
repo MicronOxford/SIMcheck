@@ -72,7 +72,6 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         gd.addCheckbox("(2) Window function*", applyWinFunc);
         gd.addCheckbox("(3) 32-bit Amp, gamma 0.2, display min-max", gammaMinMax);
         gd.addCheckbox("     8-bit log(Amp^2), display mode-max", logDisplay);
-//        gd.addCheckbox("Auto-scale FFT (mode-max)", autoScale);
         gd.addCheckbox("(4) Blur & false-color LUT", blurAndLUT);
         gd.addCheckbox("(5) Show axial FFT", showAxial);
         gd.addMessage("* suppresses edge artifacts");
@@ -216,13 +215,6 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             + " angle-specific illumination pattern ('k0') fit error, or"
             + " angle-specific z-modulation issues.  -- ");
         results.addInfo("About",
-//                "by default the reconstructed data are (1) cropped to mode;"
-//                        + " (2) a window function applied to reduce edge artifacts prior"
-//                        + " to FFT; (3) FFT slices are normalized (mode-max); (4) target"
-//                        + " rings (overlay) are added to translate frequency to"
-//                        + " spatial resolution. (5) Optionally, results may be blurred"
-//                        + " and a 16-color LUT applied to highlight slope or "
-//                        + " flatness of the Fourier spectrum.");
                 "by default the reconstructed data are (1) cropped to mode;"
                 + " (2) Fourier transformed and scaled by a gamma function"
                 + " (gamma=0.2).");
@@ -230,40 +222,15 @@ public class Rec_FourierPlots implements PlugIn, Executable {
     }
     
     /** Set display range for each channel to min-max. */
-    private double[] displayMinToMax(ImagePlus imp) {
+    private void displayMinToMax(ImagePlus imp) {
         double min, max;
-        double minMin = 0.0d;
-        double maxMax = 0.0d;
-        if (imp.isComposite()) {
-            for (int c = 1; c <= imp.getNChannels(); c++) {
-                min = I1l.getStatsForChannel(imp, c).min;
-                max = I1l.getStatsForChannel(imp, c).max;
-                imp.setC(c);
-                IJ.setMinAndMax(imp, min, max);
-                if (c == 1) {
-                    minMin = min;
-                    maxMax = max;
-                } else {
-                    if (min < minMin) {
-                        minMin = min;
-                    }
-                    if (max > maxMax) {
-                        maxMax = max;
-                    }
-                }
-            }
-            imp.setC(1);
-//            setLUT(imp, minMin, maxMax);
-            min = minMin;
-            max = maxMax;
-        } else {
-            min = imp.getStatistics().min;
-            max = imp.getStatistics().max;
+        for (int c = 1; c <= imp.getNChannels(); c++) {
+            min = I1l.getStatsForChannel(imp, c).min;
+            max = I1l.getStatsForChannel(imp, c).max;
+            imp.setC(c);
             IJ.setMinAndMax(imp, min, max);
-            setLUT(imp, min, max);
         }
-        double[] minMax = {min, max};
-        return minMax;
+        imp.setC(1);
     }
     
     /** Gaussian-blur result, or not, based on blurAndLUT option field. */
