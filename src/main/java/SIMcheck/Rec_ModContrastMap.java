@@ -58,13 +58,13 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
             return;
         }
         camBitDepth = (int)ij.Prefs.get("SIMcheck.camBitDepth", camBitDepth);
-        gd.addMessage(" --- Raw data stack --- ");
-        gd.addChoice("Raw data stack:", titles, titles[0]);
-        gd.addNumericField("       Camera Bit Depth", camBitDepth, 0);
-        gd.addMessage(" --- Modulation-Contrast-to-Noise Ratio stack --- ");
+        gd.addMessage("---------------- Raw Data -----------------");
+        gd.addChoice("Calculate MCNR from raw data:", titles, titles[0]);
+        gd.addNumericField("       Camera Bit Depth:", camBitDepth, 0);
+        gd.addMessage(" ---------- Modulation Contrast Data --------- ");
         gd.addCheckbox("Calculate MCNR stack from raw data?", true);
-        gd.addChoice("OR, specify MCNR stack:", titles, titles[0]);
-        gd.addMessage(" ------------- Reconstructed SI stack ----------- ");
+        gd.addChoice("or, specify MCNR stack:", titles, titles[0]);
+        gd.addMessage(" ------------- Reconstructed Data ----------- ");
         gd.addChoice("Reconstructed data stack:", titles, titles[0]);
         
         gd.showDialog();
