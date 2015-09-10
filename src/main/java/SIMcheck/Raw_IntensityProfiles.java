@@ -326,9 +326,9 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
     
     /** Is this percentage difference stat value acceptable? */
     private ResultSet.StatOK checkPercentDiff(double statValue) {
-        if (statValue <= 50) {
+        if (statValue <= 40) {
             return ResultSet.StatOK.YES;
-        } else if (statValue <= 70) {
+        } else if (statValue <= 60) {
             return ResultSet.StatOK.MAYBE;
         } else {
             return ResultSet.StatOK.NO;
