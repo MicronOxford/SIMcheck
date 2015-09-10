@@ -22,6 +22,8 @@ import ij.*;
 import ij.plugin.*;
 import ij.process.*;
 import ij.gui.GenericDialog; 
+import ij.gui.OvalRoi;
+import ij.gui.Roi;
 import ij.IJ;
 
 /** This plugin takes raw SIM data and splits each angle into a separate stack     
@@ -39,6 +41,7 @@ public class Raw_FourierProjections implements PlugIn, Executable {
     public int phases = 5;                                                         
     public int angles = 3;                    
     public float offsetF = 75;
+    public double maskDiameter = 0.125; // (as fraction of image width)
 
     @Override
     public void run(String arg) {
@@ -64,9 +67,84 @@ public class Raw_FourierProjections implements PlugIn, Executable {
     
     /**
      * Execute plugin functionality: stack FFT with window function,
-     * auto-scaling and projection over all slices (phase, Z angle).
+     * max projection over all slices (phase, Z angle), blank out central
+     * 1/8 circle (set to min value), display min-max.
      */
     public ResultSet exec(ImagePlus... imps) {
+        ImagePlus imp = imps[0];
+        Util_StackFFT2D stackFFT2D = new Util_StackFFT2D();
+        stackFFT2D.resultTypeChoice = Util_StackFFT2D.resultType[2];
+        ImagePlus impF = stackFFT2D.exec(imp);
+        IJ.run(impF, "Z Project...", "projection=[Max Intensity]");
+        ImagePlus impProjF = ij.WindowManager.getCurrentImage();
+        maskCentralRegion(impProjF);
+        // TODO: blank out zero order
+        // Fill central circle of 1/8 of FFT image width diameter
+        // (e.g. 32px for 256px) with the minimum value (not zero!).
+        if (impProjF.isComposite()) {
+            // display grayscale, not colored composite
+            CompositeImage ci = (CompositeImage)impProjF;
+            ci.setMode(IJ.GRAYSCALE);
+            impProjF.updateAndDraw();
+        }
+        displayMinToMax(impProjF);
+        impProjF.setTitle(I1l.makeTitle(imps[0], TLA));
+        String shortInfo = "Max-intensity projection of gamma-scaled (0.2)"
+                + " 2D FFT amplitude stack, rescaled (min-max)" 
+                + " to improve contrast of the relevant frequency range.";
+        results.addImp(shortInfo, impProjF);
+        results.addInfo("How to interpret", "look for clean 1st & 2nd"
+                + " order spots, similar across angles. Note that Spot"
+                + " intensity depends on image content.");
+        return results;
+    }
+    
+    /** Mask central offset / low freq spike to better use display range. */
+    private void maskCentralRegion(ImagePlus imp) {
+        int w = imp.getWidth();
+        double d = this.maskDiameter * w;
+        if (w % 2 == 0) {
+            d += 1;  // tweak to centre the mask about zero freq stripes
+        }
+        // N.B. we assume the image is square! (FFT result)
+        OvalRoi mask = new OvalRoi(w/2 - d/2 + 1, w/2 - d/2 + 1, d, d);
+        imp.setRoi(mask);
+        if (imp.isComposite()) {
+            for (int c = 1; c <= imp.getNChannels(); c++) {
+                double min = I1l.getStatsForChannel(imp, c).min;
+                imp.setC(c);
+                IJ.run(imp, "Set...", "value=" + min + " slice");
+            }
+            imp.setC(1);
+        } else {
+            double min = imp.getStatistics().min;
+            IJ.run(imp, "Set...", "value=" + min + " slice");
+        }
+        imp.deleteRoi();
+    }
+
+    /** Set display range for each channel to min-max. */
+    private static void displayMinToMax(ImagePlus imp) {
+        if (imp.isComposite()) {
+            for (int c = 1; c <= imp.getNChannels(); c++) {
+                double min = I1l.getStatsForChannel(imp, c).min;
+                double max = I1l.getStatsForChannel(imp, c).max;
+                imp.setC(c);
+                IJ.setMinAndMax(imp, min, max);
+            }
+            imp.setC(1);
+        } else {
+            double min = imp.getStatistics().min;
+            double max = imp.getStatistics().max;
+            IJ.setMinAndMax(imp, min, max);
+        }
+    }
+    
+    /**
+     * Execute plugin functionality: stack FFT with window function,
+     * auto-scaling and projection over all slices (phase, Z angle).
+     */
+    public ResultSet exec4(ImagePlus... imps) {
         ImagePlus imp = imps[0];
         Util_StackFFT2D stackFFT2D = new Util_StackFFT2D();
         ImagePlus impF = stackFFT2D.exec(imp);
