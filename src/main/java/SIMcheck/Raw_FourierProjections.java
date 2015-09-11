@@ -109,17 +109,17 @@ public class Raw_FourierProjections implements PlugIn, Executable {
         // N.B. we assume the image is square! (FFT result)
         OvalRoi mask = new OvalRoi(w/2 - d/2 + 1, w/2 - d/2 + 1, d, d);
         imp.setRoi(mask);
-        if (imp.isComposite()) {
+//        if (imp.isComposite()) {
             for (int c = 1; c <= imp.getNChannels(); c++) {
-                double min = I1l.getStatsForChannel(imp, c).min;
                 imp.setC(c);
+                double min = I1l.getStatsForChannel(imp, c).min;
                 IJ.run(imp, "Set...", "value=" + min + " slice");
             }
             imp.setC(1);
-        } else {
-            double min = imp.getStatistics().min;
-            IJ.run(imp, "Set...", "value=" + min + " slice");
-        }
+//        } else {
+//            double min = imp.getStatistics().min;
+//            IJ.run(imp, "Set...", "value=" + min + " slice");
+//        }
         imp.deleteRoi();
     }
 
