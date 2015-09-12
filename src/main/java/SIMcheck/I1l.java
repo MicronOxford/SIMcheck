@@ -683,6 +683,11 @@ public final class I1l {
         imp2.setOpenAsHyperStack(true);
         return imp2;
     }
+    
+    /** Replace all spaces with underscores (for macro recorder...) */
+    public static String us(String s) {
+        return s.replaceAll(" ", "_");
+    }
 
     /** Interactive test method. */
     public static void main(String[] args) {

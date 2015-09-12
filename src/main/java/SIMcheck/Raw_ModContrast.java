@@ -89,8 +89,8 @@ public class Raw_ModContrast implements PlugIn, Executable {
         GenericDialog gd = new GenericDialog(name);
         gd.addNumericField("Angles", angles, 0);
         gd.addNumericField("Phases", phases, 0);
-        gd.addNumericField("Z window half-width", zw, 0);
-        gd.addCheckbox("Fourier Transform Phases (central Z)", false);
+        gd.addNumericField("Z_window_half-width", zw, 0);
+        gd.addCheckbox("Fourier_Transform_Phases_(central_Z)", false);
         gd.showDialog();
         if (gd.wasCanceled()) {
             return;
