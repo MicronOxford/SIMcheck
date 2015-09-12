@@ -21,7 +21,6 @@ import ij.*;
 import ij.plugin.*;
 import ij.plugin.filter.*;
 import ij.process.*;
-import ij.util.ArrayUtil;
 import ij.measure.*;
 import ij.gui.*;
 import ij.IJ;
@@ -29,7 +28,6 @@ import ij.IJ;
 import java.awt.Color;
 import java.util.Arrays;
 
-import com.sun.tools.javac.code.Attribute.Array;
 
 /** This plugin plots slice average intensity for each channel of raw SI data
  * to evaluate intensity stability as phase, Z, angle and time are incremented.
@@ -148,17 +146,13 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
             // initialize min and max arbitrarily within window before updating
             double intensMin = avIntensities[pzMid];
             double intensMax = avIntensities[pzMid];
-//            double intensMean = 0.0d;
-//            int nWinSlices = 0;
             for (int a = 0; a < na; a++) {
                 for (int z = 0; z < nz; z++) {
                     if (z >= zFirst && z < zLast)  {
                         // consider intensities inside central 9Z window
                         for (int p = 0; p < np; p++) {
-//                            nWinSlices++;
                             int slice = (a * nz * np) + (z * np) + p;
                             double intens = avIntensities[slice];
-//                            intensMean += intens;
                             if (intens > intensMax) {
                                 intensMax = intens;
                             }
@@ -168,8 +162,7 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
                         }
                     }
                 }
-            }  // TODO: test the above calc
-//            intensMean /= nWinSlices;
+            }  // TODO: add test case for the above calc
             double pcDiff = 100.0d * (intensMax - intensMin) / intensMax;
             results.addStat(
                     "C" + Integer.toString(channel) + " total intensity"
@@ -178,19 +171,7 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
             /// (1) per-channel intensity decay
             double[] xSlice = J.f2d(pzat_no);
             double[] yIntens = J.f2d(avIntensities);
-            //  fitting with y=a*exp(bx)  ; fitter returns a, b, R^2
-            //   e.g. x=ln((2/3)/b) for 2/3 original intensity (<33% decay)
-//            CurveFitter expFitter = new CurveFitter(xSlice, yIntens);
-//            expFitter.doFit(CurveFitter.EXPONENTIAL);
-//            double[] fitResults = expFitter.getParams();
-//            double channelDecay = (double)100 * (1 - Math.exp(fitResults[1]
-//            		* pzat_no.length * (zwin / nz)));
-            
             // estimate % decay over each angle via simple straight line fit
-//            IJ.log("Channel " + channel + " xSlice:");
-//            IJ.log(Arrays.toString(xSlice));
-//            IJ.log("Channel " + channel + " yIntens:");
-//            IJ.log(Arrays.toString(yIntens));
             double angleDecays[] = new double[na];
             for (int a = 0; a < na; a++) {
                 int nzp = nz * np;
@@ -200,10 +181,6 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
                 fitter.doFit(CurveFitter.STRAIGHT_LINE);
                 double[] fitParams = fitter.getParams();
                 angleDecays[a] = (fitParams[1] * nzp * -100.0d) / fitParams[0];
-//                IJ.log("C" + channel + "A" + (a+1) + " x:");
-//                IJ.log(Arrays.toString(xa));
-//                IJ.log("C" + channel + "A" + (a+1) + " y:");
-//                IJ.log(Arrays.toString(ya));
             }
             double channelDecay = J.mean(angleDecays);
             // negative bleaching does not make sense, so report 0
