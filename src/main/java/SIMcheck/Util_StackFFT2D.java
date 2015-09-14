@@ -60,6 +60,7 @@ public class Util_StackFFT2D implements PlugIn {
             ImagePlus impF = exec(imp);
             impF.show();
         }
+        IJ.log("FFT2D " + resultTypeChoice + ", gaussian window " + winFraction + "%");
     }
     /** Execute plugin functionality: 2D FFT each slice.
      * @param imp input format ImagePlus
@@ -74,7 +75,6 @@ public class Util_StackFFT2D implements PlugIn {
         if (resultTypeChoice.equals(resultType[0])) {
             // default, log-scaled amplitude^2, converted to 8-bit
             impF = FFT2D.fftImp(imp2, false, winFraction, NO_GAMMA);
-//            IJ.log(resultTypeChoice + ", gaussian window " + winFraction + "%");
         } else if(resultTypeChoice.equals(resultType[1])) {
             // log-scaled amplitude^2, as 32-bit float
             impF = FFT2D.fftImp(imp2, true, winFraction, NO_GAMMA);

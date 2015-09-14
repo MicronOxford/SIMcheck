@@ -62,6 +62,7 @@ public class Util_FormatConverter implements PlugIn {
         } catch (IllegalArgumentException e) {
             IJ.showMessage("Bad input", e.getMessage());
         }
+        IJ.log("   converted format " + formats[formatChoice]);
     }
 
     /** Execute plugin functionality:
@@ -81,7 +82,6 @@ public class Util_FormatConverter implements PlugIn {
         this.nt = imp.getNFrames();
         this.inStack = imp.getStack();
         this.outStack = null;
-        IJ.log("   converting format " + formats[format]);
         if (format == 0) {
             convertELYRA();
         } else if (format == 1) {
