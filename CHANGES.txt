@@ -91,3 +91,18 @@ Version 0.9.10
 * change default pattern focus angle method back to IJ degrees
 * CIP bugfix: was overwriting intens array for each C (pass ref to Plot)
 * 16-bit util: fix for missing subtraction of specified min
+
+Version 0.9.11
+--------------
+* make reconstructed FFT gamma 0.2 display default
+
+Version 1.0.0
+-------------
+* change raw MCN stat check criteria from 3,6 to 4,8
+* python script for dumping binary LUT file as comma-separated text
+* rescale to 16-bit in Stack FFT utility to match reconstructed FFT
+* bugfix: I1l.getStatsForChannel and affected display settings
+* raw FPJ: now uses 32-bit log and central mask, display min-max
+* raw CIP check criteria change from 50,70 to 60,40
+* CIP: improve bleach estimation, add normalised plot
+* updates to allow macro recording
