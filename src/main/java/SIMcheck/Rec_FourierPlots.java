@@ -212,6 +212,10 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             }
         }
         impF.setPosition(1, impF.getNSlices() / 2, 1);
+        results.addInfo("About",
+                "by default the reconstructed data are (1) cropped to mode;"
+                        + " (2) Fourier transformed and scaled by a gamma function"
+                        + " (gamma=0.2).");
         results.addInfo("How to interpret", 
             "Fourier plots highlight potential artifacts and indicate"
             + " effective resolution:"
@@ -222,10 +226,6 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             + " resolution due to: angle-to-angle intensity variations,"
             + " angle-specific illumination pattern ('k0') fit error, or"
             + " angle-specific z-modulation issues.  -- ");
-        results.addInfo("About",
-                "by default the reconstructed data are (1) cropped to mode;"
-                + " (2) Fourier transformed and scaled by a gamma function"
-                + " (gamma=0.2).");
         return results;
     }
     
