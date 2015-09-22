@@ -71,7 +71,7 @@ Features
     Check            |        Statistic(s)                 |      Comments
 -------------------- | ----------------------------------- | ------------------
  Intensity Profiles  | bleaching, flicker, angle intensity |
- Motion / Illum Var  | angle difference (motion, illum.)   |
+ Motion / Illum Var  | None: angle differences colored     |
  Fourier Projections | None: check pattern / spots OK      |
  Modulation Contrast | feature MCNR acceptable?            | Wiener estimate
 
@@ -132,27 +132,6 @@ Style Notes
 TODO
 ====
 
-* 1.0: final updates & documentation for 1.0 release with publication
-
-      - documentation:
-        - SIMcheck manual revision & additions
-        - citable code:
-              https://github.com/blog/1840-improving-github-for-science
-
-      - tests, structure:
-        - make sure all parameters chosen are logged
-        - test data:
-          - compact test / example data suite for distribution
-          - work out strategy for test data distribution
-        - update, refactor & test Cal_Phases:
-          - stats and structure
-          - unwrap test case
-
-      - updates:
-        - make compatible with running from a macro and document batch run
-        - spherical aberration mismatch check: axis always symmetrical about 0?
-        - thresh / 16-bit: explain steps in log file (& per. channel thresh)
-
 * 1.1: post-release updates, bugfixes & suggestions from feedback
 
       - features:
@@ -162,31 +141,28 @@ TODO
         - turn FTR profile into multi-color and/or plot
 
       - updates:
-        - auto-scale display settings for all images per channel
-        - si2wf: add option without 2x size scaling
-        - si2wf: option to select only one angle
+        - si2wf: add options for no 2x size scaling, select 1 angle
         - MCN: auto-threshold using pseudo-widefield, report per. angle MCNR
         - Rec Fourier: rename ortho to axial?
         - SIR checks: exclude 0s from mode finding
         - improve "Fourier Transform Phases" info / log output
-        - turn CIP into plot (to be able to save raw data) and/or normalize
         - angle labels etc. should be overlaid, not drawn
-        - channel order: RGB vs. BGR
+        - CIP channel order: RGB vs. BGR
         - for ELYRA reconstructed .czi, discard WF and decon-WF?
         - progress bar for FPJ plugin (& others?)
-        - tidy raw FPJ & add target overlay & hide by default
-        - try to find a more robust bleach estimation procedure (CIP)
-        - MCM: add note to overlay where saturated pixels present?
-        - MCN, show saturated pixels in raw data?
-        - remove unused intermediate results from Windows list
-        - Rec Fourier: RadioButtons for mutually exclusive cut-off options?
+        - raw FPJ: add target overlay? (hide by default)
+        - MCN, show saturated pixels in raw data? (add to LUT? also MCM?)
+        - Rec Fourier: reduce options / RadioButtons for mutually exclusive options?
 
       - tests, structure:
+        - expand sample / test data set
+        - optional tests using failsafe plugin? (check data & pass/fail)
+        - get rid of IJ.run calls & intermediate results from window list
         - multi-frame: test / document stats for current time-point only
         - more crop utility tests, move to separate utility plugin
-        - get rid of IJ.run calls & show/hide of intermediate results 
 
       - documentation:
+        - macro examples / document batch running
 
 * 1.2: additional numerical stats, including resolution estimate
 
