@@ -221,6 +221,7 @@ public class FFT2D extends FHT {
             ImageProcessor ps = null;
             if (gamma > 0.0d) {
                 ps = gammaScaledAmplitude(fht, gamma);
+                // FIXME: does not return 8-bit even if floatResult==false
             } else {
                 if (floatResult) {
                     ps = logScaledPowerSpectrum(fht);

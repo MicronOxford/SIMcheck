@@ -135,7 +135,9 @@ public class ResultSet {
             sb.append("\n");
             imp.show();
         }
-        sb.append("\n");
+        if (!stats.isEmpty()){
+            sb.append("\nStatistics:\n");
+        }
         // loop over stats twice: log checked (non-NA) stats first, rest after
         boolean hasCheckedStats = false;
         for (Map.Entry<String, Stat> entry : stats.entrySet()) {
@@ -159,8 +161,14 @@ public class ResultSet {
         for (Map.Entry<String, String> entry : infos.entrySet()) {
             String infoTitle = entry.getKey();
             String info = entry.getValue();
-            sb.append("\n");
-            sb.append(infoTitle + ": " + autoFormat(info, (int)(TEXTWIDTH * 1.15),
+            if (info.length() > 20) {
+                sb.append("\n");  // blank line between infos unless very short
+            }
+            String sep = ": ";
+            if (infoTitle.charAt(infoTitle.length() - 1) == '!') {
+                sep = " ";  // don't add a colon if title ends on exclam mark!
+            }
+            sb.append(infoTitle + sep + autoFormat(info, (int)(TEXTWIDTH * 1.15),
                     infoTitle.length() + 2));
             sb.append("\n");
         }

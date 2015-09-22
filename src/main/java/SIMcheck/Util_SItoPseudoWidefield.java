@@ -64,7 +64,7 @@ public class Util_SItoPseudoWidefield implements PlugIn {
             doNormalize = gd.getNextBoolean();
         }
         if (!I1l.stackDivisibleBy(imp, phases * angles)) {
-            IJ.showMessage( "SI to Pseudo-Wide-Field",
+            IJ.showMessage( "SI to Pseudo-Widefield",
                     "Error: stack size not consistent with phases/angles.");
             return;
         }
@@ -75,6 +75,11 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         }
         IJ.run("Brightness/Contrast...");
         projImg.show();
+        String withRIN = "";
+        if (doNormalize) {
+            withRIN = " (with Ratio Intensity Normalization)";
+        }
+        IJ.log("Pseudo-Widefield from raw SI data" + withRIN + ".");
     }
 
     /** Execute plugin functionality: raw SI data to pseudo-widefield.
