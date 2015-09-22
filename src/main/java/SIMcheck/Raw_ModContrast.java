@@ -89,8 +89,8 @@ public class Raw_ModContrast implements PlugIn, Executable {
         GenericDialog gd = new GenericDialog(name);
         gd.addNumericField("Angles", angles, 0);
         gd.addNumericField("Phases", phases, 0);
-        gd.addNumericField("Z window half-width", zw, 0);
-        gd.addCheckbox("Fourier Transform Phases (central Z)", false);
+        gd.addNumericField("Z_window_half-width", zw, 0);
+        gd.addCheckbox("Fourier_Transform_Phases_(central_Z)", false);
         gd.showDialog();
         if (gd.wasCanceled()) {
             return;
@@ -259,10 +259,10 @@ public class Raw_ModContrast implements PlugIn, Executable {
                     impResult);
             results.addInfo("How to interpret",
                     "color LUT indicates MCNR value:" +
-                    "  - purple is inadequate (3 or less)" +
-                    "  - red is an acceptable value of 6+" +
-                    "  - orange is good" +
-                    "  - yellow-white is very good-excellent  -- ");
+                    "  - purple is inadequate (<4)" +
+                    "  - red is low to moderate (4-8)" +
+                    "  - orange is good (8-12)" +
+                    "  - yellow-white is very good-excellent (>12)  -- ");
             results.addInfo("Average feature MCNR",
                     "features selected by auto-thresholding (Otsu).");
             results.addInfo("Estimated Wiener filter parameter",
@@ -376,9 +376,9 @@ public class Raw_ModContrast implements PlugIn, Executable {
     
     /** Is feature MCNR stat value acceptable? */
     static ResultSet.StatOK checkMCNR(Double statValue) {
-        if (statValue >= 6.0) {
+        if (statValue >= 8.0) {
             return ResultSet.StatOK.YES;
-        } else if (statValue >= 3.0) {
+        } else if (statValue >= 4.0) {
             return ResultSet.StatOK.MAYBE;
         } else {
             return ResultSet.StatOK.NO;

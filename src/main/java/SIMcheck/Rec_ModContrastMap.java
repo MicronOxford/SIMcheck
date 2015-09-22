@@ -58,14 +58,16 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
             return;
         }
         camBitDepth = (int)ij.Prefs.get("SIMcheck.camBitDepth", camBitDepth);
-        gd.addMessage(" --- Raw data stack --- ");
-        gd.addChoice("Raw data stack:", titles, titles[0]);
-        gd.addNumericField("       Camera Bit Depth", camBitDepth, 0);
-        gd.addMessage(" --- Modulation-Contrast-to-Noise Ratio stack --- ");
-        gd.addCheckbox("Calculate MCNR stack from raw data?", true);
-        gd.addChoice("OR, specify MCNR stack:", titles, titles[0]);
-        gd.addMessage(" ------------- Reconstructed SI stack ----------- ");
-        gd.addChoice("Reconstructed data stack:", titles, titles[0]);
+        gd.addMessage(" ---------- Modulation Contrast Data --------- ");
+        gd.addChoice("Calculate_MCNR_from_raw_data:", titles, titles[0]);
+        gd.addNumericField("       Camera_Bit_Depth:", camBitDepth, 0);
+        String[] titlesWithNone = new String[titles.length + 1];
+        System.arraycopy(titles, 0, titlesWithNone, 0, titles.length);
+        titlesWithNone[titlesWithNone.length - 1] = "None";
+        gd.addChoice("or,_specify_MCNR_stack:", titlesWithNone, "None");
+        
+        gd.addMessage(" ------------- Reconstructed Data ----------- ");
+        gd.addChoice("Reconstructed_data_stack:", titles, titles[0]);
         
         gd.showDialog();
         if (gd.wasOKed()) {
@@ -76,11 +78,15 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
             String recStackChoice = gd.getNextChoice();
             ImagePlus rawImp = ij.WindowManager.getImage(rawStackChoice);
             ImagePlus impMCNR = null;
-            if (gd.getNextBoolean()) {
+            if (mcnrStackChoice.equals("None")) {
+                // let's hope there's no image window called "None" :-o
                 Raw_ModContrast plugin = new Raw_ModContrast();
                 plugin.phases = phases;
                 plugin.angles = angles;
-                impMCNR = plugin.exec(rawImp).getImp(0);
+                ResultSet mcnrResults = plugin.exec(rawImp);
+                impMCNR = mcnrResults.getImp(0);
+                impMCNR.show();
+                mcnrResults.report();
             } else {
                 impMCNR = ij.WindowManager.getImage(mcnrStackChoice);
             }
@@ -197,12 +203,13 @@ public class Rec_ModContrastMap implements PlugIn, Executable {
                 + " variations in reconstruction quality, e.g. due to"
                 + " variations in out-of-focus blur contribution due to"
                 + " feature density, or due to uneven SI illumination.");
-        results.addInfo("MCNR values", "0-3 purple (inadequate),"
-                + " to 6 red (acceptable), to 12 orange (good),"
+        results.addInfo("MCNR values", "0-4 purple (inadequate),"
+                + " to 8 red (acceptable), to 12 orange (good),"
                 + " to 18 yellow (very good), to 24 white (excellent).");
         if (saturatedPixelsDetected) {
-            results.addInfo("Saturated pixels!", "Saturated pixels detected"
-                    + " in the raw data and false-colored green.");
+            results.addInfo("Warning!!!", "Saturated pixels detected"
+                    + " in the raw data according to selected bit-depth"
+                    + " (false-colored green).");
         }
         return results;
     }

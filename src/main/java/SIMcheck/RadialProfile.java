@@ -18,10 +18,12 @@ class RadialProfile implements PlugIn {
     // parameter fields
     public int nBins=100;
 
+    // private fields
     private ImagePlus imp;
     private double X0;
     private double Y0;
     private double mR;
+    private String yAxisLabel = "Integrated Fourier amplitude";
     
     /** Can be run from main() to test, but SIMcheck calls via exec() */
     public void run(String arg) {
@@ -29,6 +31,13 @@ class RadialProfile implements PlugIn {
         plotImp.show();
     }
     
+    /** exec with specified y-axis label... */
+    public ImagePlus exec(ImagePlus imp, String yAxisLabel) {
+        this.yAxisLabel = yAxisLabel;
+        return exec(imp);
+    }
+    
+    /** exec with default y-axis label */
     public ImagePlus exec(ImagePlus imp) {
         this.imp = imp;
         setXYcenter();
@@ -91,8 +100,7 @@ class RadialProfile implements PlugIn {
             units = "1/x " + units;
         }
         plot = new Plot("Radial Profile Plot", "Radius ["+ units +"]", 
-                "Integrated Fourier amplitude (a.u.)",
-                Accumulator[0], Accumulator[1]);
+                this.yAxisLabel, Accumulator[0], Accumulator[1]);
         ImagePlus impPlot = plot.getImagePlus();
         I1l.drawPlotTitle(impPlot, "FFT radial profile plot");
         return impPlot;

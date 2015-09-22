@@ -41,45 +41,49 @@ public class Util_StackFFT2D implements PlugIn {
     // parameter fields
     public String resultTypeChoice = resultType[0];
     public double winFraction = 0.06d;
-    public double gamma = 0.3;
+    public double gamma = 0.2;
 
     @Override
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);
         imp.getWidth();
-        gd.addNumericField("gaussian window %", winFraction, 3);
+        gd.addNumericField("Gaussian window %", winFraction * 100, 1);
         gd.addRadioButtonGroup("Result type", resultType, 3, 1, resultType[0]);
         gd.addNumericField("gamma", gamma, 2);
         gd.showDialog();
         if (gd.wasOKed()) {
             this.resultTypeChoice = gd.getNextRadioButton();
-            this.winFraction = gd.getNextNumber();
+            this.winFraction = gd.getNextNumber() / 100;
             this.gamma = gd.getNextNumber();
             IJ.showStatus("FFT stack...");
             ImagePlus impF = exec(imp);
             impF.show();
         }
+        IJ.log("FFT2D " + resultTypeChoice + ", gaussian window " + winFraction + "%");
     }
     /** Execute plugin functionality: 2D FFT each slice.
      * @param imp input format ImagePlus
      * @return ImagePlus after 2D FFT of each slice
      */
     public ImagePlus exec(ImagePlus imp) {
+        ImagePlus imp2 = imp.duplicate();
+        IJ.run("Conversions...", "scale");
+        IJ.run(imp2, "16-bit", "");
+        IJ.run("Conversions...", " ");
         ImagePlus impF = null;
         if (resultTypeChoice.equals(resultType[0])) {
             // default, log-scaled amplitude^2, converted to 8-bit
-            impF = FFT2D.fftImp(imp, false, winFraction, NO_GAMMA);
-            IJ.log(resultTypeChoice + ", gaussian window " + winFraction + "%");
+            impF = FFT2D.fftImp(imp2, false, winFraction, NO_GAMMA);
         } else if(resultTypeChoice.equals(resultType[1])) {
             // log-scaled amplitude^2, as 32-bit float
-            impF = FFT2D.fftImp(imp, true, winFraction, NO_GAMMA);
-            IJ.log(resultTypeChoice + ", gaussian window " + winFraction + "%");
+            impF = FFT2D.fftImp(imp2, true, winFraction, NO_GAMMA);
+//            IJ.log(resultTypeChoice + ", gaussian window " + winFraction + "%");
         } else {
             // gamma-scaled amplitude (as 32-bit float)
-            impF = FFT2D.fftImp(imp, false, winFraction, gamma);
-            IJ.log(resultTypeChoice + ", gaussian window "
-                    + winFraction + "%, gamma=" + gamma);
+            impF = FFT2D.fftImp(imp2, false, winFraction, gamma);
+//            IJ.log(resultTypeChoice + ", gaussian window "
+//                    + winFraction + "%, gamma=" + gamma);
         }
         impF.setTitle(I1l.makeTitle(imp, TLA));
         return impF;

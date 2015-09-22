@@ -73,6 +73,34 @@ public final class I1l {
             imp.setDisplayRange(displayRange[0], displayRange[1]);
         }
     }
+    
+    /** 
+     * Apply a LUT to an ImagePlus without changing display range.
+     * @param  imp ImagePlus to which LUT will be applied
+     * @param  cm a java awt IndexColorModel (the LUT)
+     */
+    public static void applyLUT(ImagePlus imp, IndexColorModel cm) {
+        if (imp.isComposite()) {
+            CompositeImage cimp = (CompositeImage)imp;
+            cimp.setMode(CompositeImage.COLOR);
+            int saveC = cimp.getChannel();
+            for (int c = 1; c <= cimp.getNChannels(); c++) {
+                cimp.setC(c);
+                cimp.setChannelColorModel(cm);
+            }
+            imp.setC(saveC);
+        } else {
+            if (imp.getStackSize() > 1) {
+                ImageStack stack = imp.getStack();
+                stack.setColorModel(cm);
+                imp.setStack(stack);
+            } else {
+                ImageProcessor ip = imp.getProcessor();
+                ip.setColorModel(cm);
+                imp.setProcessor(ip);
+            }
+        }
+    }
 
     /** 
      * Fill ImageStack passed in from the input 2D array sp, where outer dim 
@@ -277,7 +305,7 @@ public final class I1l {
     public static ImageStatistics getStatsForChannel(
             ImagePlus imp, int channel) {
         ImagePlus impC = I1l.copyChannel(imp, channel);
-        return impC.getStatistics();
+        return (ImageStatistics)(new StackStatistics(impC));
     }
     
     /** Filter peaks based on Fourier radial position (freq) rMin to rMax */
@@ -654,6 +682,11 @@ public final class I1l {
         imp2.setCalibration(imp.getCalibration());
         imp2.setOpenAsHyperStack(true);
         return imp2;
+    }
+    
+    /** Replace all spaces with underscores (for macro recorder...) */
+    public static String us(String s) {
+        return s.replaceAll(" ", "_");
     }
 
     /** Interactive test method. */

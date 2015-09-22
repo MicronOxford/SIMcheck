@@ -42,7 +42,7 @@ import java.util.*;
 public final class SIMcheck_ implements PlugIn {
     
     // constants
-    private static final String VERSION = "0.9.10";
+    private static final String VERSION = "1.0.0";
     private static final String none = "[None]";  // no image
     private static final String omx = "OMX (CPZAT)";
 
@@ -102,27 +102,27 @@ public final class SIMcheck_ implements PlugIn {
         // present options
         gd.addCheckbox("Tile result windows after running?", doTileAfterRun);
         gd.addMessage("---------------- Raw Data -----------------");
-        gd.addChoice("Raw_Data:", titles, titles[1]);
-        gd.addChoice("Data format:", formats, omx);
+        gd.addChoice("Raw_data:", titles, titles[1]);
+        gd.addChoice("Data_format:", formats, omx);
         gd.addNumericField("Angles", angles, 0);
         gd.addNumericField("Phases", phases, 0);
-        gd.addCheckbox(Raw_IntensityProfiles.name, doIntensityProfiles);
-        gd.addCheckbox(Raw_FourierProjections.name, doFourierProjections);
-        gd.addCheckbox(Raw_MotionAndIllumVar.name, doMotionCheck);
-        gd.addCheckbox(Raw_ModContrast.name, doModContrast);
-        gd.addNumericField("    Camera Bit Depth", camBitDepth, 0);
+        gd.addCheckbox(I1l.us(Raw_IntensityProfiles.name), doIntensityProfiles);
+        gd.addCheckbox(I1l.us(Raw_FourierProjections.name), doFourierProjections);
+        gd.addCheckbox(I1l.us(Raw_MotionAndIllumVar.name), doMotionCheck);
+        gd.addCheckbox(I1l.us(Raw_ModContrast.name), doModContrast);
+        gd.addNumericField("    Camera_bit_depth", camBitDepth, 0);
         gd.addMessage("------------ Reconstructed Data ------------");
-        gd.addChoice("Reconstructed_Data:", titles, titles[0]);
-        gd.addCheckbox(Rec_IntensityHistogram.name, doHistograms);
-        gd.addCheckbox(Rec_SAMismatch.name, doSAMismatch);
-        gd.addCheckbox(Rec_FourierPlots.name, doFourierPlots);
-        gd.addCheckbox(Rec_ModContrastMap.name +
-                " (requires raw data)", doModContrastMap);
+        gd.addChoice("Reconstructed_data:", titles, titles[0]);
+        gd.addCheckbox(I1l.us(Rec_IntensityHistogram.name), doHistograms);
+        gd.addCheckbox(I1l.us(Rec_SAMismatch.name), doSAMismatch);
+        gd.addCheckbox(I1l.us(Rec_FourierPlots.name), doFourierPlots);
+        gd.addCheckbox(I1l.us(Rec_ModContrastMap.name) +
+                "_(requires_raw_data)", doModContrastMap);
         gd.addMessage("---------- Select Subregion (XYZ) ----------");
-        gd.addCheckbox("Crop data? (use reconstructed data ROI for XY)", doCrop);
+        gd.addCheckbox("Crop_data?_(use_reconstructed_data_ROI_for_XY)", doCrop);
         gd.addMessage("To crop in Z, enter slice numbers, 'first' or 'last'");
-        gd.addStringField("* Z crop first", "first");
-        gd.addStringField("* Z crop last", "last");
+        gd.addStringField("*_Z_crop_first", "first");
+        gd.addStringField("*_Z_crop_last", "last");
         gd.addHelp(
                 "http://www.micron.ox.ac.uk/microngroup/software/SIMcheck.html");
         gd.showDialog();

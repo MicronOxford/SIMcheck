@@ -28,6 +28,7 @@ import ij.IJ;
 import java.awt.Color;
 import java.util.Arrays;
 
+
 /** This plugin plots slice average intensity for each channel of raw SI data
  * to evaluate intensity stability as phase, Z, angle and time are incremented.
  * Each channel is plotted in a different (arbitrary) color.
@@ -43,7 +44,7 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
     public int phases = 5;
     public int angles = 3;
     public double zwin = 9;  // Z window that affects reconstruction of a slice
-
+    
     @Override
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
@@ -87,10 +88,14 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
         Calibration cal = imp.getCalibration();
 
         float[] avIntensities = new float[totalPlanes / nc];
+        float[][] normIntensities = new float[nc][totalPlanes / nc];
         float[] pzat_no = new float[totalPlanes / nc];
         Plot plot = new Plot(I1l.makeTitle(imp, TLA), 
+                "Slices in order: phase, Z, angle, time",
+                "Mean intensity", pzat_no, avIntensities);
+        Plot plot2 = new Plot(I1l.makeTitle(imp, TLA), 
         		"Slices in order: phase, Z, angle, time",
-        		"Mean intensity", pzat_no, avIntensities);
+        		"Normalized mean intensity", pzat_no, normIntensities[0]);
 
         // assess intensities for plot scaling
         double sliceMeanMin = 0;
@@ -109,7 +114,9 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
         }
         sliceMeanMax = sliceMeanMax * (double)1.1;  // show 10% above max slice
         plot.setLimits((double)1, (double)totalPlanes 
-        		/ nc, sliceMeanMin, sliceMeanMax);
+                / nc, sliceMeanMin, sliceMeanMax);
+        plot2.setLimits((double)1, (double)totalPlanes 
+        		/ nc, 0.0f, 1.1f);
 
         // add plot points for each channel, stepping by nc (over P,Z,A,T)
         for (int channel = 1; channel <= nc; channel++) {
@@ -122,20 +129,9 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
                 		ip, moptions, cal);
                 float planeMean = (float)stats.mean;
                 avIntensities[pzat-1] = planeMean;
+                normIntensities[channel - 1][pzat-1] = planeMean;
             }
-            if (channel == 1) {
-                Color color = Color.RED;
-                plot.setColor(color);
-            } else if (channel == 2) {
-                Color color = Color.GREEN;
-                plot.setColor(color);
-            } else if (channel == 3) {
-                Color color = Color.BLUE;
-                plot.setColor(color);
-            } else {
-                Color color = Color.BLACK;  // channels beyond 3rd BLACK 
-                plot.setColor(color);
-            }
+            plot.setColor(getColor(channel));
             float[] channelItens = Arrays.copyOf(avIntensities, pzat);
             plot.addPoints(pzat_no, channelItens, Plot.LINE);
             
@@ -145,23 +141,18 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
             // calc max % intensity fluctuation over slices used to reconstruct
             // 1 slice (e.g. 5P,9Z,3A); for central 9Z window & 1st time-point
             int zFirst = nz / 2 - (int)zwin / 2;
-//            int zLast = zFirst + (int)zwin + 1;
             int zLast = zFirst + (int)zwin;
             int pzMid = (np * nz / 2) + np / 2; // central phase & Z, 1st angle
             // initialize min and max arbitrarily within window before updating
             double intensMin = avIntensities[pzMid];
             double intensMax = avIntensities[pzMid];
-//            double intensMean = 0.0d;
-//            int nWinSlices = 0;
             for (int a = 0; a < na; a++) {
                 for (int z = 0; z < nz; z++) {
                     if (z >= zFirst && z < zLast)  {
                         // consider intensities inside central 9Z window
                         for (int p = 0; p < np; p++) {
-//                            nWinSlices++;
                             int slice = (a * nz * np) + (z * np) + p;
                             double intens = avIntensities[slice];
-//                            intensMean += intens;
                             if (intens > intensMax) {
                                 intensMax = intens;
                             }
@@ -171,8 +162,7 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
                         }
                     }
                 }
-            }  // TODO: test the above calc
-//            intensMean /= nWinSlices;
+            }  // TODO: add test case for the above calc
             double pcDiff = 100.0d * (intensMax - intensMin) / intensMax;
             results.addStat(
                     "C" + Integer.toString(channel) + " total intensity"
@@ -181,16 +171,25 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
             /// (1) per-channel intensity decay
             double[] xSlice = J.f2d(pzat_no);
             double[] yIntens = J.f2d(avIntensities);
-            //  fitting with y=a*exp(bx)  ; fitter returns a, b, R^2
-            //   e.g. x=ln((2/3)/b) for 2/3 original intensity (<33% decay)
-            CurveFitter expFitter = new CurveFitter(xSlice, yIntens);
-            expFitter.doFit(CurveFitter.EXPONENTIAL);
-            double[] fitResults = expFitter.getParams();
-            double channelDecay = (double)100 * (1 - Math.exp(fitResults[1]
-            		* pzat_no.length * (zwin / nz)));
+            // estimate % decay over each angle via simple straight line fit
+            double angleDecays[] = new double[na];
+            for (int a = 0; a < na; a++) {
+                int nzp = nz * np;
+                double[] xa = Arrays.copyOfRange(xSlice, a * nzp, (a + 1) * nzp);
+                double[] ya = Arrays.copyOfRange(yIntens, a * nzp, (a + 1) * nzp);
+                CurveFitter fitter = new CurveFitter(xa, ya);
+                fitter.doFit(CurveFitter.STRAIGHT_LINE);
+                double[] fitParams = fitter.getParams();
+                angleDecays[a] = (fitParams[1] * nzp * -100.0d) / fitParams[0];
+            }
+            double channelDecay = J.mean(angleDecays);
+            // negative bleaching does not make sense, so report 0
+            if (channelDecay < 0) {
+                channelDecay = 0.0d;
+            }
             results.addStat(
-                    "C" + Integer.toString(channel) + " average intensity"
-                    + " decay per " + (int)zwin + " section window (%)",
+                    "C" + Integer.toString(channel) + " estimated intensity"
+                    + " decay (%)",
                     channelDecay, ResultSet.StatOK.NA);
             
             /// (2) angle intensity differences
@@ -244,10 +243,23 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
                     ResultSet.StatOK.NA);
             
         }
-        ImagePlus impResult = plot.getImagePlus();
-        I1l.drawPlotTitle(impResult, "Raw data intensity profile (C1=red,"
+        normIntensities = normalizeChannels(normIntensities);
+        for (int c = 1; c <= nc; c++) {
+            plotChannelIntensities(pzat_no, normIntensities[c - 1], plot2, c);
+        }
+        ImagePlus impPlot1 = plot.getImagePlus();
+        ImagePlus impPlot2 = plot2.getImagePlus();
+        I1l.drawPlotTitle(impPlot1, "Raw data intensity profile (C1=red,"
                 + " C2=green, C3=blue, C4=black)");
-        results.addImp(name, plot.getImagePlus());
+        I1l.drawPlotTitle(impPlot2, "Relative intensity profile (C1=red,"
+                + " C2=green, C3=blue, C4=black)");
+        String shortInfo = "Average absolute (slider pos. 1) and relative"
+                + " (slider pos. 2) intensity for each plane of the raw data"
+                + " stack plotted (C1 red, C2 green, C3 blue, C4 black).";
+        ImageStack resultStack = impPlot1.getImageStack();
+        resultStack.addSlice(impPlot2.getProcessor());
+        ImagePlus impResult = new ImagePlus(impPlot1.getTitle(), resultStack);
+        results.addImp(shortInfo, impResult);
         results.addInfo("How to interpret",
                 "total intensity variation > ~50% over the 9-z-window used to"
                 + " reconstruct each z-section may cause artifacts (threshold"
@@ -256,11 +268,44 @@ public class Raw_IntensityProfiles implements PlugIn, Executable {
         return results;
     }
     
+    /** 
+     * Normalize relative intensities of channels in-place to range 0-1.
+     * N.B. this means rescalingbased on _max_ in each channel.
+     */
+    private static float[][] normalizeChannels(float[][] channelIntensities) {
+        int nc = channelIntensities.length;
+        float[] max = new float[nc];
+        for (int c = 0; c < nc; c++) {
+            max[c] = J.max(channelIntensities[c]);
+        }
+        for (int c = 0; c < nc; c++) {
+            channelIntensities[c] = J.div(channelIntensities[c], max[c]);
+        }
+        return channelIntensities;
+    }
+    
+    /** Add a series of channel intensities to an ImageJ plot. */
+    private static void plotChannelIntensities(
+            float[] x, float[] intensities, Plot plot, int channel) {
+        plot.setColor(getColor(channel));
+        plot.addPoints(x, intensities, Plot.LINE);
+    }
+    
+    /** Return color based on 1-based channel index. */
+    private static Color getColor(int channel) {
+        Color color = Color.BLACK; // channels beyond 3rd BLACK
+        Color[] colors = {Color.RED, Color.GREEN, Color.BLUE};
+        if (channel > 0 && channel < 4) {
+            color = colors[channel - 1];
+        }
+        return color;
+    }
+    
     /** Is this percentage difference stat value acceptable? */
     private ResultSet.StatOK checkPercentDiff(double statValue) {
-        if (statValue <= 50) {
+        if (statValue <= 40) {
             return ResultSet.StatOK.YES;
-        } else if (statValue <= 70) {
+        } else if (statValue <= 60) {
             return ResultSet.StatOK.MAYBE;
         } else {
             return ResultSet.StatOK.NO;

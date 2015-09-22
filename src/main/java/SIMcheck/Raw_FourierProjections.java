@@ -20,8 +20,8 @@ package SIMcheck;
 
 import ij.*;
 import ij.plugin.*;
-import ij.process.*;
 import ij.gui.GenericDialog; 
+import ij.gui.OvalRoi;
 import ij.IJ;
 
 /** This plugin takes raw SIM data and splits each angle into a separate stack     
@@ -39,6 +39,7 @@ public class Raw_FourierProjections implements PlugIn, Executable {
     public int phases = 5;                                                         
     public int angles = 3;                    
     public float offsetF = 75;
+    public double maskDiameter = 0.125; // (as fraction of image width)
 
     @Override
     public void run(String arg) {
@@ -64,130 +65,70 @@ public class Raw_FourierProjections implements PlugIn, Executable {
     
     /**
      * Execute plugin functionality: stack FFT with window function,
-     * auto-scaling and projection over all slices (phase, Z angle).
+     * max projection over all slices (phase, Z angle), blank out central
+     * 1/8 circle (set to min value), display min-max.
      */
     public ResultSet exec(ImagePlus... imps) {
         ImagePlus imp = imps[0];
         Util_StackFFT2D stackFFT2D = new Util_StackFFT2D();
+        stackFFT2D.resultTypeChoice = Util_StackFFT2D.resultType[1];
         ImagePlus impF = stackFFT2D.exec(imp);
-        autoscaleSlices(impF);
         IJ.run(impF, "Z Project...", "projection=[Max Intensity]");
         ImagePlus impProjF = ij.WindowManager.getCurrentImage();
+        maskCentralRegion(impProjF);
         if (impProjF.isComposite()) {
             // display grayscale, not colored composite
             CompositeImage ci = (CompositeImage)impProjF;
             ci.setMode(IJ.GRAYSCALE);
             impProjF.updateAndDraw();
         }
+        displayMinToMax(impProjF);
         impProjF.setTitle(I1l.makeTitle(imps[0], TLA));
-        results.addImp("2D FFT max-intensity projection", impProjF);
+        String shortInfo = "Maximum intensity projection of log"
+                + " (amplitude^2) 2D FFT stack, central region masked,"
+                + " rescaled (min-max) to improve contrast of the relevant"
+                + " frequency range.";
+        results.addImp(shortInfo, impProjF);
         results.addInfo("How to interpret", "look for clean 1st & 2nd"
-                + " order spots, similar across angles. Note that Spot"
+                + " order spots, similar across angles. Note that spot"
                 + " intensity depends on image content.");
         return results;
     }
     
-    /** Rescale 8-bit imp 0-255 for input mode to max. */
-    private void autoscaleSlices(ImagePlus imp) {
-        // FIXME, duplicated in Rec_fourier
-        int ns = imp.getStackSize();
-        for (int s = 1; s <= ns; s++) {
-            imp.setSlice(s);
-            ImageProcessor ip = imp.getProcessor();
-            ImageStatistics stats = imp.getProcessor().getStatistics();
-            int min = (int)stats.mode;
-            int max = (int)stats.max;
-            ByteProcessor bp = (ByteProcessor)imp.getProcessor();
-            ip = (ImageProcessor)I1l.setBPminMax(bp, min, max, 255);
-            imp.setProcessor(ip);
+    /** Mask central offset / low freq spike to better use display range. */
+    private void maskCentralRegion(ImagePlus imp) {
+        int w = imp.getWidth();
+        double d = this.maskDiameter * w;
+        if (w % 2 == 0) {
+            d += 1;  // tweak to centre the mask about zero freq stripes
         }
+        // N.B. we assume the image is square! (FFT result)
+        OvalRoi mask = new OvalRoi(w/2 - d/2 + 1, w/2 - d/2 + 1, d, d);
+        imp.setRoi(mask);
+            for (int c = 1; c <= imp.getNChannels(); c++) {
+                imp.setC(c);
+                double min = I1l.getStatsForChannel(imp, c).min;
+                IJ.run(imp, "Set...", "value=" + min + " slice");
+            }
+            imp.setC(1);
+        imp.deleteRoi();
     }
-    
-    /** Execute old plugin functionality: apply stack FFT with win func,
-     * bleach correction "simple ratio", subtract 50, max-intensity
-     * project, auto-contrast mode-max.
-     */
-    public ResultSet exec2(ImagePlus... imps) {
-        ImagePlus imp = imps[0];
-        imp = Util_RescaleTo16bit.exec(imp);
-        Util_StackFFT2D stackFFT2D = new Util_StackFFT2D();
-        ImagePlus impF = stackFFT2D.exec(imp);
-        IJ.run(impF, "Subtract...", "value=" + offsetF + " stack");
-        ImagePlus impNormF = impF.duplicate();
-        impNormF.setStack(I1l.normalizeStack(impF.getStack()));
-        IJ.run(impNormF, "Z Project...", "projection=[Max Intensity]");
-        ImagePlus impProjF = ij.WindowManager.getCurrentImage();
-        for (int c = 0; c < impProjF.getNChannels(); c++) {
-            impProjF.setC(c+1);
-//            int projMode = impProjF.getStatistics().mode;
-//            int projMax = (int)impProjF.getStatistics().max;
-//            IJ.setMinAndMax(imp, projMode, projMax);
-//            IJ.run(imp, "Apply LUT", "");
-//        impProjF.setProcessor((ImageProcessor)I1l.setBPminMax(
-//                (ByteProcessor)impProjF.getProcessor(),
-//                projMode, projMax, 255));  // rescale input mode-max to 0-255
-        }
-        impProjF.setTitle(I1l.makeTitle(imps[0], TLA));
-        results.addImp("2D FFT max-intensity projection", impProjF);
-        results.addInfo("How to interpret", "look for clean 1st & 2nd" +
-                " order spots, similar across angles. N.B. Spot intensity" +
-                " depends on image content.");
-        return results;
-    }        
 
-    /** Execute even older plugin functionality: split angles into separate
-     * stacks and perform 2D FFT on each slice for V2 OMX CPZAT dimension order.
-     * @param imps first imp should be input raw SI data ImagePlus
-     * @return ResultSet containing FFTs for each angle
-     */
-    public ResultSet exec3(ImagePlus... imps) {
-        ImagePlus imp = imps[0];
-        ImagePlus montage = null;
-        StackCombiner comb = new StackCombiner();
-        for (int a = 1; a <= angles; a++) {
-          	ImagePlus impCurrentA = SIMcheck_.getImpForAngle(
-          	        imp, a, phases, angles);
-//          	impCurrentA = Util_RescaleTo16bit.exec(impCurrentA);
-          	String statusString = "Performing FFT for angle " 
-          			+ Integer.toString(a);
-          	IJ.showStatus(statusString);
-          	impCurrentA = FFT2D.fftImp(impCurrentA);
-          	String title = I1l.makeTitle(imp, "FT" + a);
-          	impCurrentA.setTitle(title);
-          	IJ.run(impCurrentA, "Z Project...", "projection=[Max Intensity]");
-          	impCurrentA = ij.WindowManager.getCurrentImage();
-          	int nChannels = impCurrentA.getNChannels();
-          	ImagePlus[] impChannels = new ImagePlus[nChannels];
-          	for (int c = 1; c <= nChannels; c++) {
-          	    ImagePlus impC = I1l.copyChannel(impCurrentA, c);
-          	    ImageStatistics stats = impC.getStatistics();
-          	    double newMin = stats.dmode - stats.stdDev;
-          	    I1l.rescale8bitToMinMax(impC, newMin, stats.max);
-          	    I1l.drawLabel(impC, "A" + a);
-          	    impChannels[c - 1] = impC;
-          	}
-          	impCurrentA.getWindow().close();
-          	impCurrentA = I1l.mergeChannels("FFT_A" + a, impChannels);
-          	impCurrentA.setC(1);
-          	if (a == 1) {
-          	    montage = impCurrentA.duplicate();
-          	} else {
-          	    ImageStack montageStack = comb.combineHorizontally(
-          	            montage.getStack(), impCurrentA.getStack());
-          	    montage.setStack(montageStack);
-          	}
-          	// TODO: clear MAX_<originalTitle>_FT2.tif and "FT3.tif
-          	//       from Window list after the plugin exits ()
-          	impCurrentA.close();  // only seems to fully close "FT1.tif
+    /** Set display range for each channel to min-max. */
+    private static void displayMinToMax(ImagePlus imp) {
+        if (imp.isComposite()) {
+            for (int c = 1; c <= imp.getNChannels(); c++) {
+                double min = I1l.getStatsForChannel(imp, c).min;
+                double max = I1l.getStatsForChannel(imp, c).max;
+                imp.setC(c);
+                IJ.setMinAndMax(imp, min, max);
+            }
+            imp.setC(1);
+        } else {
+            double min = imp.getStatistics().min;
+            double max = imp.getStatistics().max;
+            IJ.setMinAndMax(imp, min, max);
         }
-        IJ.run(montage, "Grays", "");
-        montage.setTitle(I1l.makeTitle(imps[0], TLA));
-      	results.addImp("2D FFT montage for each angle (max projection)",
-      	        montage);
-        results.addInfo("How to interpret", "look for clean 1st & 2nd" +
-      	        " order spots, similar across angles. N.B. Spot intensity" +
-                " depends on image content.");
-        return results;
     }
     
     /** Interactive test method */
