@@ -50,6 +50,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
     // TODO: refactor & remove default winFraction from here
     
     // options
+    public boolean fft3d = true;          // use 3D FFT? (requires ImgLib2)
     public boolean autoCutoff = true;     // no noise cut-off?
     public boolean manualCutoff = false;  // manual noise cut-off?
     public boolean applyWinFunc = false;  // apply window function?
@@ -67,6 +68,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);
         imp.getWidth();
+        gd.addCheckbox("(0)_3D_FFT (requires ImgLib2)", fft3d);
         gd.addCheckbox("(1)_Cut-off:_auto (stack mode)", autoCutoff);
         gd.addCheckbox("     Cut-off:_manual (default=0)", manualCutoff);
         gd.addCheckbox("(2)_Window_function*", applyWinFunc);
@@ -79,6 +81,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         gd.showDialog();
         if (gd.wasOKed()) {
             // TODO: notCutoff, manualCutoff and autoScale radioButton group
+            this.fft3d = gd.getNextBoolean();
             this.autoCutoff = gd.getNextBoolean();
             this.manualCutoff = gd.getNextBoolean();
             this.applyWinFunc = gd.getNextBoolean();
@@ -107,6 +110,12 @@ public class Rec_FourierPlots implements PlugIn, Executable {
      * @return ResultSet containing FFT imp, ortho FFT imp, radial profile plot 
      */
     public ResultSet exec(ImagePlus... imps) {
+        try {
+            Class.forName("net.imglib2.img.Img");
+            // if ImgLib2 is available, leave fft3d true/false
+        } catch(ClassNotFoundException e) {
+            this.fft3d = false;  // can't find ImgLib2, so no 3D FFT
+        }
         // TODO: check we have micron calibrations before continuing..
         Calibration cal = imps[0].getCalibration();
         ImagePlus imp2 = null;
@@ -125,6 +134,9 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             winFraction = 0.0d;
         }
         ImagePlus impF = null;
+        if (fft3d) {
+            IJ.log("TODO: 3D FFT... (we're good to go!!)");
+        }
         if (logDisplay) {
             impF = FFT2D.fftImp(imp2, winFraction);
             blurRadius *= (double)impF.getWidth() / 512.0d;
