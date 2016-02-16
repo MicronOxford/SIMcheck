@@ -22,6 +22,14 @@ import ij.plugin.*;
 import ij.process.*;
 import ij.gui.GenericDialog;
 
+import net.imagej.ImageJ;
+import org.scijava.Context;
+
+import net.imglib2.img.Img;
+import net.imglib2.img.display.imagej.ImageJFunctions;
+import net.imglib2.interpolation.randomaccess.NLinearInterpolatorFactory;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
+
 /** This plugin converts a SIM image to a pseudo-wide-field image by averaging
  * phases and angles. Assumes OMX V2 CPZAT input channel order.
  *
@@ -104,23 +112,24 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         if (m == ProjMode.AVG) {
             // AVG projection results 16-bit, resized x2 in XY
             new StackConverter(projImg).convertToGray16();  // TODO: was original?
-            int newWidth = imp.getWidth() * 2;
-            int newHeight = imp.getHeight() * 2;
+            Img<UnsignedShortType> img = ImageJFunctions.wrapShort(projImg);
+
+            double[] scaleFactors;
+            if (channels > 1)
+                scaleFactors = new double[] {2, 2, 1, 1};
+            else
+                scaleFactors = new double[] {2, 2, 1};
+
+            final Context context = (Context) IJ.runPlugIn("org.scijava.Context", "");
+            final ImageJ ijc = new ImageJ(context);
+            NLinearInterpolatorFactory<UnsignedShortType> interpolation
+                = new NLinearInterpolatorFactory<UnsignedShortType>();
+            Img<UnsignedShortType> out = ijc.op().image().scale(img, scaleFactors,
+                                                                interpolation);
+
             String newTitle = I1l.makeTitle(imp, TLA);
-            if (channels > 1) {
-                IJ.run(projImg, "Scale...", "x=2 y=2 z=1.0 width=" + newWidth
-                        + " height=" + newHeight + " depth=" + Zplanes
-                        + " interpolation=Bicubic average"
-                        + " create title=" + newTitle);
-            } else {
-                // damned "Scale..." command requires "process" to do full stack
-                //   if we have an ordinary stack rather than a hyperstack
-                IJ.run(projImg, "Scale...", "x=2 y=2 z=1.0 width=" + newWidth
-                        + " height=" + newHeight + " depth=" + Zplanes
-                        + " interpolation=Bicubic average process"  // "process"
-                        + " create title=" + newTitle);
-            }
-            projImg = ij.WindowManager.getCurrentImage();
+            projImg = ImageJFunctions.wrap(out, newTitle).duplicate();
+
             I1l.copyCal(imp, projImg);
             Calibration cal = projImg.getCalibration();
             cal.pixelWidth /= 2;
