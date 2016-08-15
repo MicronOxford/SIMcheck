@@ -255,7 +255,7 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         ImagePlus impAvg = si2wf.exec(impTest, 5, 3, ProjMode.AVG);
         impAvg.setTitle("impAvg");
         impAvg.show();
-        // 2. AVG
+        // 2. MAX
         ImagePlus impMax = si2wf.exec(impTest, 5, 3, ProjMode.MAX);
         impMax.setTitle("impMax");
         impMax.show();
