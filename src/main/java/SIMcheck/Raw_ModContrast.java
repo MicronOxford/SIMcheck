@@ -25,6 +25,8 @@ import ij.gui.GenericDialog;
 
 import java.awt.image.IndexColorModel;
 
+import SIMcheck.Util_SItoPseudoWidefield.ProjMode;
+
 /** This plugin displays a modulation contrast map for raw SIM data. 
  * For each channel, displaying the result with a LUT which is also shown. 
  * Started as an ImageJ implementation of Rainer Kaufmann's original idea and 
@@ -268,8 +270,12 @@ public class Raw_ModContrast implements PlugIn, Executable {
             results.addInfo("Estimated Wiener filter parameter",
                     "for OMX data reconstruction (SoftWoRx) only.");
             for (int c = 1; c <= nc; c++) {
-                ImagePlus impC = I1l.copyChannel(impResult, c);
-                double featMCNR = I1l.stackFeatMean(impC);
+                ImagePlus impC = I1l.copyChannel(imp, c);
+                Util_SItoPseudoWidefield si2wf = new Util_SItoPseudoWidefield();
+                si2wf.doRescale = false;  // do NOT rescale 2x in XY
+                ImagePlus impPwfC = si2wf.exec(impC, 5, 3, ProjMode.AVG);
+                ImagePlus impResultC = I1l.copyChannel(impResult, c);
+                double featMCNR = I1l.stackFeatMean(impResultC, impPwfC);
                 results.addStat("C" + c + " average feature MCNR", 
                         featMCNR, checkMCNR(featMCNR));
                 results.addStat("C" + c + " estimated Wiener filter optimum", 
