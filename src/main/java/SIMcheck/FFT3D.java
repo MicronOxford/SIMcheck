@@ -4,15 +4,8 @@ package SIMcheck;
 import ij.IJ;
 import ij.ImageJ;
 import ij.plugin.*;
-import ij.process.ImageProcessor;
 import ij.ImagePlus;
-import net.imglib2.img.Img;
-import net.imglib2.exception.IncompatibleTypeException;
-import net.imglib2.img.ImagePlusAdapter;
-import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.type.numeric.complex.ComplexFloatType;
-import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.converter.ComplexPowerGLogFloatConverter;
+import edu.emory.mathcs.parallelfftj.*;
 
 /**
  * Perform 3D Fourier Transform on a 3D ImageJ1 stack (ImagePlus input),
@@ -38,7 +31,11 @@ public class FFT3D implements PlugIn
     
     /** Carry out 3D FFT using parallel FFTJ. */
     public ImagePlus exec(ImagePlus imp) {
-        ImagePlus impf = imp.duplicate();
+        Transformer transform = new FloatTransformer(imp.getStack(), null);
+        transform.fft();
+        ImagePlus impf = transform.toImagePlus(
+                SpectrumType.POWER_SPECTRUM_LOG,
+                FourierDomainOriginType.AT_CENTER);
         impf.setTitle(imp.getTitle() + "FFT3D");
         return impf;
     }
