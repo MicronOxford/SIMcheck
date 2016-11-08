@@ -50,7 +50,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
     // TODO: refactor & remove default winFraction from here
     
     // options
-    public boolean fft3d = true;          // use 3D FFT? (requires ImgLib2)
+    public boolean fft3d = true;          // use 3D FFT? (requires ParallelFFTJ)
     public boolean autoCutoff = true;     // no noise cut-off?
     public boolean manualCutoff = false;  // manual noise cut-off?
     public boolean applyWinFunc = false;  // apply window function?
@@ -68,39 +68,56 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);
         imp.getWidth();
-        gd.addCheckbox("(0)_3D_FFT (requires ImgLib2)", fft3d);
-        gd.addCheckbox("(1)_Cut-off:_auto (stack mode)", autoCutoff);
-        gd.addCheckbox("     Cut-off:_manual (default=0)", manualCutoff);
-        gd.addCheckbox("(2)_Window_function*", applyWinFunc);
-        gd.addCheckbox("(3)_32-bit_Amp, gamma 0.2, display min-max", gammaMinMax);
-        gd.addCheckbox("     8-bit log(Amp^2), display mode-max", logDisplay);
-        gd.addCheckbox("(4)_Blur_&_false-color_LUT", blurAndLUT);
-        gd.addCheckbox("(5)_Show_axial_FFT", showAxial);
-        gd.addMessage("* suppresses edge artifacts");
-        gd.addMessage("** default: 32-bit Amplitude, gamma 0.2 (display 2-40)");
-        gd.showDialog();
-        if (gd.wasOKed()) {
-            // TODO: notCutoff, manualCutoff and autoScale radioButton group
-            this.fft3d = gd.getNextBoolean();
-            this.autoCutoff = gd.getNextBoolean();
-            this.manualCutoff = gd.getNextBoolean();
-            this.applyWinFunc = gd.getNextBoolean();
-            this.gammaMinMax = gd.getNextBoolean();
-            this.logDisplay = gd.getNextBoolean();
-            if (this.logDisplay) {
-                this.autoScale = true;
+        try {
+            Class.forName("edu.emory.mathcs.parallelfftj.FloatTransformer");
+            gd.addCheckbox("Cut-off:_auto (stack mode)", autoCutoff);
+            gd.addCheckbox("Cut-off:_manual (default=0)", manualCutoff);
+            gd.showDialog();
+            if (gd.wasOKed()) {
+                // TODO: notCutoff, manualCutoff and autoScale radioButton group
+                this.autoCutoff = gd.getNextBoolean();
+                this.manualCutoff = gd.getNextBoolean();
+                if (manualCutoff) {
+                    // skip if noCutoff
+                    this.channelMinima = new double[imp.getNChannels()];
+                    SIMcheck_.specifyBackgrounds(
+                            channelMinima, "Set noise cut-off:");
+                }
             }
-            this.blurAndLUT = gd.getNextBoolean();
-            this.showAxial = gd.getNextBoolean();
-            if (manualCutoff) {
-                // skip if noCutoff
-                this.channelMinima = new double[imp.getNChannels()];
-                SIMcheck_.specifyBackgrounds(
-                        channelMinima, "Set noise cut-off:");
+            // simplified options for 3d transform (if available)
+        } catch(ClassNotFoundException e) {
+            gd.addCheckbox("(1)_Cut-off:_auto (stack mode)", autoCutoff);
+            gd.addCheckbox("     Cut-off:_manual (default=0)", manualCutoff);
+            gd.addCheckbox("(2)_Window_function*", applyWinFunc);
+            gd.addCheckbox("(3)_32-bit_Amp, gamma 0.2, display min-max", gammaMinMax);
+            gd.addCheckbox("     8-bit log(Amp^2), display mode-max", logDisplay);
+            gd.addCheckbox("(4)_Blur_&_false-color_LUT", blurAndLUT);
+            gd.addCheckbox("(5)_Show_axial_FFT", showAxial);
+            gd.addMessage("* suppresses edge artifacts");
+            gd.addMessage("** default: 32-bit Amplitude, gamma 0.2 (display 2-40)");
+            gd.showDialog();
+            if (gd.wasOKed()) {
+                // TODO: notCutoff, manualCutoff and autoScale radioButton group
+                this.autoCutoff = gd.getNextBoolean();
+                this.manualCutoff = gd.getNextBoolean();
+                this.applyWinFunc = gd.getNextBoolean();
+                this.gammaMinMax = gd.getNextBoolean();
+                this.logDisplay = gd.getNextBoolean();
+                if (this.logDisplay) {
+                    this.autoScale = true;
+                }
+                this.blurAndLUT = gd.getNextBoolean();
+                this.showAxial = gd.getNextBoolean();
+                if (manualCutoff) {
+                    // skip if noCutoff
+                    this.channelMinima = new double[imp.getNChannels()];
+                    SIMcheck_.specifyBackgrounds(
+                            channelMinima, "Set noise cut-off:");
+                }
             }
-	        results = exec(imp);
-	        results.report();
         }
+        results = exec(imp);
+        results.report();
     }
 
     /** 
@@ -111,8 +128,8 @@ public class Rec_FourierPlots implements PlugIn, Executable {
      */
     public ResultSet exec(ImagePlus... imps) {
         try {
-            Class.forName("net.imglib2.img.Img");
-            // if ImgLib2 is available, leave fft3d true/false
+            Class.forName("edu.emory.mathcs.parallelfftj.FloatTransformer");
+            // use parallel fftj for 3d transform if available
         } catch(ClassNotFoundException e) {
             this.fft3d = false;  // can't find ImgLib2, so no 3D FFT
         }
@@ -135,35 +152,37 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         }
         ImagePlus impF = null;
         if (fft3d) {
-            IJ.log("TODO: 3D FFT... (we're good to go!!)");
-        }
-        if (logDisplay) {
-            impF = FFT2D.fftImp(imp2, winFraction);
-            blurRadius *= (double)impF.getWidth() / 512.0d;
-            IJ.showStatus("Blurring & rescaling z-sections (lateral view)");
-            autoscaleSlices(impF);
-            impF = gaussBlur(impF);
-            if (imps[0].isComposite()) {
-                impF = new CompositeImage(impF);
-            }
-            rescaleToStackMax(impF);
-            setLUT(impF, 0.0d, 255.0d);
+            impF = FFT3D.fftImp(imp2);
+            displayModeToMax(impF);
         } else {
-            impF = FFT2D.fftImp(imp2, true, winFraction, 0.2d);
-            impF = gaussBlur(impF);
-            if (imps[0].isComposite()) {
-                impF = new CompositeImage(impF);
-            }
-            if (gammaMinMax) {
-                if (blurAndLUT) {
-                    displayModeToMax(impF);
-                } else {
-                    displayMinToMax(impF);
+            if (logDisplay) {
+                impF = FFT2D.fftImp(imp2, winFraction);
+                blurRadius *= (double)impF.getWidth() / 512.0d;
+                IJ.showStatus("Blurring & rescaling z-sections (lateral view)");
+                autoscaleSlices(impF);
+                impF = gaussBlur(impF);
+                if (imps[0].isComposite()) {
+                    impF = new CompositeImage(impF);
                 }
-                setLUT(impF);
+                rescaleToStackMax(impF);
+                setLUT(impF, 0.0d, 255.0d);
             } else {
-                IJ.setMinAndMax(impF, 2, 40);
-                setLUT(impF, 2.0d, 40.0d);
+                impF = FFT2D.fftImp(imp2, true, winFraction, 0.2d);
+                impF = gaussBlur(impF);
+                if (imps[0].isComposite()) {
+                    impF = new CompositeImage(impF);
+                }
+                if (gammaMinMax) {
+                    if (blurAndLUT) {
+                        displayModeToMax(impF);
+                    } else {
+                        displayMinToMax(impF);
+                    }
+                    setLUT(impF);
+                } else {
+                    IJ.setMinAndMax(impF, 2, 40);
+                    setLUT(impF, 2.0d, 40.0d);
+                }
             }
         }
         impF = overlayResRings(impF, cal);

@@ -3,6 +3,7 @@
 package SIMcheck;
 import ij.IJ;
 import ij.ImageJ;
+import ij.measure.Calibration;
 import ij.plugin.*;
 import ij.ImagePlus;
 import edu.emory.mathcs.parallelfftj.*;
@@ -25,18 +26,32 @@ public class FFT3D implements PlugIn
     public void run(String arg) {
         // process ImagePlus from current active window
         ImagePlus imp = IJ.getImage();
-        ImagePlus impf = exec(imp);
+        ImagePlus impf = fftImp(imp);
         impf.show();
     }
     
-    /** Carry out 3D FFT using parallel FFTJ. */
-    public ImagePlus exec(ImagePlus imp) {
-        Transformer transform = new FloatTransformer(imp.getStack(), null);
-        transform.fft();
-        ImagePlus impf = transform.toImagePlus(
-                SpectrumType.POWER_SPECTRUM_LOG,
-                FourierDomainOriginType.AT_CENTER);
-        impf.setTitle(imp.getTitle() + "FFT3D");
+    
+    /**
+     * 3D Fourier Transform using parallel FFTJ.
+     * @param imp ImagePlus to be Fourier-transformed.
+     * @return ImagePlus after 3D Fourier transform.
+     */
+    public static ImagePlus fftImp(ImagePlus imp)
+    {
+        Calibration cal = imp.getCalibration();
+        // process stack for each channel sequentially
+        int nc = imp.getNChannels();
+        ImagePlus[] imps = new ImagePlus[nc];
+        for (int c = 1; c <= nc; c++) {
+            ImagePlus impC = I1l.copyChannel(imp, c);
+            Transformer transform = new FloatTransformer(impC.getStack(), null);
+            transform.fft();
+            imps[c - 1] = transform.toImagePlus(
+                    SpectrumType.POWER_SPECTRUM_LOG,
+                    FourierDomainOriginType.AT_CENTER);
+        }
+        ImagePlus impf = I1l.mergeChannels(imp.getTitle() + "FFT3D", imps);
+        impf.setCalibration(cal);
         return impf;
     }
     
