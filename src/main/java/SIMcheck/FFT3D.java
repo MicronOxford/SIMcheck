@@ -1,4 +1,4 @@
-/** TODO: add copyright, including ImgLib2 stuff? (apologies for now) */
+/** TODO: add copyright, license etc. for ParallelFFTJ (apologies for now!) */
 
 package SIMcheck;
 import ij.IJ;
@@ -10,11 +10,7 @@ import edu.emory.mathcs.parallelfftj.*;
 
 /**
  * Perform 3D Fourier Transform on a 3D ImageJ1 stack (ImagePlus input),
- * using ImgLib2 to carry out the FFT. Each channel and/or time-point is
- * processed sequentially, and the result is a log-scaled power spectrum.
- * 
- * This class is an ImageJ1 plugin, but requires ImgLib2 to run. It does
- * not depend on ImageJ2/SCIFIO. Call the exec() method to use programatically.
+ * using Piotr Wendykier's ParallelFFTJ.
  * 
  * @author graemeball@gmail.com
  *
