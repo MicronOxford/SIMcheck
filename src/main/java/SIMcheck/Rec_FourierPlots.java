@@ -50,6 +50,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
     // TODO: refactor & remove default winFraction from here
     
     // options
+    public boolean fft3d = true;          // use 3D FFT? (requires ParallelFFTJ)
     public boolean autoCutoff = true;     // no noise cut-off?
     public boolean manualCutoff = false;  // manual noise cut-off?
     public boolean applyWinFunc = false;  // apply window function?
@@ -67,37 +68,59 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         ImagePlus imp = IJ.getImage();
         GenericDialog gd = new GenericDialog(name);
         imp.getWidth();
-        gd.addCheckbox("(1)_Cut-off:_auto (stack mode)", autoCutoff);
-        gd.addCheckbox("     Cut-off:_manual (default=0)", manualCutoff);
-        gd.addCheckbox("(2)_Window_function*", applyWinFunc);
-        gd.addCheckbox("(3)_32-bit_Amp, gamma 0.2, display min-max", gammaMinMax);
-        gd.addCheckbox("     8-bit log(Amp^2), display mode-max", logDisplay);
-        gd.addCheckbox("(4)_Blur_&_false-color_LUT", blurAndLUT);
-        gd.addCheckbox("(5)_Show_axial_FFT", showAxial);
-        gd.addMessage("* suppresses edge artifacts");
-        gd.addMessage("** default: 32-bit Amplitude, gamma 0.2 (display 2-40)");
-        gd.showDialog();
-        if (gd.wasOKed()) {
-            // TODO: notCutoff, manualCutoff and autoScale radioButton group
-            this.autoCutoff = gd.getNextBoolean();
-            this.manualCutoff = gd.getNextBoolean();
-            this.applyWinFunc = gd.getNextBoolean();
-            this.gammaMinMax = gd.getNextBoolean();
-            this.logDisplay = gd.getNextBoolean();
-            if (this.logDisplay) {
-                this.autoScale = true;
+        try {
+            Class.forName("edu.emory.mathcs.parallelfftj.FloatTransformer");
+            gd.addMessage("3D FFT (ParallelFFTJ), log-scaled power spectrum");
+            gd.addCheckbox("(1)_Cut-off:_auto (stack mode)", autoCutoff);
+            gd.addCheckbox("     Cut-off:_manual (default=0)", manualCutoff);
+            gd.addCheckbox("(2)_Show_axial_FFT", showAxial);
+            gd.showDialog();
+            if (gd.wasOKed()) {
+                // TODO: notCutoff, manualCutoff and autoScale radioButton group
+                this.autoCutoff = gd.getNextBoolean();
+                this.manualCutoff = gd.getNextBoolean();
+                this.showAxial = gd.getNextBoolean();
+                if (manualCutoff) {
+                    // skip if noCutoff
+                    this.channelMinima = new double[imp.getNChannels()];
+                    SIMcheck_.specifyBackgrounds(
+                            channelMinima, "Set noise cut-off:");
+                }
             }
-            this.blurAndLUT = gd.getNextBoolean();
-            this.showAxial = gd.getNextBoolean();
-            if (manualCutoff) {
-                // skip if noCutoff
-                this.channelMinima = new double[imp.getNChannels()];
-                SIMcheck_.specifyBackgrounds(
-                        channelMinima, "Set noise cut-off:");
+            // simplified options for 3d transform (if available)
+        } catch(ClassNotFoundException e) {
+            gd.addCheckbox("(1)_Cut-off:_auto (stack mode)", autoCutoff);
+            gd.addCheckbox("     Cut-off:_manual (default=0)", manualCutoff);
+            gd.addCheckbox("(2)_Window_function*", applyWinFunc);
+            gd.addCheckbox("(3)_32-bit_Amp, gamma 0.2, display min-max", gammaMinMax);
+            gd.addCheckbox("     8-bit log(Amp^2), display mode-max", logDisplay);
+            gd.addCheckbox("(4)_Blur_&_false-color_LUT", blurAndLUT);
+            gd.addCheckbox("(5)_Show_axial_FFT", showAxial);
+            gd.addMessage("* suppresses edge artifacts");
+            gd.addMessage("** default: 32-bit Amplitude, gamma 0.2 (display 2-40)");
+            gd.showDialog();
+            if (gd.wasOKed()) {
+                // TODO: notCutoff, manualCutoff and autoScale radioButton group
+                this.autoCutoff = gd.getNextBoolean();
+                this.manualCutoff = gd.getNextBoolean();
+                this.applyWinFunc = gd.getNextBoolean();
+                this.gammaMinMax = gd.getNextBoolean();
+                this.logDisplay = gd.getNextBoolean();
+                if (this.logDisplay) {
+                    this.autoScale = true;
+                }
+                this.blurAndLUT = gd.getNextBoolean();
+                this.showAxial = gd.getNextBoolean();
+                if (manualCutoff) {
+                    // skip if noCutoff
+                    this.channelMinima = new double[imp.getNChannels()];
+                    SIMcheck_.specifyBackgrounds(
+                            channelMinima, "Set noise cut-off:");
+                }
             }
-	        results = exec(imp);
-	        results.report();
         }
+        results = exec(imp);
+        results.report();
     }
 
     /** 
@@ -107,6 +130,12 @@ public class Rec_FourierPlots implements PlugIn, Executable {
      * @return ResultSet containing FFT imp, ortho FFT imp, radial profile plot 
      */
     public ResultSet exec(ImagePlus... imps) {
+        try {
+            Class.forName("edu.emory.mathcs.parallelfftj.FloatTransformer");
+            // use parallel fftj for 3d transform if available
+        } catch(ClassNotFoundException e) {
+            this.fft3d = false;  // can't find ImgLib2, so no 3D FFT
+        }
         // TODO: check we have micron calibrations before continuing..
         Calibration cal = imps[0].getCalibration();
         ImagePlus imp2 = null;
@@ -125,33 +154,38 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             winFraction = 0.0d;
         }
         ImagePlus impF = null;
-        if (logDisplay) {
-            impF = FFT2D.fftImp(imp2, winFraction);
-            blurRadius *= (double)impF.getWidth() / 512.0d;
-            IJ.showStatus("Blurring & rescaling z-sections (lateral view)");
-            autoscaleSlices(impF);
-            impF = gaussBlur(impF);
-            if (imps[0].isComposite()) {
-                impF = new CompositeImage(impF);
-            }
-            rescaleToStackMax(impF);
-            setLUT(impF, 0.0d, 255.0d);
+        if (fft3d) {
+            impF = FFT3D.fftImp(imp2);
+            displayModeToMax(impF);
         } else {
-            impF = FFT2D.fftImp(imp2, true, winFraction, 0.2d);
-            impF = gaussBlur(impF);
-            if (imps[0].isComposite()) {
-                impF = new CompositeImage(impF);
-            }
-            if (gammaMinMax) {
-                if (blurAndLUT) {
-                    displayModeToMax(impF);
-                } else {
-                    displayMinToMax(impF);
+            if (logDisplay) {
+                impF = FFT2D.fftImp(imp2, winFraction);
+                blurRadius *= (double)impF.getWidth() / 512.0d;
+                IJ.showStatus("Blurring & rescaling z-sections (lateral view)");
+                autoscaleSlices(impF);
+                impF = gaussBlur(impF);
+                if (imps[0].isComposite()) {
+                    impF = new CompositeImage(impF);
                 }
-                setLUT(impF);
+                rescaleToStackMax(impF);
+                setLUT(impF, 0.0d, 255.0d);
             } else {
-                IJ.setMinAndMax(impF, 2, 40);
-                setLUT(impF, 2.0d, 40.0d);
+                impF = FFT2D.fftImp(imp2, true, winFraction, 0.2d);
+                impF = gaussBlur(impF);
+                if (imps[0].isComposite()) {
+                    impF = new CompositeImage(impF);
+                }
+                if (gammaMinMax) {
+                    if (blurAndLUT) {
+                        displayModeToMax(impF);
+                    } else {
+                        displayMinToMax(impF);
+                    }
+                    setLUT(impF);
+                } else {
+                    IJ.setMinAndMax(impF, 2, 40);
+                    setLUT(impF, 2.0d, 40.0d);
+                }
             }
         }
         impF = overlayResRings(impF, cal);
@@ -169,38 +203,49 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             results.addImp("Fourier Transform Radial profile "
                     + "(lateral, central Z)", radialProfiles);
             if (showAxial) {
-                /// for orthogonal (axial) view, reslice first
-                new StackConverter(imp2).convertToGray32();  // for OrthoReslicer
-                OrthoReslicer orthoReslicer = new OrthoReslicer();
-                ImagePlus impOrtho = imp2.duplicate();
-                impOrtho = orthoReslicer.exec(impOrtho, false);
-                impOrtho = I1l.takeCentralZ(impOrtho);
-                Calibration calOrtho = impOrtho.getCalibration();
-                IJ.showStatus("FFT z-sections (orthogonal view)");
+                Calibration calOrtho = null;
+                ImagePlus impOrtho = null;
                 ImagePlus impOrthoF = null;
-                if (logDisplay) {
-                    impOrthoF = FFT2D.fftImp(impOrtho, winFraction);
-                    IJ.showStatus("Blur & rescale z-sections (orthogonal view)");
-                    autoscaleSlices(impOrthoF);
-                    impOrthoF = resizeAndPad(impOrthoF, cal);
-                    impOrthoF = gaussBlur(impOrthoF);
-                    // TODO, for multi-frame images, ensure impOrthoF is composite
-                    rescaleToStackMax(impOrthoF);
-                    setLUT(impOrthoF, 0.0d, 255.0d);
+                if (fft3d) {
+                    new StackConverter(impF).convertToGray32();  // for OrthoReslicer
+                    OrthoReslicer orthoReslicer = new OrthoReslicer();
+                    ImagePlus impF2 = impF.duplicate();
+                    impOrthoF = orthoReslicer.exec(impF2, false);
+                    impOrthoF = I1l.takeCentralZ(impOrthoF);
+                    calOrtho = impOrthoF.getCalibration();
                 } else {
-                    impOrthoF = FFT2D.fftImp(impOrtho, true, winFraction, 0.2d);
-                    impOrthoF = resizeAndPad(impOrthoF, cal);
-                    impOrthoF = gaussBlur(impOrthoF);
-                    if (gammaMinMax) {
-                        if (blurAndLUT) {
-                            displayCentralModeToMax(impOrthoF);
-                        } else {
-                            displayMinToMax(impOrthoF);
-                        }
-                        setLUT(impOrthoF);
+                    /// for orthogonal (axial) view, reslice first
+                    new StackConverter(imp2).convertToGray32();  // for OrthoReslicer
+                    OrthoReslicer orthoReslicer = new OrthoReslicer();
+                    impOrtho = imp2.duplicate();
+                    impOrtho = orthoReslicer.exec(impOrtho, false);
+                    impOrtho = I1l.takeCentralZ(impOrtho);
+                    calOrtho = impOrtho.getCalibration();
+                    IJ.showStatus("FFT z-sections (orthogonal view)");
+                    if (logDisplay) {
+                        impOrthoF = FFT2D.fftImp(impOrtho, winFraction);
+                        IJ.showStatus("Blur & rescale z-sections (orthogonal view)");
+                        autoscaleSlices(impOrthoF);
+                        impOrthoF = resizeAndPad(impOrthoF, cal);
+                        impOrthoF = gaussBlur(impOrthoF);
+                        // TODO, for multi-frame images, ensure impOrthoF is composite
+                        rescaleToStackMax(impOrthoF);
+                        setLUT(impOrthoF, 0.0d, 255.0d);
                     } else {
-                        IJ.setMinAndMax(impOrthoF, 2, 40);
-                        setLUT(impOrthoF, 2.0d, 40.0d);
+                        impOrthoF = FFT2D.fftImp(impOrtho, true, winFraction, 0.2d);
+                        impOrthoF = resizeAndPad(impOrthoF, cal);
+                        impOrthoF = gaussBlur(impOrthoF);
+                        if (gammaMinMax) {
+                            if (blurAndLUT) {
+                                displayCentralModeToMax(impOrthoF);
+                            } else {
+                                displayMinToMax(impOrthoF);
+                            }
+                            setLUT(impOrthoF);
+                        } else {
+                            IJ.setMinAndMax(impOrthoF, 2, 40);
+                            setLUT(impOrthoF, 2.0d, 40.0d);
+                        }
                     }
                 }
                 calOrtho.pixelHeight = calOrtho.pixelWidth;  // after resizeAndPad
@@ -212,10 +257,17 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             }
         }
         impF.setPosition(1, impF.getNSlices() / 2, 1);
-        results.addInfo("About",
-                "by default the reconstructed data are (1) cropped to mode;"
-                        + " (2) Fourier transformed and scaled by a gamma function"
-                        + " (gamma=0.2).");
+        if (fft3d) {
+            results.addInfo("About",
+                    "by default the reconstructed data are (1) cropped to mode;"
+                            + " (2) 3D Fourier transformed (ParallelFFTJ)"
+                            + " and log-scaled power spectrum displayed.");
+        } else {
+            results.addInfo("About",
+                    "by default the reconstructed data are (1) cropped to mode;"
+                            + " (2) Fourier transformed and scaled by a gamma function"
+                            + " (gamma=0.2).");
+        }
         results.addInfo("How to interpret", 
             "Fourier plots highlight potential artifacts and indicate"
             + " effective resolution:"
