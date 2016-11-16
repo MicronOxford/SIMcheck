@@ -210,8 +210,11 @@ public class Rec_FourierPlots implements PlugIn, Executable {
                     new StackConverter(impF).convertToGray32();  // for OrthoReslicer
                     OrthoReslicer orthoReslicer = new OrthoReslicer();
                     ImagePlus impF2 = impF.duplicate();
-                    impOrthoF = orthoReslicer.exec(impF2, false);
-                    impOrthoF = I1l.takeCentralZ(impOrthoF);
+                    //impOrthoF = I1l.takeCentralZ(impOrthoF);
+                    impOrthoF = orthoReslicer.exec(impF2, true);
+                    impOrthoF = pad(impOrthoF, cal);
+                    IJ.setMinAndMax(impOrthoF, 20, 40);
+                    setLUT(impOrthoF, 2.0d, 40.0d);
                     calOrtho = impOrthoF.getCalibration();
                 } else {
                     /// for orthogonal (axial) view, reslice first
@@ -440,6 +443,30 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         I1l.copyCal(imp, imp2);
         imp2.setProperty("FHT", imp.getProperty("FHT"));
         return imp2;
+    }
+    
+    /** Pad square in XY with 0s (assumes float data!) */
+    private ImagePlus pad(ImagePlus imp, Calibration cal) {
+        int width = imp.getWidth();
+        int height = imp.getHeight();
+        int slices = imp.getStackSize();
+        ImageStack stack = imp.getStack();
+        ImageStack padStack = new ImageStack(width, width, slices);
+        for (int s = 1; s <= slices; s++) {
+            ImageProcessor ip = stack.getProcessor(s);
+            int insertStart = width * (((width - height) / 2) + 1);
+            int insertEnd = insertStart + width * height;
+            ImageProcessor pip = new FloatProcessor(width, width); // to pad
+            float[] pix = (float[])((FloatProcessor)ip).getPixels();
+            float[] padpix = new float[width * width];
+            for (int i = insertStart; i < insertEnd; i++) {
+                padpix[i] = pix[i - insertStart];
+            }
+            pip.setPixels(padpix);
+            padStack.setProcessor(pip, s);
+        }
+        imp.setStack(padStack);
+        return imp;
     }
     
     /** Make radial profile plot for each channel at central Z. */
