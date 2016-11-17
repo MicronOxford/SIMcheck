@@ -73,12 +73,15 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             gd.addMessage("3D FFT (ParallelFFTJ), log-scaled power spectrum");
             gd.addCheckbox("(1)_Cut-off:_auto (stack mode)", autoCutoff);
             gd.addCheckbox("     Cut-off:_manual (default=0)", manualCutoff);
-            gd.addCheckbox("(2)_Show_axial_FFT", showAxial);
+            gd.addCheckbox("(2)_Window_function*", applyWinFunc);
+            gd.addCheckbox("(3)_Show_axial_FFT", showAxial);
+            gd.addMessage("* suppresses edge artifacts");
             gd.showDialog();
             if (gd.wasOKed()) {
                 // TODO: notCutoff, manualCutoff and autoScale radioButton group
                 this.autoCutoff = gd.getNextBoolean();
                 this.manualCutoff = gd.getNextBoolean();
+                this.applyWinFunc = gd.getNextBoolean();
                 this.showAxial = gd.getNextBoolean();
                 if (manualCutoff) {
                     // skip if noCutoff
@@ -155,7 +158,8 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         }
         ImagePlus impF = null;
         if (fft3d) {
-            impF = FFT3D.fftImp(imp2);
+            IJ.run(imp2, "32-bit", "");
+            impF = FFT3D.fftImp(imp2, winFraction);
             displayModeToMax(impF);
         } else {
             if (logDisplay) {

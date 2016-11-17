@@ -6,6 +6,8 @@ import ij.ImageJ;
 import ij.measure.Calibration;
 import ij.plugin.*;
 import ij.ImagePlus;
+import ij.process.ImageProcessor;
+import ij.ImageStack;
 import edu.emory.mathcs.parallelfftj.*;
 
 /**
@@ -17,12 +19,15 @@ import edu.emory.mathcs.parallelfftj.*;
  */
 public class FFT3D implements PlugIn
 {
+    
+    private static final double WIN_FRACTION_DEFAULT = 0.06d;
+    
     /** Carry out 3D FFT on stack of current ImagePlus. */
     @Override
     public void run(String arg) {
         // process ImagePlus from current active window
         ImagePlus imp = IJ.getImage();
-        ImagePlus impf = fftImp(imp);
+        ImagePlus impf = fftImp(imp, WIN_FRACTION_DEFAULT);
         impf.show();
     }
     
@@ -32,14 +37,22 @@ public class FFT3D implements PlugIn
      * @param imp ImagePlus to be Fourier-transformed.
      * @return ImagePlus after 3D Fourier transform.
      */
-    public static ImagePlus fftImp(ImagePlus imp)
+    public static ImagePlus fftImp(ImagePlus imp, double winFraction)
     {
         Calibration cal = imp.getCalibration();
+        // apply XY window function to each slice (TODO: Z winfunc!)
+        ImagePlus imp2 = imp.duplicate();
+        ImageStack stk = imp2.getStack();
+        for (int s = 1; s <= imp.getStackSize(); s++) {
+            ImageProcessor ip = stk.getProcessor(s);
+            stk.setProcessor(FFT2D.gaussWindow(ip, winFraction), s);
+        }
+        imp2.setStack(stk);
         // process stack for each channel sequentially
-        int nc = imp.getNChannels();
+        int nc = imp2.getNChannels();
         ImagePlus[] imps = new ImagePlus[nc];
         for (int c = 1; c <= nc; c++) {
-            ImagePlus impC = I1l.copyChannel(imp, c);
+            ImagePlus impC = I1l.copyChannel(imp2, c);
             Transformer transform = new FloatTransformer(impC.getStack(), null);
             transform.fft();
             imps[c - 1] = transform.toImagePlus(
