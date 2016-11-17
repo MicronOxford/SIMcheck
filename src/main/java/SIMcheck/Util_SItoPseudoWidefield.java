@@ -50,19 +50,20 @@ public class Util_SItoPseudoWidefield implements PlugIn {
     @Override
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
-        // TODO: option for padding to reconstructed result size for comparison
         GenericDialog gd = new GenericDialog(name);
         gd.addMessage("Requires SI raw data in OMX (CPZAT) order.");
         gd.addNumericField("Angles", angles, 0);
         gd.addNumericField("Phases", phases, 0);
-        gd.addCheckbox("Intensity normalisation (simple ratio correction)",
+        gd.addCheckbox("Intensity normalisation? (simple ratio correction)",
                 doNormalize);
+        gd.addCheckbox("Rescale 2x to reconstructed data size?", doRescale);
         gd.showDialog();
         if (gd.wasCanceled()) return;
         if(gd.wasOKed()){
-            angles = (int)gd.getNextNumber();
-            phases = (int)gd.getNextNumber();
-            doNormalize = gd.getNextBoolean();
+            this.angles = (int)gd.getNextNumber();
+            this.phases = (int)gd.getNextNumber();
+            this.doNormalize = gd.getNextBoolean();
+            this.doRescale = gd.getNextBoolean();
         }
         if (!I1l.stackDivisibleBy(imp, phases * angles)) {
             IJ.showMessage( "SI to Pseudo-Widefield",
@@ -104,7 +105,7 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         // projectPandA result in projImg; Zplanes reduced by phases*angles
         if (m == ProjMode.AVG) {
             // AVG projection results 16-bit, optinally resized x2 in XY
-            new StackConverter(projImg).convertToGray16();  // TODO: was original?
+            new StackConverter(projImg).convertToGray16();
             int newWidth = imp.getWidth() * 2;
             int newHeight = imp.getHeight() * 2;
             String newTitle = I1l.makeTitle(imp, TLA);
@@ -125,6 +126,8 @@ public class Util_SItoPseudoWidefield implements PlugIn {
                             + " create title=" + newTitle);
                 }
                 projImg = ij.WindowManager.getCurrentImage();
+            } else {
+                projImg.setTitle(newTitle);
             }
             I1l.copyCal(imp, projImg);
             Calibration cal = projImg.getCalibration();
