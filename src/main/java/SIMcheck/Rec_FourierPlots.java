@@ -212,9 +212,9 @@ public class Rec_FourierPlots implements PlugIn, Executable {
                     ImagePlus impF2 = impF.duplicate();
                     //impOrthoF = I1l.takeCentralZ(impOrthoF);
                     impOrthoF = orthoReslicer.exec(impF2, true);
-                    impOrthoF = pad(impOrthoF, cal);
+                    impOrthoF = resizeAndPad3d(impOrthoF, cal);
                     IJ.setMinAndMax(impOrthoF, 20, 40);
-                    setLUT(impOrthoF, 2.0d, 40.0d);
+                    setLUT(impOrthoF, 20.0d, 40.0d);
                     calOrtho = impOrthoF.getCalibration();
                 } else {
                     /// for orthogonal (axial) view, reslice first
@@ -445,17 +445,30 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         return imp2;
     }
     
-    /** Pad square in XY with 0s (assumes float data!) */
-    private ImagePlus pad(ImagePlus imp, Calibration cal) {
+    /** Resize and pad square resliced 3D FFT result. */
+    private ImagePlus resizeAndPad3d(ImagePlus imp, Calibration cal) {
         int width = imp.getWidth();
         int height = imp.getHeight();
-        int slices = imp.getStackSize();
-        ImageStack stack = imp.getStack();
-        ImageStack padStack = new ImageStack(width, width, slices);
+        int depth = imp.getNSlices();
+        double rescaleFactor = cal.pixelHeight / cal.pixelDepth;
+        int rescaledHeight = (int)((double)width * rescaleFactor);
+        double rescaleY = (double)height / rescaledHeight;
+        IJ.run(imp, "Scale...", 
+                "x=1.0 y=" + (1.0d / rescaleY) 
+                + " z=1.0 width=" + width 
+                + " height=" + rescaledHeight
+                + " depth=" + depth + " interpolation=Bilinear"
+                + " average process create title=impOrthoResized");
+        ImagePlus imp2 = IJ.getImage();  // TODO: refactor
+        imp2.hide();
+        int slices = imp2.getStackSize();
+        ImageStack stack = imp2.getStack();
+        ImageStack padStack = new ImageStack(width, width, 
+                imp.getStackSize());
         for (int s = 1; s <= slices; s++) {
             ImageProcessor ip = stack.getProcessor(s);
-            int insertStart = width * (((width - height) / 2) + 1);
-            int insertEnd = insertStart + width * height;
+            int insertStart = width * (((width - rescaledHeight) / 2) + 1);
+            int insertEnd = insertStart + width * rescaledHeight;
             ImageProcessor pip = new FloatProcessor(width, width); // to pad
             float[] pix = (float[])((FloatProcessor)ip).getPixels();
             float[] padpix = new float[width * width];
@@ -465,8 +478,9 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             pip.setPixels(padpix);
             padStack.setProcessor(pip, s);
         }
-        imp.setStack(padStack);
-        return imp;
+        imp2.setStack(padStack);
+        I1l.copyCal(imp, imp2);  // imp2 cal needs to be updated later
+        return imp2;
     }
     
     /** Make radial profile plot for each channel at central Z. */
