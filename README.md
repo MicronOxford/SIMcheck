@@ -136,7 +136,7 @@ TODO
 
     - Rec Fourier & Stack FFT utility: tidy options / RadioButtons for mutually exclusive options?
     - MCN: report per. angle MCNR
-    - display / warn about saturated pixels in raw data MCN check
+    - warn about saturated pixels in raw data MCN check
     - si2wf: add option to select 1 angle
     - "FTR" radial profile plot scaling: fixed (20-40) and relative `(0=min->1=Max)`
 
