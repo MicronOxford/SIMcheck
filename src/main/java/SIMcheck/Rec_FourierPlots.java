@@ -93,6 +93,8 @@ public class Rec_FourierPlots implements PlugIn, Executable {
                 }
                 doCheck = true;
             } else if (!gd.wasCanceled()) {
+                // i.e. "More" button clicked to skip 3D FFT
+                this.fft3d = false;
                 doCheck = dialog2D(imp);
             }
             // simplified options for 3d transform (if available)
