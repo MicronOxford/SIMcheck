@@ -66,9 +66,10 @@ public class Rec_FourierPlots implements PlugIn, Executable {
     @Override
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
-        GenericDialog gd = new GenericDialog(name);
         imp.getWidth();
+        boolean doCheck = false;
         try {
+            GenericDialog gd = new GenericDialog(name);
             Class.forName("edu.emory.mathcs.parallelfftj.FloatTransformer");
             gd.addMessage("3D FFT (ParallelFFTJ), log-scaled power spectrum");
             gd.addCheckbox("(1)_Cut-off:_auto (stack mode)", autoCutoff);
@@ -76,6 +77,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             gd.addCheckbox("(2)_Window_function*", applyWinFunc);
             gd.addCheckbox("(3)_Show_axial_FFT", showAxial);
             gd.addMessage("* suppresses edge artifacts");
+            gd.enableYesNoCancel("OK", "More");
             gd.showDialog();
             if (gd.wasOKed()) {
                 // TODO: notCutoff, manualCutoff and autoScale radioButton group
@@ -89,41 +91,56 @@ public class Rec_FourierPlots implements PlugIn, Executable {
                     SIMcheck_.specifyBackgrounds(
                             channelMinima, "Set noise cut-off:");
                 }
+                doCheck = true;
+            } else if (!gd.wasCanceled()) {
+                doCheck = dialog2D(imp);
             }
             // simplified options for 3d transform (if available)
         } catch(ClassNotFoundException e) {
-            gd.addCheckbox("(1)_Cut-off:_auto (stack mode)", autoCutoff);
-            gd.addCheckbox("     Cut-off:_manual (default=0)", manualCutoff);
-            gd.addCheckbox("(2)_Window_function*", applyWinFunc);
-            gd.addCheckbox("(3)_32-bit_Amp, gamma 0.2, display min-max", gammaMinMax);
-            gd.addCheckbox("     8-bit log(Amp^2), display mode-max", logDisplay);
-            gd.addCheckbox("(4)_Blur_&_false-color_LUT", blurAndLUT);
-            gd.addCheckbox("(5)_Show_axial_FFT", showAxial);
-            gd.addMessage("* suppresses edge artifacts");
-            gd.addMessage("** default: 32-bit Amplitude, gamma 0.2 (display 2-40)");
-            gd.showDialog();
-            if (gd.wasOKed()) {
-                // TODO: notCutoff, manualCutoff and autoScale radioButton group
-                this.autoCutoff = gd.getNextBoolean();
-                this.manualCutoff = gd.getNextBoolean();
-                this.applyWinFunc = gd.getNextBoolean();
-                this.gammaMinMax = gd.getNextBoolean();
-                this.logDisplay = gd.getNextBoolean();
-                if (this.logDisplay) {
-                    this.autoScale = true;
-                }
-                this.blurAndLUT = gd.getNextBoolean();
-                this.showAxial = gd.getNextBoolean();
-                if (manualCutoff) {
-                    // skip if noCutoff
-                    this.channelMinima = new double[imp.getNChannels()];
-                    SIMcheck_.specifyBackgrounds(
-                            channelMinima, "Set noise cut-off:");
-                }
-            }
+            doCheck = dialog2D(imp);
         }
-        results = exec(imp);
-        results.report();
+        if (doCheck) {
+            results = exec(imp);
+            results.report();
+        }
+    }
+    
+    /** Show dialog for check with 2D Fourier transforms and set options.
+     * Return false if check was canceled. */
+    private boolean dialog2D (ImagePlus imp) {
+        GenericDialog gd = new GenericDialog(name);
+        gd.addCheckbox("(1)_Cut-off:_auto (stack mode)", autoCutoff);
+        gd.addCheckbox("     Cut-off:_manual (default=0)", manualCutoff);
+        gd.addCheckbox("(2)_Window_function*", applyWinFunc);
+        gd.addCheckbox("(3)_32-bit_Amp, gamma 0.2, display min-max", gammaMinMax);
+        gd.addCheckbox("     8-bit log(Amp^2), display mode-max", logDisplay);
+        gd.addCheckbox("(4)_Blur_&_false-color_LUT", blurAndLUT);
+        gd.addCheckbox("(5)_Show_axial_FFT", showAxial);
+        gd.addMessage("* suppresses edge artifacts");
+        gd.addMessage("** default: 32-bit Amplitude, gamma 0.2 (display 2-40)");
+        gd.showDialog();
+        if (gd.wasOKed()) {
+            // TODO: notCutoff, manualCutoff and autoScale radioButton group
+            this.autoCutoff = gd.getNextBoolean();
+            this.manualCutoff = gd.getNextBoolean();
+            this.applyWinFunc = gd.getNextBoolean();
+            this.gammaMinMax = gd.getNextBoolean();
+            this.logDisplay = gd.getNextBoolean();
+            if (this.logDisplay) {
+                this.autoScale = true;
+            }
+            this.blurAndLUT = gd.getNextBoolean();
+            this.showAxial = gd.getNextBoolean();
+            if (manualCutoff) {
+                // skip if noCutoff
+                this.channelMinima = new double[imp.getNChannels()];
+                SIMcheck_.specifyBackgrounds(
+                        channelMinima, "Set noise cut-off:");
+            }
+            return true;
+        } else{
+            return false;
+        }
     }
 
     /** 
