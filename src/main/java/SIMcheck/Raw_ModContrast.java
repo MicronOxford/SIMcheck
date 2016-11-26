@@ -269,13 +269,13 @@ public class Raw_ModContrast implements PlugIn, Executable {
                     "features selected by auto-thresholding (Otsu).");
             results.addInfo("Estimated Wiener filter parameter",
                     "for OMX data reconstruction (SoftWoRx) only.");
+            // calculate average MCNR for each channel (auto-thresh features)
             for (int c = 1; c <= nc; c++) {
-                ImagePlus impC = I1l.copyChannel(imp, c);
-                Util_SItoPseudoWidefield si2wf = new Util_SItoPseudoWidefield();
-                si2wf.doRescale = false;  // do NOT rescale 2x in XY
-                ImagePlus impPwfC = si2wf.exec(impC, 5, 3, ProjMode.AVG);
                 ImagePlus impResultC = I1l.copyChannel(impResult, c);
-                double featMCNR = I1l.stackFeatMean(impResultC, impPwfC);
+                ImagePlus blurResult = impResultC.duplicate();
+                IJ.run(blurResult, "Gaussian Blur...", "sigma=2 stack");
+                // use features found in blurred MCNR image
+                double featMCNR = I1l.stackFeatMean(impResultC, blurResult);
                 results.addStat("C" + c + " average feature MCNR", 
                         featMCNR, checkMCNR(featMCNR));
                 results.addStat("C" + c + " estimated Wiener filter optimum", 
