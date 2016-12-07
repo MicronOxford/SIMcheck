@@ -77,7 +77,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
             gd.addCheckbox("(2)_Window_function*", applyWinFunc);
             gd.addCheckbox("(3)_Show_axial_FFT", showAxial);
             gd.addMessage("* suppresses edge artifacts");
-            gd.enableYesNoCancel("OK", "More");
+            gd.enableYesNoCancel("OK", "2D-FFT options");
             gd.showDialog();
             if (gd.wasOKed()) {
                 // TODO: notCutoff, manualCutoff and autoScale radioButton group
