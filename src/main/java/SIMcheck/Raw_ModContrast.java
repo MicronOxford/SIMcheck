@@ -83,6 +83,7 @@ public class Raw_ModContrast implements PlugIn, Executable {
     public double[] displayRange = {0.0, 24.0};
     public int zw = 1;  // combine (2*zw)+1 Z-planes for FFT (noise reduction)
     public boolean doRawFourier = false;  // raw phase Fourier instead of mcnr
+    public boolean showMask = false;
     
     @Override
     public void run(String arg) {
@@ -104,6 +105,7 @@ public class Raw_ModContrast implements PlugIn, Executable {
             if (imp.getNSlices() < (angles * phases * 2 * zw + 1)) {
                 IJ.error("Not enough Z: pick a smaller Z window half-width");
             } else {
+                this.showMask = true;
                 results = exec(imp);
                 results.report();
             }
@@ -275,7 +277,8 @@ public class Raw_ModContrast implements PlugIn, Executable {
                 ImagePlus blurResult = impResultC.duplicate();
                 IJ.run(blurResult, "Gaussian Blur...", "sigma=2 stack");
                 // use features found in blurred MCNR image
-                double featMCNR = I1l.stackFeatMean(impResultC, blurResult);
+                double featMCNR = I1l.stackFeatMean(impResultC, blurResult,
+                        showMask);
                 results.addStat("C" + c + " average feature MCNR", 
                         featMCNR, checkMCNR(featMCNR));
                 results.addStat("C" + c + " estimated Wiener filter optimum", 

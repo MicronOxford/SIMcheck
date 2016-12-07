@@ -609,8 +609,9 @@ public final class I1l {
         return Arrays.equals(imp2.getDimensions(), imp1.getDimensions());
     }
     
-    /** 2-arg variant: 2nd imp defines features; intensities from 1st imp. */
-    public static double stackFeatMean(ImagePlus impIn, ImagePlus impFeats) {
+    /** 3-arg variant: 2nd imp defines features; intensities from 1st imp. */
+    public static double stackFeatMean(ImagePlus impIn, ImagePlus impFeats,
+            boolean showMask) {
         if (!sameDimensions(impIn, impFeats)) {
             throw new IllegalArgumentException("Different dimensionality: " +
                     "impIn " + Arrays.toString(impIn.getDimensions()) + "; " +
@@ -620,7 +621,9 @@ public final class I1l {
         IJ.setAutoThreshold(impMask, "Otsu dark stack");
         Prefs.blackBackground = true;
         IJ.run(impMask, "Convert to Mask", "method=Otsu background=Dark black");
-        impMask.show();  // FIXME!
+        if (showMask) {
+            impMask.show();  // FIXME -- mask shown for inspection/debug
+        }
         int[] dims = impMask.getDimensions();  // nx, ny, nc, nz, nt
         double stackFeatureMean = 0.0d;
         long nFeatPix = 0;
