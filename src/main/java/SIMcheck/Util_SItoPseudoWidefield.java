@@ -22,6 +22,14 @@ import ij.plugin.*;
 import ij.process.*;
 import ij.gui.GenericDialog;
 
+import net.imagej.ImageJ;
+import org.scijava.Context;
+
+import net.imglib2.img.Img;
+import net.imglib2.img.display.imagej.ImageJFunctions;
+import net.imglib2.interpolation.randomaccess.NLinearInterpolatorFactory;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
+
 /** This plugin converts a SIM image to a pseudo-wide-field image by averaging
  * phases and angles. Assumes OMX V2 CPZAT input channel order.
  *
