@@ -132,16 +132,11 @@ Style Notes (1.0)
 TODO
 ====
 
-* 1.1: protocols paper updates
-
-    - Rec Fourier & Stack FFT utility: tidy options / RadioButtons for mutually exclusive options?
-    - MCN: report per. angle MCNR
-    - warn about saturated pixels in raw data MCN check
-    - si2wf: add option to select 1 angle
-    - "FTR" radial profile plot scaling: fixed (20-40) and relative `(0=min->1=Max)`
-
 * 1.2: post-release updates, bugfixes & refactoring
 
+    - MCN: report per. angle MCNR & warn about saturated pixels
+    - Rec Fourier & Stack FFT utility: tidy options, use RadioButtons
+    - si2wf: add option to select 1 angle
     - raw FPJ: add target overlay? (hide by default)
     - progress bar for FPJ plugin (& others?)
     - MCN, show saturated pixels in raw data? (add to LUT?)
