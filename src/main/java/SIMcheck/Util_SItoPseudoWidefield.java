@@ -49,27 +49,29 @@ public class Util_SItoPseudoWidefield implements PlugIn {
     public int phases = 5;
     public int angles = 3;
     public boolean doNormalize = true;
+    public boolean doRescale = true;
 
-    private static ImagePlus projImg = null;  // intermediate & final results
+    private ImagePlus projImg = null;  // intermediate & final results
     public enum ProjMode { AVG, MAX }  // can do average or max projection
     // TODO: refactor -- AVG and MAX projection details different / unexpected
 
     @Override
     public void run(String arg) {
         ImagePlus imp = IJ.getImage();
-        // TODO: option for padding to reconstructed result size for comparison
         GenericDialog gd = new GenericDialog(name);
         gd.addMessage("Requires SI raw data in OMX (CPZAT) order.");
         gd.addNumericField("Angles", angles, 0);
         gd.addNumericField("Phases", phases, 0);
-        gd.addCheckbox("Intensity normalisation (simple ratio correction)",
+        gd.addCheckbox("Intensity normalisation? (simple ratio correction)",
                 doNormalize);
+        gd.addCheckbox("Rescale 2x to reconstructed data size?", doRescale);
         gd.showDialog();
         if (gd.wasCanceled()) return;
         if(gd.wasOKed()){
-            angles = (int)gd.getNextNumber();
-            phases = (int)gd.getNextNumber();
-            doNormalize = gd.getNextBoolean();
+            this.angles = (int)gd.getNextNumber();
+            this.phases = (int)gd.getNextNumber();
+            this.doNormalize = gd.getNextBoolean();
+            this.doRescale = gd.getNextBoolean();
         }
         if (!I1l.stackDivisibleBy(imp, phases * angles)) {
             IJ.showMessage( "SI to Pseudo-Widefield",
@@ -110,30 +112,37 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         projImg = projectPandA(impCopy, channels, Zplanes, frames, m);
         // projectPandA result in projImg; Zplanes reduced by phases*angles
         if (m == ProjMode.AVG) {
-            // AVG projection results 16-bit, resized x2 in XY
-            new StackConverter(projImg).convertToGray16();  // TODO: was original?
-            Img<UnsignedShortType> img = ImageJFunctions.wrapShort(projImg);
-
-            double[] scaleFactors;
-            if (channels > 1)
-                scaleFactors = new double[] {2, 2, 1, 1};
-            else
-                scaleFactors = new double[] {2, 2, 1};
-
-            final Context context = (Context) IJ.runPlugIn("org.scijava.Context", "");
-            final ImageJ ijc = new ImageJ(context);
-            NLinearInterpolatorFactory<UnsignedShortType> interpolation
-                = new NLinearInterpolatorFactory<UnsignedShortType>();
-            Img<UnsignedShortType> out = ijc.op().image().scale(img, scaleFactors,
-                                                                interpolation);
-
+            // AVG projection results 16-bit, optinally resized x2 in XY
+            new StackConverter(projImg).convertToGray16();
+            int newWidth = imp.getWidth() * 2;
+            int newHeight = imp.getHeight() * 2;
             String newTitle = I1l.makeTitle(imp, TLA);
-            projImg = ImageJFunctions.wrap(out, newTitle).duplicate();
-
+            if (doRescale) {
+                if (channels > 1) {
+                    IJ.run(projImg, "Scale...", "x=2 y=2 z=1.0 width="
+                            + newWidth
+                            + " height=" + newHeight + " depth=" + Zplanes
+                            + " interpolation=Bicubic average"
+                            + " create title=" + newTitle);
+                } else {
+                    // "Scale..." command requires "process" to do full stack
+                    //   if we have an ordinary stack rather than a hyperstack
+                    IJ.run(projImg, "Scale...", "x=2 y=2 z=1.0 width="
+                            + newWidth
+                            + " height=" + newHeight + " depth=" + Zplanes
+                            + " interpolation=Bicubic average process"
+                            + " create title=" + newTitle);
+                }
+                projImg = ij.WindowManager.getCurrentImage();
+            } else {
+                projImg.setTitle(newTitle);
+            }
             I1l.copyCal(imp, projImg);
             Calibration cal = projImg.getCalibration();
-            cal.pixelWidth /= 2;
-            cal.pixelHeight /= 2;
+            if (doRescale) {
+                cal.pixelWidth /= 2;
+                cal.pixelHeight /= 2;
+            }
             projImg.hide();
         } else {
             // MAX proj used in MCM needs 32-bit result, *NOT* resized x2
@@ -264,7 +273,12 @@ public class Util_SItoPseudoWidefield implements PlugIn {
         ImagePlus impAvg = si2wf.exec(impTest, 5, 3, ProjMode.AVG);
         impAvg.setTitle("impAvg");
         impAvg.show();
-        // 2. AVG
+        // 1b. AVG w/o 2x rescale in XY
+        si2wf.doRescale = false;
+        ImagePlus impAvgSameScale = si2wf.exec(impTest, 5, 3, ProjMode.AVG);
+        impAvgSameScale.setTitle("impAvgSameScale");
+        impAvgSameScale.show();
+        // 2. MAX
         ImagePlus impMax = si2wf.exec(impTest, 5, 3, ProjMode.MAX);
         impMax.setTitle("impMax");
         impMax.show();
