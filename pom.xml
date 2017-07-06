@@ -69,6 +69,13 @@
         <role>developer</role>
       </roles>
     </contributor>
+    <contributor>
+      <name>Marcel Müller</name>
+      <email>muellerphysics@gmail.com</email>
+      <roles>
+        <role>developer</role>
+      </roles>
+    </contributor>
   </contributors>
 
   <scm>
@@ -111,6 +118,13 @@
       <version>RELEASE</version>
     </dependency>
 
+    <dependency>
+	<groupId>com.github.wendykierp</groupId>
+	<artifactId>JTransforms</artifactId>
+	<version>3.1</version>
+    </dependency>
+
+
     <!-- Test dependencies -->
     <dependency>
       <groupId>junit</groupId>
@@ -134,12 +148,6 @@
       <version>0.1.3</version>
     </dependency>
 
-    <dependency>
-      <groupId>edu.emory.mathcs</groupId>
-      <artifactId>parallel_fftj</artifactId>
-      <version>1.4</version>
-    </dependency>
-
   </dependencies>
 
   <repositories>
@@ -147,10 +155,6 @@
     <repository>
       <id>imagej.public</id>
       <url>http://maven.imagej.net/content/groups/public</url>
-    </repository>
-    <repository>
-      <id>lib</id>
-      <url>file://${project.basedir}/lib</url>
     </repository>
   </repositories>
 

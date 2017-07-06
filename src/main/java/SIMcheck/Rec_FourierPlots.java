@@ -50,7 +50,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
     // TODO: refactor & remove default winFraction from here
     
     // options
-    public boolean fft3d = true;          // use 3D FFT? (requires ParallelFFTJ)
+    public boolean fft3d = true;          // use 3D FFT? (requires JTransforms3)
     public boolean autoCutoff = true;     // no noise cut-off?
     public boolean manualCutoff = false;  // manual noise cut-off?
     public boolean applyWinFunc = false;  // apply window function?
@@ -68,10 +68,9 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         ImagePlus imp = IJ.getImage();
         imp.getWidth();
         boolean doCheck = false;
-        try {
+        if (FFT3D.ensureFftLibInstalled(false) == true) {
             GenericDialog gd = new GenericDialog(name);
-            Class.forName("edu.emory.mathcs.parallelfftj.FloatTransformer");
-            gd.addMessage("3D FFT (ParallelFFTJ), log-scaled power spectrum");
+            gd.addMessage("3D FFT (JTransforms), log-scaled power spectrum");
             gd.addCheckbox("(1)_Cut-off:_auto (stack mode)", autoCutoff);
             gd.addCheckbox("     Cut-off:_manual (default=0)", manualCutoff);
             gd.addCheckbox("(2)_Window_function*", applyWinFunc);
@@ -98,7 +97,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
                 doCheck = dialog2D(imp);
             }
             // simplified options for 3d transform (if available)
-        } catch(ClassNotFoundException e) {
+        } else {
             doCheck = dialog2D(imp);
         }
         if (doCheck) {
@@ -120,7 +119,14 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         gd.addCheckbox("(5)_Show_axial_FFT", showAxial);
         gd.addMessage("* suppresses edge artifacts");
         gd.addMessage("** default: 32-bit Amplitude, gamma 0.2 (display 2-40)");
-        gd.showDialog();
+        
+	try {
+	    Class.forName("org.jtransforms.fft.FloatFFT_3D");
+	} catch (ClassNotFoundException e ) {
+	    gd.addMessage("! To be able run 3D FFTs, make sure JTransforms is installed");
+	}
+        
+	gd.showDialog();
         if (gd.wasOKed()) {
             // TODO: notCutoff, manualCutoff and autoScale radioButton group
             this.autoCutoff = gd.getNextBoolean();
@@ -286,7 +292,7 @@ public class Rec_FourierPlots implements PlugIn, Executable {
         if (fft3d) {
             results.addInfo("About",
                     "by default the reconstructed data are (1) cropped to mode;"
-                            + " (2) 3D Fourier transformed (ParallelFFTJ)"
+                            + " (2) 3D Fourier transformed (JTransforms)"
                             + " and log-scaled power spectrum displayed.");
         } else {
             results.addInfo("About",
