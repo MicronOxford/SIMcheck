@@ -4,7 +4,7 @@ SIMcheck
 SIMcheck is a package of ImageJ tools for assessing the quality and
 reliability of Structured Illumination Microscopy (SIM) data.
 
-* More information can be found on the 
+* More information can be found on the
 [Micron Oxford Website](http://www.micron.ox.ac.uk/software/SIMCheck.php)
 * Further help is available
 [here](http://www.micron.ox.ac.uk/microngroup/software/SIMcheck.html)
@@ -30,11 +30,11 @@ for more details
 Manual install
 --------------
 
-The jar file for the latest release can also be
-[downloaded manually](http://downloads.micron.ox.ac.uk/fiji_update/SIMcheck/plugins/)
-for cases where the IMageJ updater is not available.  Older versions of
-SIMcheck can be obtained by navigating the
-[SIMcheck update site](http://downloads.micron.ox.ac.uk/fiji_update/SIMcheck/).
+If for some reason the ImageJ updater is not available, the jar file
+for the latest release can still be [downloaded
+manually](http://downloads.micron.ox.ac.uk/fiji_update/SIMcheck/plugins/)
+from the update site.  If so, the file extension needs to be manually
+adjusted adn dependencies will need to be installed somehow.
 
 Building from source
 --------------------
@@ -169,7 +169,7 @@ TODO
 * 2.0: integrated swing GUI control
 
 
-SIM Reconstruction Problems & Remedies 
+SIM Reconstruction Problems & Remedies
 --------------------------------------
 (Kai Wicker)
 
