@@ -106,3 +106,9 @@ Version 1.0.0
 * raw CIP check criteria change from 50,70 to 60,40
 * CIP: improve bleach estimation, add normalised plot
 * updates to allow macro recording
+
+Version 1.1
+-----------
+* SI to widefield utility: add option to skip XY rescale 2x
+* implement 3D FFT using Parallel FFTJ for Rec Fourier check
+* "FTR" radial profile plot: fixed range 20-40 for log-scaled PS

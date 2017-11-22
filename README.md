@@ -4,7 +4,7 @@ SIMcheck
 SIMcheck is a package of ImageJ tools for assessing the quality and
 reliability of Structured Illumination Microscopy (SIM) data.
 
-* More information can be found on the 
+* More information can be found on the
 [Micron Oxford Website](http://www.micron.ox.ac.uk/software/SIMCheck.php)
 * Further help is available
 [here](http://www.micron.ox.ac.uk/microngroup/software/SIMcheck.html)
@@ -30,11 +30,11 @@ for more details
 Manual install
 --------------
 
-The jar file for the latest release can also be
-[downloaded manually](http://downloads.micron.ox.ac.uk/fiji_update/SIMcheck/plugins/)
-for cases where the IMageJ updater is not available.  Older versions of
-SIMcheck can be obtained by navigating the
-[SIMcheck update site](http://downloads.micron.ox.ac.uk/fiji_update/SIMcheck/).
+If for some reason the ImageJ updater is not available, the jar file
+for the latest release can still be [downloaded
+manually](http://downloads.micron.ox.ac.uk/fiji_update/SIMcheck/plugins/)
+from the update site.  If so, the file extension needs to be manually
+adjusted adn dependencies will need to be installed somehow.
 
 Building from source
 --------------------
@@ -113,12 +113,12 @@ PROJECT STRUCTURE
 - src/main/resources/ - Application resources (IJ menu config, html help text)
 - src/test/java/ - Test sources
 - src/test/resources/ - Test resources
-- target/ - output SIMcheck_.jar file
+- target/ - output `SIMcheck_.jar` file
 - target/classes/ - build output .class files
 - target/test-classes/ - classes produced by tests
 
 
-Style Notes
+Style Notes (1.0)
 ===========
 
 * no run-time dependencies other than ImageJ1
@@ -132,46 +132,44 @@ Style Notes
 TODO
 ====
 
-* 1.1: post-release updates, bugfixes & suggestions from feedback
+* 1.2: post-release updates, bugfixes & refactoring
 
-      - features:
-        - replace 2D FFTs with 3D FFTs (at least in Fiji)
-        - display / warn about saturated pixels in raw data MCN check
-        - stat for motion & illumination variation
-        - turn FTR profile into multi-color and/or plot
-
-      - updates:
-        - si2wf: add options for no 2x size scaling, select 1 angle
-        - MCN: auto-threshold using pseudo-widefield, report per. angle MCNR
-        - Rec Fourier: rename ortho to axial?
-        - SIR checks: exclude 0s from mode finding
-        - improve "Fourier Transform Phases" info / log output
-        - angle labels etc. should be overlaid, not drawn
-        - CIP channel order: RGB vs. BGR
-        - for ELYRA reconstructed .czi, discard WF and decon-WF?
-        - progress bar for FPJ plugin (& others?)
-        - raw FPJ: add target overlay? (hide by default)
-        - MCN, show saturated pixels in raw data? (add to LUT? also MCM?)
-        - Rec Fourier: reduce options / RadioButtons for mutually exclusive options?
-
-      - tests, structure:
-        - expand sample / test data set
-        - optional tests using failsafe plugin? (check data & pass/fail)
-        - get rid of IJ.run calls & intermediate results from window list
-        - multi-frame: test / document stats for current time-point only
-        - more crop utility tests, move to separate utility plugin
-
-      - documentation:
-        - macro examples / document batch running
-
-* 1.2: additional numerical stats, including resolution estimate
+    - MCN: report per. angle MCNR & warn about saturated pixels
+    - Rec Fourier & Stack FFT utility: tidy options, use RadioButtons
+    - si2wf: add option to select 1 angle
+    - raw FPJ: add target overlay? (hide by default)
+    - progress bar for FPJ plugin (& others?)
+    - MCN, show saturated pixels in raw data? (add to LUT?)
+    - Rec Fourier: improve 3D FFT dependency (maven dep: IJ2? JTransforms?)
+    - more crop utility tests, move to separate utility plugin
+    - turn FTR profile into multi-color and/or plot
+    - improve "Fourier Transform Phases" info / log output
+    - angle labels etc. should be overlaid, not drawn
 
 * 1.3: PSF and OTF symmetry, extent, shape & order separation
+
+* 1.4: additional numerical stats, including resolution estimate
+
+    - stat for motion & illumination variation
+    - SIR Fourier: resolution estimate? stat for artifacts?
+    - multi-frame: test / document stats for current time-point only?
+
+* 1.5: ImageJ2 reimplementation / headless running
+
+    - get rid of IJ.run calls & intermediate results from window list
+    - documentation: macro examples / document batch running
+
+* 1.6: check name updates & test suite
+
+    - Rec Fourier: rename ortho to axial?
+    - better name for spherical aberration mismatch?
+    - expand sample / test data set
+    - optional tests using failsafe plugin? (check data & pass/fail)
 
 * 2.0: integrated swing GUI control
 
 
-SIM Reconstruction Problems & Remedies 
+SIM Reconstruction Problems & Remedies
 --------------------------------------
 (Kai Wicker)
 

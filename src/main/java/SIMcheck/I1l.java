@@ -603,6 +603,42 @@ public final class I1l {
         ij.plugin.filter.Analyzer.setMeasurements(mOptionsInitial); // restore
         return stackThresholdedMean;
     }
+    
+    /** Return true if dimensionalities of imp1 and imp2 are the same. */ 
+    public static boolean sameDimensions(ImagePlus imp1, ImagePlus imp2) {
+        return Arrays.equals(imp2.getDimensions(), imp1.getDimensions());
+    }
+    
+    /** 3-arg variant: 2nd imp defines features; intensities from 1st imp. */
+    public static double stackFeatMean(ImagePlus impIn, ImagePlus impFeats,
+            boolean showMask) {
+        if (!sameDimensions(impIn, impFeats)) {
+            throw new IllegalArgumentException("Different dimensionality: " +
+                    "impIn " + Arrays.toString(impIn.getDimensions()) + "; " +
+                    "impFeats " + Arrays.toString(impFeats.getDimensions()));
+        }
+        ImagePlus impMask = impFeats.duplicate();
+        IJ.setAutoThreshold(impMask, "Otsu dark stack");
+        Prefs.blackBackground = true;
+        IJ.run(impMask, "Convert to Mask", "method=Otsu background=Dark black");
+        if (showMask) {
+            impMask.show();  // FIXME -- mask shown for inspection/debug
+        }
+        int[] dims = impMask.getDimensions();  // nx, ny, nc, nz, nt
+        double stackFeatureMean = 0.0d;
+        long nFeatPix = 0;
+        for (int z = 0; z < dims[3]; z++) {
+            for (int y = 0; y < dims[1]; y++) {
+                for (int x = 0; x < dims[0]; x++) {
+                    if (impMask.getStack().getVoxel(x, y, z) > 0) {
+                        nFeatPix++;
+                        stackFeatureMean += impIn.getStack().getVoxel(x, y, z);
+                    }
+                }
+            }
+        }
+        return stackFeatureMean / nFeatPix;
+    }
 
     /** 
      * Convert position / dimsize pairs into correct hyperstack slice number.
