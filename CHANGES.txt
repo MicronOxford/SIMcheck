@@ -112,3 +112,6 @@ Version 1.1
 * SI to widefield utility: add option to skip XY rescale 2x
 * implement 3D FFT using Parallel FFTJ for Rec Fourier check
 * "FTR" radial profile plot: fixed range 20-40 for log-scaled PS
+
+Version 1.2
+-----------
