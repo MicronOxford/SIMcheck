@@ -123,8 +123,7 @@ public final class SIMcheck_ implements PlugIn {
         gd.addMessage("To crop in Z, enter slice numbers, 'first' or 'last'");
         gd.addStringField("*_Z_crop_first", "first");
         gd.addStringField("*_Z_crop_last", "last");
-        gd.addHelp(
-                "http://www.micron.ox.ac.uk/microngroup/software/SIMcheck.html");
+        gd.addHelp("https://www.micron.ox.ac.uk/software/SIMcheck/");
         gd.showDialog();
 
         // collect options
