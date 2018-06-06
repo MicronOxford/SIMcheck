@@ -115,3 +115,4 @@ Version 1.1
 
 Version 1.2
 -----------
+* Fix URL to online help
