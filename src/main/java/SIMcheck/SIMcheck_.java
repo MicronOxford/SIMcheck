@@ -42,7 +42,7 @@ import java.util.*;
 public final class SIMcheck_ implements PlugIn {
     
     // constants
-    private static final String VERSION = "1.1";
+    private static final String VERSION = "1.2";
     private static final String none = "[None]";  // no image
     private static final String omx = "OMX (CPZAT)";
 
@@ -123,8 +123,7 @@ public final class SIMcheck_ implements PlugIn {
         gd.addMessage("To crop in Z, enter slice numbers, 'first' or 'last'");
         gd.addStringField("*_Z_crop_first", "first");
         gd.addStringField("*_Z_crop_last", "last");
-        gd.addHelp(
-                "http://www.micron.ox.ac.uk/microngroup/software/SIMcheck.html");
+        gd.addHelp("https://www.micron.ox.ac.uk/software/SIMcheck/");
         gd.showDialog();
 
         // collect options
