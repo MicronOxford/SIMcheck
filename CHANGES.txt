@@ -120,3 +120,6 @@ Version 1.2
 Version 1.3
 -----------
 * New "Modulation Contrast Filter" utility.
+
+Version 1.4
+-----------
